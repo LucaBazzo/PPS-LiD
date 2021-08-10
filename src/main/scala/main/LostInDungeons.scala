@@ -1,17 +1,12 @@
 package main
 
-import com.badlogic.gdx.{Game, Screen}
+import com.badlogic.gdx.Game
+import view.screens.game.GameScreen
 
-class LostInDungeons extends Game {
+object LostInDungeons extends Game {
 
   override def create(): Unit = {
-    println("ciao")
-
-  }
-
-  override def setScreen(screen: Screen): Unit = {
-    super.setScreen(screen)
-    println(this.getScreen())
+    this.setScreen(new GameScreen())
   }
 
   override def dispose(): Unit = {

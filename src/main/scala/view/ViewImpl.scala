@@ -6,6 +6,8 @@ import main.LostInDungeons
 import utils.ApplicationConstants.TITLE
 import view.screens.game.GameScreen
 
+import java.util.concurrent.{ExecutorService, Executors}
+
 trait View {
 
   def setObserverManager(observerManager: ObserverManager)
@@ -16,18 +18,24 @@ trait View {
 
 class ViewImpl extends View {
 
-  private val screenSetter: LostInDungeons = new LostInDungeons()
+  //private val screenSetter: LostInDungeons = new LostInDungeons()
+  private var application: Lwjgl3Application = _
 
   private var observerManager: ObserverManager = _
 
   val config = new Lwjgl3ApplicationConfiguration
   config.setTitle(TITLE)
   //config.addIcon(ICON_PATH, FileType.Internal)
-  new Lwjgl3Application(screenSetter, config)
+
+  val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+
+  executorService.submit(() => {
+    new Lwjgl3Application(LostInDungeons, config)
+  })
 
   override def setObserverManager(observerManager: ObserverManager): Unit = this.observerManager = observerManager
 
-  override def startGame(): Unit = this.screenSetter.setScreen(new GameScreen())
+  override def startGame(): Unit = LostInDungeons.setScreen(new GameScreen())
 
   override def endGame(): Unit = ???
 

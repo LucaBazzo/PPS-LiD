@@ -4,13 +4,19 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.{Box2DDebugRenderer, World}
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
-import com.badlogic.gdx.{Gdx, Input, Screen, ScreenAdapter}
+import com.badlogic.gdx.{Gdx, Input, ScreenAdapter}
+import controller.ScreenQueue
+import main.LostInDungeons
 import utils.ApplicationConstants._
 import view.entities.Hero
 import view.screens.helpers.{TileMapHelper, WorldCreator}
+import view.screens.menu.{ObservableScreen, ScreenObserver}
 
-class GameScreen() extends ScreenAdapter with Screen{
+class GameScreen() extends ScreenAdapter with ObservableScreen with TheGame{
+
+  private var screenObserver: ScreenObserver = _
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   private val batch: SpriteBatch = new SpriteBatch()
@@ -27,6 +33,8 @@ class GameScreen() extends ScreenAdapter with Screen{
   //this.camera.position.set(new Vector3(viewPort.getWorldWidth / 2, viewPort.getWorldHeight / 2,0))
 
   private val player: Hero = new Hero(this.world)
+
+  private var currentScore: Int = 0
 
   new WorldCreator(this.world)
 
@@ -80,6 +88,10 @@ class GameScreen() extends ScreenAdapter with Screen{
 
     //for debug purpose
     box2DDebugRenderer.render(world, camera.combined)
+
+    if(ScreenQueue.queue.nonEmpty && ScreenQueue.getScreen() == 0) {
+      LostInDungeons.setScreen(new GameScreen())
+    }
   }
 
   override def resize(width: Int, height: Int): Unit = {
@@ -92,4 +104,10 @@ class GameScreen() extends ScreenAdapter with Screen{
     box2DDebugRenderer.dispose()
     hud.dispose()
   }
+
+  override def getStage(): Stage = ???
+
+  override def setObserver(screenObserver: ScreenObserver): Unit = this.screenObserver = screenObserver
+
+  override def sendScore(currentScore: Int): Unit = this.currentScore = currentScore
 }
