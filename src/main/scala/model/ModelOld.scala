@@ -2,7 +2,7 @@ package model
 
 /** The model.
  */
-class Model extends PublicModel {
+class ModelOld extends PublicModel {
 
   private var score: Int = 0
 

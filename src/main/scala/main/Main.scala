@@ -1,18 +1,23 @@
 package main
 
-import com.badlogic.gdx.backends.lwjgl3.{Lwjgl3Application, Lwjgl3ApplicationConfiguration}
+import controller.ControllerImpl
 
 object Main {
 
   private val ICON_PATH = "Sprites/" + "icon_32x32.png"
   private val TITLE = "Lost in Dungeons"
 
-  def main(args:Array[String]): Unit = {
-    val config = new Lwjgl3ApplicationConfiguration
+  private var l: List[Int] = List(1,2,3,4,5,6,7,8,9)
 
-    config.setTitle(TITLE)
-    //config.addIcon(ICON_PATH, FileType.Internal)
-    new Lwjgl3Application(LostInDungeons, config)
+  def getEntities(predicate: Int => Boolean): List[Int] = this.l.filter(predicate)
+
+  def main(args:Array[String]): Unit = {
+
+    new ControllerImpl()
+
+    /*println(getEntities((x:Int) => x > 5))
+
+    */
   }
 
 }

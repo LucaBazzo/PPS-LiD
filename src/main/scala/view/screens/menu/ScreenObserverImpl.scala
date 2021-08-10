@@ -1,8 +1,6 @@
 package view.screens.menu
 
 import controller.ControllerObserver
-import main.LostInDungeons
-import view.screens.game.GameScreen
 
 /** Implementation of ScreenObserver and ScreensMessenger interfaces for screen management.
  */
@@ -15,7 +13,7 @@ class ScreenObserverImpl extends ScreenObserver with ScreensMessenger {
   override def setMainMenuScreen(): Unit = ???
 
   override def setGameScreen(): Unit = {
-    this.gameScreen = new GameScreen()
+    //this.gameScreen = new GameScreen()
     this.gameScreen.setObserver(this)
     startScreen(this.gameScreen)
   }
@@ -40,7 +38,7 @@ class ScreenObserverImpl extends ScreenObserver with ScreensMessenger {
 
   private def startScreen(observableScreen: ObservableScreen): Unit = {
     if(observableScreen != null) {
-      LostInDungeons.setScreen(observableScreen)
+      //LostInDungeons.setScreen(observableScreen)
     }
   }
 }

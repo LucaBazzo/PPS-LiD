@@ -2,7 +2,9 @@ package utils
 
 import com.badlogic.gdx.math.Vector2
 
-object GameConstants {
+object ApplicationConstants {
+
+  val TITLE = "Lost in Dungeons"
 
   val WIDTH_SCREEN: Int = 400
   val HEIGHT_SCREEN: Int = 208
@@ -14,5 +16,7 @@ object GameConstants {
   val POSITION_ITERATIONS: Int = 2
 
   val GRAVITY_FORCE = new Vector2(0, -10)
+
+  val GAME_LOOP_STEP = 16666666
 
 }
