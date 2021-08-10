@@ -3,7 +3,6 @@ package view.screens.game
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
-import com.badlogic.gdx.math.{Vector2, Vector3}
 import com.badlogic.gdx.physics.box2d.{Box2DDebugRenderer, World}
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
@@ -19,17 +18,17 @@ class GameScreen() extends ScreenAdapter with ObservableScreen with TheGame{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   private val batch: SpriteBatch = new SpriteBatch()
-  private val world: World = new World(new Vector2(0, -10), true)
+  private val world: World = new World(GRAVITY_FORCE, true)
   private val box2DDebugRenderer: Box2DDebugRenderer = new Box2DDebugRenderer()
 
-  private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN / PIXEL_PER_METER, HEIGHT_SCREEN / PIXEL_PER_METER, camera)
+  private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN / 10 , HEIGHT_SCREEN / 10, camera)
 
   private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map0.tmx")
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
-  this.camera.setToOrtho(false, WIDTH_SCREEN, HEIGHT_SCREEN)
-  this.camera.position.set(new Vector3(viewPort.getWorldWidth / 2, viewPort.getWorldHeight / 2,0))
+  this.camera.setToOrtho(false, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2)
+  //this.camera.position.set(new Vector3(viewPort.getWorldWidth / 2, viewPort.getWorldHeight / 2,0))
 
   private val player: Hero = new Hero(this.world)
 
@@ -41,7 +40,6 @@ class GameScreen() extends ScreenAdapter with ObservableScreen with TheGame{
     this.handleInput(deltaTime)
 
     this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
-    this.cameraUpdate()
 
     //it will render only what the camera can see
     this.orthogonalTiledMapRenderer.setView(camera)
@@ -61,18 +59,17 @@ class GameScreen() extends ScreenAdapter with ObservableScreen with TheGame{
       player.moveLeft()
   }
 
-  private def cameraUpdate(): Unit = {
-    this.camera.position.x = player.getBody.getPosition.x
-    this.camera.position.y = player.getBody.getPosition.y
-    this.camera.update()
-  }
-
   override def render(delta: Float): Unit = {
     this.update(delta)
 
     //clears the screen
     Gdx.gl.glClearColor(0,0,0,1)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+    super.render(delta)
+
+    this.camera.position.x = player.getBody.getPosition.x
+    this.camera.position.y = player.getBody.getPosition.y
+    this.camera.update()
 
     // render the map
     orthogonalTiledMapRenderer.render()
@@ -88,7 +85,7 @@ class GameScreen() extends ScreenAdapter with ObservableScreen with TheGame{
     batch.end()
 
     //for debug purpose
-    box2DDebugRenderer.render(world, camera.combined.scl(PIXEL_PER_METER))
+    box2DDebugRenderer.render(world, camera.combined)
   }
 
   override def resize(width: Int, height: Int): Unit = {
