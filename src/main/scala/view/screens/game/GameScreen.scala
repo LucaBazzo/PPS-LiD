@@ -3,24 +3,21 @@ package view.screens.game
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
-import com.badlogic.gdx.physics.box2d.{Box2DDebugRenderer, World}
-import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, Input, ScreenAdapter}
-import controller.ScreenQueue
-import main.LostInDungeons
+import controller.ObserverManager
+import model._
+import model.entities.{Entity, Hero}
 import utils.ApplicationConstants._
-import view.entities.Hero
-import view.screens.helpers.{TileMapHelper, WorldCreator}
-import view.screens.menu.{ObservableScreen, ScreenObserver}
+import view.screens.helpers.TileMapHelper
 
-class GameScreen() extends ScreenAdapter with ObservableScreen with TheGame{
-
-  private var screenObserver: ScreenObserver = _
+class GameScreen(private val entitiesGetter: EntitiesGetter,
+                 private val observerManager: ObserverManager) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   private val batch: SpriteBatch = new SpriteBatch()
-  private val world: World = new World(GRAVITY_FORCE, true)
+
   private val box2DDebugRenderer: Box2DDebugRenderer = new Box2DDebugRenderer()
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN / 10 , HEIGHT_SCREEN / 10, camera)
@@ -29,36 +26,29 @@ class GameScreen() extends ScreenAdapter with ObservableScreen with TheGame{
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
-  this.camera.setToOrtho(false, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2)
-  //this.camera.position.set(new Vector3(viewPort.getWorldWidth / 2, viewPort.getWorldHeight / 2,0))
-
-  private val player: Hero = new Hero(this.world)
-
-  private var currentScore: Int = 0
-
-  new WorldCreator(this.world)
+  this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
   private def update(deltaTime: Float): Unit = {
     this.handleInput(deltaTime)
 
-    this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+    //old world step
 
     //it will render only what the camera can see
     this.orthogonalTiledMapRenderer.setView(camera)
   }
 
-  private def handleInput(deltaTime : Float): Unit ={
+  private def handleInput(deltaTime : Float): Unit = {
     if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE))
       Gdx.app.exit()
 
     if (Gdx.input.isKeyJustPressed(Input.Keys.UP))
-      player.jump()
+      this.observerManager.notifyEvent(0)
 
     if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-      player.moveRight()
+      this.observerManager.notifyEvent(1)
 
     if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
-      player.moveLeft()
+      this.observerManager.notifyEvent(2)
   }
 
   override def render(delta: Float): Unit = {
@@ -69,8 +59,13 @@ class GameScreen() extends ScreenAdapter with ObservableScreen with TheGame{
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     super.render(delta)
 
-    this.camera.position.x = player.getBody.getPosition.x
-    this.camera.position.y = player.getBody.getPosition.y
+    val entities: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Hero])
+    if(entities.nonEmpty) {
+      val player: Entity = entities.get.head
+      this.camera.position.x = player.getPosition._1
+      this.camera.position.y = player.getPosition._2
+    }
+
     this.camera.update()
 
     // render the map
@@ -87,11 +82,7 @@ class GameScreen() extends ScreenAdapter with ObservableScreen with TheGame{
     batch.end()
 
     //for debug purpose
-    box2DDebugRenderer.render(world, camera.combined)
-
-//    if(ScreenQueue.queue.nonEmpty && ScreenQueue.getScreen() == 0) {
-//      LostInDungeons.setScreen(new GameScreen())
-//    }
+    box2DDebugRenderer.render(this.entitiesGetter.getWorld, camera.combined)
   }
 
   override def resize(width: Int, height: Int): Unit = {
@@ -100,14 +91,8 @@ class GameScreen() extends ScreenAdapter with ObservableScreen with TheGame{
 
   override def dispose(): Unit = {
     orthogonalTiledMapRenderer.dispose()
-    world.dispose()
+    this.entitiesGetter.getWorld.dispose()
     box2DDebugRenderer.dispose()
     hud.dispose()
   }
-
-  override def getStage(): Stage = ???
-
-  override def setObserver(screenObserver: ScreenObserver): Unit = this.screenObserver = screenObserver
-
-  override def sendScore(currentScore: Int): Unit = this.currentScore = currentScore
 }

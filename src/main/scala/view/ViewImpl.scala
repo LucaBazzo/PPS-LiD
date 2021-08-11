@@ -4,25 +4,23 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.{Lwjgl3Application, Lwjgl3ApplicationConfiguration}
 import controller.ObserverManager
 import main.LostInDungeons
+import model.EntitiesGetter
 import utils.ApplicationConstants.TITLE
-import view.screens.game.{GameScreen, InitializationScreen}
+import view.screens.game.GameScreen
 
 import java.util.concurrent.{ExecutorService, Executors}
 
 trait View {
 
-  def setObserverManager(observerManager: ObserverManager)
   def startGame()
   def endGame()
   def initialize()
 }
 
-class ViewImpl extends View {
+class ViewImpl(private val entitiesGetter: EntitiesGetter,
+               private val observerManager: ObserverManager) extends View {
 
-  //private val screenSetter: LostInDungeons = new LostInDungeons()
-  private var application: Lwjgl3Application = _
-
-  private var observerManager: ObserverManager = _
+  private val screenSetter: LostInDungeons = new LostInDungeons(this.entitiesGetter, this.observerManager)
 
   val config = new Lwjgl3ApplicationConfiguration
   config.setTitle(TITLE)
@@ -30,12 +28,12 @@ class ViewImpl extends View {
 
   val executorService: ExecutorService = Executors.newSingleThreadExecutor()
   executorService.submit(() => {
-    new Lwjgl3Application(LostInDungeons, config)
+    new Lwjgl3Application(screenSetter, config)
   })
 
-  override def setObserverManager(observerManager: ObserverManager): Unit = this.observerManager = observerManager
-
-  override def startGame(): Unit = Gdx.app.postRunnable(() => LostInDungeons.setScreen(new GameScreen()))
+  override def startGame(): Unit = {
+    Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager)))
+  }
 
   override def endGame(): Unit = ???
 

@@ -6,6 +6,10 @@ import view._
 
 import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 
+/** Handles almost every aspect that allows the game to run such as starting and
+ * stopping the game loop, initializing view and model, saving existing game run
+ * and load it, handling inputs and closing the application.
+ */
 trait Controller {
 
   def stopExecutorService()
@@ -13,28 +17,37 @@ trait Controller {
   def newLevel()
 }
 
+/** Observer for controller; these methods will be notified from the view.
+ */
 trait Observer {
 
-  def handleEvent()
+  /** Notifies the observer with the event given.
+   *
+   * @param event the event generated from observable
+   */
+  def handleEvent(event: Int)
 }
 
+/** This class represent the Controller of the all game.
+ */
 class ControllerImpl extends Controller with Observer {
 
-  private val view: View = new ViewImpl()
-  private val model: Model = new ModelImpl()
-
+  private val entitiesContainer: EntitiesContainerMonitor = new EntitiesContainerMonitor()
   private val observerManager: ObserverManager = new ObserverManagerImpl()
-  this.view.setObserverManager(observerManager)
+  this.observerManager.addObserver(this)
+
+  private val view: View = new ViewImpl(entitiesContainer, observerManager)
+  private val model: Model = new ModelImpl(entitiesContainer)
 
   private val executorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-  private val gameLoop: Runnable = new GameLoopImpl(model)
-  this.executorService.scheduleAtFixedRate(gameLoop, 0, 5, TimeUnit.SECONDS)
-  //this.executorService.scheduleAtFixedRate(gameLoop, 0, GAME_LOOP_STEP, TimeUnit.NANOSECONDS)
+  private val gameLoop: GameLoop = new GameLoopImpl(model)
 
-  Thread.sleep(500)
-  this.view.startGame()
+  this.executorService.scheduleAtFixedRate(gameLoop, 0, GAME_LOOP_STEP, TimeUnit.NANOSECONDS)
 
-  override def handleEvent(): Unit = ???
+  //TODO only when the main menu is ready
+  //this.view.startGame()
+
+  override def handleEvent(event: Int): Unit = this.gameLoop.addAction(event)
 
   override def gameOver(): Unit = ???
 
