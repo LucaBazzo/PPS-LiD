@@ -1,5 +1,6 @@
 package main
 
+import com.badlogic.gdx.Gdx
 import controller.ControllerImpl
 
 object Main {

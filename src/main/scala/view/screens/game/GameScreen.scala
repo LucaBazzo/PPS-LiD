@@ -89,9 +89,9 @@ class GameScreen() extends ScreenAdapter with ObservableScreen with TheGame{
     //for debug purpose
     box2DDebugRenderer.render(world, camera.combined)
 
-    if(ScreenQueue.queue.nonEmpty && ScreenQueue.getScreen() == 0) {
-      LostInDungeons.setScreen(new GameScreen())
-    }
+//    if(ScreenQueue.queue.nonEmpty && ScreenQueue.getScreen() == 0) {
+//      LostInDungeons.setScreen(new GameScreen())
+//    }
   }
 
   override def resize(width: Int, height: Int): Unit = {

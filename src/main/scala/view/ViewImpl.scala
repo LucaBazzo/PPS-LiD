@@ -1,10 +1,11 @@
 package view
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.{Lwjgl3Application, Lwjgl3ApplicationConfiguration}
 import controller.ObserverManager
 import main.LostInDungeons
 import utils.ApplicationConstants.TITLE
-import view.screens.game.GameScreen
+import view.screens.game.{GameScreen, InitializationScreen}
 
 import java.util.concurrent.{ExecutorService, Executors}
 
@@ -28,14 +29,13 @@ class ViewImpl extends View {
   //config.addIcon(ICON_PATH, FileType.Internal)
 
   val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-
   executorService.submit(() => {
     new Lwjgl3Application(LostInDungeons, config)
   })
 
   override def setObserverManager(observerManager: ObserverManager): Unit = this.observerManager = observerManager
 
-  override def startGame(): Unit = LostInDungeons.setScreen(new GameScreen())
+  override def startGame(): Unit = Gdx.app.postRunnable(() => LostInDungeons.setScreen(new GameScreen()))
 
   override def endGame(): Unit = ???
 
