@@ -3,12 +3,15 @@ package model.entities
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import controller.GameEvent
+import controller.GameEvent.GameEvent
 import model.entities.State.State
 
 object State extends Enumeration {
   type State = Value
   val Standing, Running, Jumping, Falling = Value
 }
+
 
 trait Entity {
 
@@ -65,7 +68,7 @@ class MobileEntityImpl(private var body: Body, private val size: (Float, Float))
 
 trait Hero {
 
-  def setCommand(command: Int)
+  def setCommand(command: GameEvent)
 
   def updatePreviousState(state: State)
   def getPreviousState(): State
@@ -74,10 +77,10 @@ trait Hero {
 
 class HeroImpl(private var body: Body, private val size: (Float, Float)) extends MobileEntityImpl(body, size) with Hero{
 
-  override def setCommand(command: Int): Unit = command match {
-    case 0 => jump()
-    case 1 => moveRight()
-    case 2 => moveLeft()
+  override def setCommand(command: GameEvent): Unit = command match {
+    case GameEvent.MoveUp => jump()
+    case GameEvent.MoveRight => moveRight()
+    case GameEvent.MoveLeft => moveLeft()
   }
 
   private def jump(): Unit = {

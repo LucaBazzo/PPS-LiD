@@ -1,13 +1,14 @@
 package model
 
 import com.badlogic.gdx.physics.box2d.World
+import controller.GameEvent.GameEvent
 import model.entities.HeroImpl
 import utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
 import view.screens.helpers.WorldCreator
 
 trait Model {
 
-  def update(actions: List[Int])
+  def update(actions: List[GameEvent])
 }
 
 class ModelImpl(private val entitiesSetter: EntitiesSetter) extends Model {
@@ -22,7 +23,7 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter) extends Model {
 
   this.entitiesSetter.setWorld(this.world)
 
-  override def update(actions: List[Int]): Unit = {
+  override def update(actions: List[GameEvent]): Unit = {
     //println("MODEL update - " + actions.toString())
 
     if(actions.nonEmpty) {
