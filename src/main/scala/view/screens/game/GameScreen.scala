@@ -6,7 +6,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, Input, ScreenAdapter}
-import controller.ObserverManager
+import controller.{GameEvent, ObserverManager}
 import model._
 import model.entities.{Entity, Hero}
 import utils.ApplicationConstants._
@@ -42,13 +42,13 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       Gdx.app.exit()
 
     if (Gdx.input.isKeyJustPressed(Input.Keys.UP))
-      this.observerManager.notifyEvent(0)
+      this.observerManager.notifyEvent(GameEvent.MoveUp)
 
     if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-      this.observerManager.notifyEvent(1)
+      this.observerManager.notifyEvent(GameEvent.MoveRight)
 
     if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
-      this.observerManager.notifyEvent(2)
+      this.observerManager.notifyEvent(GameEvent.MoveLeft)
   }
 
   override def render(delta: Float): Unit = {

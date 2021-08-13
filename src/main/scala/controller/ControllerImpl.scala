@@ -1,5 +1,6 @@
 package controller
 
+import controller.GameEvent.GameEvent
 import model._
 import utils.ApplicationConstants.GAME_LOOP_STEP
 import view._
@@ -17,16 +18,6 @@ trait Controller {
   def newLevel()
 }
 
-/** Observer for controller; these methods will be notified from the view.
- */
-trait Observer {
-
-  /** Notifies the observer with the event given.
-   *
-   * @param event the event generated from observable
-   */
-  def handleEvent(event: Int)
-}
 
 /** This class represent the Controller of the all game.
  */
@@ -47,7 +38,7 @@ class ControllerImpl extends Controller with Observer {
   //TODO only when the main menu is ready
   //this.view.startGame()
 
-  override def handleEvent(event: Int): Unit = this.gameLoop.addAction(event)
+  override def handleEvent(event: GameEvent): Unit = this.gameLoop.addAction(event)
 
   override def gameOver(): Unit = ???
 

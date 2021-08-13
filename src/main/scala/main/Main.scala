@@ -13,7 +13,6 @@ object Main {
   def getEntities(predicate: Int => Boolean): List[Int] = this.l.filter(predicate)
 
   def main(args:Array[String]): Unit = {
-
     new ControllerImpl()
 
     /*println(getEntities((x:Int) => x > 5))

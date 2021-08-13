@@ -1,15 +1,16 @@
 package controller
 
+import controller.GameEvent.GameEvent
 import model.Model
 
 trait GameLoop extends Runnable {
 
-  def addAction(action: Int)
+  def addAction(action: GameEvent)
 }
 
 class GameLoopImpl(private val model: Model) extends GameLoop {
 
-  private var actions: List[Int] = List.empty
+  private var actions: List[GameEvent] = List.empty
 
   override def run(): Unit = {
     val currentActions = extractAndEmptyTheActions()
@@ -17,11 +18,11 @@ class GameLoopImpl(private val model: Model) extends GameLoop {
     this.checkEndGame()
   }
 
-  override def addAction(action: Int): Unit = synchronized {
+  override def addAction(action: GameEvent): Unit = synchronized {
     this.actions = action :: this.actions
   }
 
-  private def extractAndEmptyTheActions(): List[Int] = synchronized {
+  private def extractAndEmptyTheActions(): List[GameEvent] = synchronized {
     val currentActions = actions map identity
     this.actions = List.empty
     currentActions

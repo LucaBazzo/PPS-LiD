@@ -3,6 +3,8 @@ package model.entities
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import controller.GameEvent
+import controller.GameEvent.GameEvent
 
 trait Entity {
 
@@ -53,15 +55,15 @@ class MobileEntityImpl(private var body: Body) extends EntityImpl(body) with Mob
 
 trait Hero {
 
-  def setCommand(command: Int)
+  def setCommand(command: GameEvent)
 }
 
 class HeroImpl(private var body: Body) extends MobileEntityImpl(body) with Hero {
 
-  override def setCommand(command: Int): Unit = command match {
-    case 0 => jump()
-    case 1 => moveRight()
-    case 2 => moveLeft()
+  override def setCommand(command: GameEvent): Unit = command match {
+    case GameEvent.MoveUp => jump()
+    case GameEvent.MoveRight => moveRight()
+    case GameEvent.MoveLeft => moveLeft()
   }
 
   private def jump(): Unit = {
