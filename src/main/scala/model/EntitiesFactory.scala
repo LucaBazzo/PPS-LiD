@@ -13,14 +13,16 @@ class EntitiesFactoryImpl(private val world: World) extends EntitiesFactory {
 
   override def createMobileEntity(): Entity = {
     val position: (Float, Float) = (1, 1)
-    val body: Body = defineEntityBody(1f, position)
-    new MobileEntityImpl(body)
+    val size: Float = 1f
+    val body: Body = defineEntityBody(size, position)
+    new MobileEntityImpl(body, (size,size))
   }
 
   override def createHeroEntity(): HeroImpl = {
     val position: (Float, Float) = (1, 1)
-    val body: Body = defineEntityBody(1f, position)
-    new HeroImpl(body)
+    val size: Float = 1f
+    val body: Body = defineEntityBody(size, position)
+    new HeroImpl(body, (size,size))
   }
 
   private def defineEntityBody(size: Float, position: (Float, Float)): Body = {

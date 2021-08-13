@@ -28,6 +28,7 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter) extends Model {
     if(actions.nonEmpty) {
       for(command <- actions) this.player.setCommand(command)
     }
+    this.player.update()
 
     this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
   }

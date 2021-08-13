@@ -3,13 +3,20 @@ package model.entities
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import model.entities.State.State
+
+object State extends Enumeration {
+  type State = Value
+  val Standing, Running, Jumping, Falling = Value
+}
 
 trait Entity {
 
   def update()
-  def getState()
+  def getState(): State
   def setPosition(position: (Float, Float))
   def getPosition: (Float, Float)
+  def getSize: (Float, Float)
   def setCollisionStrategy()
   def destroyEntity()
 
@@ -17,20 +24,25 @@ trait Entity {
   def vectorScalar(vector: Vector2, scalar: Float = Gdx.graphics.getDeltaTime) = new Vector2(vector.x * scalar, vector.y * scalar)
 }
 
-abstract class EntityImpl(private var body: Body) extends Entity {
-   def update(): Unit
+abstract class EntityImpl(private var body: Body, private val size: (Float, Float)) extends Entity {
 
-   override def getState(): Unit = ???
+  protected var state: State = State.Standing
 
-   override def setPosition(position: (Float, Float)): Unit = {
-     this.body.setTransform(new Vector2(position._1, position._2), 0)
-   }
+  def update(): Unit
+
+  override def getState(): State = this.state
+
+  override def setPosition(position: (Float, Float)): Unit = {
+    this.body.setTransform(new Vector2(position._1, position._2), 0)
+  }
 
   override def getPosition: (Float, Float) = (this.body.getPosition.x, this.body.getPosition.y)
 
-   override def setCollisionStrategy(): Unit = ???
+  override def getSize: (Float, Float) = this.size
 
-   override def destroyEntity(): Unit = ???
+  override def setCollisionStrategy(): Unit = ???
+
+  override def destroyEntity(): Unit = ???
 }
 
 trait MobileEntity {
@@ -40,7 +52,7 @@ trait MobileEntity {
   def getDirection()
 }
 
-class MobileEntityImpl(private var body: Body) extends EntityImpl(body) with MobileEntity {
+class MobileEntityImpl(private var body: Body, private val size: (Float, Float)) extends EntityImpl(body, size) with MobileEntity {
 
   override def update(): Unit = this.move()
 
@@ -54,9 +66,13 @@ class MobileEntityImpl(private var body: Body) extends EntityImpl(body) with Mob
 trait Hero {
 
   def setCommand(command: Int)
+
+  def updatePreviousState(state: State)
+  def getPreviousState(): State
+  def getLinearVelocityX(): Float
 }
 
-class HeroImpl(private var body: Body) extends MobileEntityImpl(body) with Hero {
+class HeroImpl(private var body: Body, private val size: (Float, Float)) extends MobileEntityImpl(body, size) with Hero{
 
   override def setCommand(command: Int): Unit = command match {
     case 0 => jump()
@@ -79,5 +95,24 @@ class HeroImpl(private var body: Body) extends MobileEntityImpl(body) with Hero 
       this.body.applyLinearImpulse(vectorScalar(new Vector2(-60f, 0)), this.body.getWorldCenter, true)
     }
   }
+
+  private var previousState: State = State.Standing
+
+  override def update(): Unit = {
+    if(this.body.getLinearVelocity.y > 0 || (this.body.getLinearVelocity.y < 0 && this.previousState == State.Jumping))
+      this.state = State.Jumping
+    else if(this.body.getLinearVelocity.y < 0)
+      this.state = State.Falling
+    else if(this.body.getLinearVelocity.x != 0)
+      this.state = State.Running
+    else
+      this.state = State.Standing
+  }
+
+  override def getLinearVelocityX(): Float = this.body.getLinearVelocity.x
+
+  override def getPreviousState(): State = this.previousState
+
+  def updatePreviousState(state: State): Unit = this.previousState = state
 }
 
