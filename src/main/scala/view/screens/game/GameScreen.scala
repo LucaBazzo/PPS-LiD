@@ -115,10 +115,7 @@ class HeroSprite extends Sprite {
 
   this.setRegion(this.atlas.findRegion("hero"))
 
-  //private val heroStand: TextureRegion = new TextureRegion(getTexture, 0, 0, 50, 37)
   this.setBounds(0, 0, 50, 37)
-  //setRegion(heroStand)
-
 
   private var heroStand: Animation[TextureRegion] = _
   private var heroRun: Animation[TextureRegion] = _
@@ -161,7 +158,7 @@ class HeroSprite extends Sprite {
       stateTimer += dt
     else
       stateTimer = 0
-    println(state)
+    //println(state)
   }
 
   private def getFrame(state: State): TextureRegion = state match {

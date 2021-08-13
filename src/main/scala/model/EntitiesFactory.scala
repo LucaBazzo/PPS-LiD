@@ -30,9 +30,13 @@ class EntitiesFactoryImpl(private val world: World) extends EntitiesFactory {
     bodyDef.position.set(position._1, position._2)
     bodyDef.`type` = BodyDef.BodyType.DynamicBody
 
-    var body: Body = world.createBody(bodyDef)
+    val body: Body = world.createBody(bodyDef)
 
     val fixtureDef: FixtureDef = new FixtureDef()
+
+    fixtureDef.filter.categoryBits = 1
+    fixtureDef.filter.maskBits = 2
+
     val shape: CircleShape = new CircleShape()
     shape.setRadius(size)
 
