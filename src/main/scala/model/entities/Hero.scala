@@ -8,7 +8,6 @@ import model.entities.State.State
 
 trait Hero {
 
-  def setBody(body: Body)
   def setCommand(command: GameEvent)
 
   def updatePreviousState(state: State)
@@ -17,8 +16,6 @@ trait Hero {
 }
 
 class HeroImpl(private var body: Body, private val size: (Float, Float)) extends LivingEntityImpl(body, size) with Hero{
-
-  override def setBody(body: Body): Unit = this.body = body
 
   override def setCommand(command: GameEvent): Unit = command match {
     case GameEvent.MoveUp => jump()

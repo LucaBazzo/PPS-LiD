@@ -14,8 +14,8 @@ class WorldCreator(w: World) {
     val shape: PolygonShape = new PolygonShape()
     val fixtureDef: FixtureDef = new FixtureDef()
 
-    fixtureDef.filter.categoryBits = 2
-    fixtureDef.filter.maskBits = 1
+    /*fixtureDef.filter.categoryBits = 2
+    fixtureDef.filter.maskBits = 1*/
 
     bodyDef.`type` = BodyDef.BodyType.StaticBody
     bodyDef.position.set(0, -2)

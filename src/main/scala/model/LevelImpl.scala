@@ -26,7 +26,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)
 
-  //this.world.setContactListener(new CollisionManager(this))
+  this.world.setContactListener(new CollisionManager(this))
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
 

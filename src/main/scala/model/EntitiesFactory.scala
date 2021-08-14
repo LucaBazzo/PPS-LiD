@@ -34,8 +34,8 @@ class EntitiesFactoryImpl(private val world: World) extends EntitiesFactory {
 
     val fixtureDef: FixtureDef = new FixtureDef()
 
-    fixtureDef.filter.categoryBits = 1
-    fixtureDef.filter.maskBits = 2
+    /*fixtureDef.filter.categoryBits = 1
+    fixtureDef.filter.maskBits = 2*/
 
     val shape: CircleShape = new CircleShape()
     shape.setRadius(size)
