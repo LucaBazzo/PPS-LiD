@@ -30,7 +30,6 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
-
   private val heroSprite: HeroSprite = new HeroSprite()
 
   private def update(deltaTime: Float): Unit = {
@@ -71,7 +70,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.camera.position.y = player.getPosition._2
 
       this.heroSprite.update(delta, player.getState(), player.asInstanceOf[Hero].getPreviousState(),
-        player.getPosition, player.getSize, player.asInstanceOf[Hero].getLinearVelocityX())
+        (this.camera.position.x,this.camera.position.y), player.getSize, player.asInstanceOf[Hero].getLinearVelocityX())
       player.asInstanceOf[Hero].updatePreviousState(player.getState())
     }
 
@@ -150,7 +149,8 @@ class HeroSprite extends Sprite {
 
   def update(dt: Float, state: State, previousState: State,
              position: (Float, Float), size: (Float, Float), velocityX: Float): Unit = {
-    this.setPosition(position._1 - size._1 , position._2 - size._2)
+    this.setPosition(WIDTH_SCREEN / 2 - this.getWidth / 2,
+      HEIGHT_SCREEN / 2 - this.getHeight / 2 + 8f)
     var region: TextureRegion = getFrame(state)
     region = checkFlip(region, velocityX)
     this.setRegion(region)
@@ -159,6 +159,7 @@ class HeroSprite extends Sprite {
     else
       stateTimer = 0
     //println(state)
+
   }
 
   private def getFrame(state: State): TextureRegion = state match {
