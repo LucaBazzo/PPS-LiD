@@ -19,4 +19,6 @@ object ApplicationConstants {
 
   val GAME_LOOP_STEP = 16666666
 
+  val SPRITES_PACK_LOCATION = "assets/sprites/Hero.pack"
+
 }

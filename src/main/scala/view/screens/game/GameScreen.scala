@@ -4,15 +4,14 @@ import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
-import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, Input, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
 import model._
-import model.entities.State.{Falling, Jumping, Running, Standing, State}
-import model.entities.{Entity, Hero}
+import model.entities.{Entity, Hero, State}
 import utils.ApplicationConstants._
 import view.screens.helpers.TileMapHelper
+import view.screens.sprites.{EntitySprite, SpriteFactory, SpriteFactoryImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager) extends ScreenAdapter{
@@ -30,7 +29,18 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
-  private val heroSprite: HeroSprite = new HeroSprite()
+  private val spriteFactory: SpriteFactory = new SpriteFactoryImpl()
+  private val heroSprite: EntitySprite = spriteFactory.createEntitySprite("hero", 50, 37)
+  this.heroSprite.addAnimation(State.Standing,
+    spriteFactory.createSpriteAnimation(heroSprite, 0, 0, 3, 0.18f),
+    true)
+  this.heroSprite.addAnimation(State.Running,
+    spriteFactory.createSpriteAnimation(heroSprite, 1, 0, 6),
+    true)
+  this.heroSprite.addAnimation(State.Jumping,
+    spriteFactory.createSpriteAnimation(heroSprite, 2, 0, 3))
+  this.heroSprite.addAnimation(State.Falling,
+    spriteFactory.createSpriteAnimation(heroSprite, 3, 0, 1))
 
   private def update(deltaTime: Float): Unit = {
     this.handleInput(deltaTime)
@@ -69,8 +79,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.camera.position.x = player.getPosition._1
       this.camera.position.y = player.getPosition._2
 
+      this.heroSprite.setPosition(WIDTH_SCREEN / 2, HEIGHT_SCREEN / 2)
       this.heroSprite.update(delta, player.getState(), player.asInstanceOf[Hero].getPreviousState(),
-        (this.camera.position.x,this.camera.position.y), player.getSize, player.asInstanceOf[Hero].getLinearVelocityX())
+        player.asInstanceOf[Hero].getLinearVelocityX())
       player.asInstanceOf[Hero].updatePreviousState(player.getState())
     }
 
@@ -103,82 +114,5 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     this.entitiesGetter.getWorld.dispose()
     box2DDebugRenderer.dispose()
     hud.dispose()
-  }
-}
-
-
-class HeroSprite extends Sprite {
-
-  //SPRITES
-  val atlas: TextureAtlas = new TextureAtlas("assets/sprites/Hero.pack")
-
-  this.setRegion(this.atlas.findRegion("hero"))
-
-  this.setBounds(0, 0, 50, 37)
-
-  private var heroStand: Animation[TextureRegion] = _
-  private var heroRun: Animation[TextureRegion] = _
-  private var heroJump: Animation[TextureRegion] = _
-  private var heroFall: Animation[TextureRegion] = _
-
-  private var stateTimer: Float = 0
-  private var runningRight: Boolean = true
-
-  //array from gdx.utils.Array
-  private val frames: Array[TextureRegion] = new Array[TextureRegion]()
-
-  //STANDING
-  for(i <- 0 to 3) frames.add(new TextureRegion(getTexture, i * 50, 0 , 50, 37))
-  this.heroStand = new Animation(0.18f, frames)
-  frames.clear()
-
-  //RUNNING
-  for(i <- 1 to 6) frames.add(new TextureRegion(getTexture, i * 50, 37 , 50, 37))
-  this.heroRun = new Animation(0.10f, frames)
-  frames.clear()
-
-  //JUMPING
-  for(i <- 0 to 3) frames.add(new TextureRegion(getTexture, i * 50, 37 * 2 , 50, 37))
-  this.heroJump = new Animation(0.10f, frames)
-  frames.clear()
-
-  //FALLING
-  for(i <- 0 to 1) frames.add(new TextureRegion(getTexture, i * 50, 37 * 3 , 50, 37))
-  this.heroFall = new Animation(0.10f, frames)
-  frames.clear()
-
-  def update(dt: Float, state: State, previousState: State,
-             position: (Float, Float), size: (Float, Float), velocityX: Float): Unit = {
-    this.setPosition(WIDTH_SCREEN / 2 - this.getWidth / 2,
-      HEIGHT_SCREEN / 2 - this.getHeight / 2 + 8f)
-    var region: TextureRegion = getFrame(state)
-    region = checkFlip(region, velocityX)
-    this.setRegion(region)
-    if(state == previousState)
-      stateTimer += dt
-    else
-      stateTimer = 0
-    //println(state)
-
-  }
-
-  private def getFrame(state: State): TextureRegion = state match {
-    case Jumping => heroJump.getKeyFrame(stateTimer)
-    case Running => heroRun.getKeyFrame(stateTimer, true)
-    case Falling => heroFall.getKeyFrame(stateTimer)
-    case Standing => heroStand.getKeyFrame(stateTimer, true)
-  }
-
-  private def checkFlip(region: TextureRegion, velocityX: Float): TextureRegion = {
-    //facing to the right and running to the left
-    if((velocityX < 0 || !runningRight) && !region.isFlipX) {
-      region.flip(true, false)
-      this.runningRight = false
-    }
-    else if((velocityX > 0 || runningRight) && region.isFlipX) {
-      region.flip(true, false)
-      this.runningRight = true
-    }
-    region
   }
 }
