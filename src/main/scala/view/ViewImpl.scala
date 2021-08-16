@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.{Lwjgl3Application, Lwjgl3ApplicationConfiguration}
 import controller.ObserverManager
 import main.LostInDungeons
-import model.EntitiesGetter
+import model.helpers.EntitiesGetter
 import utils.ApplicationConstants.TITLE
 import view.screens.game.GameScreen
 

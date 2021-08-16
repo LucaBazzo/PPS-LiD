@@ -1,6 +1,7 @@
 package model
 
 import controller.GameEvent.GameEvent
+import model.helpers.EntitiesSetter
 
 trait Model {
 

@@ -2,7 +2,7 @@ package main
 
 import com.badlogic.gdx.Game
 import controller.ObserverManager
-import model.EntitiesGetter
+import model.helpers.EntitiesGetter
 import view.screens.game.GameScreen
 
 class LostInDungeons(private val entitiesGetter: EntitiesGetter,

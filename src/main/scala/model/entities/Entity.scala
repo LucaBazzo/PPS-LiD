@@ -3,6 +3,7 @@ package model.entities
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import model.collisions.CollisionStrategy
 import model.entities.State.State
 
 object State extends Enumeration {
@@ -13,11 +14,12 @@ object State extends Enumeration {
 trait Entity {
 
   def update()
-  def getState(): State
+  def getState: State
   def setPosition(position: (Float, Float))
   def getPosition: (Float, Float)
   def getSize: (Float, Float)
-  def setCollisionStrategy()
+  def setCollisionStrategy(collisionStrategy: CollisionStrategy)
+  def collisionDetected(entity: Entity)
   def destroyEntity()
 
   //TODO ricontrollare in futuro
@@ -30,10 +32,11 @@ trait Entity {
 abstract class EntityImpl(private var body: Body, private val size: (Float, Float)) extends Entity {
 
   protected var state: State = State.Standing
+  private var collisionStrategy: CollisionStrategy = _
 
   def update(): Unit
 
-  override def getState(): State = this.state
+  override def getState: State = this.state
 
   override def setPosition(position: (Float, Float)): Unit = {
     this.body.setTransform(new Vector2(position._1, position._2), 0)
@@ -43,9 +46,17 @@ abstract class EntityImpl(private var body: Body, private val size: (Float, Floa
 
   override def getSize: (Float, Float) = this.size
 
-  override def setCollisionStrategy(): Unit = ???
+  override def setCollisionStrategy(collisionStrategy: CollisionStrategy): Unit = this.collisionStrategy = collisionStrategy
+
+  override def collisionDetected(entity: Entity): Unit = {
+    if(this.collisionStrategy != null) this.collisionStrategy.apply(entity)
+  }
 
   override def destroyEntity(): Unit = ???
 
-  override def getBody(): Body = this.body
+  override def getBody: Body = this.body
+}
+
+case class ImmobileEntity(private var body: Body, private val size: (Float, Float)) extends EntityImpl(body, size) {
+  override def update(): Unit = {}
 }

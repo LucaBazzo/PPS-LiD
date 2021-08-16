@@ -1,6 +1,7 @@
-package model
+package model.helpers
 
 import com.badlogic.gdx.physics.box2d._
+import model.collisions.CollisionStrategyImpl
 import model.entities.{Entity, HeroImpl, MobileEntityImpl}
 
 trait EntitiesFactory {
@@ -22,7 +23,9 @@ class EntitiesFactoryImpl(private val world: World) extends EntitiesFactory {
     val position: (Float, Float) = (1, 1)
     val size: Float = 1f
     val body: Body = defineEntityBody(size, position)
-    new HeroImpl(body, (size,size))
+    val hero: HeroImpl = new HeroImpl(body, (size,size))
+    hero.setCollisionStrategy(new CollisionStrategyImpl())
+    hero
   }
 
   private def defineEntityBody(size: Float, position: (Float, Float)): Body = {

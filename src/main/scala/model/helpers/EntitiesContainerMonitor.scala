@@ -1,4 +1,4 @@
-package model
+package model.helpers
 
 import com.badlogic.gdx.physics.box2d.World
 import model.entities.Entity

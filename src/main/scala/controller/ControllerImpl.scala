@@ -2,6 +2,7 @@ package controller
 
 import controller.GameEvent.GameEvent
 import model._
+import model.helpers.EntitiesContainerMonitor
 import utils.ApplicationConstants.GAME_LOOP_STEP
 import view._
 

@@ -7,8 +7,8 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, Input, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model._
 import model.entities.{Entity, Hero, State}
+import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
 import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{EntitySprite, SpriteFactory, SpriteFactoryImpl}
@@ -35,12 +35,13 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     spriteFactory.createSpriteAnimation(heroSprite, 0, 0, 3, 0.18f),
     true)
   this.heroSprite.addAnimation(State.Running,
-    spriteFactory.createSpriteAnimation(heroSprite, 1, 0, 6),
+    spriteFactory.createSpriteAnimation(heroSprite, 1, 1, 6),
     true)
   this.heroSprite.addAnimation(State.Jumping,
     spriteFactory.createSpriteAnimation(heroSprite, 2, 0, 3))
   this.heroSprite.addAnimation(State.Falling,
-    spriteFactory.createSpriteAnimation(heroSprite, 3, 0, 1))
+    spriteFactory.createSpriteAnimation(heroSprite, 3, 1, 2),
+    true)
 
   private def update(deltaTime: Float): Unit = {
     this.handleInput(deltaTime)
