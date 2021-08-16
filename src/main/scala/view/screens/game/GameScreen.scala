@@ -81,9 +81,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.camera.position.y = player.getPosition._2
 
       this.heroSprite.setPosition(WIDTH_SCREEN / 2, HEIGHT_SCREEN / 2)
-      this.heroSprite.update(delta, player.getState(), player.asInstanceOf[Hero].getPreviousState(),
+      this.heroSprite.update(delta, player.getState, player.asInstanceOf[Hero].getPreviousState(),
         player.asInstanceOf[Hero].getLinearVelocityX())
-      player.asInstanceOf[Hero].updatePreviousState(player.getState())
+      player.asInstanceOf[Hero].updatePreviousState(player.getState)
     }
 
     this.camera.update()
