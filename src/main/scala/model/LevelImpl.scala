@@ -3,7 +3,7 @@ package model
 import com.badlogic.gdx.physics.box2d.World
 import controller.GameEvent.GameEvent
 import model.collisions.CollisionManager
-import model.entities.{Entity, HeroImpl}
+import model.entities.{EnemyImpl, Entity, HeroImpl, MobileEntityImpl}
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter}
 import model.world.WorldCreator
 import utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
@@ -22,8 +22,9 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private val entitiesFactory: EntitiesFactory = new EntitiesFactoryImpl(world)
 
   private val hero: HeroImpl = entitiesFactory.createHeroEntity()
+  private val enemies: List[EnemyImpl] = List(entitiesFactory.createEnemyEntity())
 
-  private var entitiesList: List[Entity] = List(hero)
+  private var entitiesList: List[Entity] = List(hero) ++ enemies
 
   new WorldCreator(this, this.world)
 
@@ -33,7 +34,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   this.world.setContactListener(new CollisionManager(this))
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
-
+//    println(this.world.getContactList)
     if(actions.nonEmpty) {
       for(command <- actions) this.hero.setCommand(command)
     }

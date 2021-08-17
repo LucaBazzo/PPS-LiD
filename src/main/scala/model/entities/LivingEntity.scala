@@ -15,7 +15,7 @@ trait LivingEntity {
 
 class LivingEntityImpl(private var body: Body, private val size: (Float, Float)) extends MobileEntityImpl(body, size) with LivingEntity {
 
-  override def sufferDamage(damage: Float): Unit = ???
+  override def sufferDamage(damage: Float): Unit = {}
 
   override def getLife(): Float = ???
 

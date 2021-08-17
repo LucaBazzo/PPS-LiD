@@ -34,7 +34,7 @@ abstract class EntityImpl(private var body: Body, private val size: (Float, Floa
   protected var state: State = State.Standing
   private var collisionStrategy: CollisionStrategy = _
 
-  def update(): Unit
+//  override def update(): Unit
 
   override def getState: State = this.state
 

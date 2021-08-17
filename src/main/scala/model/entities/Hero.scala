@@ -15,7 +15,7 @@ trait Hero {
   def getLinearVelocityX(): Float
 }
 
-class HeroImpl(private var body: Body, private val size: (Float, Float)) extends LivingEntityImpl(body, size) with Hero{
+case class HeroImpl(private var body: Body, private val size: (Float, Float)) extends LivingEntityImpl(body, size) with Hero{
 
   override def setCommand(command: GameEvent): Unit = command match {
     case GameEvent.MoveUp => jump()

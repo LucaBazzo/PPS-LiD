@@ -1,6 +1,6 @@
 package model.collisions
 
-import model.entities.Entity
+import model.entities.{EnemyImpl, Entity, EntityImpl, HeroImpl, ImmobileEntity, LivingEntityImpl, MobileEntityImpl}
 
 trait CollisionStrategy {
 
@@ -9,4 +9,14 @@ trait CollisionStrategy {
 
 class CollisionStrategyImpl extends CollisionStrategy {
   override def apply(entity: Entity): Unit = println("Collision Detected with " + entity.toString)
+}
+
+class ApplyDamageToHero extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case HeroImpl(body, size) => {
+      println("Entity colliding with hero")
+      entity.asInstanceOf[HeroImpl].sufferDamage(0)
+    }
+    case _ => {}
+  }
 }

@@ -6,6 +6,8 @@ import com.badlogic.gdx.physics.box2d._
 import model.Level
 import model.entities.Entity
 
+// TODO: come gestire collissioni continue?
+
 class CollisionManager(private val level: Level) extends ContactListener {
 
   override def beginContact(contact: Contact): Unit = {
