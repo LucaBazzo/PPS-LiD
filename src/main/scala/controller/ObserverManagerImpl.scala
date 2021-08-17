@@ -16,7 +16,8 @@ case class Attack() extends GameEvent
 
 object GameEvent extends Enumeration {
   type GameEvent = Value
-  val StartGame, StopGame, CloseApplication, MoveUp, MoveDown, MoveRight, MoveLeft, Attack = Value
+  val StartGame, StopGame, CloseApplication, Jump, MoveDown, MoveRight, MoveLeft,
+          Slide, Attack = Value
 }
 
 /** Observer for controller; these methods will be notified from the view.

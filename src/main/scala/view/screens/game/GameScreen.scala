@@ -42,6 +42,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   this.heroSprite.addAnimation(State.Falling,
     spriteFactory.createSpriteAnimation(heroSprite, 3, 1, 2),
     true)
+  this.heroSprite.addAnimation(State.Sliding,
+    spriteFactory.createSpriteAnimation(heroSprite, 3, 3, 6))
 
   private def update(deltaTime: Float): Unit = {
     this.handleInput(deltaTime)
@@ -56,14 +58,18 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE))
       Gdx.app.exit()
 
-    if (Gdx.input.isKeyJustPressed(Input.Keys.UP))
-      this.observerManager.notifyEvent(GameEvent.MoveUp)
+    if (Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE)
+          || Gdx.input.isKeyJustPressed(Input.Keys.UP))
+      this.observerManager.notifyEvent(GameEvent.Jump)
 
-    if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+    if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT))
       this.observerManager.notifyEvent(GameEvent.MoveRight)
 
-    if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+    if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT))
       this.observerManager.notifyEvent(GameEvent.MoveLeft)
+
+    if (Gdx.input.isKeyJustPressed(Input.Keys.E))
+      this.observerManager.notifyEvent(GameEvent.Slide)
   }
 
   override def render(delta: Float): Unit = {
