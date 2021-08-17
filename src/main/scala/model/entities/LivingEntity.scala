@@ -4,7 +4,7 @@ import com.badlogic.gdx.physics.box2d.Body
 
 import scala.collection.immutable.HashMap
 
-trait LivingEntity {
+trait LivingEntity extends MobileEntity {
 
   def sufferDamage(damage: Float)
   def getLife(): Float

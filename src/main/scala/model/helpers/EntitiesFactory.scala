@@ -1,13 +1,14 @@
 package model.helpers
 
 import com.badlogic.gdx.physics.box2d._
+import model.HeroMovementStrategy
 import model.collisions.CollisionStrategyImpl
-import model.entities.{Entity, HeroImpl, MobileEntityImpl}
+import model.entities.{Entity, Hero, HeroImpl, MobileEntityImpl}
 
 trait EntitiesFactory {
 
   def createMobileEntity(): Entity
-  def createHeroEntity(): HeroImpl
+  def createHeroEntity(): Hero
 }
 
 class EntitiesFactoryImpl(private val world: World) extends EntitiesFactory {
@@ -19,12 +20,13 @@ class EntitiesFactoryImpl(private val world: World) extends EntitiesFactory {
     new MobileEntityImpl(body, (size,size))
   }
 
-  override def createHeroEntity(): HeroImpl = {
+  override def createHeroEntity(): Hero = {
     val position: (Float, Float) = (1, 1)
     val size: Float = 1f
     val body: Body = defineEntityBody(size, position)
-    val hero: HeroImpl = new HeroImpl(body, (size,size))
+    val hero: Hero = new HeroImpl(body, (size,size))
     hero.setCollisionStrategy(new CollisionStrategyImpl())
+    hero.setMovementStrategy(new HeroMovementStrategy(hero))
     hero
   }
 

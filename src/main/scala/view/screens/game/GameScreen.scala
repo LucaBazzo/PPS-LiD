@@ -33,15 +33,15 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   private val heroSprite: EntitySprite = spriteFactory.createEntitySprite("hero", 50, 37)
   this.heroSprite.addAnimation(State.Standing,
     spriteFactory.createSpriteAnimation(heroSprite, 0, 0, 3, 0.18f),
-    true)
+    loop = true)
   this.heroSprite.addAnimation(State.Running,
     spriteFactory.createSpriteAnimation(heroSprite, 1, 1, 6),
-    true)
+    loop = true)
   this.heroSprite.addAnimation(State.Jumping,
     spriteFactory.createSpriteAnimation(heroSprite, 2, 0, 3))
   this.heroSprite.addAnimation(State.Falling,
     spriteFactory.createSpriteAnimation(heroSprite, 3, 1, 2),
-    true)
+    loop = true)
   this.heroSprite.addAnimation(State.Sliding,
     spriteFactory.createSpriteAnimation(heroSprite, 3, 3, 6))
 
@@ -82,14 +82,13 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
     val entities: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Hero])
     if(entities.nonEmpty) {
-      val player: Entity = entities.get.head
+      val player: Hero = entities.get.head.asInstanceOf[Hero]
       this.camera.position.x = player.getPosition._1
       this.camera.position.y = player.getPosition._2
 
       this.heroSprite.setPosition(WIDTH_SCREEN / 2, HEIGHT_SCREEN / 2)
-      this.heroSprite.update(delta, player.getState, player.asInstanceOf[Hero].getPreviousState(),
-        player.asInstanceOf[Hero].getLinearVelocityX())
-      player.asInstanceOf[Hero].updatePreviousState(player.getState)
+      this.heroSprite.update(delta, player.getState, player.getPreviousState, player.getLinearVelocityX)
+      player.updatePreviousState(player.getState)
     }
 
     this.camera.update()
