@@ -39,7 +39,16 @@ class ControllerImpl extends Controller with Observer {
   //TODO only when the main menu is ready
   //this.view.startGame()
 
-  override def handleEvent(event: GameEvent): Unit = this.gameLoop.addAction(event)
+  override def handleEvent(event: GameEvent): Unit = event match {
+    case GameEvent.CloseApplication => {
+      // terminate game loop executor
+      this.executorService.shutdown()
+
+      // let view terminate itself
+      this.view.terminate()
+    }
+    case _ => this.gameLoop.addAction(event)
+  }
 
   override def gameOver(): Unit = ???
 

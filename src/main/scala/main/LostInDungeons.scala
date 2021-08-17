@@ -1,7 +1,7 @@
 package main
 
 import com.badlogic.gdx.Game
-import controller.ObserverManager
+import controller.{GameEvent, ObserverManager}
 import model.helpers.EntitiesGetter
 import view.screens.game.GameScreen
 
@@ -15,5 +15,6 @@ class LostInDungeons(private val entitiesGetter: EntitiesGetter,
   override def dispose(): Unit = {
     this.getScreen.dispose()
     super.dispose()
+    observerManager.notifyEvent(GameEvent.CloseApplication)
   }
 }

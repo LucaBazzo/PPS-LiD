@@ -54,7 +54,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private def handleInput(deltaTime : Float): Unit = {
     if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE))
-      Gdx.app.exit()
+      this.observerManager.notifyEvent(GameEvent.CloseApplication)
 
     if (Gdx.input.isKeyJustPressed(Input.Keys.UP))
       this.observerManager.notifyEvent(GameEvent.MoveUp)
