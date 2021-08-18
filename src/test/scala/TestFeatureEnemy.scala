@@ -1,4 +1,9 @@
-class TestFeatureEnemy {
+package scala
+
+import org.scalatest.flatspec.AnyFlatSpec
+import scala.collection.mutable
+
+class TestFeatureEnemy extends AnyFlatSpec {
   // test creation
 
   // test enemy entity state after creation
