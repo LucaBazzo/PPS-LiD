@@ -1,15 +1,17 @@
 package view.screens.game
 
+import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
-import com.badlogic.gdx.{Gdx, Input, ScreenAdapter}
+import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
 import model.entities.{Entity, Hero, State}
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
+import view.inputs.GameInputProcessor
 import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{EntitySprite, SpriteFactory, SpriteFactoryImpl}
 
@@ -48,8 +50,10 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     spriteFactory.createSpriteAnimation(heroSprite, 0, 4, 6, 0.18f),
     loop = true)
 
+  Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
+
   private def update(deltaTime: Float): Unit = {
-    this.handleInput(deltaTime)
+    this.handleHoldingInput()
 
     //old world step
 
@@ -57,25 +61,14 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     this.orthogonalTiledMapRenderer.setView(camera)
   }
 
-  private def handleInput(deltaTime : Float): Unit = {
-    if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE))
-      Gdx.app.exit()
+  private def handleHoldingInput(): Unit = {
 
-    if (Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE)
-          || Gdx.input.isKeyJustPressed(Input.Keys.UP))
-      this.observerManager.notifyEvent(GameEvent.Jump)
-
-    if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+    if (Gdx.input.isKeyPressed(Keys.D) || Gdx.input.isKeyPressed(Keys.RIGHT))
       this.observerManager.notifyEvent(GameEvent.MoveRight)
 
-    if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT))
+    if (Gdx.input.isKeyPressed(Keys.A) || Gdx.input.isKeyPressed(Keys.LEFT))
       this.observerManager.notifyEvent(GameEvent.MoveLeft)
 
-    if (Gdx.input.isKeyJustPressed(Input.Keys.E))
-      this.observerManager.notifyEvent(GameEvent.Slide)
-
-    /*if (Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN))
-      this.observerManager.notifyEvent(GameEvent.Crouch)*/
   }
 
   override def render(delta: Float): Unit = {
@@ -92,9 +85,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.camera.position.x = player.getPosition._1
       this.camera.position.y = player.getPosition._2
 
-      this.heroSprite.setPosition(WIDTH_SCREEN / 2, HEIGHT_SCREEN / 2, player.isSliding)
-      this.heroSprite.update(delta, player.getState, player.getPreviousState, player.isFacingRight)
-      player.updatePreviousState(player.getState)
+      this.heroSprite.setPosition(WIDTH_SCREEN / 2, HEIGHT_SCREEN / 2, player.isLittle)
+      this.heroSprite.update(delta, player.getState, player.isFacingRight)
     }
 
     this.camera.update()

@@ -14,46 +14,78 @@ trait MovementStrategy {
 class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
 
   override def apply(command: GameEvent): Unit = {
-    if(!entity.isSliding) {
+    if(checkCommand(command)) {
       command match {
-        case GameEvent.Jump => if(entity.getState != State.Falling) jump()
+        case GameEvent.Jump => jump()
         case GameEvent.MoveRight => moveRight()
         case GameEvent.MoveLeft => moveLeft()
-        case GameEvent.Slide => if(entity.getState != State.Jumping && entity.getState != State.Falling) slide()
-        case _ => throw new UnsupportedOperationException
+        case GameEvent.Slide => slide()
       }
     }
   }
 
+  private def checkCommand(command: GameEvent): Boolean = {
+    if(entity.getState != State.Sliding) {
+      command match {
+        case controller.GameEvent.Jump => return entity.getState != State.Falling &&
+                entity.getState != State.Jumping && entity.getState != State.Crouch
+        case controller.GameEvent.MoveRight | controller.GameEvent.MoveLeft => return true
+        case controller.GameEvent.Slide => return entity.getState != State.Jumping && entity.getState != State.Falling
+        case _ => throw new UnsupportedOperationException
+      }
+    }
+    false
+  }
+
   private def jump(): Unit = {
-    entity.getBody.applyLinearImpulse(entity.vectorScalar(new Vector2(0, 400f)), entity.getBody.getWorldCenter, true)
+    this.applyLinearImpulse(new Vector2(0, 400f))
+    this.entity.setState(State.Jumping)
   }
 
   private def moveRight(): Unit = {
-    if (entity.getBody.getLinearVelocity.x <= 2) {
-      entity.getBody.applyLinearImpulse(entity.vectorScalar(new Vector2(60f, 0)), entity.getBody.getWorldCenter, true)
+    if(entity.getState != State.Crouch) {
+      if (entity.getBody.getLinearVelocity.x <= 2) {
+        this.applyLinearImpulse(new Vector2(60f, 0))
+      }
+
+      if(this.entity.getState == State.Standing)
+        this.entity.setState(State.Running)
     }
     entity.setFacing(right = true)
   }
 
   private def moveLeft(): Unit = {
-    if (entity.getBody.getLinearVelocity.x >= -2) {
-      entity.getBody.applyLinearImpulse(entity.vectorScalar(new Vector2(-60f, 0)), entity.getBody.getWorldCenter, true)
+    if(entity.getState != State.Crouch) {
+      if (entity.getBody.getLinearVelocity.x >= -2) {
+        this.applyLinearImpulse(new Vector2(-60f, 0))
+      }
+
+      if(this.entity.getState == State.Standing)
+        this.entity.setState(State.Running)
     }
     entity.setFacing(right = false)
   }
 
   private def slide(): Unit = {
     this.stopMovement()
-    EntitiesFactoryImpl.defineSlidingHero(entity)
+
+    if(entity.getState != State.Crouch) {
+      EntitiesFactoryImpl.defineSlidingHero(entity)
+      this.entity.setLittle(true)
+    }
+
     if (entity.isFacingRight && entity.getBody.getLinearVelocity.x <= 4) {
-      entity.getBody.applyLinearImpulse(entity.vectorScalar(new Vector2(200f, 0)), entity.getBody.getWorldCenter, true)
+      this.applyLinearImpulse(new Vector2(200f, 0))
     }
-    if (!entity.isFacingRight && entity.getBody.getLinearVelocity.x >= -4) {
-      entity.getBody.applyLinearImpulse(entity.vectorScalar(new Vector2(-200f, 0)), entity.getBody.getWorldCenter, true)
+    else if (!entity.isFacingRight && entity.getBody.getLinearVelocity.x >= -4) {
+      this.applyLinearImpulse(new Vector2(-200f, 0))
     }
-    entity.setSliding(true)
+
+    this.entity.setState(State.Sliding)
   }
+
+  private def applyLinearImpulse(vector: Vector2): Unit =
+    entity.getBody.applyLinearImpulse(entity.vectorScalar(vector), entity.getBody.getWorldCenter, true)
 
   //TODO temporaneo
   private def stopMovement(): Unit = {

@@ -36,7 +36,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   override def updateEntities(actions: List[GameEvent]): Unit = {
 
     if(actions.nonEmpty) {
-      for(command <- actions) this.hero.setCommand(command)
+      for(command <- actions) this.hero.notifyCommand(command)
     }
 
     this.entitiesList.foreach((entity: Entity) => entity.update())

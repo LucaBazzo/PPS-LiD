@@ -1,6 +1,7 @@
 package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.{Animation, Sprite, TextureRegion}
+import model.entities.State
 import model.entities.State.State
 
 trait EntitySprite extends Sprite {
@@ -14,7 +15,7 @@ trait EntitySprite extends Sprite {
       super.setPosition(x - this.getWidth / 2, y - this.getHeight / 2 + 4.3f)
   }
 
-  def update(dt: Float, state: State, previousState: State, isFacingRight: Boolean)
+  def update(dt: Float, state: State, isFacingRight: Boolean)
 
   def getIntWidth: Int = super.getWidth.asInstanceOf[Int]
 
@@ -27,20 +28,22 @@ class EntitySpriteImpl extends EntitySprite {
   private var loops: Map[State, Boolean] = Map()
 
   private var stateTimer: Float = 0
+  private var previousState: State = State.Standing
 
   override def addAnimation(state: State, animation: Animation[TextureRegion], loop: Boolean = false): Unit = {
     this.animations += (state -> animation)
     this.loops += (state -> loop)
   }
 
-  override def update(dt: Float, state: State, previousState: State, isFacingRight: Boolean): Unit = {
+  override def update(dt: Float, state: State, isFacingRight: Boolean): Unit = {
     var region: TextureRegion = getFrame(state)
     region = checkFlip(region, isFacingRight)
     this.setRegion(region)
-    if(state == previousState)
+    if(state == this.previousState)
       stateTimer += dt
     else
       stateTimer = 0
+    this.previousState = state
     //println(state)
   }
 
