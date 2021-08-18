@@ -44,6 +44,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     loop = true)
   this.heroSprite.addAnimation(State.Sliding,
     spriteFactory.createSpriteAnimation(heroSprite, 3, 3, 6))
+  this.heroSprite.addAnimation(State.Crouch,
+    spriteFactory.createSpriteAnimation(heroSprite, 0, 4, 6, 0.18f),
+    loop = true)
 
   private def update(deltaTime: Float): Unit = {
     this.handleInput(deltaTime)
@@ -70,6 +73,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
     if (Gdx.input.isKeyJustPressed(Input.Keys.E))
       this.observerManager.notifyEvent(GameEvent.Slide)
+
+    /*if (Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN))
+      this.observerManager.notifyEvent(GameEvent.Crouch)*/
   }
 
   override def render(delta: Float): Unit = {
@@ -86,8 +92,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.camera.position.x = player.getPosition._1
       this.camera.position.y = player.getPosition._2
 
-      this.heroSprite.setPosition(WIDTH_SCREEN / 2, HEIGHT_SCREEN / 2)
-      this.heroSprite.update(delta, player.getState, player.getPreviousState, player.getLinearVelocityX)
+      this.heroSprite.setPosition(WIDTH_SCREEN / 2, HEIGHT_SCREEN / 2, player.isSliding)
+      this.heroSprite.update(delta, player.getState, player.getPreviousState, player.isFacingRight)
       player.updatePreviousState(player.getState)
     }
 

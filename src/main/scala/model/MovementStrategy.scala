@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.entities.{Hero, State}
+import model.helpers.EntitiesFactoryImpl
 
 trait MovementStrategy {
 
@@ -44,6 +45,7 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
 
   private def slide(): Unit = {
     this.stopMovement()
+    EntitiesFactoryImpl.defineSlidingHero(entity)
     if (entity.isFacingRight && entity.getBody.getLinearVelocity.x <= 4) {
       entity.getBody.applyLinearImpulse(entity.vectorScalar(new Vector2(200f, 0)), entity.getBody.getWorldCenter, true)
     }

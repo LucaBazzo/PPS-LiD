@@ -1,12 +1,12 @@
 package model
 
-import com.badlogic.gdx.physics.box2d.World
+import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
+import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
 import model.collisions.CollisionManager
 import model.entities.{Entity, Hero}
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter}
 import model.world.WorldCreator
-import utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
 
 trait Level {
 
@@ -19,7 +19,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private val world: World = new World(GRAVITY_FORCE, true)
 
-  private val entitiesFactory: EntitiesFactory = new EntitiesFactoryImpl(world)
+  private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
+  entitiesFactory.setWorld(world)
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
 

@@ -8,7 +8,7 @@ import model.entities.State.State
 
 object State extends Enumeration {
   type State = Value
-  val Standing, Running, Jumping, Falling, Sliding = Value
+  val Standing, Running, Jumping, Falling, Sliding, Crouch = Value
 }
 
 trait Entity {
