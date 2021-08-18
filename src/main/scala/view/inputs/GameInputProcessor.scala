@@ -1,6 +1,6 @@
 package view.inputs
 
-import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.Input.{Buttons, Keys}
 import com.badlogic.gdx.{Gdx, InputProcessor}
 import controller.{GameEvent, ObserverManager}
 
@@ -27,7 +27,13 @@ class GameInputProcessor(private val observerManager: ObserverManager) extends I
 
   override def keyTyped(c: Char): Boolean = {false}
 
-  override def touchDown(i: Int, i1: Int, i2: Int, i3: Int): Boolean = {false}
+  override def touchDown(x: Int, y: Int, pointer: Int, button: Int): Boolean = {
+    button match {
+      case Buttons.LEFT => this.observerManager.notifyEvent(GameEvent.Attack)
+      case _ => return false
+    }
+    true
+  }
 
   override def touchUp(i: Int, i1: Int, i2: Int, i3: Int): Boolean = {false}
 

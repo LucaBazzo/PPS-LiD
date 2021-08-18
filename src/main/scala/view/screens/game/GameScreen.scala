@@ -49,6 +49,13 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   this.heroSprite.addAnimation(State.Crouch,
     spriteFactory.createSpriteAnimation(heroSprite, 0, 4, 6, 0.18f),
     loop = true)
+  this.heroSprite.addAnimation(State.Attack01,
+    spriteFactory.createSpriteAnimation(heroSprite, 6, 0, 6))
+  this.heroSprite.addAnimation(State.Attack02,
+    spriteFactory.createSpriteAnimation(heroSprite, 7, 0, 3, 0.20f))
+  //TODO aggiungere le animazioni della riga sotto
+  this.heroSprite.addAnimation(State.Attack03,
+    spriteFactory.createSpriteAnimation(heroSprite, 7, 4, 6, 0.20f))
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 

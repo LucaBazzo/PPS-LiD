@@ -12,7 +12,7 @@ class WorldCreator(private val level: Level, private val world: World) {
 
   def createImmobileEntity(): Entity = {
     val position: (Float, Float) = (0, -2)
-    val size: (Float,Float) = (5, 0.5f)
+    val size: (Float,Float) = (8, 0.5f)
     val body: Body = defineRectangleBody(size, position)
     val immobileEntity: Entity = ImmobileEntity(body, size)
     immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())

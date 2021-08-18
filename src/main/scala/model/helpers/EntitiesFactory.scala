@@ -2,7 +2,7 @@ package model.helpers
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
-import model.HeroMovementStrategy
+import model.{HeroAttackStrategy, HeroMovementStrategy}
 import model.collisions.CollisionStrategyImpl
 import model.entities.{Entity, Hero, HeroImpl, MobileEntityImpl}
 
@@ -33,9 +33,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val position: (Float, Float) = (1, 1)
     val size: (Float, Float) = (0.85f, 1.4f)
     val body: Body = defineEntityBody(size, position)
-    val hero: Hero = new HeroImpl(body, size)
+    //TODO mettere a posto Impl una volta aggiunte le collisioni
+    val hero: HeroImpl = new HeroImpl(body, size)
     hero.setCollisionStrategy(new CollisionStrategyImpl())
     hero.setMovementStrategy(new HeroMovementStrategy(hero))
+    hero.setAttackStrategy(new HeroAttackStrategy(hero))
     hero
   }
 

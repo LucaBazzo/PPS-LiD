@@ -27,10 +27,11 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
   private def checkCommand(command: GameEvent): Boolean = {
     if(entity.getState != State.Sliding) {
       command match {
-        case controller.GameEvent.Jump => return entity.getState != State.Falling &&
+        case GameEvent.Jump => return entity.getState != State.Falling &&
                 entity.getState != State.Jumping && entity.getState != State.Crouch
-        case controller.GameEvent.MoveRight | controller.GameEvent.MoveLeft => return true
-        case controller.GameEvent.Slide => return entity.getState != State.Jumping && entity.getState != State.Falling
+        case GameEvent.MoveRight | GameEvent.MoveLeft => return entity.getState != State.Attack01 &&
+                entity.getState != State.Attack02 && entity.getState != State.Attack03
+        case GameEvent.Slide => return entity.getState != State.Jumping && entity.getState != State.Falling
         case _ => throw new UnsupportedOperationException
       }
     }
@@ -67,7 +68,7 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
   }
 
   private def slide(): Unit = {
-    this.stopMovement()
+    this.entity.stopMovement()
 
     if(entity.getState != State.Crouch) {
       EntitiesFactoryImpl.defineSlidingHero(entity)
@@ -87,8 +88,4 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
   private def applyLinearImpulse(vector: Vector2): Unit =
     entity.getBody.applyLinearImpulse(entity.vectorScalar(vector), entity.getBody.getWorldCenter, true)
 
-  //TODO temporaneo
-  private def stopMovement(): Unit = {
-    entity.getBody.setLinearVelocity(0,0)
-  }
 }

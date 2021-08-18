@@ -7,6 +7,7 @@ trait MobileEntity extends Entity {
 
   def setMovementStrategy(strategy: MovementStrategy)
   def move()
+  def stopMovement()
   def setFacing(right: Boolean)
   def isFacingRight: Boolean
 }
@@ -22,6 +23,8 @@ class MobileEntityImpl(private var body: Body, private val size: (Float, Float))
   override def setMovementStrategy(strategy: MovementStrategy): Unit = this.movementStrategy = strategy
 
   override def move(): Unit = {}
+
+  override def stopMovement(): Unit = this.body.setLinearVelocity(0,0)
 
   override def setFacing(right: Boolean): Unit = this.facingRight = right
 
