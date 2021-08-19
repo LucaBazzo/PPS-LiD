@@ -1,28 +1,111 @@
 package model.entities
 
 import com.badlogic.gdx.physics.box2d.Body
-import model.entities.ItemList.ItemList
+import model.entities.Items.{Items}
 
-object ItemList extends Enumeration {
-  type ItemList = Value
-  val Cake = Value
+object Items extends Enumeration {
+  type Items = Value
+  val Cake, Wrench, Map, PotionS, PotionM, PotionL, PotionXL, Armor, Boots, BFSword, Key, SkeletonKey, Bow, Shield = Value
+}
+
+object ItemPools extends Enumeration {
+  type ItemPools = Value
+  val Keys, Enemy_Drops, Level_1, Level_2, Boss = Value
 }
 
 trait Item {
 
   def collect()
-  def getEnumVal(): ItemList
+  def getEnumVal(): Items
 }
 
-abstract class ItemImpl(private val itemName: ItemList, private var body: Body, private val size: (Float, Float))
+abstract class ItemImpl(private val itemName: Items, private var body: Body, private val size: (Float, Float))
       extends EntityImpl(body, size) with Item {
 
   def collect()
 
-  override def getEnumVal(): ItemList = itemName
+  override def getEnumVal(): Items = itemName
 }
 
-class CakeItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(ItemList.Cake, body, size) {
+class CakeItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class WrenchItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class MapItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class SmallPotionItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class PotionItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class LargePotionItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class HugePotionItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class ArmorItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class BootsItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class BFSwordItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class KeyItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class SkeletonKeyItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class BowItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
+  override def update(): Unit = {}
+
+  override def collect(): Unit = {}
+}
+
+class ShieldItem(private var body: Body, private val size: (Float, Float)) extends ItemImpl(Items.Cake, body, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
