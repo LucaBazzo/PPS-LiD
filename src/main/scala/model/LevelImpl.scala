@@ -2,7 +2,7 @@ package model
 
 import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
 import com.badlogic.gdx.physics.box2d._
-import controller.GameEvent.{Attack, GameEvent}
+import controller.GameEvent.GameEvent
 import model.collisions.CollisionManager
 import model.entities.{Entity, Hero}
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter}
@@ -38,12 +38,6 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
     if(actions.nonEmpty) {
       for(command <- actions) this.hero.notifyCommand(command)
-    }
-
-    if(actions.nonEmpty) {
-      for(command <- actions) if(command == Attack) {
-        entitiesFactory.createAttackPattern((0.1f, 1f), this.hero.getPosition, (0, 2), -60)
-      }
     }
 
     this.entitiesList.foreach((entity: Entity) => entity.update())

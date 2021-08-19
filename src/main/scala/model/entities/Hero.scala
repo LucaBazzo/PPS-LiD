@@ -117,8 +117,10 @@ class HeroImpl(private var body: Body, private val size: (Float, Float)) extends
       if(this.attackTimer > 0)
         this.attackTimer -= 3
       if((this.state == State.Attack01 || this.state == State.Attack02 || this.state == State.Attack03)
-            && this.attackTimer <= 0)
+            && this.attackTimer <= 0) {
+        this.attackStrategy.stopAttack()
         this.state = State.Standing
+      }
     }
   }
 

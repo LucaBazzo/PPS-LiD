@@ -20,7 +20,7 @@ trait EntitiesFactory {
   def createAttackPattern(rotatingBodySize: (Float, Float),
                           pivotPoint: (Float, Float),
                           rotatingBodyDistance: (Float, Float),
-                          angularVelocity: Float)
+                          angularVelocity: Float): AttackPattern
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -162,17 +162,13 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createAttackPattern(rotatingBodySize: (Float, Float),
                                    pivotPoint: (Float, Float),
                                    rotatingBodyDistance: (Float, Float),
-                                   angularVelocity: Float): Unit = {
+                                   angularVelocity: Float): AttackPattern = {
 
     val pivotBody: Body = this.defineStaticBody((0.2f, 0.2f), (pivotPoint._1, pivotPoint._2))
 
     val rotatingBodyPosition = (pivotPoint._1 + rotatingBodyDistance._1, pivotPoint._2 + rotatingBodyDistance._2)
     val rotatingBody: Body = this.defineSword(rotatingBodySize, rotatingBodyPosition)
 
-    println(pivotPoint)
-    println(rotatingBodyPosition)
-
-    val attackPattern: AttackPattern = new AttackPatternImpl(this.world, pivotBody,rotatingBody, -60)
-    attackPattern.attack()
+    new AttackPatternImpl(this.world, pivotBody,rotatingBody, angularVelocity)
   }
 }
