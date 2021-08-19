@@ -7,12 +7,10 @@ import model.entities.{Entity, ImmobileEntity}
 
 class WorldCreator(private val level: Level, private val world: World) {
 
-  private val rectangle: Entity = createImmobileEntity()
+  private val rectangle: Entity = createImmobileEntity((0, -2), (8, 0.5f))
   level.addEntity(rectangle)
 
-  def createImmobileEntity(): Entity = {
-    val position: (Float, Float) = (0, -2)
-    val size: (Float,Float) = (8, 0.5f)
+  def createImmobileEntity(position: (Float, Float), size: (Float,Float)): Entity = {
     val body: Body = defineRectangleBody(size, position)
     val immobileEntity: Entity = ImmobileEntity(body, size)
     immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
@@ -29,8 +27,8 @@ class WorldCreator(private val level: Level, private val world: World) {
 
     val body: Body = world.createBody(bodyDef)
 
-    /*fixtureDef.filter.categoryBits = 2
-    fixtureDef.filter.maskBits = 1*/
+    fixtureDef.filter.categoryBits = 2
+    fixtureDef.filter.maskBits = 1
 
     shape.setAsBox(size._1, size._2)
     fixtureDef.shape = shape

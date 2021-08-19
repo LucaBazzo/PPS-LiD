@@ -97,7 +97,7 @@ class HeroImpl(private var body: Body, private val size: (Float, Float)) extends
         println(this.state)
       }
 
-      println(this.getState, this.attackTimer)
+      //println(this.getState, this.attackTimer)
 
       if(this.body.getLinearVelocity.y < 0 && this.state != State.Jumping)
         this.state = State.Falling
