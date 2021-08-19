@@ -11,6 +11,11 @@ trait SpriteFactory {
   def createSpriteAnimation(sprite: EntitySprite, rowNumber: Int,
                             startIndex: Int, endIndex: Int,
                             frameDuration: Float = 0.10f): Animation[TextureRegion]
+
+  def createSpriteAnimationFromTwoRows(sprite: EntitySprite,
+                                       rowNumber: Int, startIndex: Int, endIndex: Int,
+                                       rowNumber2: Int, startIndex2: Int, endIndex2: Int,
+                                       frameDuration: Float = 0.10f): Animation[TextureRegion]
 }
 
 class SpriteFactoryImpl extends SpriteFactory {
@@ -33,6 +38,26 @@ class SpriteFactoryImpl extends SpriteFactory {
     for(i <- startIndex to endIndex){
       frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth,
         sprite.getIntHeight * rowNumber , sprite.getIntWidth, sprite.getIntHeight))
+    }
+
+    new Animation(frameDuration, frames)
+  }
+
+  def createSpriteAnimationFromTwoRows(sprite: EntitySprite,
+                            rowNumber: Int, startIndex: Int, endIndex: Int,
+                            rowNumber2: Int, startIndex2: Int, endIndex2: Int,
+                            frameDuration: Float = 0.10f): Animation[TextureRegion] = {
+    //array from gdx.utils.Array
+    val frames: Array[TextureRegion] = new Array[TextureRegion]()
+
+    for(i <- startIndex to endIndex){
+      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth,
+        sprite.getIntHeight * rowNumber , sprite.getIntWidth, sprite.getIntHeight))
+    }
+
+    for(i <- startIndex2 to endIndex2){
+      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth,
+        sprite.getIntHeight * rowNumber2 , sprite.getIntWidth, sprite.getIntHeight))
     }
 
     new Animation(frameDuration, frames)

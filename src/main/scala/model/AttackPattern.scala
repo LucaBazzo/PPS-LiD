@@ -19,7 +19,10 @@ class AttackPatternImpl(private val world: World,
 
   override def attack(): Unit = this.rotatingBody.setAngularVelocity(angularVelocity)
 
-  override def stopAttack(): Unit = this.rotatingBody.setAngularVelocity(0)
+  override def stopAttack(): Unit = {
+    this.rotatingBody.setAngularVelocity(0)
+    this.rotatingBody.setLinearVelocity(0,0)
+  }
 
   override def destroyAttack(): Unit = {
     this.world.destroyJoint(this.joint)

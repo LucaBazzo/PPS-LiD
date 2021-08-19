@@ -14,13 +14,14 @@ trait EntitiesFactory {
   def setWorld(world: World)
   def defineSlidingHero(hero: Hero)
   def defineNormalHero(hero: Hero)
-  def defineSword(size: (Float, Float), position: (Float, Float)): Body
+  def defineSword(size: (Float, Float), position: (Float, Float), angle: Float): Body
   def defineStaticBody(size: (Float, Float), position: (Float, Float)): Body
 
   def createAttackPattern(rotatingBodySize: (Float, Float),
                           pivotPoint: (Float, Float),
                           rotatingBodyDistance: (Float, Float),
-                          angularVelocity: Float): AttackPattern
+                          angularVelocity: Float,
+                          startingAngle: Float): AttackPattern
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -59,7 +60,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val body: Body = world.createBody(bodyDef)
 
     fixtureDef.filter.categoryBits = 1
-    fixtureDef.filter.maskBits = 2
+    fixtureDef.filter.maskBits = (2 | 8).asInstanceOf[Short]
 
     shape.setAsBox(size._1, size._2)
     fixtureDef.shape = shape
@@ -81,8 +82,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     hero.getBody.destroyFixture(hero.getBody.getFixtureList.first())
 
-    /*fixtureDef.filter.categoryBits = 1
-    fixtureDef.filter.maskBits = 2*/
+    fixtureDef.filter.categoryBits = 1
+    fixtureDef.filter.maskBits = (2 | 8).asInstanceOf[Short]
 
     shape.setAsBox(size._1, size._2)
     fixtureDef.shape = shape
@@ -104,8 +105,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     hero.getBody.destroyFixture(hero.getBody.getFixtureList.first())
 
-    /*fixtureDef.filter.categoryBits = 1
-    fixtureDef.filter.maskBits = 2*/
+    fixtureDef.filter.categoryBits = 1
+    fixtureDef.filter.maskBits = (2 | 8).asInstanceOf[Short]
 
     shape.setAsBox(size._1, size._2)
     fixtureDef.shape = shape
@@ -113,7 +114,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     hero.getBody.setTransform(position.add(0,+0.5f), 0)
   }
 
-  override def defineSword(size: (Float, Float), position: (Float, Float)): Body = {
+  override def defineSword(size: (Float, Float), position: (Float, Float), angle: Float = 0): Body = {
     val bodyDef: BodyDef = new BodyDef()
     val shape: PolygonShape = new PolygonShape()
     val fixtureDef: FixtureDef = new FixtureDef()
@@ -121,14 +122,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     bodyDef.position.set(position._1, position._2)
     bodyDef.`type` = BodyDef.BodyType.DynamicBody
     bodyDef.gravityScale = 0
+    bodyDef.angle = angle
 
     val body: Body = world.createBody(bodyDef)
-    /*val massData: MassData = body.getMassData
-    massData.center.set(10,10)
-    body.resetMassData()
-    body.setMassData(massData)*/
 
     fixtureDef.filter.categoryBits = 4
+    fixtureDef.filter.maskBits = 8
 
     shape.setAsBox(size._1, size._2)
     fixtureDef.shape = shape
@@ -162,12 +161,13 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createAttackPattern(rotatingBodySize: (Float, Float),
                                    pivotPoint: (Float, Float),
                                    rotatingBodyDistance: (Float, Float),
-                                   angularVelocity: Float): AttackPattern = {
+                                   angularVelocity: Float,
+                                   startingAngle: Float = 0): AttackPattern = {
 
     val pivotBody: Body = this.defineStaticBody((0.2f, 0.2f), (pivotPoint._1, pivotPoint._2))
 
     val rotatingBodyPosition = (pivotPoint._1 + rotatingBodyDistance._1, pivotPoint._2 + rotatingBodyDistance._2)
-    val rotatingBody: Body = this.defineSword(rotatingBodySize, rotatingBodyPosition)
+    val rotatingBody: Body = this.defineSword(rotatingBodySize, rotatingBodyPosition, startingAngle)
 
     new AttackPatternImpl(this.world, pivotBody,rotatingBody, angularVelocity)
   }

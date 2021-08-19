@@ -25,7 +25,6 @@ class HeroImpl(private var body: Body, private val size: (Float, Float)) extends
   private var little: Boolean = false
 
   private var waitTimer: Float = 0
-  var attackTimer: Float = 0
 
   override def setBody(body: Body): Unit = this.body = body
 
@@ -92,11 +91,6 @@ class HeroImpl(private var body: Body, private val size: (Float, Float)) extends
         this.stopMovement()
       }
 
-      if(this.state == State.Attack01 && attackTimer <= 0) {
-        this.attackTimer = 140
-        println(this.state)
-      }
-
       //println(this.getState, this.attackTimer)
 
       if(this.body.getLinearVelocity.y < 0 && this.state != State.Jumping)
@@ -114,10 +108,13 @@ class HeroImpl(private var body: Body, private val size: (Float, Float)) extends
         this.setLittle(false)
       }
 
-      if(this.attackTimer > 0)
-        this.attackTimer -= 3
+      if(!this.attackStrategy.isAttackFinished) {
+        this.attackStrategy.checkTimeEvent()
+        this.attackStrategy.decrementAttackTimer()
+      }
+
       if((this.state == State.Attack01 || this.state == State.Attack02 || this.state == State.Attack03)
-            && this.attackTimer <= 0) {
+            && this.attackStrategy.isAttackFinished) {
         this.attackStrategy.stopAttack()
         this.state = State.Standing
       }

@@ -10,6 +10,9 @@ class WorldCreator(private val level: Level, private val world: World) {
   private val rectangle: Entity = createImmobileEntity((0, -2), (8, 0.5f))
   level.addEntity(rectangle)
 
+  private val enemy: Entity = createImmobileEnemy((5, 1), (1, 1))
+  level.addEntity(enemy)
+
   def createImmobileEntity(position: (Float, Float), size: (Float,Float)): Entity = {
     val body: Body = defineRectangleBody(size, position)
     val immobileEntity: Entity = ImmobileEntity(body, size)
@@ -29,6 +32,33 @@ class WorldCreator(private val level: Level, private val world: World) {
 
     fixtureDef.filter.categoryBits = 2
     fixtureDef.filter.maskBits = 1
+
+    shape.setAsBox(size._1, size._2)
+    fixtureDef.shape = shape
+    body.createFixture(fixtureDef)
+
+    body
+  }
+
+  def createImmobileEnemy(position: (Float, Float), size: (Float,Float)): Entity = {
+    val body: Body = defineRectangleEnemy(size, position)
+    val immobileEntity: Entity = ImmobileEntity(body, size)
+    immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
+    immobileEntity
+  }
+
+  private def defineRectangleEnemy(size: (Float,Float), position: (Float, Float)): Body = {
+    val bodyDef: BodyDef = new BodyDef()
+    val shape: PolygonShape = new PolygonShape()
+    val fixtureDef: FixtureDef = new FixtureDef()
+
+    bodyDef.`type` = BodyDef.BodyType.StaticBody
+    bodyDef.position.set(position._1, position._2)
+
+    val body: Body = world.createBody(bodyDef)
+
+    fixtureDef.filter.categoryBits = 8
+    fixtureDef.filter.maskBits = (1 | 4).asInstanceOf[Short]
 
     shape.setAsBox(size._1, size._2)
     fixtureDef.shape = shape

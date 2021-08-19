@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.Level
-import model.entities.Entity
 
 class CollisionManager(private val level: Level) extends ContactListener {
 
@@ -12,11 +11,13 @@ class CollisionManager(private val level: Level) extends ContactListener {
     val bodyA: Body = contact.getFixtureA.getBody
     val bodyB: Body = contact.getFixtureB.getBody
 
-    val entityA: Entity = level.getEntity((x: Entity) => x.getBody equals bodyA)
+    println(bodyA, bodyB)
+
+    /*val entityA: Entity = level.getEntity((x: Entity) => x.getBody equals bodyA)
     val entityB: Entity = level.getEntity((x: Entity) => x.getBody equals bodyB)
 
     entityA.collisionDetected(entityB)
-    entityB.collisionDetected(entityA)
+    entityB.collisionDetected(entityA)*/
   }
 
   override def endContact(contact: Contact): Unit = {

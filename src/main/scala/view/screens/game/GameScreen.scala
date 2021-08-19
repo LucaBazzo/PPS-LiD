@@ -33,31 +33,37 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val spriteFactory: SpriteFactory = new SpriteFactoryImpl()
   private val heroSprite: EntitySprite = spriteFactory.createEntitySprite("hero", 50, 37)
-  this.heroSprite.addAnimation(State.Standing,
-    spriteFactory.createSpriteAnimation(heroSprite, 0, 0, 3, 0.18f),
-    loop = true)
-  this.heroSprite.addAnimation(State.Running,
-    spriteFactory.createSpriteAnimation(heroSprite, 1, 1, 6),
-    loop = true)
-  this.heroSprite.addAnimation(State.Jumping,
-    spriteFactory.createSpriteAnimation(heroSprite, 2, 0, 3))
-  this.heroSprite.addAnimation(State.Falling,
-    spriteFactory.createSpriteAnimation(heroSprite, 3, 1, 2),
-    loop = true)
-  this.heroSprite.addAnimation(State.Sliding,
-    spriteFactory.createSpriteAnimation(heroSprite, 3, 3, 6))
-  this.heroSprite.addAnimation(State.Crouch,
-    spriteFactory.createSpriteAnimation(heroSprite, 0, 4, 6, 0.18f),
-    loop = true)
-  this.heroSprite.addAnimation(State.Attack01,
-    spriteFactory.createSpriteAnimation(heroSprite, 6, 0, 6))
-  this.heroSprite.addAnimation(State.Attack02,
-    spriteFactory.createSpriteAnimation(heroSprite, 7, 0, 3, 0.20f))
-  //TODO aggiungere le animazioni della riga sotto
-  this.heroSprite.addAnimation(State.Attack03,
-    spriteFactory.createSpriteAnimation(heroSprite, 7, 4, 6, 0.20f))
+  this.defineHeroSpriteAnimations()
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
+
+  private def defineHeroSpriteAnimations(): Unit = {
+    this.heroSprite.addAnimation(State.Standing,
+      spriteFactory.createSpriteAnimation(heroSprite, 0, 0, 3, 0.18f),
+      loop = true)
+    this.heroSprite.addAnimation(State.Running,
+      spriteFactory.createSpriteAnimation(heroSprite, 1, 1, 6),
+      loop = true)
+    this.heroSprite.addAnimation(State.Jumping,
+      spriteFactory.createSpriteAnimation(heroSprite, 2, 0, 3))
+    this.heroSprite.addAnimation(State.Falling,
+      spriteFactory.createSpriteAnimation(heroSprite, 3, 1, 2),
+      loop = true)
+    this.heroSprite.addAnimation(State.Sliding,
+      spriteFactory.createSpriteAnimation(heroSprite, 3, 3, 6))
+    this.heroSprite.addAnimation(State.Crouch,
+      spriteFactory.createSpriteAnimationFromTwoRows(heroSprite, 0, 4, 6,
+        1,0,0,0.18f),
+      loop = true)
+    this.heroSprite.addAnimation(State.Attack01,
+      spriteFactory.createSpriteAnimation(heroSprite, 6, 0, 6))
+    this.heroSprite.addAnimation(State.Attack02,
+      spriteFactory.createSpriteAnimation(heroSprite, 7, 0, 3, 0.20f))
+    this.heroSprite.addAnimation(State.Attack03,
+      spriteFactory.createSpriteAnimationFromTwoRows(heroSprite, 7, 4, 6,
+        8, 0, 2))
+
+  }
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
