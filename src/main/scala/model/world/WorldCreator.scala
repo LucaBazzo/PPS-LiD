@@ -9,11 +9,11 @@ class WorldCreator(private val level: Level, private val world: World) {
 
   private val rectangle: Entity = createImmobileEntity()
   level.addEntity(rectangle)
-  level.addEntity(createLeftWall())
+//  level.addEntity(createLeftWall())
 
   def createImmobileEntity(): Entity = {
-    val position: (Float, Float) = (0, -2)
-    val size: (Float,Float) = (5, 0.5f)
+    val position: (Float, Float) = (0, -3)
+    val size: (Float,Float) = (20, 0.5f)
     val body: Body = defineRectangleBody(size, position)
     val immobileEntity: Entity = ImmobileEntity(body, size)
     immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
@@ -21,7 +21,7 @@ class WorldCreator(private val level: Level, private val world: World) {
   }
 
   def createLeftWall(): Entity = {
-    val position: (Float, Float) = (-4.5f, 2.5f)
+    val position: (Float, Float) = (-20, 0)
     val size: (Float,Float) = (0.5f, 5f)
     val body: Body = defineRectangleBody(size, position)
     val immobileEntity: Entity = ImmobileEntity(body, size)

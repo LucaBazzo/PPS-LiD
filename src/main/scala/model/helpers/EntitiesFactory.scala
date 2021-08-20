@@ -1,8 +1,10 @@
 package model.helpers
 
 import com.badlogic.gdx.physics.box2d._
+import model.Level
 import model.collisions.{ApplyDamageToHero, CollisionStrategyImpl}
 import model.entities.{EnemyImpl, Entity, HeroImpl, MobileEntityImpl}
+import model.movement.{ChaseHero, PatrolAndStopIfFacingHero, PatrolPlatform, PatrolPlatformRandomly}
 
 trait EntitiesFactory {
 
@@ -13,18 +15,18 @@ trait EntitiesFactory {
   def createEnemyEntity(): EnemyImpl
 }
 
-class EntitiesFactoryImpl(private val world: World) extends EntitiesFactory {
+class EntitiesFactoryImpl(private val world: World, private val level: Level) extends EntitiesFactory {
 
   override def createEnemyEntity: EnemyImpl = {
     // TODO: valutare se aggregare con createMobileEntity
     val position: (Float, Float) = (4, 20)
-    val size: Float = 0.5f
+    val size: Float = 1f
     val body: Body = defineEntityBody(size, position)
-    val enemy:EnemyImpl = new EnemyImpl(body, (size,size), 0)
+    val enemy:EnemyImpl = new EnemyImpl(body, (size,size))
 
-    enemy.setCollisionStrategy(new ApplyDamageToHero())
+    enemy.setCollisionStrategy(new ApplyDamageToHero(enemy))
 //    enemy.setAttackStrategy()
-//    enemy.setMovementStrategy()
+    enemy.setMovementStrategy(new PatrolAndStopIfFacingHero(enemy, world, level.getEntity(e => e.isInstanceOf[HeroImpl])))
     enemy
   }
 
@@ -36,7 +38,7 @@ class EntitiesFactoryImpl(private val world: World) extends EntitiesFactory {
   }
 
   override def createHeroEntity(): HeroImpl = {
-    val position: (Float, Float) = (1, 1)
+    val position: (Float, Float) = (-1, 1)
     val size: Float = 1f
     val body: Body = defineEntityBody(size, position)
     val hero: HeroImpl = new HeroImpl(body, (size,size))
