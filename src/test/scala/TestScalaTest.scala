@@ -11,11 +11,4 @@ class TestScalaTest extends AnyFlatSpec {
     assert(stack.pop() === 2)
     assert(stack.pop() === 1)
   }
-
-  it should "throw NoSuchElementException if an empty stack is popped" in {
-    val emptyStack = new Stack[String]
-    assertThrows[NoSuchElementException] {
-      emptyStack.pop()
-    }
-  }
 }
