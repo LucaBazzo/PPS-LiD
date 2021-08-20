@@ -3,18 +3,20 @@ package model.entities
 import com.badlogic.gdx.physics.box2d.Body
 
 trait Enemy {
-
-  def getType()
 }
 
 trait Score {
-  def getScore: Int
+  def getScore(): Int
 }
 
-case class EnemyImpl(private var body: Body, private val size: (Float, Float), private val score: Int)
-                  extends LivingEntityImpl(body, size) with Enemy with Score {
+case class EnemyImpl(private var body: Body, private val size: (Float, Float)) extends LivingEntityImpl(body, size) with Enemy {
 
-  override def getType(): Unit = {}
+  val attackDamage = 10
+  val movementSpeed = 5
+  val horizontalFieldOfView = 5
 
-  override def getScore: Int = this.score
+  override def update(): Unit = {
+    this.move()
+  }
+
 }
