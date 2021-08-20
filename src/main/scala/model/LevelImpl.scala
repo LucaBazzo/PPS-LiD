@@ -11,8 +11,11 @@ import model.world.WorldCreator
 trait Level {
 
   def updateEntities(actions: List[GameEvent])
+
   def addEntity(entity: Entity)
+  def removeEntity(entity: Entity)
   def getEntity(predicate: Entity => Boolean): Entity
+  def getWorld: World
 }
 
 class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
@@ -20,12 +23,11 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private val world: World = new World(GRAVITY_FORCE, true)
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
-  entitiesFactory.setWorld(world)
+  entitiesFactory.setLevel(this)
+
+  private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-
-
-  private var entitiesList: List[Entity] = List(hero)
 
   new WorldCreator(this, this.world)
 
@@ -47,8 +49,15 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   override def addEntity(entity: Entity): Unit = {
     this.entitiesList = entity :: this.entitiesList
-    this.entitiesSetter.setEntities(entitiesList)
+    this.entitiesSetter.setEntities(this.entitiesList)
   }
 
   override def getEntity(predicate: Entity => Boolean): Entity = entitiesList.filter(predicate).head
+
+  override def removeEntity(entity: Entity): Unit = {
+    this.entitiesList = this.entitiesList.filterNot((e: Entity) => e.equals(entity))
+    this.entitiesSetter.setEntities(this.entitiesList)
+  }
+
+  override def getWorld: World = this.world
 }

@@ -2,7 +2,7 @@ package model
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.entities.{HeroImpl, State}
+import model.entities.{HeroImpl, MobileEntity, State}
 import model.helpers.EntitiesFactoryImpl
 
 trait AttackStrategy {
@@ -17,7 +17,7 @@ trait AttackStrategy {
 
 class HeroAttackStrategy(private val entity: HeroImpl) extends AttackStrategy {
 
-  private var attackPattern: AttackPattern = _
+  private var attackPattern: MobileEntity = _
   private var attackTimer: Float = 0
   private var timeEventPresent: Boolean = false
 
@@ -29,7 +29,7 @@ class HeroAttackStrategy(private val entity: HeroImpl) extends AttackStrategy {
     }
   }
 
-  override def stopAttack(): Unit = this.attackPattern.destroyAttack()
+  override def stopAttack(): Unit = this.attackPattern.destroyEntity()
 
   override def isAttackFinished: Boolean = this.attackTimer <= 0
 
@@ -52,7 +52,7 @@ class HeroAttackStrategy(private val entity: HeroImpl) extends AttackStrategy {
       this.entity.setState(State.Attack02)
       stopAttack()
       this.setAttackPattern()
-      this.attackPattern.attack()
+      this.attackPattern.move()
       this.restartTimer(130)
     }
     else if(this.entity.getState == State.Attack02 && this.attackTimer < 75) {
@@ -66,7 +66,7 @@ class HeroAttackStrategy(private val entity: HeroImpl) extends AttackStrategy {
       && this.isAttackFinished) {
       this.entity.setState(State.Attack01)
       this.setAttackPattern()
-      this.attackPattern.attack()
+      this.attackPattern.move()
       this.restartTimer(100)
     }
   }
@@ -96,11 +96,11 @@ class HeroAttackStrategy(private val entity: HeroImpl) extends AttackStrategy {
   override def checkTimeEvent(): Unit = {
     if(this.entity.getState == State.Attack03 && !timeEventPresent &&
       this.attackTimer <= 120 && this.attackTimer > 60) {
-      this.attackPattern.attack()
+      this.attackPattern.move()
       this.timeEventPresent = true
     }
     if(timeEventPresent && this.entity.getState == State.Attack03 && this.attackTimer <= 60) {
-      this.attackPattern.stopAttack()
+      this.attackPattern.stopMovement()
       this.timeEventPresent = false
     }
   }

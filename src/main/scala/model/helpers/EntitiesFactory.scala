@@ -2,16 +2,18 @@ package model.helpers
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef
 import model.collisions.CollisionStrategyImpl
-import model.entities.{Entity, Hero, HeroImpl, MobileEntityImpl}
-import model.{AttackPattern, AttackPatternImpl, HeroAttackStrategy, HeroMovementStrategy}
+import model.entities._
+import model.{CircularMovementStrategy, HeroAttackStrategy, HeroMovementStrategy, Level}
+
 
 trait EntitiesFactory {
 
   def createMobileEntity(): Entity
   def createHeroEntity(): Hero
 
-  def setWorld(world: World)
+  def setLevel(level: Level)
   def defineSlidingHero(hero: Hero)
   def defineNormalHero(hero: Hero)
   def defineSword(size: (Float, Float), position: (Float, Float), angle: Float): Body
@@ -21,20 +23,29 @@ trait EntitiesFactory {
                           pivotPoint: (Float, Float),
                           rotatingBodyDistance: (Float, Float),
                           angularVelocity: Float,
-                          startingAngle: Float): AttackPattern
+                          startingAngle: Float): MobileEntity
+
+  def revoluteJoint(pivotBody: Body, rotatingBody: Body): Joint
+
+  def removeEntity(entity: Entity)
+
+  def destroyBody(body: Body)
+  def destroyJoint(joint: Joint)
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
 
-  private var world: World = _
+  private var level: Level = _
 
-  override def setWorld(world: World): Unit = this.world = world
+  override def setLevel(level: Level): Unit = this.level = level
 
   override def createMobileEntity(): Entity = {
     val position: (Float, Float) = (1, 1)
     val size: (Float, Float) = (1, 1)
     val body: Body = defineEntityBody(size, position)
-    new MobileEntityImpl(body, size)
+    val mobileEntity: MobileEntity = new MobileEntityImpl(body, size)
+    this.level.addEntity(mobileEntity)
+    mobileEntity
   }
 
   override def createHeroEntity(): Hero = {
@@ -46,6 +57,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     hero.setCollisionStrategy(new CollisionStrategyImpl())
     hero.setMovementStrategy(new HeroMovementStrategy(hero))
     hero.setAttackStrategy(new HeroAttackStrategy(hero))
+
+    this.level.addEntity(hero)
     hero
   }
 
@@ -57,7 +70,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     bodyDef.position.set(position._1, position._2)
     bodyDef.`type` = BodyDef.BodyType.DynamicBody
 
-    val body: Body = world.createBody(bodyDef)
+    val body: Body = this.level.getWorld.createBody(bodyDef)
 
     fixtureDef.filter.categoryBits = 1
     fixtureDef.filter.maskBits = (2 | 8).asInstanceOf[Short]
@@ -124,7 +137,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     bodyDef.gravityScale = 0
     bodyDef.angle = angle
 
-    val body: Body = world.createBody(bodyDef)
+    val body: Body = this.level.getWorld.createBody(bodyDef)
 
     fixtureDef.filter.categoryBits = 4
     fixtureDef.filter.maskBits = 8
@@ -147,7 +160,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     bodyDef.position.set(position._1, position._2)
     bodyDef.`type` = BodyDef.BodyType.StaticBody
 
-    val body: Body = world.createBody(bodyDef)
+    val body: Body = this.level.getWorld.createBody(bodyDef)
 
     fixtureDef.filter.categoryBits = 4
 
@@ -162,13 +175,36 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                                    pivotPoint: (Float, Float),
                                    rotatingBodyDistance: (Float, Float),
                                    angularVelocity: Float,
-                                   startingAngle: Float = 0): AttackPattern = {
+                                   startingAngle: Float = 0): MobileEntity = {
 
     val pivotBody: Body = this.defineStaticBody((0.2f, 0.2f), (pivotPoint._1, pivotPoint._2))
 
     val rotatingBodyPosition = (pivotPoint._1 + rotatingBodyDistance._1, pivotPoint._2 + rotatingBodyDistance._2)
     val rotatingBody: Body = this.defineSword(rotatingBodySize, rotatingBodyPosition, startingAngle)
 
-    new AttackPatternImpl(this.world, pivotBody,rotatingBody, angularVelocity)
+    //new AttackPatternImpl(this.world, pivotBody,rotatingBody, angularVelocity)
+    val circularMobileEntity = new CircularMobileEntity(rotatingBody, rotatingBodySize, pivotBody)
+    circularMobileEntity.setMovementStrategy(new CircularMovementStrategy(circularMobileEntity, angularVelocity))
+    circularMobileEntity.setCollisionStrategy(new CollisionStrategyImpl)
+
+    this.level.addEntity(circularMobileEntity)
+    circularMobileEntity
   }
+
+  override def revoluteJoint(pivotBody: Body, rotatingBody: Body): Joint = {
+    val rjd: RevoluteJointDef = new RevoluteJointDef()
+
+    rjd.initialize(pivotBody, rotatingBody, pivotBody.getWorldCenter)
+    /*rjd.motorSpeed = 3.14f * 2    //how fast
+    rjd.maxMotorTorque = 1000.0f  //how powerful
+    rjd.enableMotor = false*/
+
+    this.level.getWorld.createJoint(rjd)
+  }
+
+  override def removeEntity(entity: Entity): Unit = this.level.removeEntity(entity)
+
+  override def destroyBody(body: Body): Unit = this.level.getWorld.destroyBody(body)
+
+  override def destroyJoint(joint: Joint): Unit = this.level.getWorld.destroyJoint(joint)
 }

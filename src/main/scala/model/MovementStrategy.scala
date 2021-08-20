@@ -3,12 +3,14 @@ package model
 import com.badlogic.gdx.math.Vector2
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.entities.{Hero, State}
+import model.entities.{Hero, MobileEntity, State}
 import model.helpers.EntitiesFactoryImpl
 
 trait MovementStrategy {
 
+  def apply()
   def apply(command: GameEvent)
+  def stopMovement()
 }
 
 class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
@@ -23,6 +25,8 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
       }
     }
   }
+
+  override def stopMovement(): Unit = this.entity.getBody.setLinearVelocity(0,0)
 
   private def checkCommand(command: GameEvent): Boolean = {
     if(entity.getState != State.Sliding) {
@@ -88,4 +92,17 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
   private def applyLinearImpulse(vector: Vector2): Unit =
     entity.getBody.applyLinearImpulse(entity.vectorScalar(vector), entity.getBody.getWorldCenter, true)
 
+  override def apply(): Unit = {}
+}
+
+class CircularMovementStrategy(private val entity: MobileEntity, private val angularVelocity: Float) extends MovementStrategy {
+
+  override def apply(): Unit = this.entity.getBody.setAngularVelocity(angularVelocity)
+
+  override def stopMovement(): Unit = {
+    this.entity.getBody.setAngularVelocity(0)
+    this.entity.getBody.setLinearVelocity(0,0)
+  }
+
+  override def apply(command: GameEvent): Unit = ???
 }
