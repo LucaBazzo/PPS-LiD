@@ -25,13 +25,12 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private val hero: HeroImpl = entitiesFactory.createHeroEntity()
   entitiesList = hero :: entitiesList
-
   entitiesList = entitiesFactory.createEnemyEntity() :: entitiesList
-
   new WorldCreator(this, this.world)
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)
+
   this.world.setContactListener(new CollisionManager(this))
 
   override def updateEntities(actions: List[GameEvent]): Unit = {

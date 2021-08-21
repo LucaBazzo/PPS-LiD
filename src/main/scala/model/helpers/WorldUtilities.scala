@@ -1,9 +1,12 @@
 package model.helpers
 
-import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.{Application, Gdx}
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.{Fixture, World}
-import model.entities.Entity
+import model.Level
+import model.entities.{Attack, Entity, HeroImpl}
+
+import java.awt.geom.Point2D
 
 object WorldUtilities {
   def scaleForceVector(vector: Vector2) =
@@ -37,4 +40,32 @@ object WorldUtilities {
   def checkPointCollision(world:World, x:Float, y:Float, entity:Entity): Boolean = {
     checkAABBCollision(world:World, x, y, x, y, entity)
   }
+
+  def checkEntityIsVisible(targetEntity:Entity, originEntity:Entity, world: World, level:Level): Boolean = {
+    var isHeroVisible = false
+    var count = 0
+    world.rayCast((fixture:Fixture, _, _, _) => {
+//      val levelEntity:Entity = level.getEntity(e => e.getBody.equals(fixture.getBody))
+//      println(levelEntity)
+//      levelEntity match {
+//        case HeroImpl(_, _) => {
+//          isHeroVisible = true
+//          0
+//        }
+//        case Attack(_, _) => 1
+//        case _ => 0
+//      }
+
+//      fixture.getFilterData().categoryBits == Application.WALL
+      isHeroVisible = fixture.getBody.equals(targetEntity.getBody)
+      -1
+    }, originEntity.getBody.getWorldCenter, targetEntity.getBody.getWorldCenter)
+    isHeroVisible
+  }
+
+  def getEntitiesDistance(entity1:Entity, entity2:Entity): Float = {
+    // TODO : convertire distanza tra centri (attuale) in minima distanza tra le superfici dei body
+    entity1.getBody.getWorldCenter.dst(entity2.getBody.getWorldCenter)
+  }
+
 }
