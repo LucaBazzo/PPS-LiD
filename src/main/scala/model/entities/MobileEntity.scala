@@ -1,8 +1,8 @@
 package model.entities
 
-import com.badlogic.gdx.physics.box2d.{Body, Joint}
-import model.MovementStrategy
+import com.badlogic.gdx.physics.box2d.Joint
 import model.helpers.EntitiesFactoryImpl
+import model.{EntityBody, MovementStrategy}
 
 trait MobileEntity extends Entity {
 
@@ -13,7 +13,7 @@ trait MobileEntity extends Entity {
   def isFacingRight: Boolean
 }
 
-class MobileEntityImpl(private var body: Body, private val size: (Float, Float)) extends EntityImpl(body, size) with MobileEntity {
+class MobileEntityImpl(private var entityBody: EntityBody, private val size: (Float, Float)) extends EntityImpl(entityBody, size) with MobileEntity {
 
   private var facingRight: Boolean = true
 
@@ -35,16 +35,16 @@ class MobileEntityImpl(private var body: Body, private val size: (Float, Float))
 }
 
 
-class CircularMobileEntity(private var body: Body,
+class CircularMobileEntity(private var entityBody: EntityBody,
                            private val size: (Float, Float),
-                           private val pivotBody: Body) extends MobileEntityImpl(body, size) {
+                           private val pivotBody: EntityBody) extends MobileEntityImpl(entityBody, size) {
 
-  private val joint: Joint = EntitiesFactoryImpl.revoluteJoint(this.pivotBody, this.body)
+  private val joint: Joint = EntitiesFactoryImpl.createJoint(this.pivotBody.getBody, this.entityBody.getBody)
 
   override def destroyEntity(): Unit = {
     EntitiesFactoryImpl.destroyJoint(this.joint)
-    EntitiesFactoryImpl.destroyBody(this.pivotBody)
-    EntitiesFactoryImpl.destroyBody(this.body)
+    EntitiesFactoryImpl.destroyBody(this.pivotBody.getBody)
+    EntitiesFactoryImpl.destroyBody(this.entityBody.getBody)
     EntitiesFactoryImpl.removeEntity(this)
   }
 

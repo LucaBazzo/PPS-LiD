@@ -1,10 +1,10 @@
 package model.entities
 
-import com.badlogic.gdx.physics.box2d.Body
 import controller.GameEvent
 import controller.GameEvent.GameEvent
+import model.EntityBody
 import model.entities.State.State
-import model.helpers.EntitiesFactoryImpl
+import model.helpers.EntitiesFactoryImpl.createPolygonalShape
 
 trait Hero extends LivingEntity {
 
@@ -13,20 +13,19 @@ trait Hero extends LivingEntity {
   def getPreviousState: State
   def getLinearVelocityX: Float
 
-  def setBody(body: Body)
   def setState(state: State)
   def isLittle: Boolean
   def setLittle(little: Boolean)
+
+  def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0))
 }
 
-class HeroImpl(private var body: Body, private val size: (Float, Float)) extends LivingEntityImpl(body, size) with Hero{
+class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Float)) extends LivingEntityImpl(entityBody, size) with Hero{
 
   private var previousState: State = State.Standing
   private var little: Boolean = false
 
   private var waitTimer: Float = 0
-
-  override def setBody(body: Body): Unit = this.body = body
 
   override def notifyCommand(command: GameEvent): Unit = command match {
     case GameEvent.Jump | GameEvent.MoveRight | GameEvent.MoveLeft | GameEvent.Slide => move(command)
@@ -50,7 +49,7 @@ class HeroImpl(private var body: Body, private val size: (Float, Float)) extends
     this.state match {
       case State.Standing | State.Running =>
         this.stopMovement()
-        EntitiesFactoryImpl.defineSlidingHero(this)
+        this.changeHeroFixture((0.85f, 0.9f), (0, -0.5f))
         this.state = State.Crouch
         this.setLittle(true)
       case _ =>
@@ -58,7 +57,6 @@ class HeroImpl(private var body: Body, private val size: (Float, Float)) extends
   }
 
   override def update(): Unit = {
-
     /*this.state match {
       case model.entities.State.Running => {
         if(this.body.getLinearVelocity.y == 0 && this.body.getLinearVelocity.x == 0)
@@ -86,25 +84,25 @@ class HeroImpl(private var body: Body, private val size: (Float, Float)) extends
       waitTimer -= 10
     }
     else {
-      if((this.body.getLinearVelocity.x <= 1 && this.state == State.Sliding && isFacingRight) ||
-        this.body.getLinearVelocity.x >= -1 && this.state == State.Sliding && !isFacingRight) {
+      if((this.entityBody.getBody.getLinearVelocity.x <= 1 && this.state == State.Sliding && isFacingRight) ||
+        this.entityBody.getBody.getLinearVelocity.x >= -1 && this.state == State.Sliding && !isFacingRight) {
         this.stopMovement()
       }
 
       //println(this.getState, this.attackTimer)
 
-      if(this.body.getLinearVelocity.y < 0 && this.state != State.Jumping)
+      if(this.entityBody.getBody.getLinearVelocity.y < 0 && this.state != State.Jumping)
         this.state = State.Falling
-      else if(this.body.getLinearVelocity.y == 0 && this.body.getLinearVelocity.x != 0
+      else if(this.entityBody.getBody.getLinearVelocity.y == 0 && this.entityBody.getBody.getLinearVelocity.x != 0
         && this.state == State.Jumping)
         this.state = State.Running
-      else if((this.body.getLinearVelocity.y == 0 && this.body.getLinearVelocity.x == 0)
+      else if((this.entityBody.getBody.getLinearVelocity.y == 0 && this.entityBody.getBody.getLinearVelocity.x == 0)
         && this.state != State.Crouch &&
         this.state != State.Attack01 && this.state != State.Attack02 && this.state != State.Attack03)
         this.state = State.Standing
 
       if(this.state != State.Sliding && this.state != State.Crouch && isLittle) {
-        EntitiesFactoryImpl.defineNormalHero(this)
+        this.changeHeroFixture((0.85f, 1.4f), (0, 0.5f))
         this.setLittle(false)
       }
 
@@ -114,7 +112,7 @@ class HeroImpl(private var body: Body, private val size: (Float, Float)) extends
       }
 
       if((this.state == State.Attack01 || this.state == State.Attack02 || this.state == State.Attack03)
-            && this.attackStrategy.isAttackFinished) {
+            && this.attackStrategy.isAttackFinished){
         this.attackStrategy.stopAttack()
         this.state = State.Standing
       }
@@ -150,7 +148,7 @@ class HeroImpl(private var body: Body, private val size: (Float, Float)) extends
       this.state = State.Standing
   }*/
 
-  override def getLinearVelocityX: Float = this.body.getLinearVelocity.x
+  override def getLinearVelocityX: Float = this.entityBody.getBody.getLinearVelocity.x
 
   override def getPreviousState: State = this.previousState
 
@@ -165,4 +163,12 @@ class HeroImpl(private var body: Body, private val size: (Float, Float)) extends
   }
 
   override def isLittle: Boolean = this.little
+
+  override def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit = {
+    this.entityBody
+      .setShape(createPolygonalShape(newSize))
+      .createFixture()
+
+    this.entityBody.addCoordinates(addCoordinates._1, addCoordinates._2)
+  }
 }

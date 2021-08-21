@@ -2,7 +2,7 @@ package model
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.entities.{HeroImpl, MobileEntity, State}
+import model.entities.{Hero, MobileEntity, State}
 import model.helpers.EntitiesFactoryImpl
 
 trait AttackStrategy {
@@ -15,7 +15,7 @@ trait AttackStrategy {
   def isAttackFinished: Boolean
 }
 
-class HeroAttackStrategy(private val entity: HeroImpl) extends AttackStrategy {
+class HeroAttackStrategy(private val entity: Hero) extends AttackStrategy {
 
   private var attackPattern: MobileEntity = _
   private var attackTimer: Float = 0

@@ -3,6 +3,7 @@ package model.entities
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import model.EntityBody
 import model.collisions.CollisionStrategy
 import model.entities.State.State
 import model.helpers.EntitiesFactoryImpl
@@ -31,7 +32,7 @@ trait Entity {
   def vectorScalar(vector: Vector2, scalar: Float = Gdx.graphics.getDeltaTime) = new Vector2(vector.x * scalar, vector.y * scalar)
 }
 
-abstract class EntityImpl(private var body: Body, private val size: (Float, Float)) extends Entity {
+abstract class EntityImpl(private var entityBody: EntityBody, private val size: (Float, Float)) extends Entity {
 
   protected var state: State = State.Standing
   private var collisionStrategy: CollisionStrategy = _
@@ -41,10 +42,10 @@ abstract class EntityImpl(private var body: Body, private val size: (Float, Floa
   override def getState: State = this.state
 
   override def setPosition(position: (Float, Float)): Unit = {
-    this.body.setTransform(new Vector2(position._1, position._2), 0)
+    this.entityBody.getBody.setTransform(new Vector2(position._1, position._2), 0)
   }
 
-  override def getPosition: (Float, Float) = (this.body.getPosition.x, this.body.getPosition.y)
+  override def getPosition: (Float, Float) = (this.entityBody.getBody.getPosition.x, this.entityBody.getBody.getPosition.y)
 
   override def getSize: (Float, Float) = this.size
 
@@ -55,13 +56,13 @@ abstract class EntityImpl(private var body: Body, private val size: (Float, Floa
   }
 
   override def destroyEntity(): Unit = {
-    EntitiesFactoryImpl.destroyBody(this.body)
+    EntitiesFactoryImpl.destroyBody(this.entityBody.getBody)
     EntitiesFactoryImpl.removeEntity(this)
   }
 
-  override def getBody: Body = this.body
+  override def getBody: Body = this.entityBody.getBody
 }
 
-case class ImmobileEntity(private var body: Body, private val size: (Float, Float)) extends EntityImpl(body, size) {
+case class ImmobileEntity(private var entityBody: EntityBody, private val size: (Float, Float)) extends EntityImpl(entityBody, size) {
   override def update(): Unit = {}
 }

@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.Vector2
 import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.entities.{Hero, MobileEntity, State}
-import model.helpers.EntitiesFactoryImpl
 
 trait MovementStrategy {
 
@@ -29,12 +28,12 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
   override def stopMovement(): Unit = this.entity.getBody.setLinearVelocity(0,0)
 
   private def checkCommand(command: GameEvent): Boolean = {
-    if(entity.getState != State.Sliding) {
+    if(entity.getState != State.Sliding && entity.getState != State.Attack01 &&
+      entity.getState != State.Attack02 && entity.getState != State.Attack03) {
       command match {
         case GameEvent.Jump => return entity.getState != State.Falling &&
                 entity.getState != State.Jumping && entity.getState != State.Crouch
-        case GameEvent.MoveRight | GameEvent.MoveLeft => return entity.getState != State.Attack01 &&
-                entity.getState != State.Attack02 && entity.getState != State.Attack03
+        case GameEvent.MoveRight | GameEvent.MoveLeft => return true
         case GameEvent.Slide => return entity.getState != State.Jumping && entity.getState != State.Falling
         case _ => throw new UnsupportedOperationException
       }
@@ -75,7 +74,7 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
     this.entity.stopMovement()
 
     if(entity.getState != State.Crouch) {
-      EntitiesFactoryImpl.defineSlidingHero(entity)
+      this.entity.changeHeroFixture((0.85f, 0.9f), (0, -0.5f))
       this.entity.setLittle(true)
     }
 

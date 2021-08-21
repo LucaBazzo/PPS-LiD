@@ -1,7 +1,6 @@
 package model.entities
 
-import com.badlogic.gdx.physics.box2d.Body
-import model.AttackStrategy
+import model.{AttackStrategy, EntityBody}
 
 import scala.collection.immutable.HashMap
 
@@ -14,7 +13,7 @@ trait LivingEntity extends MobileEntity {
   def alterStatistics[A <: Int](statistic: String, alteration: A)
 }
 
-class LivingEntityImpl(private var body: Body, private val size: (Float, Float)) extends MobileEntityImpl(body, size) with LivingEntity {
+class LivingEntityImpl(private var entityBody: EntityBody, private val size: (Float, Float)) extends MobileEntityImpl(entityBody, size) with LivingEntity {
 
   protected var attackStrategy: AttackStrategy = _
 
