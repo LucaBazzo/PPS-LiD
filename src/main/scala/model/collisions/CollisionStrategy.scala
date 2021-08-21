@@ -10,11 +10,14 @@ class CollisionStrategyImpl() extends CollisionStrategy {
   override def apply(entity: Entity): Unit = println("Collision Detected with " + entity.toString)
 }
 
-class ApplyDamageToHero(private val owner:EnemyImpl) extends CollisionStrategy {
+class DoNothingOnCollision() extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = {}
+}
+
+class ApplyDamageToHero(private val owner:Entity) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
     case HeroImpl(_, _) => {
       println("Entity colliding with hero")
-      entity.asInstanceOf[HeroImpl].sufferDamage(this.owner.attackDamage)
     }
     case _ => {}
   }

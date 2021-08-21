@@ -9,7 +9,7 @@ import model.entities.{Attack, EnemyImpl, Entity, HeroImpl, MobileEntityImpl}
 import model.movement.{ChaseHero, DoNotMove, PatrolAndStopIfFacingHero, PatrolAndStopIfSeeingHero, PatrolPlatform, PatrolPlatformRandomly, ProjectileTrajectory, WeightlessProjectileTrajectory}
 
 trait EntitiesFactory {
-  def createArrowProjectile(startingPoint: Vector2, targetPoint: Vector2, owner:Entity): Attack
+  def createProjectile(startingPoint: Vector2, targetPoint: Vector2, owner:Entity): Attack
 
   def createHeroEntity(): HeroImpl
 
@@ -19,7 +19,7 @@ trait EntitiesFactory {
 class EntitiesFactoryImpl(private val world: World, private val level: Level) extends EntitiesFactory {
 
 
-  override def createArrowProjectile(startingPoint: Vector2, targetPoint: Vector2, owner:Entity): Attack = {
+  override def createProjectile(startingPoint: Vector2, targetPoint: Vector2, owner:Entity): Attack = {
     val position: (Float, Float) = (startingPoint.x+2, startingPoint.y+2)
     val size: Float = 0.5f
     val body: Body = defineEntityBody(size, position)
