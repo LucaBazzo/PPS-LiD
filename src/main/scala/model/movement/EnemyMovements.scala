@@ -2,15 +2,16 @@ package model.movement
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
+import model.Level
 import model.entities.{Entity, Hero}
-import model.helpers.WorldUtilities.{checkAABBCollision, checkPointCollision, scaleForceVector}
+import model.helpers.WorldUtilities.{checkAABBCollision, checkEntityIsVisible, checkPointCollision, scaleForceVector}
 
 import scala.util.Random
 
 
-class Stationary() extends MovementStrategy {
+class DoNotMove() extends MovementStrategy {
   override def move(): Unit = { }
-
+  override def canMove(): Boolean = false
 }
 
 class PatrolPlatform(val entity: Entity, val world: World) extends MovementStrategy {
@@ -26,17 +27,22 @@ class PatrolPlatform(val entity: Entity, val world: World) extends MovementStrat
       checkPointCollision(world, entity.getPosition._1 + entity.getSize._1 + 0.5f, entity.getPosition._2 - entity.getSize._2 - 0.5f)
 
   override def move(): Unit = {
-    // change direction check
-    if (!canMoveLeft && movingLeft) movingLeft = false
-    if (!canMoveRight && !movingLeft) movingLeft = true
+    if (canMove()) {
+      // change direction check
+      if (!canMoveLeft && movingLeft) movingLeft = false
+      if (!canMoveRight && !movingLeft) movingLeft = true
 
-    // apply movement to entity's body
-    if (movingLeft && entity.getBody.getLinearVelocity.x >= -3) {
-      entity.getBody.applyLinearImpulse(new Vector2(-3f, 0), entity.getBody.getWorldCenter, true)
-    } else if (!movingLeft && entity.getBody.getLinearVelocity.x <= 3){
-      entity.getBody.applyLinearImpulse(new Vector2(+3f, 0), entity.getBody.getWorldCenter, true)
+      // apply movement to entity's body
+      if (movingLeft && entity.getBody.getLinearVelocity.x >= -3) {
+        entity.getBody.applyLinearImpulse(new Vector2(-3f, 0), entity.getBody.getWorldCenter, true)
+      } else if (!movingLeft && entity.getBody.getLinearVelocity.x <= 3){
+        entity.getBody.applyLinearImpulse(new Vector2(+3f, 0), entity.getBody.getWorldCenter, true)
+      }
+
     }
   }
+
+  override def canMove(): Boolean = canMoveLeft || canMoveRight
 }
 
 class PatrolPlatformRandomly(override val entity: Entity, override val world: World) extends PatrolPlatform(entity, world)  {
@@ -44,25 +50,35 @@ class PatrolPlatformRandomly(override val entity: Entity, override val world: Wo
   private var lastRandomChange = System.currentTimeMillis()
 
   override def move(): Unit = {
-    // randomly change direction every 5 seconds
-    if (System.currentTimeMillis() - lastRandomChange > 5000) {
-      movingLeft = randomGen.nextBoolean()
-      lastRandomChange = System.currentTimeMillis()
+    if (canMove()) {
+      // randomly change direction every 5 seconds
+      if (System.currentTimeMillis() - lastRandomChange > 5000) {
+        movingLeft = randomGen.nextBoolean()
+        lastRandomChange = System.currentTimeMillis()
+      }
+      super.move()
     }
-    super.move()
+  }
+}
+
+class PatrolAndStopIfSeeingHero(override val entity:Entity, override val world: World, val heroEntity:Entity, val level:Level) extends PatrolPlatform(entity, world) {
+  override def move(): Unit = super.move()
+
+  override def canMove(): Boolean = {
+    !checkEntityIsVisible(heroEntity, entity, world, level) && super.canMove()
   }
 }
 
 class ChaseHero(val entity: Entity, val world: World, val heroEntity:Entity) extends MovementStrategy {
-  // TODO: stop moving when near hero. entity continues to appliy forces and move towards hero when touching hero.
-  // TODO: make fieldOfView an enemy stat
   val linearFieldOfView: Float = 5f
 
   override def move(): Unit = {
-    if (isHeroOnTheFarLeft && !isHeroOnTheNearLeft) {
-      entity.getBody.applyLinearImpulse(scaleForceVector(new Vector2(-5f, 0)), entity.getBody.getWorldCenter, true)
-    } else if (isHeroOnTheFarRight && !isHeroOnTheNearRight) {
-      entity.getBody.applyLinearImpulse(scaleForceVector(new Vector2(5f, 0)), entity.getBody.getWorldCenter, true)
+    if (canMove()) {
+      if (isHeroOnTheFarLeft && !isHeroOnTheNearLeft) {
+        entity.getBody.applyLinearImpulse(scaleForceVector(new Vector2(-5f, 0)), entity.getBody.getWorldCenter, true)
+      } else if (isHeroOnTheFarRight && !isHeroOnTheNearRight) {
+        entity.getBody.applyLinearImpulse(scaleForceVector(new Vector2(5f, 0)), entity.getBody.getWorldCenter, true)
+      }
     }
   }
 
@@ -85,6 +101,8 @@ class ChaseHero(val entity: Entity, val world: World, val heroEntity:Entity) ext
     entity.getPosition._1 + entity.getSize._1, entity.getPosition._2,
     entity.getPosition._1 + entity.getSize._1 + 2, entity.getPosition._2,
     heroEntity)
+
+  override def canMove(): Boolean = (isHeroOnTheFarLeft && !isHeroOnTheNearLeft) || (isHeroOnTheFarRight && !isHeroOnTheNearRight)
 }
 
 class PatrolAndStopIfFacingHero(override val entity: Entity, override val world: World, val heroEntity: Entity) extends PatrolPlatform(entity, world)  {
@@ -103,5 +121,7 @@ class PatrolAndStopIfFacingHero(override val entity: Entity, override val world:
     entity.getPosition._1 + entity.getSize._1, entity.getPosition._2,
     entity.getPosition._1 + entity.getSize._1 + 2, entity.getPosition._2,
     heroEntity)
+
+  override def canMove(): Boolean = !isHeroOnTheNearLeft && !isHeroOnTheNearRight && super.canMove()
 }
 
