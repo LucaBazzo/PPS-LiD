@@ -10,7 +10,8 @@ import model.helpers.EntitiesFactoryImpl
 
 object State extends Enumeration {
   type State = Value
-  val Standing, Running, Jumping, Falling, Sliding, Crouch,
+  val Standing, Crouch, Sliding,
+      Running, Jumping, Falling, Somersault,
       Attack01, Attack02, Attack03 = Value
 }
 

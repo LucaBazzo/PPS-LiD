@@ -66,7 +66,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val size: (Float, Float) = (0.85f, 1.4f)
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Hero,
-      EntityType.Immobile | EntityType.Enemy, createPolygonalShape(size), size, position, friction = 0.6f)
+      EntityType.Immobile | EntityType.Enemy, createPolygonalShape(size), size, position, friction = 0.8f)
 
     val hero: Hero = new HeroImpl(entityBody, size)
     hero.setCollisionStrategy(new CollisionStrategyImpl())

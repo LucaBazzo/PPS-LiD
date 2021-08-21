@@ -10,3 +10,4 @@ trait CollisionStrategy {
 class CollisionStrategyImpl extends CollisionStrategy {
   override def apply(entity: Entity): Unit = println("Collision Detected with " + entity.toString)
 }
+

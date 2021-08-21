@@ -32,7 +32,7 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
       entity.getState != State.Attack02 && entity.getState != State.Attack03) {
       command match {
         case GameEvent.Jump => return entity.getState != State.Falling &&
-                entity.getState != State.Jumping && entity.getState != State.Crouch
+                entity.getState != State.Somersault && entity.getState != State.Crouch
         case GameEvent.MoveRight | GameEvent.MoveLeft => return true
         case GameEvent.Slide => return entity.getState != State.Jumping && entity.getState != State.Falling
         case _ => throw new UnsupportedOperationException
@@ -43,12 +43,15 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
 
   private def jump(): Unit = {
     this.applyLinearImpulse(new Vector2(0, 400f))
-    this.entity.setState(State.Jumping)
+    if(this.entity.getState == State.Jumping)
+      this.entity.setState(State.Somersault)
+    else
+      this.entity.setState(State.Jumping)
   }
 
   private def moveRight(): Unit = {
     if(entity.getState != State.Crouch) {
-      if (entity.getBody.getLinearVelocity.x <= 2) {
+      if (entity.getBody.getLinearVelocity.x <= 3.5f) {
         this.applyLinearImpulse(new Vector2(60f, 0))
       }
 
@@ -60,7 +63,7 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
 
   private def moveLeft(): Unit = {
     if(entity.getState != State.Crouch) {
-      if (entity.getBody.getLinearVelocity.x >= -2) {
+      if (entity.getBody.getLinearVelocity.x >= -3.5f) {
         this.applyLinearImpulse(new Vector2(-60f, 0))
       }
 
@@ -78,11 +81,11 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
       this.entity.setLittle(true)
     }
 
-    if (entity.isFacingRight && entity.getBody.getLinearVelocity.x <= 4) {
-      this.applyLinearImpulse(new Vector2(200f, 0))
+    if (entity.isFacingRight) {
+      this.applyLinearImpulse(new Vector2(350f, 0))
     }
-    else if (!entity.isFacingRight && entity.getBody.getLinearVelocity.x >= -4) {
-      this.applyLinearImpulse(new Vector2(-200f, 0))
+    else {
+      this.applyLinearImpulse(new Vector2(-350f, 0))
     }
 
     this.entity.setState(State.Sliding)

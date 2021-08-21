@@ -39,8 +39,8 @@ class HeroAttackStrategy(private val entity: Hero) extends AttackStrategy {
 
   private def checkCommand(command: GameEvent): Boolean = {
     command match {
-      case GameEvent.Attack => return entity.getState != State.Falling &&
-        entity.getState != State.Jumping && entity.getState != State.Crouch && entity.getState != State.Sliding
+      case GameEvent.Attack => return entity.getState == State.Running || entity.getState == State.Standing ||
+        entity.getState == State.Attack01 || entity.getState == State.Attack02
       case _ => throw new UnsupportedOperationException
     }
     false

@@ -62,6 +62,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     this.heroSprite.addAnimation(State.Attack03,
       spriteFactory.createSpriteAnimationFromTwoRows(heroSprite, 7, 4, 6,
         8, 0, 2))
+    this.heroSprite.addAnimation(State.Somersault,
+      spriteFactory.createSpriteAnimationFromTwoRows(heroSprite, 2, 4, 6,
+        3, 0, 0), loop = true)
 
   }
 

@@ -94,7 +94,7 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
       if(this.entityBody.getBody.getLinearVelocity.y < 0 && this.state != State.Jumping)
         this.state = State.Falling
       else if(this.entityBody.getBody.getLinearVelocity.y == 0 && this.entityBody.getBody.getLinearVelocity.x != 0
-        && this.state == State.Jumping)
+        && (this.state == State.Jumping || this.state == State.Falling))
         this.state = State.Running
       else if((this.entityBody.getBody.getLinearVelocity.y == 0 && this.entityBody.getBody.getLinearVelocity.x == 0)
         && this.state != State.Crouch &&
