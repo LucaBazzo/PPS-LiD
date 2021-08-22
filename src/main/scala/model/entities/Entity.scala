@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import model.collisions.CollisionStrategy
-import model.entities.State.{State, Value}
+import model.entities.State.State
 
 object State extends Enumeration {
   type State = Value
@@ -20,7 +20,6 @@ trait Entity {
   def getSize: (Float, Float)
   def setCollisionStrategy(collisionStrategy: CollisionStrategy)
   def collisionDetected(entity: Entity)
-  def destroyEntity()
 
   //TODO ricontrollare in futuro
   def getBody: Body
@@ -49,8 +48,6 @@ abstract class EntityImpl(private var body: Body, private val size: (Float, Floa
   override def collisionDetected(entity: Entity): Unit = {
     if(this.collisionStrategy != null) this.collisionStrategy.apply(entity)
   }
-
-  override def destroyEntity(): Unit = ???
 
   override def getBody: Body = this.body
 }
