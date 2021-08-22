@@ -1,36 +1,23 @@
 package model.helpers
 
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.Level
-import model.attack.{DoNotAttack, MeleeSwordAttack, RangedArrowAttack}
-import model.collisions.{ApplyDamageToHero, CollisionStrategyImpl, DoNothingOnCollision}
-import model.entities.{Attack, EnemyImpl, Entity, HeroImpl, MobileEntityImpl}
-import model.movement.{ChaseHero, DoNotMove, PatrolAndStopIfFacingHero, PatrolAndStopIfSeeingHero, PatrolPlatform, PatrolPlatformRandomly, ProjectileTrajectory, WeightlessProjectileTrajectory}
+import model.attack.DoNotAttack
+import model.collisions.{CollisionStrategyImpl, DoNothingOnCollision}
+import model.entities.{EnemyImpl, HeroImpl}
+import model.movement.PatrolAndStopIfFacingHero
 
 trait EntitiesFactory {
-  def createProjectile(startingPoint: Vector2, targetPoint: Vector2, owner:Entity): Attack
 
   def createHeroEntity(): HeroImpl
 
-  def createEnemyEntity(): EnemyImpl
+  def createEnemyEntity(position: (Float, Float)): EnemyImpl
 }
 
 class EntitiesFactoryImpl(private val world: World, private val level: Level) extends EntitiesFactory {
 
-
-  override def createProjectile(startingPoint: Vector2, targetPoint: Vector2, owner:Entity): Attack = {
-    val position: (Float, Float) = (startingPoint.x+2, startingPoint.y+2)
-    val size: Float = 0.5f
-    val body: Body = defineEntityBody(size, position)
-    val attack:Attack = Attack(body, (size,size))
-    attack.setMovementStrategy(new ProjectileTrajectory(attack, targetPoint))
-    attack.setCollisionStrategy(new ApplyDamageToHero(owner))
-    attack
-  }
-
-  override def createEnemyEntity: EnemyImpl = {
-    val position: (Float, Float) = (4, 20)
+  override def createEnemyEntity(position: (Float, Float)): EnemyImpl = {
+//    val position: (Float, Float) = (4, 20)
     val size: Float = 1f
 
     val body: Body = defineEntityBody(size, position)
@@ -42,10 +29,14 @@ class EntitiesFactoryImpl(private val world: World, private val level: Level) ex
 
     val enemy:EnemyImpl = EnemyImpl(body, (size,size))
     enemy.setCollisionStrategy(new DoNothingOnCollision())
-//    enemy.setAttackStrategy(new RangedArrowAttack(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level, this))
+
     enemy.setAttackStrategy(new DoNotAttack())
-//    enemy.setMovementStrategy(new PatrolAndStopIfSeeingHero(enemy, world, level.getEntity(e => e.isInstanceOf[HeroImpl]), level))
-    enemy.setMovementStrategy(new DoNotMove())
+//    enemy.setAttackStrategy(new ContactAttackStrategy(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
+//    enemy.setAttackStrategy(new MeleeAttackStrategy(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
+//    enemy.setAttackStrategy(new RangedArrowAttack(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
+
+    enemy.setMovementStrategy(new PatrolAndStopIfFacingHero(enemy, world, level.getEntity(e => e.isInstanceOf[HeroImpl]) ))
+
     enemy
   }
 
