@@ -1,14 +1,11 @@
 package model.helpers
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.{Body, CircleShape, Fixture, FixtureDef, PolygonShape, Shape, World}
+import com.badlogic.gdx.physics.box2d._
 import model.entities.Entity
+import model.helpers.WorldUtilities.{getBodyHeight, getBodyWidth}
 
 object WorldUtilities {
-  def scaleForceVector(vector: Vector2) =
-    new Vector2(vector.x * Gdx.graphics.getDeltaTime, vector.y * Gdx.graphics.getDeltaTime)
-
   def checkAABBCollision(world:World, x1:Float, y1:Float, x2:Float, y2:Float, entity:Entity): Boolean = {
     var output: Boolean = false
     world.QueryAABB((fixture: Fixture) => {
@@ -33,7 +30,7 @@ object WorldUtilities {
 
   def checkAABBCollision(world:World, x1:Float, y1:Float, x2:Float, y2:Float): Boolean = {
     var output: Boolean = false
-    world.QueryAABB((fixture: Fixture) => {
+    world.QueryAABB((_) => {
       output = true
       false // automatically stop consecutive queries
     },x1, y1, x2, y2)
@@ -62,7 +59,7 @@ object WorldUtilities {
 
     // Check if source and target bodies are obstructed by other colliding entities
     // No fixtures between target and source means that they are overlapping
-    var isTargetVisible = if (fixList.size > 0) false else true
+    var isTargetVisible = if (fixList.nonEmpty) false else true
     var preemptiveStop = false
     for (fixture <- fixList if !preemptiveStop && !isTargetVisible) {
       isTargetVisible = fixture.getBody.equals(targetBody)
@@ -89,14 +86,6 @@ object WorldUtilities {
     sourceBody.getPosition.x - targetBody.getPosition.x < 0
   }
 
-}
-
-object SensorsUtility {
-  val fixtureDef:FixtureDef = new FixtureDef()
-  val shape:PolygonShape = new PolygonShape
-
-  fixtureDef.isSensor = true
-
   def getBodyWidth(body: Body): Float = {
     // TODO: instead of looking only the first Fixture, consider every non-sensor fixture
     val fixture:Fixture = body.getFixtureList.toArray().head
@@ -112,6 +101,14 @@ object SensorsUtility {
       case Shape.Type.Circle => fixture.getShape.asInstanceOf[CircleShape].getRadius*2
     }
   }
+
+}
+
+object SensorsUtility {
+  val fixtureDef:FixtureDef = new FixtureDef()
+  val shape:PolygonShape = new PolygonShape
+
+  fixtureDef.isSensor = true
 
   def createLowerLeftSensor(body:Body): Fixture = {
     shape.setAsBox(0.1f, 0.1f, new Vector2(

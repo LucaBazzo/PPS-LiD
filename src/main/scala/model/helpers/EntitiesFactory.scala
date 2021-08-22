@@ -11,23 +11,30 @@ trait EntitiesFactory {
 
   def createHeroEntity(): HeroImpl
 
-  def createEnemyEntity(position: (Float, Float)): EnemyImpl
+  def createEnemyEntity(position: (Float, Float), size:Float): EnemyImpl
 }
 
 class EntitiesFactoryImpl(private val world: World, private val level: Level) extends EntitiesFactory {
 
-  override def createEnemyEntity(position: (Float, Float)): EnemyImpl = {
-//    val position: (Float, Float) = (4, 20)
-    val size: Float = 1f
+  override def createEnemyEntity(position: (Float, Float), size:Float): EnemyImpl = {
 
-    val body: Body = defineEntityBody(size, position)
+    val bodyDef: BodyDef = new BodyDef()
+    bodyDef.position.set(position._1, position._2)
+    bodyDef.`type` = BodyDef.BodyType.DynamicBody
 
-    val collisionFilter: Filter = new Filter()
-    collisionFilter.categoryBits = EntitiesBits.ENEMY_CATEGORY_BIT
-    collisionFilter.maskBits = EntitiesBits.ENEMY_COLLISIONS_MASK
-    body.getFixtureList.toArray().head.setFilterData(collisionFilter)
+    val body: Body = world.createBody(bodyDef)
+
+    val fixtureDef: FixtureDef = new FixtureDef()
+    val shape: CircleShape = new CircleShape()
+    shape.setRadius(size)
+    fixtureDef.shape = shape
+    fixtureDef.filter.categoryBits = EntitiesBits.ENEMY_CATEGORY_BIT
+    fixtureDef.filter.maskBits = EntitiesBits.ENEMY_COLLISIONS_MASK
+
+    body.createFixture(fixtureDef)
 
     val enemy:EnemyImpl = EnemyImpl(body, (size,size))
+
     enemy.setCollisionStrategy(new DoNothingOnCollision())
 
     enemy.setAttackStrategy(new DoNotAttack())

@@ -15,11 +15,11 @@ class DoNotMove() extends MovementStrategy {
 }
 
 abstract class PatrolPlatform(val entity: Entity, val world: World) extends MovementStrategy {
-  // TODO: link to implementation
   // TODO: move statistics to enemy class
   protected val maxMovementSpeed: Float = 3 // maximum horizontal velocity
   protected val acceleration: Float = 1 // strength of the force applied
-  protected var lastMovementTime: Long = 0l // last time a force was applied to the body
+  // TODO: link to implementation
+  protected var lastMovementTime: Long = 0 // last time a force was applied to the body
   protected val movementImpulseFrequency: Float = 5000 // movement impulse frequency
 
   protected var isMovingLeft: Boolean = true
@@ -43,7 +43,6 @@ abstract class PatrolPlatform(val entity: Entity, val world: World) extends Move
           entity.getBody.setLinearVelocity(-maxMovementSpeed, entity.getBody.getLinearVelocity.y)
       } else if (!isMovingLeft) {
         entity.getBody.applyLinearImpulse(new Vector2(+acceleration, 0), entity.getBody.getWorldCenter, true)
-
         if (entity.getBody.getLinearVelocity.x >= maxMovementSpeed)
           entity.getBody.setLinearVelocity(maxMovementSpeed, entity.getBody.getLinearVelocity.y)
       }
@@ -123,82 +122,4 @@ class PatrolAndStopIfFacingHero(override val entity:Entity, override val world: 
       getBodiesDistance(entity.getBody, targetEntity.getBody) <= maxDistance
   }
 }
-
-//class PlatformPatrolRandomly(override val entity: Entity, override val world: World) extends PlatformPatrolWithAABBTests(entity, world)  {
-//  val randomGen = new Random(0)
-//  var lastRandomChange = System.currentTimeMillis()
-//
-//  override def move(): Unit = {
-//    // randomly change direction every 5 seconds
-//    if (System.currentTimeMillis() - lastRandomChange > 5000) {
-//      isMovingLeft = randomGen.nextBoolean()
-//      lastRandomChange = System.currentTimeMillis()
-//    }
-//    super.move()
-//  }
-//}
-//
-//class PatrolAndStopNearHero(override val entity:Entity, override val world: World, val heroEntity:Entity, val level:Level) extends PlatformPatrolWithCollisionsCheck(entity, world) {
-//  override def move(): Unit = super.move()
-//
-//  override def canMove(): Boolean = {
-//    !checkEntityIsVisible(heroEntity, entity, world, level) && super.canMove()
-//  }
-//}
-//
-//class ChaseHero(val entity: Entity, val world: World, val heroEntity:Entity) extends MovementStrategy {
-//  val linearFieldOfView: Float = 5f
-//
-//  override def move(): Unit = {
-//    if (canMove()) {
-//      if (isHeroOnTheFarLeft && !isHeroOnTheNearLeft) {
-//        entity.getBody.applyLinearImpulse(scaleForceVector(new Vector2(-5f, 0)), entity.getBody.getWorldCenter, true)
-//      } else if (isHeroOnTheFarRight && !isHeroOnTheNearRight) {
-//        entity.getBody.applyLinearImpulse(scaleForceVector(new Vector2(5f, 0)), entity.getBody.getWorldCenter, true)
-//      }
-//    }
-//  }
-//
-//  protected def isHeroOnTheFarLeft: Boolean = checkAABBCollision(world,
-//    entity.getPosition._1 - entity.getSize._1 - linearFieldOfView, entity.getPosition._2,
-//    entity.getPosition._1 - entity.getSize._1 , entity.getPosition._2,
-//    heroEntity)
-//
-//  protected def isHeroOnTheFarRight: Boolean = checkAABBCollision(world,
-//    entity.getPosition._1 + entity.getSize._1, entity.getPosition._2,
-//    entity.getPosition._1 + entity.getSize._1 + linearFieldOfView, entity.getPosition._2,
-//    heroEntity)
-//
-//  protected def isHeroOnTheNearLeft: Boolean = checkAABBCollision(world,
-//    entity.getPosition._1 - entity.getSize._1 - 2, entity.getPosition._2,
-//    entity.getPosition._1 - entity.getSize._1 , entity.getPosition._2,
-//    heroEntity)
-//
-//  protected def isHeroOnTheNearRight: Boolean = checkAABBCollision(world,
-//    entity.getPosition._1 + entity.getSize._1, entity.getPosition._2,
-//    entity.getPosition._1 + entity.getSize._1 + 2, entity.getPosition._2,
-//    heroEntity)
-//
-//  override def canMove(): Boolean = (isHeroOnTheFarLeft && !isHeroOnTheNearLeft) || (isHeroOnTheFarRight && !isHeroOnTheNearRight)
-//}
-//
-//class AndStopIfFacingHeroPatrolWithCollisionsCheck(override val entity: Entity, override val world: World, val heroEntity: Entity) extends PlatformPatrolWithCollisionsCheck(entity, world)  {
-//
-//  override def move(): Unit = {
-//    if ((!isHeroOnTheNearLeft && isMovingLeft) || (!isHeroOnTheNearRight && !isMovingLeft))
-//      super.move()
-//  }
-//
-//  protected def isHeroOnTheNearLeft: Boolean = checkAABBCollision(world,
-//    entity.getPosition._1 - entity.getSize._1 - 2, entity.getPosition._2,
-//    entity.getPosition._1 - entity.getSize._1 , entity.getPosition._2,
-//    heroEntity)
-//
-//  protected def isHeroOnTheNearRight: Boolean = checkAABBCollision(world,
-//    entity.getPosition._1 + entity.getSize._1, entity.getPosition._2,
-//    entity.getPosition._1 + entity.getSize._1 + 2, entity.getPosition._2,
-//    heroEntity)
-//
-//  override def canMove(): Boolean = !isHeroOnTheNearLeft && !isHeroOnTheNearRight && super.canMove()
-//}
 

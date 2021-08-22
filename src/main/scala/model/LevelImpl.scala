@@ -25,7 +25,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private val hero: HeroImpl = entitiesFactory.createHeroEntity()
   entitiesList = hero :: entitiesList
-  entitiesList = entitiesFactory.createEnemyEntity((4, 15)) :: entitiesList
+  entitiesList = entitiesFactory.createEnemyEntity((4, 15), 1) :: entitiesList
   new WorldCreator(this, this.world)
 
   this.entitiesSetter.setEntities(entitiesList)

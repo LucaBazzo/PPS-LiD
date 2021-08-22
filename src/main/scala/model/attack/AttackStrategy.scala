@@ -9,18 +9,25 @@ import model.helpers.EntitiesBits
 import model.helpers.WorldUtilities.{checkBodyIsVisible, getBodiesDistance, isTargetOnTheRight}
 import model.movement.ProjectileTrajectory
 
+class TimedAttack(attackEntity:Entity, delta:Int, level: Level) extends Runnable {
+  override def run(): Unit = {
+    Thread.sleep(delta)
+    level.removeEntity(attackEntity)
+  }
+}
+
 trait AttackStrategy {
   def attack(): Unit
-  def canAttack(): Boolean
-  def isAttacking(): Boolean
+  def canAttack: Boolean
+  def isAttacking: Boolean
 }
 
 class DoNotAttack() extends AttackStrategy {
-  override def canAttack(): Boolean = false
+  override def canAttack: Boolean = false
 
   override def attack(): Unit = { }
 
-  override def isAttacking(): Boolean = false
+  override def isAttacking: Boolean = false
 }
 
 class ContactAttackStrategy(sourceEntity: Entity, targetEntity:Entity, world:World, level:Level)
@@ -52,37 +59,38 @@ class ContactAttackStrategy(sourceEntity: Entity, targetEntity:Entity, world:Wor
     level.addEntity(contactAttack)
   }
 
-  override def canAttack(): Boolean = false
+  override def canAttack: Boolean = false
 
   override def attack(): Unit = { }
 
-  override def isAttacking(): Boolean = false
+  override def isAttacking: Boolean = false
 }
 
 class MeleeAttackStrategy(sourceEntity: Entity, targetEntity:Entity, world:World, level:Level) extends AttackStrategy {
-  val maxDistance = 3
-  val visibilityMaxHorizontalAngle = 80
+  protected val maxDistance:Float = 3
+  protected val visibilityMaxHorizontalAngle:Int = 80
+  protected val attackFrequency:Int = 2000
+  protected val attackDuration:Int = 1000
 
-  val attackFrequency = 2000
-  val attackDuration = 1000
+  protected var lastAttackTime:Long = 0
 
-  var lastAttackTime = 0l
-
-  override def canAttack(): Boolean =  {
+  override def canAttack: Boolean =  {
     System.currentTimeMillis() - lastAttackTime > attackFrequency &&
       checkBodyIsVisible(world, sourceEntity.getBody, targetEntity.getBody, visibilityMaxHorizontalAngle) &&
       getBodiesDistance(sourceEntity.getBody, targetEntity.getBody) <= maxDistance
   }
 
   override def attack(): Unit = {
-    if (canAttack()) {
+    if (canAttack) {
       lastAttackTime = System.currentTimeMillis()
-      new Thread(new TimedAttack(spawnAttack(), attackDuration, level)).start() //automaticalli delete attack entity after some time
-      //automaticalli delete attack entity after some time
+      //automatically delete attack entity after some time
+      new Thread(new TimedAttack(spawnAttack(), attackDuration, level)).start()
     }
   }
 
-  def spawnAttack(): Entity = {
+  override def isAttacking: Boolean = System.currentTimeMillis() - lastAttackTime < attackDuration
+
+  private def spawnAttack(): Entity = {
     val bodyDef: BodyDef = new BodyDef()
     bodyDef.position.set(sourceEntity.getBody.getWorldCenter.add(
       if (isTargetOnTheRight(sourceEntity.getBody, targetEntity.getBody)) +1f else -1f, 0))
@@ -108,41 +116,32 @@ class MeleeAttackStrategy(sourceEntity: Entity, targetEntity:Entity, world:World
 
     contactAttack
   }
-
-  override def isAttacking(): Boolean = System.currentTimeMillis() - lastAttackTime < attackDuration
-
-}
-
-class TimedAttack(attackEntity:Entity, delta:Int, level: Level) extends Runnable {
-  override def run(): Unit = {
-    Thread.sleep(delta)
-    level.removeEntity(attackEntity)
-  }
 }
 
 class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World, level:Level) extends AttackStrategy {
-  val maxDistance = 15
-  val visibilityMaxHorizontalAngle = 60
+  protected val maxDistance:Float = 15
+  protected val visibilityMaxHorizontalAngle:Int = 80
+  protected val attackFrequency:Int = 2000
+  protected val attackDuration:Int = 1000
 
-  val attackFrequency = 2000
-  val attackDuration = 100
+  protected var lastAttackTime:Long = 0
 
-  var lastAttackTime = 0l
-
-  override def canAttack(): Boolean =  {
+  override def canAttack: Boolean =  {
     System.currentTimeMillis() - lastAttackTime > attackFrequency &&
       checkBodyIsVisible(world, sourceEntity.getBody, targetEntity.getBody, visibilityMaxHorizontalAngle) &&
       getBodiesDistance(sourceEntity.getBody, targetEntity.getBody) <= maxDistance
   }
 
   override def attack(): Unit = {
-    if (canAttack()) {
+    if (canAttack) {
       lastAttackTime = System.currentTimeMillis()
       new Thread(new TimedAttack(spawnAttack(), attackDuration, level)).start()
     }
   }
 
-  def spawnAttack(): Entity = {
+  override def isAttacking: Boolean = System.currentTimeMillis() - lastAttackTime < attackDuration
+
+  private def spawnAttack(): Entity = {
     val bodyDef: BodyDef = new BodyDef()
     bodyDef.position.set(sourceEntity.getBody.getWorldCenter.add(
       if (isTargetOnTheRight(sourceEntity.getBody, targetEntity.getBody))
@@ -166,9 +165,6 @@ class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World, 
 
     arrowAttack
   }
-
-  override def isAttacking(): Boolean = System.currentTimeMillis() - lastAttackTime < attackDuration
-
 }
 
 //class MagicMissleAttack(enemyEntity: Entity, heroEntity:Entity, world:World, level:Level) extends AttackStrategy {
