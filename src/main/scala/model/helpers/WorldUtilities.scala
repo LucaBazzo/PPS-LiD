@@ -1,12 +1,9 @@
 package model.helpers
 
-import com.badlogic.gdx.{Application, Gdx}
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.{Fixture, World}
-import model.Level
-import model.entities.{Attack, Entity, HeroImpl}
-
-import java.awt.geom.Point2D
+import com.badlogic.gdx.physics.box2d.{Body, Fixture, World}
+import model.entities.Entity
 
 object WorldUtilities {
   def scaleForceVector(vector: Vector2) =
@@ -15,12 +12,22 @@ object WorldUtilities {
   def checkAABBCollision(world:World, x1:Float, y1:Float, x2:Float, y2:Float, entity:Entity): Boolean = {
     var output: Boolean = false
     world.QueryAABB((fixture: Fixture) => {
-      if (entity.getBody equals fixture.getBody) {
+      if (entity.getBody equals fixture.getBody)
         output = true
-        false // automatically stop consecutive queries
-      } else
-        true  // query next colliding fixture if present
+      !output // automatically stop consecutive queries if a match has been found
     }, x1, y1, x2, y2)
+    output
+  }
+
+  def checkAABBCollision(world:World, x1:Float, y1:Float, x2:Float, y2:Float, entityBit:Short): Boolean = {
+    var output: Boolean = false
+    world.QueryAABB((fixture: Fixture) => {
+      // a collision with a specific entity type has occurred
+      output = fixture.getFilterData.categoryBits == entityBit
+
+      // automatically stop consecutive queries if a match has been found
+      !output
+    },x1, y1, x2, y2)
     output
   }
 
@@ -41,31 +48,41 @@ object WorldUtilities {
     checkAABBCollision(world:World, x, y, x, y, entity)
   }
 
-  def checkEntityIsVisible(targetEntity:Entity, originEntity:Entity, world: World, level:Level): Boolean = {
-    var isHeroVisible = false
-    var count = 0
-    world.rayCast((fixture:Fixture, _, _, _) => {
-//      val levelEntity:Entity = level.getEntity(e => e.getBody.equals(fixture.getBody))
-//      println(levelEntity)
-//      levelEntity match {
-//        case HeroImpl(_, _) => {
-//          isHeroVisible = true
-//          0
-//        }
-//        case Attack(_, _) => 1
-//        case _ => 0
-//      }
-
-//      fixture.getFilterData().categoryBits == Application.WALL
-      isHeroVisible = fixture.getBody.equals(targetEntity.getBody)
-      -1
-    }, originEntity.getBody.getWorldCenter, targetEntity.getBody.getWorldCenter)
-    isHeroVisible
+  def checkPointCollision(world:World, x:Float, y:Float, entityBit:Short): Boolean = {
+    checkAABBCollision(world:World, x, y, x, y, entityBit)
   }
 
-  def getEntitiesDistance(entity1:Entity, entity2:Entity): Float = {
+  def checkBodyIsVisible(world: World, sourceBody:Body, targetBody:Body, maxHorizontalAngle:Float=90): Boolean = {
+    // Get the list of ordered fixtures (bodies) between source and target bodies
+    var fixList:List[Fixture] = List.empty
+    world.rayCast((fixture:Fixture, _, _, _) => {
+      fixList = fixture :: fixList
+      1
+    }, sourceBody.getPosition, targetBody.getPosition)
+
+    // Check if source and target bodies are obstructed by other colliding entities
+    // No fixtures between target and source means that they are overlapping
+    var isTargetVisible = if (fixList.size > 0) false else true
+    var preemptiveStop = false
+    for (fixture <- fixList if !preemptiveStop && !isTargetVisible) {
+      isTargetVisible = fixture.getBody.equals(targetBody)
+
+      // Check horizontal axis angle of source-target bodies
+      if (isTargetVisible) {
+        val angle = new Vector2(sourceBody.getPosition.sub(targetBody.getPosition)).angleDeg()
+        isTargetVisible = ((angle <= maxHorizontalAngle || angle >= 360-maxHorizontalAngle)
+          || (180-maxHorizontalAngle <= angle && 180+maxHorizontalAngle >= angle))
+      }
+
+      if ((sourceBody.getFixtureList.toArray().head.getFilterData.maskBits & fixture.getFilterData.categoryBits) != 0)
+        preemptiveStop = true
+    }
+    isTargetVisible
+  }
+
+  def getBodiesDistance(body1:Body, body2:Body): Float = {
     // TODO : convertire distanza tra centri (attuale) in minima distanza tra le superfici dei body
-    entity1.getBody.getWorldCenter.dst(entity2.getBody.getWorldCenter)
+    body1.getWorldCenter.dst(body2.getWorldCenter)
   }
 
 }

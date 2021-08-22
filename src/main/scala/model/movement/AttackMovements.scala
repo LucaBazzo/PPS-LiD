@@ -8,8 +8,6 @@ class ProjectileTrajectory(val entity: Entity, val vector: Vector2) extends Move
   entity.getBody.applyLinearImpulse(vector, entity.getBody.getWorldCenter, true)
 
   override def move(): Unit = { }
-
-  override def canMove(): Boolean = true
 }
 
 class WeightlessProjectileTrajectory(val entity: Entity, val targetPoint: Vector2, val world: World) extends MovementStrategy {
@@ -21,6 +19,4 @@ class WeightlessProjectileTrajectory(val entity: Entity, val targetPoint: Vector
   override def move(): Unit = {
     // prevents the entity from falling
   }
-
-  override def canMove(): Boolean = true
 }
