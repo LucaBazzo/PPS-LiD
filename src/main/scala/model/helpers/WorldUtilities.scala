@@ -2,7 +2,7 @@ package model.helpers
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.{Body, Fixture, World}
+import com.badlogic.gdx.physics.box2d.{Body, CircleShape, Fixture, FixtureDef, PolygonShape, Shape, World}
 import model.entities.Entity
 
 object WorldUtilities {
@@ -85,4 +85,51 @@ object WorldUtilities {
     body1.getWorldCenter.dst(body2.getWorldCenter)
   }
 
+}
+
+object SensorsUtility {
+  val fixtureDef:FixtureDef = new FixtureDef()
+  val shape:PolygonShape = new PolygonShape
+
+  fixtureDef.isSensor = true
+
+  def getBodyWidth(body: Body): Float = {
+    // TODO: instead of looking only the first Fixture, consider every non-sensor fixture
+    val fixture:Fixture = body.getFixtureList.toArray().head
+    fixture.getType match {
+      case Shape.Type.Circle => fixture.getShape.asInstanceOf[CircleShape].getRadius*2
+    }
+  }
+
+  def getBodyHeight(body: Body): Float = {
+    // TODO: instead of looking only the first Fixture, consider every non-sensor fixture
+    val fixture:Fixture = body.getFixtureList.toArray().head
+    fixture.getType match {
+      case Shape.Type.Circle => fixture.getShape.asInstanceOf[CircleShape].getRadius*2
+    }
+  }
+
+  def createLowerLeftSensor(body:Body): Fixture = {
+    shape.setAsBox(0.1f, 0.1f, new Vector2(
+      -getBodyWidth(body)/2 - 0.1f,
+      -getBodyHeight(body)/2 - 0.1f), 0)
+    fixtureDef.shape = shape
+    body.createFixture(fixtureDef)
+  }
+
+  def createLowerRightSensor(body:Body): Fixture = {
+    shape.setAsBox(0.1f, 0.1f, new Vector2(
+      +getBodyWidth(body)/2 + 0.1f,
+      -getBodyHeight(body)/2 - 0.1f), 0)
+    fixtureDef.shape = shape
+    body.createFixture(fixtureDef)
+  }
+
+  def sensorIsIntersectingWith(sensor:Fixture, categoryBit: Short, world:World): Boolean = {
+    var output: Boolean = true
+    for (contact <- world.getContactList.toArray()) {
+      output = contact.getFixtureA.equals(sensor) && contact.getFixtureB.getFilterData.categoryBits.equals(categoryBit)
+    }
+    output
+  }
 }

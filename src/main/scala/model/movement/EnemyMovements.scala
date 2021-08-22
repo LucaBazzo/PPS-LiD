@@ -4,61 +4,13 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.entities.Entity
 import model.helpers.EntitiesBits
+import model.helpers.SensorsUtility.{createLowerLeftSensor, createLowerRightSensor, sensorIsIntersectingWith}
 import model.helpers.WorldUtilities.{checkBodyIsVisible, checkPointCollision, getBodiesDistance}
 
 
 class DoNotMove() extends MovementStrategy {
   override def move(): Unit = { }
 }
-
-object SensorsUtility {
-  val fixtureDef:FixtureDef = new FixtureDef()
-  val shape:PolygonShape = new PolygonShape
-
-  fixtureDef.isSensor = true
-
-  def getBodyWidth(body: Body): Float = {
-    // TODO: instead of looking only the first Fixture, consider every non-sensor fixture
-    val fixture:Fixture = body.getFixtureList.toArray().head
-    fixture.getType match {
-      case Shape.Type.Circle => fixture.getShape.asInstanceOf[CircleShape].getRadius*2
-    }
-  }
-
-  def getBodyHeight(body: Body): Float = {
-    // TODO: instead of looking only the first Fixture, consider every non-sensor fixture
-    val fixture:Fixture = body.getFixtureList.toArray().head
-    fixture.getType match {
-      case Shape.Type.Circle => fixture.getShape.asInstanceOf[CircleShape].getRadius*2
-    }
-  }
-
-  def createLowerLeftSensor(body:Body): Fixture = {
-    shape.setAsBox(0.1f, 0.1f, new Vector2(
-      -getBodyWidth(body)/2 - 0.1f,
-      -getBodyHeight(body)/2 - 0.1f), 0)
-    fixtureDef.shape = shape
-    body.createFixture(fixtureDef)
-  }
-
-  def createLowerRightSensor(body:Body): Fixture = {
-    shape.setAsBox(0.1f, 0.1f, new Vector2(
-      +getBodyWidth(body)/2 + 0.1f,
-      -getBodyHeight(body)/2 - 0.1f), 0)
-    fixtureDef.shape = shape
-    body.createFixture(fixtureDef)
-  }
-
-  def sensorIsIntersectingWith(sensor:Fixture, categoryBit: Short, world:World): Boolean = {
-    var output: Boolean = true
-    for (contact <- world.getContactList.toArray()) {
-      output = contact.getFixtureA.equals(sensor) && contact.getFixtureB.getFilterData.categoryBits.equals(categoryBit)
-    }
-    output
-  }
-}
-
-import model.movement.SensorsUtility._
 
 abstract class PatrolPlatform(val entity: Entity, val world: World) extends MovementStrategy {
   // TODO: link to implementation
