@@ -116,7 +116,7 @@ class MeleeAttackStrategy(sourceEntity: Entity, targetEntity:Entity, world:World
 class TimedAttack(attackEntity:Entity, delta:Int, level: Level) extends Runnable {
   override def run(): Unit = {
     Thread.sleep(delta)
-//    level.removeEntity(attackEntity)
+    level.removeEntity(attackEntity)
   }
 }
 

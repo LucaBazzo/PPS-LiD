@@ -85,6 +85,10 @@ object WorldUtilities {
     body1.getWorldCenter.dst(body2.getWorldCenter)
   }
 
+  def isTargetOnTheRight(sourceBody: Body, targetBody: Body): Boolean = {
+    sourceBody.getPosition.x - targetBody.getPosition.x < 0
+  }
+
 }
 
 object SensorsUtility {
