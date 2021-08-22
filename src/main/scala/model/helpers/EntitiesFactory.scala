@@ -2,7 +2,7 @@ package model.helpers
 
 import com.badlogic.gdx.physics.box2d._
 import model.Level
-import model.attack.DoNotAttack
+import model.attack.RangedArrowAttack
 import model.collisions.{CollisionStrategyImpl, DoNothingOnCollision}
 import model.entities.{EnemyImpl, HeroImpl}
 import model.movement.PatrolAndStopIfFacingHero
@@ -37,10 +37,10 @@ class EntitiesFactoryImpl(private val world: World, private val level: Level) ex
 
     enemy.setCollisionStrategy(new DoNothingOnCollision())
 
-    enemy.setAttackStrategy(new DoNotAttack())
+//    enemy.setAttackStrategy(new DoNotAttack())
 //    enemy.setAttackStrategy(new ContactAttackStrategy(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
 //    enemy.setAttackStrategy(new MeleeAttackStrategy(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
-//    enemy.setAttackStrategy(new RangedArrowAttack(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
+    enemy.setAttackStrategy(new RangedArrowAttack(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
 
     enemy.setMovementStrategy(new PatrolAndStopIfFacingHero(enemy, world, level.getEntity(e => e.isInstanceOf[HeroImpl]) ))
 

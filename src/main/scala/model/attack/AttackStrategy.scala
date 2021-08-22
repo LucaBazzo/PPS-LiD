@@ -55,7 +55,7 @@ class ContactAttackStrategy(sourceEntity: Entity, targetEntity:Entity, world:Wor
     val joint = world.createJoint(jointDef)
 
     val contactAttack:Entity = new MobileEntityImpl(body, sourceEntity.getSize)
-    contactAttack.setCollisionStrategy(new ApplyDamage(targetEntity))
+    contactAttack.setCollisionStrategy(new ApplyDamage(contactAttack, targetEntity))
     level.addEntity(contactAttack)
   }
 
@@ -111,7 +111,7 @@ class MeleeAttackStrategy(sourceEntity: Entity, targetEntity:Entity, world:World
     val joint = world.createJoint(jointDef)
 
     val contactAttack:Entity = new MobileEntityImpl(body, sourceEntity.getSize)
-    contactAttack.setCollisionStrategy(new ApplyDamage(targetEntity))
+    contactAttack.setCollisionStrategy(new ApplyDamage(contactAttack, targetEntity))
     level.addEntity(contactAttack)
 
     contactAttack
@@ -135,7 +135,8 @@ class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World, 
   override def attack(): Unit = {
     if (canAttack) {
       lastAttackTime = System.currentTimeMillis()
-      new Thread(new TimedAttack(spawnAttack(), attackDuration, level)).start()
+      spawnAttack()
+//      new Thread(new TimedAttack(spawnAttack(), attackDuration, level)).start()
     }
   }
 
@@ -152,6 +153,7 @@ class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World, 
     val fixtureDef: FixtureDef = new FixtureDef()
     val shape: CircleShape = new CircleShape()
     shape.setRadius(0.5f)
+    fixtureDef.isSensor = true
     fixtureDef.shape = shape
     fixtureDef.filter.categoryBits = EntitiesBits.ENEMY_PROJECTILE_CATEGORY_BIT
     fixtureDef.filter.maskBits = EntitiesBits.ENEMY_PROJECTILE_COLLISIONS_MASK
@@ -159,8 +161,9 @@ class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World, 
 
     val arrowAttack:MobileEntityImpl = new MobileEntityImpl(body, sourceEntity.getSize)
     arrowAttack.setMovementStrategy(new ProjectileTrajectory(arrowAttack, sourceEntity, targetEntity))
-    arrowAttack.setCollisionStrategy(new ApplyDamage(targetEntity))
-    arrowAttack.getBody.setBullet(true)
+    arrowAttack.setCollisionStrategy(new ApplyDamage(arrowAttack, targetEntity))
+//    arrowAttack.setCollisionStrategy(new ApplyDamageAndDestroySourceEntity(arrowAttack, targetEntity, level))
+//    arrowAttack.getBody.setBullet(true)
     level.addEntity(arrowAttack)
 
     arrowAttack
