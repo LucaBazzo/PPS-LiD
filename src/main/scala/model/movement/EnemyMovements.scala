@@ -5,20 +5,22 @@ import com.badlogic.gdx.physics.box2d._
 import model.entities.Entity
 import model.helpers.EntitiesBits
 import model.helpers.SensorsUtility.{createLowerLeftSensor, createLowerRightSensor, sensorIsIntersectingWith}
-import model.helpers.WorldUtilities.{checkBodyIsVisible, checkPointCollision, getBodiesDistance}
+import model.helpers.WorldUtilities.{checkBodyIsVisible, checkPointCollision, getBodiesDistance, isTargetOnTheRight}
 
 
 class DoNotMove() extends MovementStrategy {
   override def move(): Unit = { }
+
+  override def isMoving(): Boolean = false
 }
 
 abstract class PatrolPlatform(val entity: Entity, val world: World) extends MovementStrategy {
   // TODO: link to implementation
   // TODO: move statistics to enemy class
   protected val maxMovementSpeed: Float = 3 // maximum horizontal velocity
-  protected val acceleration: Float = 3 // strength of the force applied
-  protected val lastMovementTime: Float = 0 // last time a force was applied to the body
-  protected val movementImpulseFrequency: Float = 1000 // movement impulse frequency
+  protected val acceleration: Float = 1 // strength of the force applied
+  protected var lastMovementTime: Long = 0l // last time a force was applied to the body
+  protected val movementImpulseFrequency: Float = 5000 // movement impulse frequency
 
   protected var isMovingLeft: Boolean = true
 
@@ -34,19 +36,21 @@ abstract class PatrolPlatform(val entity: Entity, val world: World) extends Move
     if (!canMoveToTheRight && !isMovingLeft) isMovingLeft = true
 
     // apply movement to entity's body
-    if (canMoveToTheLeft || canMoveToTheRight) {
+    if (canMoveToTheLeft || canMoveToTheRight ) {
       if (isMovingLeft) {
-        entity.getBody.applyLinearImpulse(new Vector2(-3f, 0), entity.getBody.getWorldCenter, true)
-        if (entity.getBody.getLinearVelocity.x <= -3)
-          entity.getBody.setLinearVelocity(-3, entity.getBody.getLinearVelocity.y)
+        entity.getBody.applyLinearImpulse(new Vector2(-acceleration, 0), entity.getBody.getWorldCenter, true)
+        if (entity.getBody.getLinearVelocity.x <= -maxMovementSpeed)
+          entity.getBody.setLinearVelocity(-maxMovementSpeed, entity.getBody.getLinearVelocity.y)
       } else if (!isMovingLeft) {
-        entity.getBody.applyLinearImpulse(new Vector2(+3f, 0), entity.getBody.getWorldCenter, true)
+        entity.getBody.applyLinearImpulse(new Vector2(+acceleration, 0), entity.getBody.getWorldCenter, true)
 
-        if (entity.getBody.getLinearVelocity.x >= 3)
-          entity.getBody.setLinearVelocity(3, entity.getBody.getLinearVelocity.y)
+        if (entity.getBody.getLinearVelocity.x >= maxMovementSpeed)
+          entity.getBody.setLinearVelocity(maxMovementSpeed, entity.getBody.getLinearVelocity.y)
       }
     }
   }
+
+  override def isMoving(): Boolean = entity.getBody.getLinearVelocity.x != 0
 
   protected def checkMoveToTheLeft: Boolean
   protected def checkMoveToTheRight: Boolean
@@ -81,14 +85,38 @@ class PlatformPatrolWithAABBTests(override val entity: Entity, override  val wor
         entity.getPosition._2 - entity.getSize._2 - 0.5f, EntitiesBits.WORLD_CATEGORY_BIT)
 }
 
-class PatrolAndStopNearHero(override val entity:Entity, override val world: World, val targetEntity:Entity) extends PlatformPatrolWithAABBTests(entity, world) {
+class PatrolAndStopIfNearHero(override val entity:Entity, override val world: World, val targetEntity:Entity) extends PlatformPatrolWithAABBTests(entity, world) {
   // TODO: move statistics to enemy class
   protected val maxDistance: Float = 4
   protected val visibilityMaxHorizontalAngle: Float = 30 // defines a vision "cone" originating from the entity
 
-  override protected def checkMoveToTheLeft: Boolean = super.checkMoveToTheLeft && !isHeroNear
+  override def move(): Unit = {
+    if (!isHeroNear) {
+      super.move()
+    } else {
+      entity.getBody.setLinearVelocity(0, entity.getBody.getLinearVelocity.y)
+    }
+  }
 
-  override protected def checkMoveToTheRight: Boolean = super.checkMoveToTheRight && !isHeroNear
+  protected def isHeroNear: Boolean = {
+    checkBodyIsVisible(world, entity.getBody, targetEntity.getBody, visibilityMaxHorizontalAngle) &&
+      getBodiesDistance(entity.getBody, targetEntity.getBody) <= maxDistance
+  }
+}
+
+class PatrolAndStopIfFacingHero(override val entity:Entity, override val world: World, val targetEntity:Entity) extends PlatformPatrolWithAABBTests(entity, world) {
+  // TODO: move statistics to enemy class
+  protected val maxDistance: Float = 4
+  protected val visibilityMaxHorizontalAngle: Float = 30 // defines a vision "cone" originating from the entity
+
+  override def move(): Unit = {
+    if (isHeroNear && (isTargetOnTheRight(entity.getBody, targetEntity.getBody) && !isMovingLeft
+      || !isTargetOnTheRight(entity.getBody, targetEntity.getBody) && isMovingLeft)) {
+      entity.getBody.setLinearVelocity(0, entity.getBody.getLinearVelocity.y)
+    } else {
+      super.move()
+    }
+  }
 
   protected def isHeroNear: Boolean = {
     checkBodyIsVisible(world, entity.getBody, targetEntity.getBody, visibilityMaxHorizontalAngle) &&

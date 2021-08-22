@@ -11,6 +11,9 @@ class ProjectileTrajectory(val entity: Entity, val sourceEntity: Entity, val tar
     entity.getBody.getWorldCenter, true)
 
   override def move(): Unit = { }
+
+  override def isMoving(): Boolean = entity.getBody.getLinearVelocity.x != 0
+
 }
 
 class WeightlessProjectileTrajectory(val entity: Entity, val targetPoint: Vector2, val world: World) extends MovementStrategy {
@@ -20,4 +23,6 @@ class WeightlessProjectileTrajectory(val entity: Entity, val targetPoint: Vector
   entity.getBody.setGravityScale(0)
 
   override def move(): Unit = { }
+
+  override def isMoving(): Boolean = entity.getBody.getLinearVelocity.x != 0
 }

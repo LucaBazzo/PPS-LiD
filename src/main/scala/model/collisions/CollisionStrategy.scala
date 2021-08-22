@@ -1,6 +1,6 @@
 package model.collisions
 
-import model.entities.{EnemyImpl, Entity, EntityImpl, HeroImpl, ImmobileEntity, LivingEntityImpl, MobileEntityImpl}
+import model.entities.Entity
 
 trait CollisionStrategy {
   def apply(entity: Entity)
@@ -14,11 +14,10 @@ class DoNothingOnCollision() extends CollisionStrategy {
   override def apply(entity: Entity): Unit = {}
 }
 
-class ApplyDamageToHero(private val owner:Entity) extends CollisionStrategy {
-  override def apply(entity: Entity): Unit = entity match {
-    case HeroImpl(_, _) => {
-      println("Entity colliding with hero")
+class ApplyDamage(private val targetEntity:Entity) extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = {
+    if (entity equals targetEntity) {
+      println("attacking target")
     }
-    case _ => {}
   }
 }
