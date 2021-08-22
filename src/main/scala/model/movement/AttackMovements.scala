@@ -4,8 +4,11 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
 import model.entities.Entity
 
-class ProjectileTrajectory(val entity: Entity, val vector: Vector2) extends MovementStrategy {
-  entity.getBody.applyLinearImpulse(vector, entity.getBody.getWorldCenter, true)
+class ProjectileTrajectory(val entity: Entity, val sourceEntity: Entity, val targetEntity: Entity) extends MovementStrategy {
+  val force = 20
+  entity.getBody.applyLinearImpulse(
+    targetEntity.getBody.getPosition.sub(sourceEntity.getBody.getPosition).nor().scl(force),
+    entity.getBody.getWorldCenter, true)
 
   override def move(): Unit = { }
 }
@@ -16,7 +19,5 @@ class WeightlessProjectileTrajectory(val entity: Entity, val targetPoint: Vector
   entity.getBody.applyLinearImpulse(targetPoint.nor().scl(force), entity.getBody.getWorldCenter, true)
   entity.getBody.setGravityScale(0)
 
-  override def move(): Unit = {
-    // prevents the entity from falling
-  }
+  override def move(): Unit = { }
 }
