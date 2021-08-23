@@ -113,9 +113,10 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     val items: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Item])
     if(items.nonEmpty) {
       val item: Item = items.get.head.asInstanceOf[Item]
-      val pos: (Float, Float) = (4,2)//item.getPostion
+      val pos: (Float, Float) = item.getPosition
 
-      this.itemSprite.setPosition(pos._1, pos._2)
+      this.itemSprite.setPosition(pos._1 - item.getSize._1 * 6.47f / 2,
+        pos._2 - item.getSize._2, false)
       this.itemSprite.update(delta, State.Standing, true)
     }
 
@@ -133,6 +134,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     // render objects inside
 
     this.heroSprite.setSize(0.85f * 6.47f,1.4f * 2.57f)
+    this.itemSprite.setSize(0.5f * 2.57f,0.5f * 2.57f)
     this.heroSprite.draw(batch)
     this.itemSprite.draw(batch)
 

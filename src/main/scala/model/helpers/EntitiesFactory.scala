@@ -5,9 +5,9 @@ import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef
 import model._
 import model.collisions.ImplicitConversions._
-import model.collisions.{CollisionStrategyImpl, EntityType}
+import model.collisions.{CollisionStrategyImpl, EntityType, ItemCollisionStrategy}
 import model.entities.ItemPools.ItemPools
-import model.entities._
+import model.entities.{Entity, _}
 
 trait EntitiesFactory {
 
@@ -18,7 +18,10 @@ trait EntitiesFactory {
 
   def createHeroEntity(): Hero
 
-  def createItem(PoolName: ItemPools): Item
+  def createItem(PoolName: ItemPools,
+                 size: (Float, Float) = (0.5f, 0.5f),
+                 position: (Float, Float) = (0, 0),
+                 collisions: Short = EntityType.Hero): Item
 
   def createPolygonalShape(size: (Float, Float)): Shape
 
@@ -75,7 +78,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val size: (Float, Float) = (0.85f, 1.4f)
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Hero,
-      EntityType.Immobile | EntityType.Enemy, createPolygonalShape(size), size, position, friction = 0.8f)
+      EntityType.Immobile | EntityType.Enemy | EntityType.Item, createPolygonalShape(size), size, position, friction = 0.8f)
 
     val hero: Hero = new HeroImpl(entityBody, size)
     hero.setCollisionStrategy(new CollisionStrategyImpl())
@@ -86,11 +89,15 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     hero
   }
 
-  override def createItem(PoolName: ItemPools): ItemImpl = {
-    val size: (Float, Float) = (0.5f, 0.5f)
-    val body: Body = defineEntityBody(size._1, (4,2), BodyDef.BodyType.StaticBody)
-    val item: ItemImpl = itemPool.getItem(body, size, PoolName)
+  override def createItem(PoolName: ItemPools,
+                          size: (Float, Float) = (0.5f, 0.5f),
+                          position: (Float, Float) = (0, 0),
+                          collisions: Short = EntityType.Hero): Item = {
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Item,
+      collisions, createPolygonalShape(size), size, position)
+    val item: Item = itemPool.getItem(entityBody, size, PoolName)
     item.setCollisionStrategy(new ItemCollisionStrategy())
+    this.level.addEntity(item)
     item
   }
 

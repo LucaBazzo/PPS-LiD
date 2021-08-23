@@ -19,22 +19,22 @@ class ItemTest extends AnyFlatSpec {
   "A Level" must "with an Item from level 1 pool" in {
     val level: Level = new LevelImpl(new EntitiesContainerMonitor)
     val item: ItemImpl = level.getEntity(x => x.isInstanceOf[ItemImpl]).asInstanceOf[ItemImpl]
-    assert(LEVEL_1_ITEMS.contains(item.getEnumVal()))
+    assert(LEVEL_1_ITEMS.contains(item.getEnumVal))
   }
 
   "In a Level" should "be able to spawn items from every pool" in {
     val level: Level = new LevelImpl(new EntitiesContainerMonitor)
     level.spawnItem(ItemPools.Level_2)
     val item2: ItemImpl = level.getEntity(x => x.isInstanceOf[ItemImpl]
-      && LEVEL_2_ITEMS.contains(x.asInstanceOf[ItemImpl].getEnumVal())).asInstanceOf[ItemImpl]
+      && LEVEL_2_ITEMS.contains(x.asInstanceOf[ItemImpl].getEnumVal)).asInstanceOf[ItemImpl]
     level.spawnItem(ItemPools.Boss)
     val item3: ItemImpl = level.getEntity(x => x.isInstanceOf[ItemImpl]).asInstanceOf[ItemImpl]
     level.spawnItem(ItemPools.Keys)
     val item4: ItemImpl = level.getEntity(x => x.isInstanceOf[ItemImpl]).asInstanceOf[ItemImpl]
     level.spawnItem(ItemPools.Enemy_Drops)
     val item5: ItemImpl = level.getEntity(x => x.isInstanceOf[ItemImpl]).asInstanceOf[ItemImpl]
-    assert(LEVEL_2_ITEMS.contains(item2.getEnumVal()) && BOSS_ITEMS.contains(item3.getEnumVal())
-      && MAP_ITEMS.contains(item4.getEnumVal()) && ENEMY_ITEMS.contains(item5.getEnumVal()))
+    assert(LEVEL_2_ITEMS.contains(item2.getEnumVal) && BOSS_ITEMS.contains(item3.getEnumVal)
+      && MAP_ITEMS.contains(item4.getEnumVal) && ENEMY_ITEMS.contains(item5.getEnumVal))
   }
 
   "An item pool (excluding keys and enemy drops)" should "never give the same item twice unless it has exhausted all its items" in {
@@ -80,7 +80,7 @@ class ItemTest extends AnyFlatSpec {
       level.spawnItem(ItemPools.Boss)
       itemList3 = itemList3 ++ List(level.getEntity(x => x.isInstanceOf[ItemImpl]).asInstanceOf[ItemImpl])
     }
-    assert(itemList1.takeRight(2).forall(x => x.getEnumVal() == Items.Cake) && itemList2.takeRight(2).forall(x => x.getEnumVal() == Items.Cake) &&
-      itemList3.takeRight(2).forall(x => x.getEnumVal() == Items.Cake))
+    assert(itemList1.takeRight(2).forall(x => x.getEnumVal == Items.Cake) && itemList2.takeRight(2).forall(x => x.getEnumVal == Items.Cake) &&
+      itemList3.takeRight(2).forall(x => x.getEnumVal == Items.Cake))
   }
 }

@@ -5,8 +5,8 @@ import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
 import model.collisions.CollisionManager
 import model.entities.ItemPools.ItemPools
-import model.entities.{Entity, Hero, ItemImpl, ItemPools}
-import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter}
+import model.entities.{Entity, Hero, Item, ItemPools}
+import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl}
 import model.world.WorldCreator
 
 trait Level {
@@ -25,12 +25,12 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private val world: World = new World(GRAVITY_FORCE, true)
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
-  entitiesFactory.setLevel(this)
+  entitiesFactory.setLevel(this, new ItemPoolImpl())
 
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val item: ItemImpl = entitiesFactory.createItem(ItemPools.Level_1)
+  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (0.5f, 0.5f), (4,2))
 
   new WorldCreator(this)
 

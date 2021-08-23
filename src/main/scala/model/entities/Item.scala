@@ -13,14 +13,14 @@ object ItemPools extends Enumeration {
   val Keys, Enemy_Drops, Level_1, Level_2, Boss = Value
 }
 
-trait Item {
+trait Item extends Entity {
 
   def collect(): Unit
   def getEnumVal: Items
 }
 
 abstract class ItemImpl(private val itemName: Items, private var entityBody: EntityBody, private val size: (Float, Float))
-      extends EntityImpl(entityBody, size) with Item {
+      extends ImmobileEntity(entityBody, size) with Item {
 
   def collect(): Unit
 
