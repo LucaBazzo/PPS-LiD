@@ -28,6 +28,6 @@ class ApplyDamageAndDestroyEntity(private val sourceEntity:Entity, private val t
 
   override def apply(entity: Entity): Unit = {
     super.apply(entity)
-    level.removeEntity(sourceEntity)
+//    level.removeEntity(sourceEntity)
   }
 }
