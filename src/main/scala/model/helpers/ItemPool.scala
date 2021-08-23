@@ -15,7 +15,7 @@ class ItemPoolImpl extends ItemPool {
 
   private var level1_Item_List: List[Items] = List(Items.Cake, Items.Wrench, Items.Map)
   private var level2_Item_List: List[Items] = level1_Item_List ++ List(Items.Armor, Items.SkeletonKey, Items.Boots, Items.BFSword)
-  private var boss_Item_List: List[Items] = List()
+  private var boss_Item_List: List[Items] = List(Items.Bow, Items.Shield)
   private var map_Item_List: List[Items] = List(Items.Key)
   private var enemy_Item_List: List[Items] = List(Items.PotionS, Items.PotionM, Items.PotionL, Items.PotionXL)
   private val rand = new Random
@@ -42,15 +42,27 @@ class ItemPoolImpl extends ItemPool {
   }
 
   private def pickItemFromPool(poolName: ItemPools): Items = poolName match {
-    case ItemPools.Level_1 => pickRandomItemFromPool(level1_Item_List)
-    case ItemPools.Level_2 => pickRandomItemFromPool(level2_Item_List)
-    case ItemPools.Boss => pickRandomItemFromPool(boss_Item_List)
-    case ItemPools.Enemy_Drops => pickRandomItemFromPool(enemy_Item_List)
-    case ItemPools.Keys => pickRandomItemFromPool(map_Item_List)
+    case ItemPools.Level_1 => {
+                                val item = pickRandomItemFromList(level1_Item_List)
+                                level1_Item_List = level1_Item_List.filter(x => x != item)
+                                item
+                              }
+    case ItemPools.Level_2 => {
+      val item = pickRandomItemFromList(level2_Item_List)
+      level2_Item_List = level2_Item_List.filter(x => x != item)
+      item
+    }
+    case ItemPools.Boss => {
+      val item = pickRandomItemFromList(boss_Item_List)
+      boss_Item_List = boss_Item_List.filter(x => x != item)
+      item
+    }
+    case ItemPools.Enemy_Drops => pickRandomItemFromList(enemy_Item_List)
+    case ItemPools.Keys => pickRandomItemFromList(map_Item_List)
     case _ => Items.Cake
   }
 
-  private def pickRandomItemFromPool(itemList: List[Items]): Items = {
+  private def pickRandomItemFromList(itemList: List[Items]): Items = {
     if(itemList.length > 0)
       itemList(rand.nextInt(itemList.length))
     else

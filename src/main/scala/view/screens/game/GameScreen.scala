@@ -7,7 +7,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, Input, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model.entities.{Entity, Hero, State}
+import model.entities.{Entity, Hero, HeroImpl, ItemImpl, State}
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
 import view.screens.helpers.TileMapHelper
@@ -30,17 +30,21 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
   private val spriteFactory: SpriteFactory = new SpriteFactoryImpl()
+  private val itemSprite: EntitySprite = spriteFactory.createEntitySprite("items", 32, 32)
+  this.itemSprite.addAnimation(State.Standing,
+    spriteFactory.createSpriteAnimation(itemSprite, 0, 0, 0, 0.20f))
+
   private val heroSprite: EntitySprite = spriteFactory.createEntitySprite("hero", 50, 37)
   this.heroSprite.addAnimation(State.Standing,
-    spriteFactory.createSpriteAnimation(heroSprite, 0, 0, 3, 0.18f),
+    spriteFactory.createSpriteAnimation(heroSprite, 3, 0, 3, 0.18f),
     true)
   this.heroSprite.addAnimation(State.Running,
-    spriteFactory.createSpriteAnimation(heroSprite, 1, 1, 6),
+    spriteFactory.createSpriteAnimation(heroSprite, 4, 1, 6),
     true)
   this.heroSprite.addAnimation(State.Jumping,
-    spriteFactory.createSpriteAnimation(heroSprite, 2, 0, 3))
+    spriteFactory.createSpriteAnimation(heroSprite, 5, 0, 3))
   this.heroSprite.addAnimation(State.Falling,
-    spriteFactory.createSpriteAnimation(heroSprite, 3, 1, 2),
+    spriteFactory.createSpriteAnimation(heroSprite, 6, 1, 2),
     true)
 
   private def update(deltaTime: Float): Unit = {
@@ -74,7 +78,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     super.render(delta)
 
-    val entities: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Hero])
+    val entities: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[HeroImpl])
     if(entities.nonEmpty) {
       val player: Entity = entities.get.head
       this.camera.position.x = player.getPosition._1
@@ -84,6 +88,15 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.heroSprite.update(delta, player.getState, player.asInstanceOf[Hero].getPreviousState(),
         player.asInstanceOf[Hero].getLinearVelocityX())
       player.asInstanceOf[Hero].updatePreviousState(player.getState)
+    }
+
+    val items: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[ItemImpl])
+    if(items.nonEmpty) {
+      val item: ItemImpl = items.get.head.asInstanceOf[ItemImpl]
+      val pos: (Float, Float) = item.getPosition
+
+      this.itemSprite.setPosition(pos._1, pos._2)
+      this.itemSprite.update(delta, State.Standing, State.Standing, 0)
     }
 
     this.camera.update()
@@ -99,6 +112,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     batch.begin()
     // render objects inside
     this.heroSprite.draw(batch)
+    this.itemSprite.draw(batch)
 
     batch.end()
 

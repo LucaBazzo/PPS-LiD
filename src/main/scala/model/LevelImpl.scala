@@ -3,6 +3,7 @@ package model
 import com.badlogic.gdx.physics.box2d.World
 import controller.GameEvent.GameEvent
 import model.collisions.CollisionManager
+import model.entities.ItemPools.ItemPools
 import model.entities.{Entity, HeroImpl, ItemImpl, ItemPools}
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter}
 import model.world.WorldCreator
@@ -13,6 +14,7 @@ trait Level {
   def updateEntities(actions: List[GameEvent])
   def addEntity(entity: Entity)
   def getEntity(predicate: Entity => Boolean): Entity
+  def spawnItem(pool: ItemPools.ItemPools)
 }
 
 class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
@@ -23,7 +25,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private val hero: HeroImpl = entitiesFactory.createHeroEntity()
 
-  private val item: ItemImpl = entitiesFactory.createItem(ItemPools.Enemy_Drops)
+  private val item: ItemImpl = entitiesFactory.createItem(ItemPools.Level_1)
 
   private var entitiesList: List[Entity] = List(hero, item)
 
@@ -51,4 +53,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   }
 
   override def getEntity(predicate: Entity => Boolean): Entity = entitiesList.filter(predicate).head
+
+  override def spawnItem(pool: ItemPools): Unit = {
+    this.addEntity(entitiesFactory.createItem(pool))
+  }
 }

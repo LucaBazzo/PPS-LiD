@@ -16,6 +16,7 @@ trait EntitiesFactory {
 class EntitiesFactoryImpl(private val world: World) extends EntitiesFactory {
 
   private val itemPool: ItemPool = new ItemPoolImpl()
+  private var itemPos: (Float, Float) = (4, 2)
 
   override def createMobileEntity(): Entity = {
     val position: (Float, Float) = (1, 1)
@@ -34,10 +35,10 @@ class EntitiesFactoryImpl(private val world: World) extends EntitiesFactory {
   }
 
   override def createItem(PoolName: ItemPools): ItemImpl = {
-    val position: (Float, Float) = (4, 2)
     val size: (Float, Float) = (0.5f, 0.5f)
-    val body: Body = defineEntityBody(size._1, position, BodyDef.BodyType.StaticBody)
+    val body: Body = defineEntityBody(size._1, itemPos, BodyDef.BodyType.StaticBody)
     val item: ItemImpl = itemPool.getItem(body, size, PoolName)
+    itemPos = (itemPos._1 + 2, itemPos._2)
     item.setCollisionStrategy(new ItemCollisionStrategy())
     item
   }
