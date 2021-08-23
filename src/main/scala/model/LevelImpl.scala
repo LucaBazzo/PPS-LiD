@@ -4,7 +4,8 @@ import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TI
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
 import model.collisions.CollisionManager
-import model.entities.{Entity, Hero}
+import model.entities.ItemPools.ItemPools
+import model.entities.{Entity, Hero, ItemImpl, ItemPools}
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter}
 import model.world.WorldCreator
 
@@ -15,6 +16,7 @@ trait Level {
   def addEntity(entity: Entity)
   def removeEntity(entity: Entity)
   def getEntity(predicate: Entity => Boolean): Entity
+  def spawnItem(pool: ItemPools.ItemPools)
   def getWorld: World
 }
 
@@ -28,6 +30,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
+  private val item: ItemImpl = entitiesFactory.createItem(ItemPools.Level_1)
 
   new WorldCreator(this)
 
@@ -60,4 +63,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   }
 
   override def getWorld: World = this.world
+
+  override def spawnItem(pool: ItemPools): Unit = {
+    this.addEntity(entitiesFactory.createItem(pool))
+  }
 }

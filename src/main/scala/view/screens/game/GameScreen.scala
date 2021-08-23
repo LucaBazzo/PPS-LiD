@@ -8,7 +8,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model.entities.{Entity, Hero, State}
+import model.entities.{Entity, Hero, Item, State}
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
@@ -32,6 +32,10 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   //this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
   private val spriteFactory: SpriteFactory = new SpriteFactoryImpl()
+  private val itemSprite: EntitySprite = spriteFactory.createEntitySprite("items", 32, 32)
+  this.itemSprite.addAnimation(State.Standing,
+    spriteFactory.createSpriteAnimation(itemSprite, 0, 0, 0, 0.20f))
+
   private val heroSprite: EntitySprite = spriteFactory.createEntitySprite("hero", 50, 37)
   this.defineHeroSpriteAnimations()
 
@@ -106,6 +110,15 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.heroSprite.update(delta, player.getState, player.isFacingRight)
     }
 
+    val items: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Item])
+    if(items.nonEmpty) {
+      val item: Item = items.get.head.asInstanceOf[Item]
+      val pos: (Float, Float) = (4,2)//item.getPostion
+
+      this.itemSprite.setPosition(pos._1, pos._2)
+      this.itemSprite.update(delta, State.Standing, true)
+    }
+
     this.camera.update()
 
     // render the map
@@ -121,6 +134,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
     this.heroSprite.setSize(0.85f * 6.47f,1.4f * 2.57f)
     this.heroSprite.draw(batch)
+    this.itemSprite.draw(batch)
 
     batch.end()
 

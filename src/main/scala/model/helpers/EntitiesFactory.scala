@@ -6,16 +6,19 @@ import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef
 import model._
 import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionStrategyImpl, EntityType}
+import model.entities.ItemPools.ItemPools
 import model.entities._
 
 trait EntitiesFactory {
 
-  def setLevel(level: Level)
+  def setLevel(level: Level, pool: ItemPool)
 
   def createMobileEntity(size: (Float, Float) = (1, 1),
                          position: (Float, Float) = (0, 0)): Entity
 
   def createHeroEntity(): Hero
+
+  def createItem(PoolName: ItemPools): Item
 
   def createPolygonalShape(size: (Float, Float)): Shape
 
@@ -46,7 +49,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   private var level: Level = _
 
-  override def setLevel(level: Level): Unit = this.level = level
+  private var itemPool: ItemPool = _
+
+  override def setLevel(level: Level, pool: ItemPool): Unit = {
+    this.level = level
+    this.itemPool = pool
+  }
 
   override def createMobileEntity(size: (Float, Float) = (1, 1),
                                   position: (Float, Float) = (0, 0)): Entity = {
@@ -76,6 +84,14 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     this.level.addEntity(hero)
     hero
+  }
+
+  override def createItem(PoolName: ItemPools): ItemImpl = {
+    val size: (Float, Float) = (0.5f, 0.5f)
+    val body: Body = defineEntityBody(size._1, (4,2), BodyDef.BodyType.StaticBody)
+    val item: ItemImpl = itemPool.getItem(body, size, PoolName)
+    item.setCollisionStrategy(new ItemCollisionStrategy())
+    item
   }
 
   override def createPolygonalShape(size: (Float, Float)): Shape = {
@@ -173,4 +189,5 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     entityBody
   }
+
 }
