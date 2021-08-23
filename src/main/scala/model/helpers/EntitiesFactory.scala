@@ -3,10 +3,10 @@ package model.helpers
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef
+import model._
 import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionStrategyImpl, EntityType}
 import model.entities._
-import model._
 
 trait EntitiesFactory {
 
@@ -14,6 +14,7 @@ trait EntitiesFactory {
 
   def createMobileEntity(size: (Float, Float) = (1, 1),
                          position: (Float, Float) = (0, 0)): Entity
+
   def createHeroEntity(): Hero
 
   def createPolygonalShape(size: (Float, Float)): Shape

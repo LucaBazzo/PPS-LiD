@@ -34,7 +34,7 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
         case GameEvent.Jump => return entity.getState != State.Falling &&
                 entity.getState != State.Somersault && entity.getState != State.Crouch
         case GameEvent.MoveRight | GameEvent.MoveLeft => return true
-        case GameEvent.Slide => return entity.getState != State.Jumping && entity.getState != State.Falling
+        case GameEvent.Slide => return entity.getState != State.Jumping && entity.getState != State.Falling && entity.getState != State.Somersault
         case _ => throw new UnsupportedOperationException
       }
     }

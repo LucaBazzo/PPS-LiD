@@ -9,10 +9,11 @@ trait EntitySprite extends Sprite {
   def addAnimation(state: State, animation: Animation[TextureRegion], loop: Boolean = false)
 
   def setPosition(x: Float, y: Float, isLittle: Boolean): Unit = {
-    if(isLittle)
+    super.setPosition(x,y)
+    /*if(isLittle)
       super.setPosition(x - this.getWidth / 2, y - this.getHeight / 2 + 9.3f)
     else
-      super.setPosition(x - this.getWidth / 2, y - this.getHeight / 2 + 4.3f)
+      super.setPosition(x - this.getWidth / 2, y - this.getHeight / 2 + 4.3f)*/
   }
 
   def update(dt: Float, state: State, isFacingRight: Boolean)

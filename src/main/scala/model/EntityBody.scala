@@ -38,11 +38,6 @@ class EntityBodyImpl extends EntityBody {
   }
 
   override def setCollisions(entitiesTypes: Short): EntityBody = {
-    /*def setCollisions_(entitiesTypes: List[Short]): Short = entitiesTypes match {
-      case Nil => 0
-      case h :: t =>  h | setCollisions(t)
-    }
-    this.fixtureDef.filter.maskBits = setCollisions_(entitiesTypes)*/
     this.fixtureDef.filter.maskBits = entitiesTypes
     this
   }

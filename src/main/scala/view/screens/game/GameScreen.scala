@@ -29,7 +29,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
-  this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
+  //this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
   private val spriteFactory: SpriteFactory = new SpriteFactoryImpl()
   private val heroSprite: EntitySprite = spriteFactory.createEntitySprite("hero", 50, 37)
@@ -101,7 +101,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.camera.position.x = player.getPosition._1
       this.camera.position.y = player.getPosition._2
 
-      this.heroSprite.setPosition(WIDTH_SCREEN / 2, HEIGHT_SCREEN / 2, player.isLittle)
+      this.heroSprite.setPosition(player.getPosition._1 - player.getSize._1 * 6.47f / 2,
+        player.getPosition._2 - player.getSize._2, player.isLittle)
       this.heroSprite.update(delta, player.getState, player.isFacingRight)
     }
 
@@ -111,18 +112,23 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     orthogonalTiledMapRenderer.render()
 
     //what will be shown by the camera
-    batch.setProjectionMatrix(hud.getStage().getCamera.combined)
-    hud.getStage().draw()
-    //batch.setProjectionMatrix(camera.combined)
+
+    batch.setProjectionMatrix(camera.combined)
+
 
     batch.begin()
     // render objects inside
+
+    this.heroSprite.setSize(0.85f * 6.47f,1.4f * 2.57f)
     this.heroSprite.draw(batch)
 
     batch.end()
 
     //for debug purpose
     box2DDebugRenderer.render(this.entitiesGetter.getWorld, camera.combined)
+
+    batch.setProjectionMatrix(hud.getStage().getCamera.combined)
+    hud.getStage().draw()
   }
 
   override def resize(width: Int, height: Int): Unit = {
