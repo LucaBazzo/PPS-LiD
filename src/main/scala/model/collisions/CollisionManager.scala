@@ -1,7 +1,5 @@
 package model.collisions
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.Level
 import model.entities.Entity

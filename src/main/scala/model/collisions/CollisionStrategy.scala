@@ -23,11 +23,11 @@ class ApplyDamage(private val sourceEntity:Entity, private val targetEntity:Enti
   }
 }
 
-class ApplyDamageAndDestroySourceEntity(private val sourceEntity:Entity, private val targetEntity:Entity, private val level:Level)
+class ApplyDamageAndDestroyEntity(private val sourceEntity:Entity, private val targetEntity:Entity, private val level:Level)
   extends ApplyDamage(sourceEntity, targetEntity) {
 
   override def apply(entity: Entity): Unit = {
     super.apply(entity)
-//    level.removeEntity(sourceEntity)
+    level.removeEntity(sourceEntity)
   }
 }

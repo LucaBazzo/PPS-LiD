@@ -14,8 +14,4 @@ class TimedAttack(private var body: Body, private val size: (Float, Float), priv
       super.update()
     }
   }
-
-  override def collisionDetected(entity: Entity): Unit = {
-//    level.removeEntity(this)
-  }
 }

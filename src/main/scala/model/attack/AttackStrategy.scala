@@ -3,7 +3,7 @@ package model.attack
 import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef
 import model.Level
-import model.collisions.ApplyDamage
+import model.collisions.{ApplyDamage, ApplyDamageAndDestroyEntity}
 import model.entities.{Entity, MobileEntityImpl, TimedAttack}
 import model.helpers.EntitiesBits
 import model.helpers.WorldUtilities.{checkBodyIsVisible, getBodiesDistance, isTargetOnTheRight}
@@ -160,8 +160,8 @@ class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World, 
 
     val arrowAttack:TimedAttack = new TimedAttack(body, sourceEntity.getSize, 1000, level)
     arrowAttack.setMovementStrategy(new ProjectileTrajectory(arrowAttack, sourceEntity, targetEntity))
-    arrowAttack.setCollisionStrategy(new ApplyDamage(arrowAttack, targetEntity))
-//    arrowAttack.setCollisionStrategy(new ApplyDamageAndDestroySourceEntity(arrowAttack, targetEntity, level))
+//    arrowAttack.setCollisionStrategy(new ApplyDamage(arrowAttack, targetEntity))
+    arrowAttack.setCollisionStrategy(new ApplyDamageAndDestroyEntity(arrowAttack, targetEntity, level))
 //    arrowAttack.getBody.setBullet(true)
     arrowAttack
   }
