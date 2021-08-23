@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
 import model.collisions.CollisionManager
 import model.entities.ItemPools.ItemPools
-import model.entities.{Entity, Hero, Item, ItemPools}
+import model.entities.{Enemy, Entity, Hero, Item, ItemPools}
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl}
 import model.world.WorldCreator
 
@@ -30,6 +30,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
+  private val enemy: Enemy = entitiesFactory.createEnemyEntity()
   private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (0.5f, 0.5f), (4,2))
 
   new WorldCreator(this)
@@ -40,7 +41,6 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   this.world.setContactListener(new CollisionManager(this))
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
-
     if(actions.nonEmpty) {
       for(command <- actions) this.hero.notifyCommand(command)
     }

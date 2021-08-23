@@ -1,6 +1,7 @@
 package model.entities
 
-import model.{AttackStrategy, EntityBody}
+import model.EntityBody
+import model.attack.AttackStrategy
 
 import scala.collection.immutable.HashMap
 
@@ -17,7 +18,7 @@ class LivingEntityImpl(private var entityBody: EntityBody, private val size: (Fl
 
   protected var attackStrategy: AttackStrategy = _
 
-  override def sufferDamage(damage: Float): Unit = ???
+  override def sufferDamage(damage: Float): Unit = {}
 
   override def getLife(): Float = ???
 
@@ -26,4 +27,5 @@ class LivingEntityImpl(private var entityBody: EntityBody, private val size: (Fl
   override def getStatistics[A <: Int](): HashMap[String, A] = ???
 
   override def alterStatistics[A <: Int](statistic: String, alteration: A): Unit = ???
+
 }

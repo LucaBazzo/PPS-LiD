@@ -17,7 +17,7 @@ trait EntityBody {
   def setEntityType(entityType: Short): EntityBody
   def setShape(shape: Shape): EntityBody
   def setCollisions(entitiesTypes: Short): EntityBody
-  def setFixtureValues(density: Float = 0, friction: Float = 2, restitution: Float = 0): EntityBody
+  def setFixtureValues(density: Float = 0, friction: Float = 2, restitution: Float = 0, isSensor: Boolean = false): EntityBody
   def createFixture()
 
   def setPosition(position: (Float, Float), angle: Float = 0)
@@ -48,10 +48,11 @@ class EntityBodyImpl extends EntityBody {
     this
   }
 
-  override def setFixtureValues(density: Float = 0, friction: Float = 2, restitution: Float = 0): EntityBody = {
+  override def setFixtureValues(density: Float = 0, friction: Float = 2, restitution: Float = 0, isSensor: Boolean = false): EntityBody = {
     this.fixtureDef.density = density
     this.fixtureDef.friction = friction
     this.fixtureDef.restitution = restitution
+    this.fixtureDef.isSensor = isSensor
     this
   }
 

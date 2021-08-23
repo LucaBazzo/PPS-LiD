@@ -2,7 +2,8 @@ package model.entities
 
 import com.badlogic.gdx.physics.box2d.Joint
 import model.helpers.EntitiesFactoryImpl
-import model.{EntityBody, MovementStrategy}
+import model.EntityBody
+import model.movement.MovementStrategy
 
 trait MobileEntity extends Entity {
 

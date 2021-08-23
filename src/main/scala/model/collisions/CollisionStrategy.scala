@@ -1,9 +1,10 @@
 package model.collisions
 
 import model.entities.{Entity, HeroImpl, ItemImpl}
+import model.Level
+import model.helpers.EntitiesFactoryImpl
 
 trait CollisionStrategy {
-
   def apply(entity: Entity)
 }
 
@@ -21,3 +22,25 @@ class ItemCollisionStrategy extends CollisionStrategy {
   }
 }
 
+
+class DoNothingOnCollision() extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = {}
+}
+
+class ApplyDamage(private val sourceEntity:Entity, private val targetEntity:Entity) extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = {
+    if (entity equals targetEntity) {
+      println("attacking target")
+    }
+  }
+}
+
+class ApplyDamageAndDestroyEntity(private val sourceEntity:Entity, private val targetEntity:Entity)
+  extends ApplyDamage(sourceEntity, targetEntity) {
+
+  override def apply(entity: Entity): Unit = {
+    super.apply(entity)
+    EntitiesFactoryImpl.destroyBody(sourceEntity.getBody)
+    EntitiesFactoryImpl.removeEntity(sourceEntity)
+  }
+}

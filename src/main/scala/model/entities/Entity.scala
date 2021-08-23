@@ -18,27 +18,32 @@ object State extends Enumeration {
 trait Entity {
 
   def update()
+
   def getState: State
+
   def setPosition(position: (Float, Float))
+
   def getPosition: (Float, Float)
+
   def getSize: (Float, Float)
+
   def setCollisionStrategy(collisionStrategy: CollisionStrategy)
+
   def collisionDetected(entity: Entity)
-  def destroyEntity()
 
   //TODO ricontrollare in futuro
   def getBody: Body
 
   //TODO vedere dove metterlo
   def vectorScalar(vector: Vector2, scalar: Float = Gdx.graphics.getDeltaTime) = new Vector2(vector.x * scalar, vector.y * scalar)
+
+  def destroyEntity(): Unit
 }
 
 abstract class EntityImpl(private var entityBody: EntityBody, private val size: (Float, Float)) extends Entity {
 
   protected var state: State = State.Standing
-  private var collisionStrategy: CollisionStrategy = _
-
-  def update(): Unit
+  protected var collisionStrategy: CollisionStrategy = _
 
   override def getState: State = this.state
 
