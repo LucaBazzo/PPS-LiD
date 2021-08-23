@@ -5,7 +5,6 @@ import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
 import model.collisions.EntityType
 import model.entities.Entity
-import model.helpers.EntitiesBits
 import model.helpers.WorldUtilities.{checkBodyIsVisible, checkPointCollision, getBodiesDistance, isTargetOnTheRight}
 
 class DoNotMove() extends MovementStrategy {
@@ -39,7 +38,6 @@ abstract class PatrolPlatform(val entity: Entity, val world: World) extends Move
 
     // apply movement to entity's body
     if (canMoveToTheLeft || canMoveToTheRight ) {
-      println("ASD")
       if (isMovingLeft) {
         entity.getBody.applyLinearImpulse(new Vector2(-acceleration, 0), entity.getBody.getWorldCenter, true)
         if (entity.getBody.getLinearVelocity.x <= -maxMovementSpeed)
