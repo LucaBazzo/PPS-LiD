@@ -5,7 +5,13 @@ import com.badlogic.gdx.physics.box2d._
 import model.entities.Entity
 import model.helpers.WorldUtilities.{getBodyHeight, getBodyWidth}
 
+import scala.collection.immutable.ListMap
+
 object WorldUtilities {
+  def computePointsDistance(sourcePoint: Vector2, targetPoint: Vector2): Float =
+    Math.sqrt(Math.pow(sourcePoint.x - targetPoint.x, 2) +
+      Math.pow(sourcePoint.y - targetPoint.y, 2)).toFloat
+
   def checkAABBCollision(world:World, x1:Float, y1:Float, x2:Float, y2:Float, entity:Entity): Boolean = {
     var output: Boolean = false
     world.QueryAABB((fixture: Fixture) => {
@@ -51,9 +57,9 @@ object WorldUtilities {
 
   def checkBodyIsVisible(world: World, sourceBody:Body, targetBody:Body, maxHorizontalAngle:Float=90): Boolean = {
     // Get the list of ordered fixtures (bodies) between source and target bodies
-    var fixList:List[Fixture] = List.empty
-    world.rayCast((fixture:Fixture, _, _, _) => {
-      fixList = fixture :: fixList
+    var fixList:Map[Fixture, Float] = Map.empty
+    world.rayCast((fixture:Fixture, point:Vector2, _, _) => {
+      fixList = fixList + (fixture -> WorldUtilities.computePointsDistance(sourceBody.getPosition, point))
       1
     }, sourceBody.getPosition, targetBody.getPosition)
 
@@ -61,7 +67,7 @@ object WorldUtilities {
     // No fixtures between target and source means that they are overlapping
     var isTargetVisible = if (fixList.nonEmpty) false else true
     var preemptiveStop = false
-    for (fixture <- fixList if !preemptiveStop && !isTargetVisible) {
+    for (fixture <- ListMap(fixList.toSeq.sortBy(_._2):_*).keys if !preemptiveStop && !isTargetVisible) {
       isTargetVisible = fixture.getBody.equals(targetBody)
 
       // Check horizontal axis angle of source-target bodies
@@ -69,8 +75,10 @@ object WorldUtilities {
         val angle = new Vector2(sourceBody.getPosition.sub(targetBody.getPosition)).angleDeg()
         isTargetVisible = ((angle <= maxHorizontalAngle || angle >= 360-maxHorizontalAngle)
           || (180-maxHorizontalAngle <= angle && 180+maxHorizontalAngle >= angle))
+        preemptiveStop = true
       }
 
+      // an entity who can collides with the source is obstructing the visual
       if ((sourceBody.getFixtureList.toArray().head.getFilterData.maskBits & fixture.getFilterData.categoryBits) != 0)
         preemptiveStop = true
     }
