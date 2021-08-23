@@ -50,6 +50,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   override def removeEntity(entity:Entity): Unit = {
     entitiesList = entitiesList.filterNot((e:Entity) => e.equals(entity))
+    entity.getBody.getFixtureList.forEach(f => entity.getBody.destroyFixture(f))
     world.destroyBody(entity.getBody)
   }
 
