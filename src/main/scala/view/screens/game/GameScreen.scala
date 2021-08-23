@@ -1,15 +1,17 @@
 package view.screens.game
 
+import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
-import com.badlogic.gdx.{Gdx, Input, ScreenAdapter}
+import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
 import model.entities.{Entity, Hero, State}
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
+import view.inputs.GameInputProcessor
 import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{EntitySprite, SpriteFactory, SpriteFactoryImpl}
 
@@ -27,24 +29,47 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
-  this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
+  //this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
   private val spriteFactory: SpriteFactory = new SpriteFactoryImpl()
   private val heroSprite: EntitySprite = spriteFactory.createEntitySprite("hero", 50, 37)
-  this.heroSprite.addAnimation(State.Standing,
-    spriteFactory.createSpriteAnimation(heroSprite, 0, 0, 3, 0.18f),
-    true)
-  this.heroSprite.addAnimation(State.Running,
-    spriteFactory.createSpriteAnimation(heroSprite, 1, 1, 6),
-    true)
-  this.heroSprite.addAnimation(State.Jumping,
-    spriteFactory.createSpriteAnimation(heroSprite, 2, 0, 3))
-  this.heroSprite.addAnimation(State.Falling,
-    spriteFactory.createSpriteAnimation(heroSprite, 3, 1, 2),
-    true)
+  this.defineHeroSpriteAnimations()
+
+  Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
+
+  private def defineHeroSpriteAnimations(): Unit = {
+    this.heroSprite.addAnimation(State.Standing,
+      spriteFactory.createSpriteAnimation(heroSprite, 0, 0, 3, 0.18f),
+      loop = true)
+    this.heroSprite.addAnimation(State.Running,
+      spriteFactory.createSpriteAnimation(heroSprite, 1, 1, 6),
+      loop = true)
+    this.heroSprite.addAnimation(State.Jumping,
+      spriteFactory.createSpriteAnimation(heroSprite, 2, 0, 3))
+    this.heroSprite.addAnimation(State.Falling,
+      spriteFactory.createSpriteAnimation(heroSprite, 3, 1, 2),
+      loop = true)
+    this.heroSprite.addAnimation(State.Sliding,
+      spriteFactory.createSpriteAnimation(heroSprite, 3, 3, 6))
+    this.heroSprite.addAnimation(State.Crouch,
+      spriteFactory.createSpriteAnimationFromTwoRows(heroSprite, 0, 4, 6,
+        1,0,0,0.18f),
+      loop = true)
+    this.heroSprite.addAnimation(State.Attack01,
+      spriteFactory.createSpriteAnimation(heroSprite, 6, 0, 6))
+    this.heroSprite.addAnimation(State.Attack02,
+      spriteFactory.createSpriteAnimation(heroSprite, 7, 0, 3, 0.20f))
+    this.heroSprite.addAnimation(State.Attack03,
+      spriteFactory.createSpriteAnimationFromTwoRows(heroSprite, 7, 4, 6,
+        8, 0, 2))
+    this.heroSprite.addAnimation(State.Somersault,
+      spriteFactory.createSpriteAnimationFromTwoRows(heroSprite, 2, 4, 6,
+        3, 0, 0), loop = true)
+
+  }
 
   private def update(deltaTime: Float): Unit = {
-    this.handleInput(deltaTime)
+    this.handleHoldingInput()
 
     //old world step
 
@@ -52,18 +77,14 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     this.orthogonalTiledMapRenderer.setView(camera)
   }
 
-  private def handleInput(deltaTime : Float): Unit = {
-    if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE))
-      Gdx.app.exit()
+  private def handleHoldingInput(): Unit = {
 
-    if (Gdx.input.isKeyJustPressed(Input.Keys.UP))
-      this.observerManager.notifyEvent(GameEvent.MoveUp)
-
-    if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+    if (Gdx.input.isKeyPressed(Keys.D) || Gdx.input.isKeyPressed(Keys.RIGHT))
       this.observerManager.notifyEvent(GameEvent.MoveRight)
 
-    if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+    if (Gdx.input.isKeyPressed(Keys.A) || Gdx.input.isKeyPressed(Keys.LEFT))
       this.observerManager.notifyEvent(GameEvent.MoveLeft)
+
   }
 
   override def render(delta: Float): Unit = {
@@ -76,14 +97,13 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
     val entities: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Hero])
     if(entities.nonEmpty) {
-      val player: Entity = entities.get.head
+      val player: Hero = entities.get.head.asInstanceOf[Hero]
       this.camera.position.x = player.getPosition._1
       this.camera.position.y = player.getPosition._2
 
-      this.heroSprite.setPosition(WIDTH_SCREEN / 2, HEIGHT_SCREEN / 2)
-      this.heroSprite.update(delta, player.getState, player.asInstanceOf[Hero].getPreviousState(),
-        player.asInstanceOf[Hero].getLinearVelocityX())
-      player.asInstanceOf[Hero].updatePreviousState(player.getState)
+      this.heroSprite.setPosition(player.getPosition._1 - player.getSize._1 * 6.47f / 2,
+        player.getPosition._2 - player.getSize._2, player.isLittle)
+      this.heroSprite.update(delta, player.getState, player.isFacingRight)
     }
 
     this.camera.update()
@@ -92,18 +112,23 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     orthogonalTiledMapRenderer.render()
 
     //what will be shown by the camera
-    batch.setProjectionMatrix(hud.getStage().getCamera.combined)
-    hud.getStage().draw()
-    //batch.setProjectionMatrix(camera.combined)
+
+    batch.setProjectionMatrix(camera.combined)
+
 
     batch.begin()
     // render objects inside
+
+    this.heroSprite.setSize(0.85f * 6.47f,1.4f * 2.57f)
     this.heroSprite.draw(batch)
 
     batch.end()
 
     //for debug purpose
     box2DDebugRenderer.render(this.entitiesGetter.getWorld, camera.combined)
+
+    batch.setProjectionMatrix(hud.getStage().getCamera.combined)
+    hud.getStage().draw()
   }
 
   override def resize(width: Int, height: Int): Unit = {

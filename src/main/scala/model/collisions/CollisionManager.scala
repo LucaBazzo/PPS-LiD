@@ -5,6 +5,39 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.Level
 import model.entities.Entity
+import ImplicitConversions._
+
+object EntityType extends Enumeration {
+
+  private var currentBitValue: Short = 1
+  private val bitMulti: Int = 2
+
+  /** Collision bit used in fixture filters for recognizing the player.
+   */
+  val Hero: Short = currentBitValue
+  val Enemy: Short = getNextBitValue
+  val Mobile: Short = getNextBitValue
+  val Immobile: Short = getNextBitValue
+  val Item: Short = getNextBitValue
+  val Sword: Short = getNextBitValue
+
+  private def getNextBitValue: Short = {
+    this.currentBitValue = this.currentBitValue * bitMulti
+    this.currentBitValue
+  }
+
+}
+
+object ImplicitConversions {
+
+  implicit def intToShort(value: Int): Short = {
+    value.toShort
+  }
+
+  implicit def tupleToVector2(tuple: (Float, Float)): Vector2 = {
+    new Vector2(tuple._1, tuple._2)
+  }
+}
 
 class CollisionManager(private val level: Level) extends ContactListener {
 

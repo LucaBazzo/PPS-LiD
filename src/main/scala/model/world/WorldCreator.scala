@@ -1,42 +1,20 @@
 package model.world
 
-import com.badlogic.gdx.physics.box2d._
 import model.Level
-import model.collisions.CollisionStrategyImpl
-import model.entities.{Entity, ImmobileEntity}
+import model.collisions.EntityType
+import model.collisions.ImplicitConversions._
+import model.entities.Entity
+import model.helpers.EntitiesFactoryImpl
 
-class WorldCreator(private val level: Level, private val world: World) {
+class WorldCreator(private val level: Level) {
 
-  private val rectangle: Entity = createImmobileEntity()
+  private val rectangle: Entity = EntitiesFactoryImpl.createImmobileEntity((12, 0.5f), (0, -2), EntityType.Hero)
   level.addEntity(rectangle)
 
-  def createImmobileEntity(): Entity = {
-    val position: (Float, Float) = (0, -2)
-    val size: (Float,Float) = (5, 0.5f)
-    val body: Body = defineRectangleBody(size, position)
-    val immobileEntity: Entity = ImmobileEntity(body, size)
-    immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
-    immobileEntity
-  }
+  private val enemy: Entity = EntitiesFactoryImpl.createImmobileEnemy((0.5f, 0.5f), (8, 1), EntityType.Hero | EntityType.Sword)
+  level.addEntity(enemy)
 
-  private def defineRectangleBody(size: (Float,Float), position: (Float, Float)): Body = {
-    val bodyDef: BodyDef = new BodyDef()
-    val shape: PolygonShape = new PolygonShape()
-    val fixtureDef: FixtureDef = new FixtureDef()
-
-    bodyDef.`type` = BodyDef.BodyType.StaticBody
-    bodyDef.position.set(position._1, position._2)
-
-    val body: Body = world.createBody(bodyDef)
-
-    /*fixtureDef.filter.categoryBits = 2
-    fixtureDef.filter.maskBits = 1*/
-
-    shape.setAsBox(size._1, size._2)
-    fixtureDef.shape = shape
-    body.createFixture(fixtureDef)
-
-    body
-  }
+  private val square: Entity = EntitiesFactoryImpl.createImmobileEnemy((0.5f, 1), (-8, 1.5f), EntityType.Hero)
+  level.addEntity(square)
 
 }

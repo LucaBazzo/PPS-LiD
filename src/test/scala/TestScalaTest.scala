@@ -1,5 +1,3 @@
-package scala
-
 import collection.mutable.Stack
 import org.scalatest.flatspec.AnyFlatSpec
 
