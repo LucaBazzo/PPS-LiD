@@ -22,7 +22,7 @@ trait Hero extends LivingEntity {
   def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0))
 }
 
-class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Float)) extends LivingEntityImpl(entityBody, size) with Hero{
+class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float]) extends LivingEntityImpl(entityBody, size, statistics) with Hero{
 
   private var previousState: State = State.Standing
   private var little: Boolean = false
