@@ -5,6 +5,7 @@ import controller.GameEvent.GameEvent
 import model.EntityBody
 import model.collisions.ImplicitConversions._
 import model.entities.State.State
+import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
 import utils.ApplicationConstants.{HERO_SIZE, HERO_SIZE_SMALL}
 

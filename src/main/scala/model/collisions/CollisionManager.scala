@@ -50,6 +50,8 @@ object ImplicitConversions {
     def PPM: (Float, Float) = base / PIXELS_PER_METER
 
     def /(div: Float): (Float, Float) = (base._1 / div, base._2 / div)
+
+    def *(mul: Float): (Float, Float) = (base._1 * mul, base._2 * mul)
   }
 }
 

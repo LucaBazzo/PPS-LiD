@@ -9,6 +9,7 @@ import model.attack.{HeroAttackStrategyImpl, RangedArrowAttack}
 import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionStrategyImpl, DoNothingOnCollision, EntityType, ItemCollisionStrategy}
 import model.entities.ItemPools.ItemPools
+import model.entities.Statistic.Statistic
 import model.entities.{Entity, _}
 import model.movement.{CircularMovementStrategy, HeroMovementStrategy, PatrolAndStopIfFacingHero}
 
@@ -85,14 +86,21 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val position: (Float, Float) = (10, 10)
     val size: (Float, Float) = HERO_SIZE
 
+    val statistic: Map[Statistic, Float] = Map(
+      Statistic.Health -> 1000,
+      Statistic.CurrentHealth -> 1000,
+      Statistic.Strength -> 10,
+      Statistic.MovementSpeed -> 1,
+      Statistic.Defence -> 0)
+
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Hero,
       EntityType.Immobile | EntityType.Enemy | EntityType.Item, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
-    val hero: Hero = new HeroImpl(entityBody, size.PPM, new HashMap[Statistic, Float]())
+    val hero: Hero = new HeroImpl(entityBody, size.PPM, statistic)
 
     hero.setCollisionStrategy(new CollisionStrategyImpl())
-    hero.setMovementStrategy(new HeroMovementStrategy(hero))
-    hero.setAttackStrategy(new HeroAttackStrategyImpl(hero))
+    hero.setMovementStrategy(new HeroMovementStrategy(hero, statistic(Statistic.MovementSpeed)))
+    hero.setAttackStrategy(new HeroAttackStrategyImpl(hero, statistic(Statistic.Strength)))
 
     this.level.addEntity(hero)
     hero

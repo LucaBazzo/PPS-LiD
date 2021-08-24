@@ -14,4 +14,5 @@ trait AttackStrategy {
   def decrementAttackTimer():Unit = ???
   def checkTimeEvent():Unit = ???
 
+  def alterStrength(alteration: Float): Unit = ???
 }

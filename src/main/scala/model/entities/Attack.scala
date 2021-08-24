@@ -1,6 +1,7 @@
 package model.entities
 
 import model.EntityBody
+import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl
 
 class TimedAttack(private var entityBody: EntityBody, private val size: (Float, Float), private val duration:Long, private val statistics:Map[Statistic, Float]) extends MobileEntityImpl(entityBody, size, statistics) {

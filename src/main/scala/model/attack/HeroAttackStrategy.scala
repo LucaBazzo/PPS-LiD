@@ -5,7 +5,7 @@ import controller.GameEvent.GameEvent
 import model.entities.{Hero, MobileEntity, State}
 import model.helpers.EntitiesFactoryImpl
 
-class HeroAttackStrategyImpl(private val entity: Hero) extends AttackStrategy {
+class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Float) extends AttackStrategy {
 
   private var attackPattern: MobileEntity = _
   private var attackTimer: Float = 0
@@ -94,4 +94,6 @@ class HeroAttackStrategyImpl(private val entity: Hero) extends AttackStrategy {
       this.timeEventPresent = false
     }
   }
+
+  override def alterStrength(alteration: Float): Unit = this.strength += alteration
 }
