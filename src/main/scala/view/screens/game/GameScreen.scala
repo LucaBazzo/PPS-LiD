@@ -9,12 +9,15 @@ import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
 import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Entity, Hero, Item, State}
+import model.entities.{Entity, Hero, Item, Items, State}
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
 import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{EntitySprite, SpriteFactory, SpriteFactoryImpl}
+
+import scala.collection.immutable.HashMap
+import scala.collection.mutable
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager) extends ScreenAdapter{
@@ -33,10 +36,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   //this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
   private val spriteFactory: SpriteFactory = new SpriteFactoryImpl()
-  private val itemSprite: EntitySprite = spriteFactory.createEntitySprite("items", 32,
-    32, 10, 10, 2)
-  this.itemSprite.addAnimation(State.Standing,
-    spriteFactory.createSpriteAnimation(itemSprite, 0, 0, 0, 0.20f))
+
+  private val itemSprites: Map[Items.Value, EntitySprite] = spriteFactory.createItemSprites()
 
   private val heroSprite: EntitySprite = spriteFactory.createHeroSprite("hero", 50, 37)
   this.defineHeroSpriteAnimations()
@@ -111,10 +112,10 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     }
 
     val items: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Item])
-    if(items.nonEmpty) {
-      val item: Item = items.get.head.asInstanceOf[Item]
-      this.itemSprite.update(delta, item)
-    }
+    items.get.foreach(x => {
+      val item: Item = x.asInstanceOf[Item]
+      this.itemSprites.get(item.getEnumVal).get.update(delta, item)
+    })
 
     this.camera.update()
 
@@ -129,7 +130,10 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     batch.begin()
     // render objects inside
     this.heroSprite.draw(batch)
-    this.itemSprite.draw(batch)
+    items.get.foreach(x => {
+      val item: Item = x.asInstanceOf[Item]
+      this.itemSprites.get(x.asInstanceOf[Item].getEnumVal).get.draw(batch)
+    })
 
     batch.end()
 

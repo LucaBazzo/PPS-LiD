@@ -2,7 +2,11 @@ package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.{Animation, TextureAtlas, TextureRegion}
 import com.badlogic.gdx.utils.Array
+import model.entities.Items.Items
+import model.entities.{Items, State}
 import utils.ApplicationConstants.SPRITES_PACK_LOCATION
+
+import scala.collection.mutable
 
 trait SpriteFactory {
 
@@ -20,6 +24,8 @@ trait SpriteFactory {
                                        rowNumber: Int, startIndex: Int, endIndex: Int,
                                        rowNumber2: Int, startIndex2: Int, endIndex2: Int,
                                        frameDuration: Float = 0.10f): Animation[TextureRegion]
+
+  def createItemSprites(): Map[Items.Value, EntitySprite]
 }
 
 class SpriteFactoryImpl extends SpriteFactory {
@@ -77,5 +83,25 @@ class SpriteFactoryImpl extends SpriteFactory {
     }
 
     new Animation(frameDuration, frames)
+  }
+
+  override def createItemSprites(): Map[Items.Value, EntitySprite] = {
+    var itemRow: Int = 0
+    var itemCol: Int = 0
+    val itemsMap: mutable.HashMap[Items.Value, EntitySprite] = new mutable.HashMap[Items, EntitySprite]()
+    Items.values.foreach(x => {
+      var sprite = this.createEntitySprite("items", 32,
+        32, 10, 10, 2)
+      sprite.addAnimation(State.Standing,
+        this.createSpriteAnimation(sprite, itemRow, itemCol, itemCol, 0.20f))
+      itemsMap.addOne(x, sprite )
+      itemCol = itemCol + 1
+      if(itemCol > 6) {
+        itemCol = 0
+        itemRow = 1
+      }
+    })
+
+    itemsMap.toMap
   }
 }

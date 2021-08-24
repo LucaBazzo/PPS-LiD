@@ -10,7 +10,7 @@ trait CollisionStrategy {
 
 class CollisionStrategyImpl extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
-    case i:ItemImpl => println("Collect item: " + entity.toString)
+    case i:ItemImpl => println("Collect item: " + i.getEnumVal)
     case _ => println("Collision Detected with" + entity.toString)
   }
 }

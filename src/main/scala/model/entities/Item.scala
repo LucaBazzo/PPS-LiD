@@ -5,7 +5,7 @@ import model.entities.Items.Items
 
 object Items extends Enumeration {
   type Items = Value
-  val Cake, Wrench, Map, PotionS, PotionM, PotionL, PotionXL, Armor, Boots, BFSword, Key, SkeletonKey, Bow, Shield = Value
+  val Armor, Cake, Boots, Shield, Map, Wrench, Key, PotionS, PotionM, PotionL, PotionXL, SkeletonKey, Bow, BFSword = Value
 }
 
 object ItemPools extends Enumeration {
