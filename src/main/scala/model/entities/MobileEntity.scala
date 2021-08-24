@@ -1,22 +1,52 @@
 package model.entities
 
-import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.Body
+import com.badlogic.gdx.physics.box2d.Joint
+import model.helpers.EntitiesFactoryImpl
+import model.EntityBody
+import model.movement.MovementStrategy
 
-trait MobileEntity {
+trait MobileEntity extends Entity {
 
-  def setMovementStrategy()
+  def setMovementStrategy(strategy: MovementStrategy)
   def move()
-  def getDirection()
+  def stopMovement()
+  def setFacing(right: Boolean)
+  def isFacingRight: Boolean
 }
 
-class MobileEntityImpl(private var body: Body, private val size: (Float, Float)) extends EntityImpl(body, size) with MobileEntity {
+class MobileEntityImpl(private var entityBody: EntityBody, private val size: (Float, Float)) extends EntityImpl(entityBody, size) with MobileEntity {
 
-  override def update(): Unit = this.move()
+  private var facingRight: Boolean = true
 
-  override def setMovementStrategy(): Unit = ???
+  protected var movementStrategy: MovementStrategy = _
 
-  override def move(): Unit = this.body.applyLinearImpulse(vectorScalar(new Vector2(0, 400f)), this.body.getWorldCenter, true)
+  override def update(): Unit = {}
 
-  override def getDirection(): Unit = ???
+  override def setMovementStrategy(strategy: MovementStrategy): Unit = this.movementStrategy = strategy
+
+  override def move(): Unit = {
+    this.movementStrategy.apply()
+  }
+
+  override def stopMovement(): Unit = if(this.movementStrategy != null) this.movementStrategy.stopMovement()
+
+  override def setFacing(right: Boolean): Unit = this.facingRight = right
+
+  override def isFacingRight: Boolean = this.facingRight
+}
+
+
+class CircularMobileEntity(private var entityBody: EntityBody,
+                           private val size: (Float, Float),
+                           private val pivotBody: EntityBody) extends MobileEntityImpl(entityBody, size) {
+
+  private val joint: Joint = EntitiesFactoryImpl.createJoint(this.pivotBody.getBody, this.entityBody.getBody)
+
+  override def destroyEntity(): Unit = {
+    EntitiesFactoryImpl.destroyJoint(this.joint)
+    EntitiesFactoryImpl.destroyBody(this.pivotBody.getBody)
+    EntitiesFactoryImpl.destroyBody(this.entityBody.getBody)
+    EntitiesFactoryImpl.removeEntity(this)
+  }
+
 }

@@ -16,7 +16,7 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter) extends Model {
   private var level: Level = new LevelImpl(entitiesSetter)
 
   override def update(actions: List[GameEvent]): Unit = {
-    //println("MODEL update - " + actions.toString())
+//    println("MODEL update - " + actions.toString())
 
     this.level.updateEntities(actions)
   }

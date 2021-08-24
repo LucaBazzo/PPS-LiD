@@ -11,10 +11,10 @@ import view.screens.game.GameScreen
 import java.util.concurrent.{ExecutorService, Executors}
 
 trait View {
-
   def startGame()
   def endGame()
   def initialize()
+  def terminate()
 }
 
 class ViewImpl(private val entitiesGetter: EntitiesGetter,
@@ -39,5 +39,8 @@ class ViewImpl(private val entitiesGetter: EntitiesGetter,
 
   override def initialize(): Unit = ???
 
-
+  override def terminate(): Unit = {
+    this.executorService.shutdown()
+    Gdx.app.exit()
+  }
 }
