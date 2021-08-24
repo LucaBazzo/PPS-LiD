@@ -24,6 +24,11 @@ class EnemyImpl(private var entityBody: EntityBody, private val size: (Float, Fl
     this.move // movementStrategy.move()
     attackStrategy.apply()
 
+//    if (!attackStrategy.isAttackFinished) println("attacking")
+//
+//    else if (this.entityBody.getBody.getLinearVelocity.x != 0) println("moving")
+//
+//    else println("idle")
 
   }
 }
