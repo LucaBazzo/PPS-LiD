@@ -195,7 +195,7 @@ override def createEnemyProjectile(size: (Float, Float) = (10, 10),
                                   position: (Float, Float) = (0, 0)): MobileEntity = {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Mobile,
-      EntityType.Immobile | EntityType.Hero | EntityType.Sword, this.createCircleShape(size._1.PPM), position.PPM, isSensor = true)
+      EntityType.Immobile | EntityType.Hero | EntityType.Sword, this.createCircleShape(size._1.PPM), position, isSensor = true)
 
     val arrowEntity: TimedAttack = new TimedAttack(entityBody, size.PPM, 1000)
     this.level.addEntity(arrowEntity)

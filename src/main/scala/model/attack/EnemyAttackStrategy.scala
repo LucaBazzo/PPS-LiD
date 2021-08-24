@@ -2,6 +2,7 @@ package model.attack
 
 import com.badlogic.gdx.physics.box2d._
 import model.collisions.ApplyDamage
+import model.collisions.ImplicitConversions.RichInt
 import model.entities.{Entity, MobileEntity, MobileEntityImpl}
 import model.helpers.EntitiesFactoryImpl.createEnemyProjectile
 import model.helpers.WorldUtilities.{checkBodyIsVisible, getBodiesDistance, isTargetOnTheRight}
@@ -105,8 +106,8 @@ class DoNotAttack() extends AttackStrategy {
 //}
 
 class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World) extends AttackStrategy {
-  protected val maxDistance:Float = 15
-  protected val visibilityMaxHorizontalAngle:Int = 80
+  protected val maxDistance:Float = 50.PPM
+  protected val visibilityMaxHorizontalAngle:Int = 10
   protected val attackFrequency:Int = 2000
   protected val attackDuration:Int = 1000
 
@@ -134,7 +135,7 @@ class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World) 
       if (isTargetOnTheRight(sourceEntity.getBody, targetEntity.getBody))
         sourceEntity.getSize._1 else -sourceEntity.getSize._1, 0)
 
-    val entity:MobileEntity = createEnemyProjectile((5f, 5f), (spawnCoordinates.x, spawnCoordinates.y))
+    val entity:MobileEntity = createEnemyProjectile((5, 5), (spawnCoordinates.x, spawnCoordinates.y))
 
     entity.setMovementStrategy(new ProjectileTrajectory(entity, sourceEntity, targetEntity))
     entity.setCollisionStrategy(new ApplyDamage(entity, targetEntity))

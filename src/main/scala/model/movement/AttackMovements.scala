@@ -6,7 +6,7 @@ import controller.GameEvent.GameEvent
 import model.entities.{Entity, MobileEntity}
 
 class ProjectileTrajectory(val entity: Entity, val sourceEntity: Entity, val targetEntity: Entity) extends MovementStrategy {
-  val force = 20
+  val force = 5
   entity.getBody.applyLinearImpulse(
     targetEntity.getBody.getPosition.sub(sourceEntity.getBody.getPosition).nor().scl(force),
     entity.getBody.getWorldCenter, true)
@@ -20,7 +20,7 @@ class ProjectileTrajectory(val entity: Entity, val sourceEntity: Entity, val tar
 
 class WeightlessProjectileTrajectory(val entity: Entity, val targetPoint: Vector2, val world: World) extends MovementStrategy {
   // velocity of the projectile
-  val force = 20
+  val force = 10
   entity.getBody.applyLinearImpulse(targetPoint.nor().scl(force), entity.getBody.getWorldCenter, true)
   entity.getBody.setGravityScale(0)
 

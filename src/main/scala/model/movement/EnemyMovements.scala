@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
 import model.collisions.EntityType
+import model.collisions.ImplicitConversions.RichInt
 import model.entities.Entity
 import model.helpers.WorldUtilities.{checkBodyIsVisible, checkPointCollision, getBodiesDistance, isTargetOnTheRight}
 
@@ -17,8 +18,8 @@ class DoNotMove() extends MovementStrategy {
 
 abstract class PatrolPlatform(val entity: Entity, val world: World) extends MovementStrategy {
   // TODO: move statistics to enemy class
-  protected val maxMovementSpeed: Float = 3 // maximum horizontal velocity
-  protected val acceleration: Float = 1 // strength of the force applied
+  protected val maxMovementSpeed: Float = 30.PPM // maximum horizontal velocity
+  protected val acceleration: Float = 10.PPM // strength of the force applied
   // TODO: link to implementation
   protected var lastMovementTime: Long = 0 // last time a force was applied to the body
   protected val movementImpulseFrequency: Float = 5000 // movement impulse frequency
@@ -76,21 +77,21 @@ class PlatformPatrolWithAABBTests(override val entity: Entity, override  val wor
   extends PatrolPlatform(entity, world) {
 
   override protected def checkMoveToTheLeft: Boolean =
-    !checkPointCollision(world, entity.getPosition._1 - entity.getSize._1 - 0.5f,
+    !checkPointCollision(world, entity.getPosition._1 - entity.getSize._1 - 5.PPM,
       entity.getPosition._2, EntityType.Immobile) &&
-      checkPointCollision(world, entity.getPosition._1 - entity.getSize._1 - 0.5f,
-        entity.getPosition._2 - entity.getSize._2 - 0.5f, EntityType.Immobile)
+      checkPointCollision(world, entity.getPosition._1 - entity.getSize._1 - 5.PPM,
+        entity.getPosition._2 - entity.getSize._2 - 5.PPM, EntityType.Immobile)
 
   override protected def checkMoveToTheRight: Boolean =
-    !checkPointCollision(world, entity.getPosition._1 + entity.getSize._1 + 0.5f,
+    !checkPointCollision(world, entity.getPosition._1 + entity.getSize._1 + 5.PPM,
       entity.getPosition._2, EntityType.Immobile) &&
-      checkPointCollision(world, entity.getPosition._1 + entity.getSize._1 + 0.5f,
-        entity.getPosition._2 - entity.getSize._2 - 0.5f, EntityType.Immobile)
+      checkPointCollision(world, entity.getPosition._1 + entity.getSize._1 + 5.PPM,
+        entity.getPosition._2 - entity.getSize._2 - 5.PPM, EntityType.Immobile)
 }
 
 class PatrolAndStopIfNearHero(override val entity:Entity, override val world: World, val targetEntity:Entity) extends PlatformPatrolWithAABBTests(entity, world) {
   // TODO: move statistics to enemy class
-  protected val maxDistance: Float = 4
+  protected val maxDistance: Float = 40.PPM
   protected val visibilityMaxHorizontalAngle: Float = 30 // defines a vision "cone" originating from the entity
 
   override def apply(): Unit = {
@@ -109,7 +110,7 @@ class PatrolAndStopIfNearHero(override val entity:Entity, override val world: Wo
 
 class PatrolAndStopIfFacingHero(override val entity:Entity, override val world: World, val targetEntity:Entity) extends PlatformPatrolWithAABBTests(entity, world) {
   // TODO: move statistics to enemy class
-  protected val maxDistance: Float = 4
+  protected val maxDistance: Float = 40.PPM
   protected val visibilityMaxHorizontalAngle: Float = 30 // defines a vision "cone" originating from the entity
 
   override def apply(): Unit = {
