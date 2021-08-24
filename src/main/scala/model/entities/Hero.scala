@@ -3,8 +3,10 @@ package model.entities
 import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.EntityBody
+import model.collisions.ImplicitConversions._
 import model.entities.State.State
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
+import utils.ApplicationConstants.{HERO_SIZE, HERO_SIZE_SMALL}
 
 trait Hero extends LivingEntity {
 
@@ -49,7 +51,7 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
     this.state match {
       case State.Standing | State.Running =>
         this.stopMovement()
-        this.changeHeroFixture((0.85f, 0.9f), (0, -0.5f))
+        this.changeHeroFixture(HERO_SIZE_SMALL, (0, -6f))
         this.state = State.Crouch
         this.setLittle(true)
       case _ =>
@@ -102,7 +104,7 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
         this.state = State.Standing
 
       if(this.state != State.Sliding && this.state != State.Crouch && isLittle) {
-        this.changeHeroFixture((0.85f, 1.4f), (0, 0.5f))
+        this.changeHeroFixture(HERO_SIZE, (0, 5f))
         this.setLittle(false)
       }
 
@@ -166,9 +168,9 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
 
   override def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit = {
     this.entityBody
-      .setShape(createPolygonalShape(newSize))
+      .setShape(createPolygonalShape(newSize.PPM))
       .createFixture()
 
-    this.entityBody.addCoordinates(addCoordinates._1, addCoordinates._2)
+    this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
   }
 }

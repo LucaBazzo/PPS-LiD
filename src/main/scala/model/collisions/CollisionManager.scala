@@ -5,6 +5,7 @@ import model.Level
 import model.entities.Entity
 import ImplicitConversions._
 import com.badlogic.gdx.math.Vector2
+import _root_.utils.ApplicationConstants.PIXELS_PER_METER
 
 object EntityType extends Enumeration {
 
@@ -35,6 +36,20 @@ object ImplicitConversions {
 
   implicit def tupleToVector2(tuple: (Float, Float)): Vector2 = {
     new Vector2(tuple._1, tuple._2)
+  }
+
+  implicit class RichFloat(base: Float) {
+    def PPM: Float = base / PIXELS_PER_METER
+  }
+
+  implicit class RichInt(base: Int) {
+    def PPM: Float = base / PIXELS_PER_METER
+  }
+
+  implicit class RichTuple2(base: (Float, Float)) {
+    def PPM: (Float, Float) = base / PIXELS_PER_METER
+
+    def /(div: Float): (Float, Float) = (base._1 / div, base._2 / div)
   }
 }
 

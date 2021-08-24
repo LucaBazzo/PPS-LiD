@@ -134,7 +134,7 @@ class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World) 
       if (isTargetOnTheRight(sourceEntity.getBody, targetEntity.getBody))
         sourceEntity.getSize._1 else -sourceEntity.getSize._1, 0)
 
-    val entity:MobileEntity = createEnemyProjectile((0.5f, 0.5f), (spawnCoordinates.x, spawnCoordinates.y))
+    val entity:MobileEntity = createEnemyProjectile((5f, 5f), (spawnCoordinates.x, spawnCoordinates.y))
 
     entity.setMovementStrategy(new ProjectileTrajectory(entity, sourceEntity, targetEntity))
     entity.setCollisionStrategy(new ApplyDamage(entity, targetEntity))

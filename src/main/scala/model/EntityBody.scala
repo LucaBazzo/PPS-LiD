@@ -10,7 +10,6 @@ trait EntityBody {
   def getBody: Body
 
   def createBody(bodyType: BodyType = BodyType.StaticBody,
-                 size: (Float, Float) = (1,1),
                  position: (Float, Float) = (0,0),
                  angle: Float = 0, gravity: Boolean = true): EntityBody
 
@@ -64,7 +63,6 @@ class EntityBodyImpl extends EntityBody {
   }
 
   override def createBody(bodyType: BodyType = BodyType.StaticBody,
-                          size: (Float, Float) = (1,1),
                           position: (Float, Float) = (0,0),
                           angle: Float = 0, gravity: Boolean = true): EntityBody = {
     val bodyDef: BodyDef = new BodyDef()
@@ -80,7 +78,9 @@ class EntityBodyImpl extends EntityBody {
     this
   }
 
-  override def setPosition(position: (Float, Float), angle: Float = 0): Unit = this.body.setTransform(position, angle)
+  override def setPosition(position: (Float, Float), angle: Float = 0): Unit =
+    this.body.setTransform(position, angle)
 
-  override def addCoordinates(x: Float, y: Float): Unit = this.body.setTransform(this.body.getPosition.add(x,y), 0)
+  override def addCoordinates(x: Float, y: Float): Unit =
+    this.body.setTransform(this.body.getPosition.add(x, y), 0)
 }

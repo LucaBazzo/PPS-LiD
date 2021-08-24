@@ -3,7 +3,9 @@ package model.movement
 import com.badlogic.gdx.math.Vector2
 import controller.GameEvent
 import controller.GameEvent.GameEvent
+import model.collisions.ImplicitConversions.RichFloat
 import model.entities.{Hero, State}
+import utils.ApplicationConstants.HERO_SIZE_SMALL
 
 trait MovementStrategy {
 
@@ -42,7 +44,7 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
   }
 
   private def jump(): Unit = {
-    this.applyLinearImpulse(new Vector2(0, 400f))
+    this.applyLinearImpulse(new Vector2(0, 7500f.PPM))
     if(this.entity.getState == State.Jumping)
       this.entity.setState(State.Somersault)
     else
@@ -51,8 +53,8 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
 
   private def moveRight(): Unit = {
     if(entity.getState != State.Crouch) {
-      if (entity.getBody.getLinearVelocity.x <= 3.5f) {
-        this.applyLinearImpulse(new Vector2(60f, 0))
+      if (entity.getBody.getLinearVelocity.x <= 35f.PPM) {
+        this.applyLinearImpulse(new Vector2(1000f.PPM, 0))
       }
 
       if(this.entity.getState == State.Standing)
@@ -63,8 +65,8 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
 
   private def moveLeft(): Unit = {
     if(entity.getState != State.Crouch) {
-      if (entity.getBody.getLinearVelocity.x >= -3.5f) {
-        this.applyLinearImpulse(new Vector2(-60f, 0))
+      if (entity.getBody.getLinearVelocity.x >= -35f.PPM) {
+        this.applyLinearImpulse(new Vector2(-1000f.PPM, 0))
       }
 
       if(this.entity.getState == State.Standing)
@@ -77,15 +79,15 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
     this.entity.stopMovement()
 
     if(entity.getState != State.Crouch) {
-      this.entity.changeHeroFixture((0.85f, 0.9f), (0, -0.5f))
+      this.entity.changeHeroFixture(HERO_SIZE_SMALL, (0, -6f))
       this.entity.setLittle(true)
     }
 
     if (entity.isFacingRight) {
-      this.applyLinearImpulse(new Vector2(350f, 0))
+      this.applyLinearImpulse(new Vector2(6000f.PPM, 0))
     }
     else {
-      this.applyLinearImpulse(new Vector2(-350f, 0))
+      this.applyLinearImpulse(new Vector2(-6000f.PPM, 0))
     }
 
     this.entity.setState(State.Sliding)

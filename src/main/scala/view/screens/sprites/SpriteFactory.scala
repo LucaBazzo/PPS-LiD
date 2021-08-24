@@ -6,7 +6,11 @@ import utils.ApplicationConstants.SPRITES_PACK_LOCATION
 
 trait SpriteFactory {
 
-  def createEntitySprite(regionName: String, width: Float, height: Float): EntitySprite
+  def createHeroSprite(regionName: String, spriteWidth: Float, spriteHeight: Float): EntitySprite
+
+  def createEntitySprite(regionName: String, spriteWidth: Float, spriteHeight: Float,
+                         entitySpriteWidth: Float, entitySpriteHeight: Float,
+                         sizeMultiplicative: Float = 0): EntitySprite
 
   def createSpriteAnimation(sprite: EntitySprite, rowNumber: Int,
                             startIndex: Int, endIndex: Int,
@@ -23,11 +27,21 @@ class SpriteFactoryImpl extends SpriteFactory {
   private val atlas: TextureAtlas = new TextureAtlas(SPRITES_PACK_LOCATION)
   private var offset: Int = 0
 
-  override def createEntitySprite(regionName: String, width: Float, height: Float): EntitySprite = {
-    val sprite = new EntitySpriteImpl()
+  override def createHeroSprite(regionName: String, spriteWidth: Float, spriteHeight: Float): EntitySprite = {
+    val sprite = new HeroEntitySprite(spriteWidth, spriteHeight)
     sprite.setRegion(this.atlas.findRegion(regionName))
     this.offset = sprite.getRegionY - 1
-    sprite.setBounds(0, 0, width, height)
+    sprite.setBounds(0, 0, spriteWidth, spriteHeight)
+    sprite
+  }
+
+  override def createEntitySprite(regionName: String, spriteWidth: Float, spriteHeight: Float,
+                                  entitySpriteWidth: Float, entitySpriteHeight: Float,
+                                  sizeMultiplicative: Float = 1): EntitySprite = {
+    val sprite = new EntitySpriteImpl(entitySpriteWidth * sizeMultiplicative, entitySpriteHeight * sizeMultiplicative)
+    sprite.setRegion(this.atlas.findRegion(regionName))
+    this.offset = sprite.getRegionY - 1
+    sprite.setBounds(0, 0, spriteWidth, spriteHeight)
     sprite
   }
 
