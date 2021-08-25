@@ -34,12 +34,11 @@ object TileMapHelper {
     tiledMap.getLayers().forEach(layer => {
       layer.getObjects().forEach(obj => {
 
-
         rect = obj.asInstanceOf[RectangleMapObject].getRectangle
 
-        val position: (Float, Float) = ((rect.getX + rect.getWidth / 2) / 10, (rect.getY + rect.getHeight / 2) / 10)
-        val size: (Float, Float) = (rect.getWidth / 2 / 10, rect.getHeight / 2 / 10)
-        val entity: Entity = EntitiesFactoryImpl.createImmobileEntity(size, position, EntityType.Hero)
+        val position: (Float, Float) = ((rect.getX + rect.getWidth / 2) , (rect.getY + rect.getHeight / 2) )
+        val size: (Float, Float) = (rect.getWidth / 2 , rect.getHeight / 2 )
+        val entity: Entity = EntitiesFactoryImpl.createImmobileEntity(size, position, EntityType.Hero )
         level.addEntity(entity)
 
       })
