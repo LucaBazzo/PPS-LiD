@@ -8,8 +8,9 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model.entities.{Entity, Hero, Item, State}
+import model.entities._
 import model.helpers.EntitiesGetter
+import utils.ApplicationConstants
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
 import view.screens.helpers.TileMapHelper
@@ -32,12 +33,18 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   //this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
   private val spriteFactory: SpriteFactory = new SpriteFactoryImpl()
-  private val itemSprite: EntitySprite = spriteFactory.createEntitySprite("items", 32, 32)
+  private val itemSprite: EntitySprite = spriteFactory.createEntitySprite(ApplicationConstants.SPRITES_PACK_LOCATION,
+    "items", 32, 32)
   this.itemSprite.addAnimation(State.Standing,
     spriteFactory.createSpriteAnimation(itemSprite, 0, 0, 0, 0.20f))
 
-  private val heroSprite: EntitySprite = spriteFactory.createEntitySprite("hero", 50, 37)
+  private val heroSprite: EntitySprite = spriteFactory.createEntitySprite(ApplicationConstants.SPRITES_PACK_LOCATION,
+    "hero", 50, 37)
   this.defineHeroSpriteAnimations()
+
+  private val skeletonSprite: EntitySprite = spriteFactory.createEntitySprite(ApplicationConstants.ENEMIES_SPRITES_PACK_LOCATION,
+    "skeleton", 98, 59)
+  this.defineSkeletonSpriteAnimations()
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
@@ -69,7 +76,23 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     this.heroSprite.addAnimation(State.Somersault,
       spriteFactory.createSpriteAnimationFromTwoRows(heroSprite, 2, 4, 6,
         3, 0, 0), loop = true)
+  }
 
+  private def defineSkeletonSpriteAnimations(): Unit = {
+    this.skeletonSprite.addAnimation(State.Standing,
+      spriteFactory.createSpriteAnimationFromTwoRows(skeletonSprite, 1, 5, 6,
+        2,0,1,0.18f),
+      loop = true)
+
+    this.skeletonSprite.addAnimation(State.Running,
+      spriteFactory.createSpriteAnimation(skeletonSprite, 3, 3, 6, 0.18f),
+      loop = true)
+
+    this.skeletonSprite.addAnimation(State.Attack01,
+      spriteFactory.createSpriteAnimationFromTwoRows(skeletonSprite, 0, 0, 6,
+        1,0,0,0.18f))
+
+    // TODO: add take-hit animation
   }
 
   private def update(deltaTime: Float): Unit = {
@@ -110,6 +133,16 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.heroSprite.update(delta, player.getState, player.isFacingRight)
     }
 
+    val skeletonEntities: Option[List[Entity]] = entitiesGetter.getEntities(
+      (x: Entity) => x.isInstanceOf[Enemy] && x.asInstanceOf[EnemyImpl].getType().equals(EnemyType.Skeleton))
+    if (skeletonEntities.nonEmpty) {
+      // TODO: adapt to multiple skeletons instances
+      val skeleton: Enemy = skeletonEntities.get.head.asInstanceOf[EnemyImpl]
+      this.skeletonSprite.setPosition(skeleton.getPosition._1 - skeleton.getSize._1,
+        skeleton.getPosition._2 - skeleton.getSize._2, false)
+      this.skeletonSprite.update(delta, skeleton.getState, skeleton.isFacingRight)
+    }
+
     val items: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Item])
     if(items.nonEmpty) {
       val item: Item = items.get.head.asInstanceOf[Item]
@@ -134,8 +167,10 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     // render objects inside
 
     this.heroSprite.setSize(0.85f * 6.47f,1.4f * 2.57f)
+    this.skeletonSprite.setSize(0.85f * 6.47f,1.4f * 2.57f)
     this.itemSprite.setSize(0.5f * 2.57f,0.5f * 2.57f)
     this.heroSprite.draw(batch)
+    this.skeletonSprite.draw(batch)
     this.itemSprite.draw(batch)
 
     batch.end()

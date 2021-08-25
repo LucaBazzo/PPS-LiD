@@ -2,11 +2,10 @@ package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.{Animation, TextureAtlas, TextureRegion}
 import com.badlogic.gdx.utils.Array
-import utils.ApplicationConstants.SPRITES_PACK_LOCATION
 
 trait SpriteFactory {
 
-  def createEntitySprite(regionName: String, width: Float, height: Float): EntitySprite
+  def createEntitySprite(spritesFile: String, regionName: String, width: Float, height: Float): EntitySprite
 
   def createSpriteAnimation(sprite: EntitySprite, rowNumber: Int,
                             startIndex: Int, endIndex: Int,
@@ -20,13 +19,17 @@ trait SpriteFactory {
 
 class SpriteFactoryImpl extends SpriteFactory {
 
-  private val atlas: TextureAtlas = new TextureAtlas(SPRITES_PACK_LOCATION)
-  private var offset: Int = 0
+  private var offsetY: Int = 0
+  private var offsetX: Int = 0
 
-  override def createEntitySprite(regionName: String, width: Float, height: Float): EntitySprite = {
+  override def createEntitySprite(spritesFile: String, regionName: String, width: Float, height: Float): EntitySprite = {
+    val atlas: TextureAtlas = new TextureAtlas(spritesFile)
     val sprite = new EntitySpriteImpl()
-    sprite.setRegion(this.atlas.findRegion(regionName))
-    this.offset = sprite.getRegionY - 1
+    println(atlas.findRegion(regionName))
+    sprite.setRegion(atlas.findRegion(regionName))
+    this.offsetY = sprite.getRegionY - 1
+    this.offsetX = sprite.getRegionX - 1
+
     sprite.setBounds(0, 0, width, height)
     sprite
   }
@@ -38,8 +41,8 @@ class SpriteFactoryImpl extends SpriteFactory {
     val frames: Array[TextureRegion] = new Array[TextureRegion]()
 
     for(i <- startIndex to endIndex){
-      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth,
-        sprite.getIntHeight * rowNumber + this.offset , sprite.getIntWidth, sprite.getIntHeight))
+      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth + this.offsetX,
+        sprite.getIntHeight * rowNumber + this.offsetY , sprite.getIntWidth, sprite.getIntHeight))
     }
 
     new Animation(frameDuration, frames)
@@ -53,13 +56,13 @@ class SpriteFactoryImpl extends SpriteFactory {
     val frames: Array[TextureRegion] = new Array[TextureRegion]()
 
     for(i <- startIndex to endIndex){
-      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth,
-        sprite.getIntHeight * rowNumber + this.offset , sprite.getIntWidth, sprite.getIntHeight))
+      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth + this.offsetX ,
+        sprite.getIntHeight * rowNumber + this.offsetY , sprite.getIntWidth, sprite.getIntHeight))
     }
 
     for(i <- startIndex2 to endIndex2){
-      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth,
-        sprite.getIntHeight * rowNumber2 + this.offset , sprite.getIntWidth, sprite.getIntHeight))
+      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth + this.offsetX ,
+        sprite.getIntHeight * rowNumber2 + this.offsetY , sprite.getIntWidth, sprite.getIntHeight))
     }
 
     new Animation(frameDuration, frames)

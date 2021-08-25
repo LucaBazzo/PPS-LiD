@@ -45,7 +45,6 @@ class EntitySpriteImpl extends EntitySprite {
     else
       stateTimer = 0
     this.previousState = state
-    //println(state)
   }
 
   private def getFrame(state: State): TextureRegion = animations(state).getKeyFrame(stateTimer, loops(state))

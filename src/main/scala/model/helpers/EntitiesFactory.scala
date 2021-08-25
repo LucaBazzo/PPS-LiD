@@ -113,7 +113,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Enemy,
       EntityType.Immobile | EntityType.Sword, createPolygonalShape(size), size, position)
 
-    val enemy:Enemy = new EnemyImpl(entityBody, size)
+    val enemy:Enemy = new EnemyImpl(entityBody, size, 100, EnemyType.Skeleton)
 
     enemy.setCollisionStrategy(new DoNothingOnCollision())
 

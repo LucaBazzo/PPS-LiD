@@ -1,22 +1,30 @@
 package model.entities
 
 import model.EntityBody
+import model.entities.EnemyType.EnemyType
+
+object EnemyType extends Enumeration {
+  type EnemyType = Value
+  val Skeleton, Slime = Value
+}
+
 
 trait Enemy extends LivingEntity {
-
-  def getType()
+  def getType(): EnemyType
 }
 
 trait Score {
   def getScore: Int
 }
 
-class EnemyImpl(private var entityBody: EntityBody, private val size: (Float, Float), private val score: Int = 100)
-                  extends LivingEntityImpl(entityBody, size) with Enemy with Score {
+class EnemyImpl(private var entityBody: EntityBody,
+                private val size: (Float, Float),
+                private val score: Int = 100,
+                private val enemyType: EnemyType) extends LivingEntityImpl(entityBody, size) with Enemy with Score {
 
   val attackDamage = 10
 
-  override def getType(): Unit = ???
+  override def getType(): EnemyType = this.enemyType
 
   override def getScore: Int = this.score
 
