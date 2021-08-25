@@ -1,6 +1,7 @@
 package model
 
 import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
 import model.collisions.CollisionManager
@@ -21,9 +22,7 @@ trait Level {
   def getWorld: World
 }
 
-class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
-
-  private val world: World = new World(GRAVITY_FORCE, true)
+class LevelImpl(private val entitiesSetter: EntitiesSetter, private val world: World) extends Level {
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
   entitiesFactory.setLevel(this, new ItemPoolImpl())

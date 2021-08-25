@@ -3,11 +3,13 @@ package view.screens.game
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
+import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
+import com.badlogic.gdx.physics.box2d.{Box2DDebugRenderer, World}
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
+import model.Level
 import model.collisions.ImplicitConversions.RichInt
 import model.entities.{Entity, Hero, Item, State}
 import model.helpers.EntitiesGetter
@@ -17,7 +19,9 @@ import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{EntitySprite, SpriteFactory, SpriteFactoryImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
-                 private val observerManager: ObserverManager) extends ScreenAdapter{
+                 private val observerManager: ObserverManager,
+                 private val world: World,
+                 private val level: Level) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   private val batch: SpriteBatch = new SpriteBatch()
@@ -26,7 +30,10 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map0.tmx")
+  private val tiledMap: TiledMap = TileMapHelper.getTiledMap("assets/maps/level1.tmx")
+  TileMapHelper.setWorld(world, tiledMap, level)
+
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/level1.tmx")
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
