@@ -1,0 +1,41 @@
+
+enemies_sprites.png
+size: 1871, 924
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+evil_wizard
+  rotate: false
+  xy: 0, 0
+  size: 1183, 924
+  orig: 1183, 924
+  offset: 0, 0
+  index: -1
+fire_ball
+  rotate: false
+  xy: 1185, 242
+  size: 259, 64
+  orig: 259, 64
+  offset: 0, 0
+  index: -1
+fire_worm
+  rotate: false
+  xy: 1185, 308
+  size: 539, 378
+  orig: 539, 378
+  offset: 0, 0
+  index: -1
+scheleton
+  rotate: false
+  xy: 1185, 688
+  size: 686, 236
+  orig: 686, 236
+  offset: 0, 0
+  index: -1
+slime
+  rotate: false
+  xy: 1185, 180
+  size: 217, 60
+  orig: 217, 60
+  offset: 0, 0
+  index: -1
