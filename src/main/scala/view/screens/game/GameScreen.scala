@@ -28,10 +28,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val box2DDebugRenderer: Box2DDebugRenderer = new Box2DDebugRenderer()
 
-  private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
+  private val viewPort: FitViewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val tiledMap: TiledMap = TileMapHelper.getTiledMap("assets/maps/level1.tmx")
-  TileMapHelper.setWorld(world, tiledMap, level)
+  TileMapHelper.setWorld(world, level, "assets/maps/level1.tmx")
 
   private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/level1.tmx")
 

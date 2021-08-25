@@ -21,15 +21,11 @@ object TileMapHelper {
     new TmxMapLoader().load(path)
   }
 
-  def setWorld(world: World, tiledMap: TiledMap, level: Level): String = {
+  def setWorld(world: World, level: Level, path: String): String = {
 
     var rect: Rectangle = new Rectangle()
-    val bdef: BodyDef = new BodyDef()
-    val shape: PolygonShape = new PolygonShape()
-    val fdef: FixtureDef = new FixtureDef()
-    var body: Body = null
 
-    val tiledMap: TiledMap = new TmxMapLoader().load("assets/maps/level1.tmx")
+    val tiledMap: TiledMap = new TmxMapLoader().load(path)
 
     tiledMap.getLayers().forEach(layer => {
       layer.getObjects().forEach(obj => {
