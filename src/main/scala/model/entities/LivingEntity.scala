@@ -2,6 +2,7 @@ package model.entities
 
 import model.EntityBody
 import model.attack.AttackStrategy
+import model.entities.Statistic.Statistic
 
 trait LivingEntity extends MobileEntity {
 
@@ -28,6 +29,6 @@ class LivingEntityImpl(private var entityBody: EntityBody, private val size: (Fl
 
     override def getStatistics(): Map[Statistic, Float] = statistics
 
-    override def alterStatistics(statistic: Statistic, alteration: Float): Unit = statistics(statistic) -> alteration
+    override def alterStatistics(statistic: Statistic, alteration: Float): Unit = printf("Hero's " + statistic + " +" + alteration.toString + "\n")//statistics(statistic) -> alteration
 
 }

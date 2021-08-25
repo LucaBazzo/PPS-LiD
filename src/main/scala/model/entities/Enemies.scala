@@ -1,6 +1,7 @@
 package model.entities
 
 import model.EntityBody
+import model.entities.Statistic.Statistic
 
 trait Enemy extends LivingEntity {
 

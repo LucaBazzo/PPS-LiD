@@ -112,10 +112,11 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     }
 
     val items: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Item])
-    items.get.foreach(x => {
-      val item: Item = x.asInstanceOf[Item]
-      this.itemSprites.get(item.getEnumVal).get.update(delta, item)
-    })
+    if(items.get.nonEmpty)
+      items.get.foreach(x => {
+        val item: Item = x.asInstanceOf[Item]
+        this.itemSprites.get(item.getEnumVal).get.update(delta, item)
+      })
 
     this.camera.update()
 
@@ -130,10 +131,11 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     batch.begin()
     // render objects inside
     this.heroSprite.draw(batch)
-    items.get.foreach(x => {
-      val item: Item = x.asInstanceOf[Item]
-      this.itemSprites.get(x.asInstanceOf[Item].getEnumVal).get.draw(batch)
-    })
+    if(items.get.nonEmpty)
+      items.get.foreach(x => {
+        val item: Item = x.asInstanceOf[Item]
+        this.itemSprites.get(x.asInstanceOf[Item].getEnumVal).get.draw(batch)
+      })
 
     batch.end()
 

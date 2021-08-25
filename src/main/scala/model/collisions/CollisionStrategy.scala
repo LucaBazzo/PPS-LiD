@@ -1,6 +1,6 @@
 package model.collisions
 
-import model.entities.{Entity, HeroImpl, ItemImpl}
+import model.entities.{Entity, Hero, HeroImpl, Item, ItemImpl}
 import model.Level
 import model.helpers.EntitiesFactoryImpl
 
@@ -10,14 +10,17 @@ trait CollisionStrategy {
 
 class CollisionStrategyImpl extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
-    case i:ItemImpl => println("Collect item: " + i.getEnumVal)
+    case i:Item =>  println("Collect item: " + i.getEnumVal)
     case _ => println("Collision Detected with" + entity.toString)
   }
 }
 
-class ItemCollisionStrategy extends CollisionStrategy {
+class ItemCollisionStrategy(private val item: Item) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
-    case h:HeroImpl => println("Hero picked up item")
+    case h:Hero => println("Hero picked up item")
+                   val effect = item.collect()
+                   println(effect._3 + "\n")
+                   h.alterStatistics(effect._1, effect._2)
     case _ => println("____")
   }
 }

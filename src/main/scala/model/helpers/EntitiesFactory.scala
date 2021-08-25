@@ -9,6 +9,8 @@ import model.attack.{HeroAttackStrategyImpl, RangedArrowAttack}
 import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionStrategyImpl, DoNothingOnCollision, EntityType, ItemCollisionStrategy}
 import model.entities.ItemPools.ItemPools
+import model.entities.Statistic
+import model.entities.Statistic.Statistic
 import model.entities.{Entity, _}
 import model.movement.{CircularMovementStrategy, HeroMovementStrategy, PatrolAndStopIfFacingHero}
 
@@ -126,7 +128,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Item,
       collisions, createPolygonalShape(size.PPM), position.PPM)
     val item: Item = itemPool.getItem(entityBody, size.PPM, PoolName)
-    item.setCollisionStrategy(new ItemCollisionStrategy())
+    item.setCollisionStrategy(new ItemCollisionStrategy(item))
     this.level.addEntity(item)
     item
   }

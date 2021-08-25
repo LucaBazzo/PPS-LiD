@@ -3,9 +3,10 @@ package model.entities
 import com.badlogic.gdx.physics.box2d.Joint
 import model.helpers.EntitiesFactoryImpl
 import model.EntityBody
+import model.entities.Statistic.Statistic
 import model.movement.MovementStrategy
 
-class Statistic extends Enumeration {
+object Statistic extends Enumeration {
   type Statistic = Value
 
   val CurrentHealth, Health, Strength, Defence, MovementSpeed, MaxMovementSpeed, Acceleration, AttackSpeed = Value
