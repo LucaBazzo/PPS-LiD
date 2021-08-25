@@ -5,7 +5,7 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions.RichFloat
 import model.entities.{Hero, State}
-import utils.ApplicationConstants.HERO_SIZE_SMALL
+import utils.ApplicationConstants.{HERO_POSITION, HERO_POSITION_SMALL, HERO_SIZE_SMALL}
 
 trait MovementStrategy {
 
@@ -79,7 +79,7 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
     this.entity.stopMovement()
 
     if(entity.getState != State.Crouch) {
-      this.entity.changeHeroFixture(HERO_SIZE_SMALL, (0, -6f))
+      this.entity.changeHeroFixture(HERO_SIZE_SMALL, HERO_POSITION_SMALL)
       this.entity.setLittle(true)
     }
 

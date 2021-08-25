@@ -13,8 +13,10 @@ import utils.ApplicationConstants.PIXELS_PER_METER
 
 object TileMapHelper {
 
+  private val scale: Float = 1/(PIXELS_PER_METER/2)
+
   def getMap(path: String): OrthogonalTiledMapRenderer = {
-    new OrthogonalTiledMapRenderer(new TmxMapLoader().load(path), 1 / PIXELS_PER_METER)
+    new OrthogonalTiledMapRenderer(new TmxMapLoader().load(path), scale)
   }
 
   def getTiledMap(path: String): TiledMap = {
@@ -32,8 +34,10 @@ object TileMapHelper {
 
         rect = obj.asInstanceOf[RectangleMapObject].getRectangle
 
-        val position: (Float, Float) = ((rect.getX + rect.getWidth / 2) , (rect.getY + rect.getHeight / 2) )
-        val size: (Float, Float) = (rect.getWidth / 2 , rect.getHeight / 2 )
+        val size: (Float, Float) = (rect.getWidth, rect.getHeight)
+
+        val position: (Float, Float) = ((rect.getX*2 + rect.getWidth) , (rect.getY*2 + rect.getHeight) )
+
         val entity: Entity = EntitiesFactoryImpl.createImmobileEntity(size, position, EntityType.Hero )
         level.addEntity(entity)
 

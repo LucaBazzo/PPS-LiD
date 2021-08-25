@@ -1,6 +1,6 @@
 package model.helpers
 
-import _root_.utils.ApplicationConstants.HERO_SIZE
+import _root_.utils.ApplicationConstants.{HERO_SIZE, HERO_POSITION}
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef
@@ -82,7 +82,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createHeroEntity(): Hero = {
-    val position: (Float, Float) = (10, 10)
+    val position: (Float, Float) = HERO_POSITION
     val size: (Float, Float) = HERO_SIZE
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Hero,

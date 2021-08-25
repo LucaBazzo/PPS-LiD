@@ -6,7 +6,7 @@ import model.EntityBody
 import model.collisions.ImplicitConversions._
 import model.entities.State.State
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
-import utils.ApplicationConstants.{HERO_SIZE, HERO_SIZE_SMALL}
+import utils.ApplicationConstants.{HERO_POSITION, HERO_POSITION_SMALL, HERO_SIZE, HERO_SIZE_SMALL}
 
 trait Hero extends LivingEntity {
 
@@ -51,7 +51,7 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
     this.state match {
       case State.Standing | State.Running =>
         this.stopMovement()
-        this.changeHeroFixture(HERO_SIZE_SMALL, (0, -6f))
+        this.changeHeroFixture(HERO_SIZE_SMALL, HERO_POSITION_SMALL)
         this.state = State.Crouch
         this.setLittle(true)
       case _ =>
@@ -104,7 +104,7 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
         this.state = State.Standing
 
       if(this.state != State.Sliding && this.state != State.Crouch && isLittle) {
-        this.changeHeroFixture(HERO_SIZE, (0, 5f))
+        this.changeHeroFixture(HERO_SIZE, HERO_POSITION)
         this.setLittle(false)
       }
 

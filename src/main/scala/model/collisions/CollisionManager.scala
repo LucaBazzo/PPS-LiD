@@ -15,6 +15,7 @@ object EntityType extends Enumeration {
   /** Collision bit used in fixture filters for recognizing the player.
    */
   val Hero: Short = currentBitValue
+  val Wall: Short = getNextBitValue
   val Enemy: Short = getNextBitValue
   val Mobile: Short = getNextBitValue
   val Immobile: Short = getNextBitValue
