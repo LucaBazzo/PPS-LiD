@@ -7,6 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.{Image, Label, Table}
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 
+import java.util.concurrent.{ExecutorService, Executors}
+
 class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable{
 
   private val viewPort: Viewport = new FitViewport(width, height, new OrthographicCamera())
@@ -20,6 +22,7 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable{
   private var healthPercentage: Float = 1
 
   private val healthImage: Image = new Image(new Texture(HEALTH_BAR_PATH))
+  healthImage.setWidth(80)
   val healthImageWidth: Float = healthImage.getWidth
 
   val healthTable: Table = new Table()
@@ -27,23 +30,36 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable{
 
   val levelLabel: Label = GUIFactoryImpl.createLabel("", GUIFactoryImpl.createBitmapFont(FONT_PATH_LABEL), Color.WHITE)
   val scoreLabel: Label = GUIFactoryImpl.createLabel("", GUIFactoryImpl.createBitmapFont(FONT_PATH_LABEL), Color.WHITE)
+  val itemsTextLabel: Label = GUIFactoryImpl.createLabel("", GUIFactoryImpl.createBitmapFont(FONT_PATH_LABEL), Color.WHITE)
   levelLabel.setText("LEVEL 01")
   scoreLabel.setText("SCORE " + String.format("%06d", score))
   scoreLabel.setFontScale(0.2f)
   levelLabel.setFontScale(0.2f)
+  itemsTextLabel.setFontScale(0.2f)
 
-  var table: Table = new Table()
+  var tableTop: Table = new Table()
+  tableTop.top()
+  tableTop.setFillParent(true)
+  tableTop.add(healthTable).expandX().fill(0.8f, 0).padTop(10).padLeft(20)
+  tableTop.add(levelLabel).expandX().center().padTop(10)
+  tableTop.add(scoreLabel).expandX().padTop(10)
+
+  var table = new Table()
   //it will display at the top
   table.top()
+  table.padTop(40)
   //the table has the size of the stage
   table.setFillParent(true)
 
-  table.add(healthTable).expandX().fill(0.8f, 0).padTop(10).padLeft(20)
-  table.add(levelLabel).expandX().center().padTop(10)
-  table.add(scoreLabel).expandX().padTop(10)
+  table.add(tableTop)
+  table.row()
+  table.add(itemsTextLabel)
+
 
   //adds the table to the stage
+  stage.addActor(tableTop)
   stage.addActor(table)
+
 
   def getStage: Stage = this.stage
 
@@ -67,6 +83,18 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable{
 
   def setCurrentScore(score: Int): Unit = {
     scoreLabel.setText("SCORE " + String.format("%06d", score))
+  }
+
+  def setItemText(text: String): Unit = {
+    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+
+    val task: Runnable = () => {
+      itemsTextLabel.setText(text)
+      Thread.sleep(2500)
+      itemsTextLabel.setText("")
+    }
+
+    executorService.submit(task)
   }
 }
 
