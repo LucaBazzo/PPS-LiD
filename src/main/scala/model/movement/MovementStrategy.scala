@@ -5,7 +5,7 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions.RichFloat
 import model.entities.{Hero, State}
-import utils.ApplicationConstants.{HERO_POSITION, HERO_POSITION_SMALL, HERO_SIZE_SMALL}
+import utils.ApplicationConstants.{HERO_POSITION_SMALL, HERO_SIZE_SMALL}
 
 trait MovementStrategy {
 

@@ -104,7 +104,7 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
         this.state = State.Standing
 
       if(this.state != State.Sliding && this.state != State.Crouch && isLittle) {
-        this.changeHeroFixture(HERO_SIZE, HERO_POSITION)
+        this.changeHeroFixture(HERO_SIZE, (0, 5f))
         this.setLittle(false)
       }
 
