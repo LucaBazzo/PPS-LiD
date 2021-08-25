@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
 import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Entity, Hero, Item, State}
+import model.entities.{Entity, Hero, Item, State, Statistic}
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
@@ -77,7 +77,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
 
-    //old world step
+    //TODO add the changeHealth method when the get of the hero is done correctly
+    this.hud.setCurrentScore(this.entitiesGetter.getScore)
 
     //it will render only what the camera can see
     this.orthogonalTiledMapRenderer.setView(camera)
@@ -108,6 +109,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.camera.position.y = hero.getPosition._2
 
       this.heroSprite.update(delta, hero)
+
+      this.hud.changeHealth(hero.getStatistics(Statistic.CurrentHealth), hero.getStatistics(Statistic.Health))
     }
 
     val items: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Item])
@@ -130,14 +133,15 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     // render objects inside
     this.heroSprite.draw(batch)
     this.itemSprite.draw(batch)
+    this.hud.drawHealthBar(batch)
 
     batch.end()
 
     //for debug purpose
     box2DDebugRenderer.render(this.entitiesGetter.getWorld, camera.combined)
 
-    batch.setProjectionMatrix(hud.getStage().getCamera.combined)
-    hud.getStage().draw()
+    batch.setProjectionMatrix(hud.getStage.getCamera.combined)
+    hud.getStage.draw()
   }
 
   override def resize(width: Int, height: Int): Unit = {
