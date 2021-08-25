@@ -6,10 +6,12 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.{Image, Label, Table}
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
+import model.entities.Items
+import model.entities.Items.Items
 
 import java.util.concurrent.{ExecutorService, Executors}
 
-class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable{
+class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable {
 
   private val viewPort: Viewport = new FitViewport(width, height, new OrthographicCamera())
   val stage: Stage = new Stage(viewPort, spriteBatch)
@@ -26,7 +28,7 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable{
   val healthImageWidth: Float = healthImage.getWidth
 
   val healthTable: Table = new Table()
-  healthTable.add(healthImage)//.expandX().fill(true, false)
+  healthTable.add(healthImage) //.expandX().fill(true, false)
 
   val levelLabel: Label = GUIFactoryImpl.createLabel("", GUIFactoryImpl.createBitmapFont(FONT_PATH_LABEL), Color.WHITE)
   val scoreLabel: Label = GUIFactoryImpl.createLabel("", GUIFactoryImpl.createBitmapFont(FONT_PATH_LABEL), Color.WHITE)
@@ -44,6 +46,10 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable{
   tableTop.add(levelLabel).expandX().center().padTop(10)
   tableTop.add(scoreLabel).expandX().padTop(10)
 
+  var itemsTable: Table = new Table()
+  itemsTable.bottom().left()
+  itemsTable.setFillParent(true)
+
   var table = new Table()
   //it will display at the top
   table.top()
@@ -54,12 +60,18 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable{
   table.add(tableTop)
   table.row()
   table.add(itemsTextLabel)
+  table.row()
+  table.add(itemsTable)
 
 
   //adds the table to the stage
   stage.addActor(tableTop)
   stage.addActor(table)
+  stage.addActor(itemsTable)
 
+  //TODO da rifattorizzare e chiamare dall'esterno
+  this.addNewItem(Items.BFSword)
+  this.addNewItem(Items.Key)
 
   def getStage: Stage = this.stage
 
@@ -71,9 +83,9 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable{
   }
 
   def drawHealthBar(batch: SpriteBatch): Unit = {
-    if(healthPercentage > 0.6f)
+    if (healthPercentage > 0.6f)
       healthImage.setColor(Color.GREEN)
-    else if(healthPercentage > 0.2f)
+    else if (healthPercentage > 0.2f)
       healthImage.setColor(Color.ORANGE)
     else
       healthImage.setColor(Color.RED)
@@ -95,6 +107,18 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable{
     }
 
     executorService.submit(task)
+  }
+
+  def addNewItem(item: Items): Unit = item match {
+    case Items.BFSword => addItemToTable("assets/textures/sword.png")
+    case Items.Key => addItemToTable("assets/textures/key.png")
+    case _ => throw new UnsupportedOperationException
+  }
+
+  private def addItemToTable(path: String): Unit = {
+    val itemImage = new Image(new Texture(path))
+    itemImage.setScale(0.75f, 0.75f)
+    itemsTable.add(itemImage).padLeft(5).padBottom(2)
   }
 }
 

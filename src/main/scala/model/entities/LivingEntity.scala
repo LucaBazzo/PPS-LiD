@@ -17,7 +17,11 @@ class LivingEntityImpl(private var entityBody: EntityBody, private val size: (Fl
 
   protected var attackStrategy: AttackStrategy = _
 
-  override def sufferDamage(damage: Float): Unit = this.alterStatistics(Statistic.CurrentHealth, -damage)
+  override def sufferDamage(damage: Float): Unit = {
+    val trueDamage = damage - this.statistics(Statistic.Defence)
+    if(trueDamage > 0)
+      this.alterStatistics(Statistic.CurrentHealth, -trueDamage)
+  }
 
   override def getLife: Float = this.statistics(Statistic.Health)
 

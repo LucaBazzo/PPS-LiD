@@ -4,6 +4,7 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.EntityBody
 import model.collisions.ImplicitConversions._
+import model.entities.Items.Items
 import model.entities.State.State
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
@@ -21,6 +22,9 @@ trait Hero extends LivingEntity {
   def setLittle(little: Boolean)
 
   def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0))
+
+  def itemPicked(itemType: Items)
+  def getItemsPicked: List[Items]
 }
 
 class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float]) extends LivingEntityImpl(entityBody, size, statistics) with Hero{
@@ -174,4 +178,10 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
 
     this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
   }
+
+  private var itemsPicked: List[Items] = List.empty
+
+  override def itemPicked(itemType: Items): Unit = this.itemsPicked = itemType :: this.itemsPicked
+
+  override def getItemsPicked: List[Items] = this.itemsPicked
 }
