@@ -38,8 +38,24 @@ object TileMapHelper {
 
         val position: (Float, Float) = ((rect.getX*2 + rect.getWidth) , (rect.getY*2 + rect.getHeight) )
 
-        val entity: Entity = EntitiesFactoryImpl.createImmobileEntity(size, position, (EntityType.Hero | EntityType.Enemy).asInstanceOf[Short] )
-        level.addEntity(entity)
+        var entity: Entity = null
+
+        layer.getName() match {
+          case "ground" => {
+            entity = EntitiesFactoryImpl.createImmobileEntity(size, position, (EntityType.Hero | EntityType.Enemy).asInstanceOf[Short] )
+            level.addEntity(entity)
+          }
+          case "lava" => {
+            entity = EntitiesFactoryImpl.createImmobileEntity(size, position)
+            level.addEntity(entity)
+          }
+          case "bridge" => {
+            entity = EntitiesFactoryImpl.createImmobileEntity(size, position, (EntityType.Hero | EntityType.Enemy).asInstanceOf[Short] )
+            level.addEntity(entity)
+          }
+          //case "ladder" => {}
+          case _ => {}
+        }
 
       })
 
