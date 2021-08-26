@@ -22,6 +22,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   private val camera: OrthographicCamera = new OrthographicCamera()
   private val batch: SpriteBatch = new SpriteBatch()
 
+  private val soundManager: SoundManager = new SoundManager()
+  soundManager.startMusic()
+
   private val box2DDebugRenderer: Box2DDebugRenderer = new Box2DDebugRenderer()
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)

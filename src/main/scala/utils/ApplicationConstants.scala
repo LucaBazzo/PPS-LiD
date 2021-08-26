@@ -19,6 +19,8 @@ object ApplicationConstants {
 
   val SPRITES_PACK_LOCATION = "assets/sprites/sprites.pack"
 
+  val LEVEL_MUSIC_LOCATION = "assets/audio/music.mp3"
+
   val HERO_SIZE: (Float, Float) = (8.5f, 15f)
 
   val HERO_SIZE_SMALL: (Float, Float) = (8.5f, 8f)
