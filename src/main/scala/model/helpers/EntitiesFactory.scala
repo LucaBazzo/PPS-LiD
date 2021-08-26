@@ -65,6 +65,7 @@ trait EntitiesFactory {
 
   def destroyJoint(joint: Joint)
 
+  def destroyBodies(): Unit
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -72,6 +73,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   private var level: Level = _
 
   private var itemPool: ItemPool = _
+
+  private var bodiesToBeDestroyed: List[Body] = List.empty
 
   override def setLevel(level: Level, pool: ItemPool): Unit = {
     this.level = level
@@ -118,16 +121,16 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     enemy.setCollisionStrategy(new DoNothingOnCollision())
 
     enemy.setAttackStrategy(new DoNotAttack())
-//    enemy.setAttackStrategy(new ContactAttackStrategy(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
+    //    enemy.setAttackStrategy(new ContactAttackStrategy(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
     enemy.setAttackStrategy(new MeleeAttackStrategy(enemy,
       level.getEntity(e => e.isInstanceOf[HeroImpl]), this.level.getWorld))
-//    enemy.setAttackStrategy(new RangedArrowAttack(enemy,
-//      level.getEntity(e => e.isInstanceOf[Hero]), this.level.getWorld))
+    //    enemy.setAttackStrategy(new RangedArrowAttack(enemy,
+    //      level.getEntity(e => e.isInstanceOf[Hero]), this.level.getWorld))
 
     enemy.setMovementStrategy(new PatrolAndStopIfFacingHero(enemy, this.level.getWorld,
       level.getEntity(e => e.isInstanceOf[Hero]) ))
-//    enemy.setMovementStrategy(new PatrolPlatform(enemy, this.level.getWorld))
-//    enemy.setMovementStrategy(new DoNotMove())
+    //    enemy.setMovementStrategy(new PatrolPlatform(enemy, this.level.getWorld))
+    //    enemy.setMovementStrategy(new DoNotMove())
 
     this.level.addEntity(enemy)
     enemy
@@ -172,8 +175,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   //TODO temporanero, solo per test sulle collisioni
   override def createImmobileEnemy(size: (Float, Float) = (10, 10),
-                                    position: (Float, Float) = (0, 0),
-                                    collisions: Short = 0): Entity = {
+                                   position: (Float, Float) = (0, 0),
+                                   collisions: Short = 0): Entity = {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Enemy,
       collisions, createPolygonalShape(size.PPM), position.PPM)
@@ -207,8 +210,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     circularMobileEntity
   }
 
-override def createEnemyProjectile(size: (Float, Float) = (10, 10),
-                                  position: (Float, Float) = (0, 0)): MobileEntity = {
+  override def createEnemyProjectile(size: (Float, Float) = (10, 10),
+                                     position: (Float, Float) = (0, 0)): MobileEntity = {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Mobile,
       EntityType.Immobile | EntityType.Hero | EntityType.Sword, this.createCircleShape(size._1.PPM), position, isSensor = true)
@@ -245,9 +248,19 @@ override def createEnemyProjectile(size: (Float, Float) = (10, 10),
 
   override def removeEntity(entity: Entity): Unit = this.level.removeEntity(entity)
 
-  override def destroyBody(body: Body): Unit = this.level.getWorld.destroyBody(body)
 
   override def destroyJoint(joint: Joint): Unit = this.level.getWorld.destroyJoint(joint)
+
+  override def destroyBody(body: Body): Unit = synchronized {
+    this.bodiesToBeDestroyed = body :: this.bodiesToBeDestroyed
+  }
+
+  override def destroyBodies(): Unit = synchronized {
+    for(body <- bodiesToBeDestroyed) {
+      this.level.getWorld.destroyBody(body)
+    }
+    this.bodiesToBeDestroyed = List.empty
+  }
 
   override def createBody(bodyDef: BodyDef): Body = this.level.getWorld.createBody(bodyDef)
 
