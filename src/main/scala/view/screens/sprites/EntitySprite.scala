@@ -1,29 +1,24 @@
 package view.screens.sprites
 
-import com.badlogic.gdx.graphics.g2d.{Animation, Sprite, TextureRegion}
-import model.entities.State
+import com.badlogic.gdx.graphics.g2d.{Animation, Batch, Sprite, TextureRegion}
+import model.collisions.ImplicitConversions.RichFloat
 import model.entities.State.State
+import model.entities.{Enemy, Entity, Hero, MobileEntity, State}
 
 trait EntitySprite extends Sprite {
 
   def addAnimation(state: State, animation: Animation[TextureRegion], loop: Boolean = false)
 
-  def setPosition(x: Float, y: Float, isLittle: Boolean): Unit = {
-    super.setPosition(x,y)
-    /*if(isLittle)
-      super.setPosition(x - this.getWidth / 2, y - this.getHeight / 2 + 9.3f)
-    else
-      super.setPosition(x - this.getWidth / 2, y - this.getHeight / 2 + 4.3f)*/
-  }
+  def update(dt: Float, entity: Entity)
 
-  def update(dt: Float, state: State, isFacingRight: Boolean)
+  def setPosition(entity: Entity)
 
   def getIntWidth: Int = super.getWidth.asInstanceOf[Int]
 
   def getIntHeight: Int = super.getHeight.asInstanceOf[Int]
 }
 
-class EntitySpriteImpl extends EntitySprite {
+class EntitySpriteImpl(width: Float, height: Float) extends EntitySprite {
 
   private var animations: Map[State, Animation[TextureRegion]] = Map()
   private var loops: Map[State, Boolean] = Map()
@@ -36,15 +31,24 @@ class EntitySpriteImpl extends EntitySprite {
     this.loops += (state -> loop)
   }
 
-  override def update(dt: Float, state: State, isFacingRight: Boolean): Unit = {
+  override def update(dt: Float, entity: Entity): Unit = {
+    val state: State = entity.getState
     var region: TextureRegion = getFrame(state)
-    region = checkFlip(region, isFacingRight)
+    entity match {
+      case me: MobileEntity => region = checkFlip(region, me.isFacingRight)
+      case _ =>
+    }
     this.setRegion(region)
     if(state == this.previousState)
       stateTimer += dt
     else
       stateTimer = 0
     this.previousState = state
+    this.setPosition(entity)
+  }
+
+  override def setPosition(entity: Entity): Unit = {
+    super.setPosition(entity.getPosition._1 - this.getWidth / 2, entity.getPosition._2 - this.getHeight / 2)
   }
 
   private def getFrame(state: State): TextureRegion = animations(state).getKeyFrame(stateTimer, loops(state))
@@ -60,4 +64,22 @@ class EntitySpriteImpl extends EntitySprite {
     region
   }
 
+  override def draw(batch: Batch): Unit = {
+    this.setSize(this.width.PPM, this.height.PPM)
+    super.draw(batch)
+  }
+
 }
+
+class HeroEntitySprite(width: Float, height: Float) extends EntitySpriteImpl(width, height) {
+
+  override def setPosition(entity: Entity): Unit = {
+    if(entity.asInstanceOf[Hero].isLittle)
+      super.setPosition(entity.getPosition._1 - this.getWidth / 2,
+        entity.getPosition._2 - this.getHeight / 2 + 9.3f.PPM)
+    else
+      super.setPosition(entity.getPosition._1 - this.getWidth / 2,
+        entity.getPosition._2 - this.getHeight / 2 + 4f.PPM)
+  }
+}
+

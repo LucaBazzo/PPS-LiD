@@ -8,6 +8,7 @@ import model.entities.ItemPools.ItemPools
 import model.entities.{Enemy, Entity, Hero, Item, ItemPools}
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl}
 import model.world.WorldCreator
+import model.collisions.ImplicitConversions._
 
 trait Level {
 
@@ -30,9 +31,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val enemy: Enemy = entitiesFactory.createEnemyEntity((4, 15))
-//  private val enemy2: Enemy = entitiesFactory.createEnemyEntity((7, 19))
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (0.5f, 0.5f), (4,2))
+  private val enemy: Enemy = entitiesFactory.createEnemyEntity()
+  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,20))
 
   new WorldCreator(this)
 

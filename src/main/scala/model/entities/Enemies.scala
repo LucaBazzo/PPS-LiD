@@ -19,8 +19,10 @@ trait Score {
 
 class EnemyImpl(private var entityBody: EntityBody,
                 private val size: (Float, Float),
+                private val statistics:Map[Statistic, Float],
                 private val score: Int = 100,
-                private val enemyType: EnemyType) extends LivingEntityImpl(entityBody, size) with Enemy with Score {
+                private val enemyType: EnemyType) extends LivingEntityImpl(entityBody, size, statistics)
+          with Enemy with Score {
 
   val attackDamage = 10
 

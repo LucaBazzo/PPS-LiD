@@ -2,10 +2,15 @@ package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.{Animation, TextureAtlas, TextureRegion}
 import com.badlogic.gdx.utils.Array
+import utils.ApplicationConstants.SPRITES_PACK_LOCATION
 
 trait SpriteFactory {
 
-  def createEntitySprite(spritesFile: String, regionName: String, width: Float, height: Float): EntitySprite
+  def createHeroSprite(spriteSheetName:String, regionName: String, spriteWidth: Float, spriteHeight: Float): EntitySprite
+
+  def createEntitySprite(spriteSheetName:String, regionName: String, spriteWidth: Float, spriteHeight: Float,
+                         entitySpriteWidth: Float, entitySpriteHeight: Float,
+                         sizeMultiplicative: Float = 0): EntitySprite
 
   def createSpriteAnimation(sprite: EntitySprite, rowNumber: Int,
                             startIndex: Int, endIndex: Int,
@@ -20,19 +25,28 @@ trait SpriteFactory {
 class SpriteFactoryImpl extends SpriteFactory {
   private var atlasLookup: Map[String, TextureAtlas] = Map.empty
 
+
   // TODO: move entities (sprite file name, region name, image width, image heigth) into constants file
 
-  override def createEntitySprite(spritesFile: String, regionName: String, width: Float, height: Float): EntitySprite = {
-    // create or find an already loaded TextureAtlas
-    var atlas: Option[TextureAtlas] = atlasLookup.get(spritesFile)
+  override def createHeroSprite(spriteSheetName:String, regionName: String, spriteWidth: Float, spriteHeight: Float): EntitySprite = {
+    var atlas: Option[TextureAtlas] = atlasLookup.get(spriteSheetName)
     if (atlas.isEmpty) {
-      atlas = Option(new TextureAtlas(spritesFile))
-      atlasLookup = atlasLookup + (spritesFile -> atlas.get)
+      atlas = Option(new TextureAtlas(spriteSheetName))
     }
 
-    val sprite = new EntitySpriteImpl()
+    val sprite = new HeroEntitySprite(spriteWidth, spriteHeight)
     sprite.setRegion(atlas.get.findRegion(regionName))
-    sprite.setBounds(0, 0, width, height)
+    sprite.setBounds(0, 0, spriteWidth, spriteHeight)
+    sprite
+  }
+
+  override def createEntitySprite(spriteSheetName: String, regionName: String, spriteWidth: Float, spriteHeight: Float,
+                                  entitySpriteWidth: Float, entitySpriteHeight: Float,
+                                  sizeMultiplicative: Float = 1): EntitySprite = {
+    val atlas: TextureAtlas = new TextureAtlas(spriteSheetName)
+    val sprite = new EntitySpriteImpl(entitySpriteWidth * sizeMultiplicative, entitySpriteHeight * sizeMultiplicative)
+    sprite.setRegion(atlas.findRegion(regionName))
+    sprite.setBounds(0, 0, spriteWidth, spriteHeight)
     sprite
   }
 

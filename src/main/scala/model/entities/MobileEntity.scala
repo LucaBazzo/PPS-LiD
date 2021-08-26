@@ -5,6 +5,14 @@ import model.helpers.EntitiesFactoryImpl
 import model.EntityBody
 import model.movement.MovementStrategy
 
+import scala.collection.immutable.HashMap
+
+class Statistic extends Enumeration {
+  type Statistic = Value
+
+  val CurrentHealth, Health, Strength, Defence, MovementSpeed, MaxMovementSpeed, Acceleration, AttackSpeed = Value
+}
+
 trait MobileEntity extends Entity {
 
   def setMovementStrategy(strategy: MovementStrategy)
@@ -14,7 +22,9 @@ trait MobileEntity extends Entity {
   def isFacingRight: Boolean
 }
 
-class MobileEntityImpl(private var entityBody: EntityBody, private val size: (Float, Float)) extends EntityImpl(entityBody, size) with MobileEntity {
+class MobileEntityImpl(private var entityBody: EntityBody,
+                       private val size: (Float, Float),
+                       private val statistics:Map[Statistic, Float] = new HashMap()) extends EntityImpl(entityBody, size) with MobileEntity {
 
   private var facingRight: Boolean = true
 
@@ -38,7 +48,8 @@ class MobileEntityImpl(private var entityBody: EntityBody, private val size: (Fl
 
 class CircularMobileEntity(private var entityBody: EntityBody,
                            private val size: (Float, Float),
-                           private val pivotBody: EntityBody) extends MobileEntityImpl(entityBody, size) {
+                           private val statistics:Map[Statistic, Float],
+                           private val pivotBody: EntityBody) extends MobileEntityImpl(entityBody, size, statistics) {
 
   private val joint: Joint = EntitiesFactoryImpl.createJoint(this.pivotBody.getBody, this.entityBody.getBody)
 

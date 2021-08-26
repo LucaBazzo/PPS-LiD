@@ -63,23 +63,23 @@ class HeroAttackStrategyImpl(private val entity: Hero) extends AttackStrategy {
 
   private def setAttackPattern(): Unit = this.entity.getState match {
     case State.Attack01 if this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((0.1f, 1f),
-        this.entity.getPosition, (0, -1.5f), 60, 100)
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((1f, 10f),
+        this.entity.getPosition, (0, -15f), 60, 100)
     case State.Attack01 if !this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((0.1f, 1f),
-        this.entity.getPosition, (0, -1.5f), -60, -100)
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((1f, 10f),
+        this.entity.getPosition, (0, -15f), -60, -100)
     case State.Attack02 if this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((0.1f, 1f),
-        this.entity.getPosition, (0, 1.5f), -60, 10)
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((1f, 10f),
+        this.entity.getPosition, (0, 15f), -60, 10)
     case State.Attack02 if !this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((0.1f, 1f),
-        this.entity.getPosition, (0, 1.5f), 60, 10)
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((1f, 10f),
+        this.entity.getPosition, (0, 15f), 60, 10)
     case State.Attack03 if this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((1f, 0.2f),
-        this.entity.getPosition, (1.5f, 0), -80)
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((10f, 2f),
+        this.entity.getPosition, (15f, 0), -80)
     case State.Attack03 if !this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((1f, 0.2f),
-        this.entity.getPosition, (-1.5f, 0), 80)
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern((10f, 2f),
+        this.entity.getPosition, (-15f, 0), 80)
     case _ => throw new UnsupportedOperationException
   }
 

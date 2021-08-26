@@ -3,9 +3,10 @@ package model.attack
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.collisions.ApplyDamage
-import model.entities.{Entity, MobileEntity}
-import model.helpers.EntitiesFactoryImpl
 import model.helpers.EntitiesFactoryImpl.{createEnemyProjectile, createEnemySwordAttack}
+import model.collisions.ImplicitConversions.RichInt
+import model.entities.{Entity, MobileEntity, MobileEntityImpl}
+import model.helpers.EntitiesFactoryImpl
 import model.helpers.WorldUtilities.{checkBodyIsVisible, getBodiesDistance, isTargetOnTheRight}
 import model.movement.ProjectileTrajectory
 
@@ -94,7 +95,7 @@ class MeleeAttackStrategy(sourceEntity: Entity, targetEntity:Entity, world:World
       if (isTargetOnTheRight(sourceEntity.getBody, targetEntity.getBody))
         sourceEntity.getSize._1 else -sourceEntity.getSize._1, 0)
 
-    val entity:MobileEntity = createEnemySwordAttack((1f, 1f), (spawnCoordinates.x, spawnCoordinates.y), sourceEntity.getBody)
+    val entity:MobileEntity = createEnemySwordAttack((10f, 10f), (spawnCoordinates.x, spawnCoordinates.y), sourceEntity.getBody)
 
     entity.setCollisionStrategy(new ApplyDamage(entity, targetEntity))
     entity.getBody.setBullet(true)
@@ -105,8 +106,8 @@ class MeleeAttackStrategy(sourceEntity: Entity, targetEntity:Entity, world:World
 }
 
 class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World) extends AttackStrategy {
-  protected val maxDistance:Float = 15
-  protected val visibilityMaxHorizontalAngle:Int = 80
+  protected val maxDistance:Float = 50.PPM
+  protected val visibilityMaxHorizontalAngle:Int = 10
   protected val attackFrequency:Int = 2000
   protected val attackDuration:Int = 1500
 
@@ -142,7 +143,7 @@ class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World) 
       if (isTargetOnTheRight(sourceEntity.getBody, targetEntity.getBody))
         sourceEntity.getSize._1 else -sourceEntity.getSize._1, 0)
 
-    val entity:MobileEntity = createEnemyProjectile((0.5f, 0.5f), (spawnCoordinates.x, spawnCoordinates.y))
+    val entity:MobileEntity = createEnemyProjectile((5, 5), (spawnCoordinates.x, spawnCoordinates.y))
 
     entity.setMovementStrategy(new ProjectileTrajectory(entity, sourceEntity, targetEntity))
     entity.setCollisionStrategy(new ApplyDamage(entity, targetEntity))
