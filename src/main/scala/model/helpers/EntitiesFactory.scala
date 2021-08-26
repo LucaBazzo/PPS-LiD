@@ -99,7 +99,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createEnemyEntity(): Enemy = {
-    val position: (Float, Float) = (40f, 150f)
+    val position: (Float, Float) = (250f, 300f)
     val size: (Float, Float) = (10f, 10f)
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Enemy,

@@ -4,7 +4,7 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Rectangle
-import com.badlogic.gdx.physics.box2d.{Body, BodyDef, FixtureDef, PolygonShape, World}
+import com.badlogic.gdx.physics.box2d.World
 import model.Level
 import model.collisions.EntityType
 import model.entities.Entity
@@ -23,7 +23,7 @@ object TileMapHelper {
     new TmxMapLoader().load(path)
   }
 
-  def setWorld(world: World, level: Level, path: String): String = {
+  def setWorld(world: World, level: Level, path: String): Unit = {
 
     var rect: Rectangle = new Rectangle()
 
@@ -38,14 +38,12 @@ object TileMapHelper {
 
         val position: (Float, Float) = ((rect.getX*2 + rect.getWidth) , (rect.getY*2 + rect.getHeight) )
 
-        val entity: Entity = EntitiesFactoryImpl.createImmobileEntity(size, position, EntityType.Hero )
+        val entity: Entity = EntitiesFactoryImpl.createImmobileEntity(size, position, (EntityType.Hero | EntityType.Enemy).asInstanceOf[Short] )
         level.addEntity(entity)
 
       })
 
     })
-
-    "ok"
 
   }
 
