@@ -10,7 +10,6 @@ trait AttackStrategy {
   def stopAttack()
   def isAttackFinished: Boolean
 
-
   def decrementAttackTimer():Unit = ???
   def checkTimeEvent():Unit = ???
 

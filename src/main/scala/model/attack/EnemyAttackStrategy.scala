@@ -15,9 +15,10 @@ class DoNotAttack() extends AttackStrategy {
 
   override def apply(): Unit = { }
 
-  override def isAttackFinished: Boolean = false
+  override def isAttackFinished: Boolean = true
 
-  override def stopAttack(): Unit = ???
+  override def stopAttack(): Unit = { }
+
 }
 //
 //class ContactAttackStrategy(sourceEntity: Entity, targetEntity:Entity, world:World, level:Level)
@@ -60,7 +61,7 @@ class MeleeAttackStrategy(sourceEntity: Entity, targetEntity:Entity, world:World
   protected val maxDistance:Float = 4
   protected val visibilityMaxHorizontalAngle:Int = 80
   protected val attackFrequency:Int = 2000
-  protected val attackDuration:Int = 1000
+  protected val attackDuration:Int = 1200
 
   protected var lastAttackTime:Long = 0
 
@@ -107,7 +108,7 @@ class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World) 
   protected val maxDistance:Float = 15
   protected val visibilityMaxHorizontalAngle:Int = 80
   protected val attackFrequency:Int = 2000
-  protected val attackDuration:Int = 1000
+  protected val attackDuration:Int = 1500
 
   protected var lastAttackTime:Long = 0
 

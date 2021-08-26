@@ -4,7 +4,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.{RevoluteJointDef, WeldJointDef}
 import model._
-import model.attack.{HeroAttackStrategyImpl, RangedArrowAttack}
+import model.attack.{DoNotAttack, HeroAttackStrategyImpl, MeleeAttackStrategy}
 import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionStrategyImpl, DoNothingOnCollision, EntityType, ItemCollisionStrategy}
 import model.entities.ItemPools.ItemPools
@@ -20,7 +20,7 @@ trait EntitiesFactory {
 
   def createHeroEntity(): Hero
 
-  def createEnemyEntity(): Enemy
+  def createEnemyEntity(position: (Float, Float) = (0, 0)): Enemy
 
   def createItem(PoolName: ItemPools,
                  size: (Float, Float) = (0.5f, 0.5f),
@@ -106,9 +106,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     hero
   }
 
-  override def createEnemyEntity(): Enemy = {
-    val position: (Float, Float) = (4, 15)
-    val size: (Float, Float) = (1f, 1f)
+  override def createEnemyEntity(position: (Float, Float) = (0, 0)): Enemy = {
+    val size: (Float, Float) = (1f, 1.75f)
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Enemy,
       EntityType.Immobile | EntityType.Sword, createPolygonalShape(size), size, position)
@@ -117,15 +116,17 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     enemy.setCollisionStrategy(new DoNothingOnCollision())
 
-//    enemy.setAttackStrategy(new DoNotAttack())
+    enemy.setAttackStrategy(new DoNotAttack())
 //    enemy.setAttackStrategy(new ContactAttackStrategy(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
-//    enemy.setAttackStrategy(new MeleeAttackStrategy(enemy,
-//      level.getEntity(e => e.isInstanceOf[HeroImpl]), this.level.getWorld))
-    enemy.setAttackStrategy(new RangedArrowAttack(enemy,
-      level.getEntity(e => e.isInstanceOf[Hero]), this.level.getWorld))
+    enemy.setAttackStrategy(new MeleeAttackStrategy(enemy,
+      level.getEntity(e => e.isInstanceOf[HeroImpl]), this.level.getWorld))
+//    enemy.setAttackStrategy(new RangedArrowAttack(enemy,
+//      level.getEntity(e => e.isInstanceOf[Hero]), this.level.getWorld))
 
     enemy.setMovementStrategy(new PatrolAndStopIfFacingHero(enemy, this.level.getWorld,
       level.getEntity(e => e.isInstanceOf[Hero]) ))
+//    enemy.setMovementStrategy(new PatrolPlatform(enemy, this.level.getWorld))
+//    enemy.setMovementStrategy(new DoNotMove())
 
     this.level.addEntity(enemy)
     enemy
@@ -276,34 +277,3 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
 }
-
-//  override def createEnemyEntity(position: (Float, Float), size:Float): EnemyImpl = {
-//
-//    val bodyDef: BodyDef = new BodyDef()
-//    bodyDef.position.set(position._1, position._2)
-//    bodyDef.`type` = BodyDef.BodyType.DynamicBody
-//
-//    val body: Body = world.createBody(bodyDef)
-//
-//    val fixtureDef: FixtureDef = new FixtureDef()
-//    val shape: CircleShape = new CircleShape()
-//    shape.setRadius(size)
-//    fixtureDef.shape = shape
-//    fixtureDef.filter.categoryBits = EntitiesBits.ENEMY_CATEGORY_BIT
-//    fixtureDef.filter.maskBits = EntitiesBits.ENEMY_COLLISIONS_MASK
-//
-//    body.createFixture(fixtureDef)
-//
-//    val enemy:EnemyImpl = EnemyImpl(body, (size,size))
-//
-//    enemy.setCollisionStrategy(new DoNothingOnCollision())
-//
-////    enemy.setAttackStrategy(new DoNotAttack())
-////    enemy.setAttackStrategy(new ContactAttackStrategy(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
-////    enemy.setAttackStrategy(new MeleeAttackStrategy(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
-//    enemy.setAttackStrategy(new RangedArrowAttack(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
-//
-//    enemy.setMovementStrategy(new PatrolAndStopIfFacingHero(enemy, world, level.getEntity(e => e.isInstanceOf[HeroImpl]) ))
-//
-//    enemy
-//  }
