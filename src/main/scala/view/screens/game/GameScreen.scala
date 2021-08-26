@@ -10,8 +10,8 @@ import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
 import model.entities._
 import model.helpers.EntitiesGetter
-import utils.ApplicationConstants
 import utils.ApplicationConstants._
+import utils.SpritesConstants
 import view.inputs.GameInputProcessor
 import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{EntitySprite, SpriteFactory, SpriteFactoryImpl}
@@ -33,18 +33,21 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   //this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
   private val spriteFactory: SpriteFactory = new SpriteFactoryImpl()
-  private val itemSprite: EntitySprite = spriteFactory.createEntitySprite(ApplicationConstants.SPRITES_PACK_LOCATION,
+  private val itemSprite: EntitySprite = spriteFactory.createEntitySprite(SpritesConstants.ITEMS_SPRITES_PACK_LOCATION,
     "items", 32, 32)
+  private val heroSprite: EntitySprite = spriteFactory.createEntitySprite(SpritesConstants.HERO_SPRITES_PACK_LOCATION,
+    "hero", 50, 37)
+  private val skeletonSprite: EntitySprite = spriteFactory.createEntitySprite(SpritesConstants.ENEMIES_SPRITES_PACK_LOCATION,
+    "skeleton", 150, 150)
+
+  this.defineHeroSpriteAnimations()
+  this.defineSkeletonSpriteAnimations()
   this.itemSprite.addAnimation(State.Standing,
     spriteFactory.createSpriteAnimation(itemSprite, 0, 0, 0, 0.20f))
 
-  private val heroSprite: EntitySprite = spriteFactory.createEntitySprite(ApplicationConstants.SPRITES_PACK_LOCATION,
-    "hero", 50, 37)
-  this.defineHeroSpriteAnimations()
-
-  private val skeletonSprite: EntitySprite = spriteFactory.createEntitySprite(ApplicationConstants.ENEMIES_SPRITES_PACK_LOCATION,
-    "skeleton", 98, 59)
-  this.defineSkeletonSpriteAnimations()
+  this.heroSprite.setSize(0.85f * 6.47f,1.4f * 2.57f)
+  this.itemSprite.setSize(0.5f * 2.57f,0.5f * 2.57f)
+  this.skeletonSprite.setSize(10,10)
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
@@ -83,14 +86,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       spriteFactory.createSpriteAnimationFromTwoRows(skeletonSprite, 1, 5, 6,
         2,0,1,0.18f),
       loop = true)
-
     this.skeletonSprite.addAnimation(State.Running,
       spriteFactory.createSpriteAnimation(skeletonSprite, 3, 3, 6, 0.18f),
       loop = true)
-
     this.skeletonSprite.addAnimation(State.Attack01,
       spriteFactory.createSpriteAnimationFromTwoRows(skeletonSprite, 0, 0, 6,
-        1,0,0,0.18f))
+        1,0,0,0.15f))
 
     // TODO: add take-hit animation
   }
@@ -127,7 +128,6 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       val player: Hero = entities.get.head.asInstanceOf[Hero]
       this.camera.position.x = player.getPosition._1
       this.camera.position.y = player.getPosition._2
-
       this.heroSprite.setPosition(player.getPosition._1 - player.getSize._1 * 6.47f / 2,
         player.getPosition._2 - player.getSize._2, player.isLittle)
       this.heroSprite.update(delta, player.getState, player.isFacingRight)
@@ -136,11 +136,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     val skeletonEntities: Option[List[Entity]] = entitiesGetter.getEntities(
       (x: Entity) => x.isInstanceOf[Enemy] && x.asInstanceOf[EnemyImpl].getType().equals(EnemyType.Skeleton))
     if (skeletonEntities.nonEmpty) {
-      // TODO: adapt to multiple skeletons instances
-      val skeleton: Enemy = skeletonEntities.get.head.asInstanceOf[EnemyImpl]
-      this.skeletonSprite.setPosition(skeleton.getPosition._1 - skeleton.getSize._1,
-        skeleton.getPosition._2 - skeleton.getSize._2, false)
-      this.skeletonSprite.update(delta, skeleton.getState, skeleton.isFacingRight)
+      for (skeleton <- skeletonEntities.get) {
+        // TODO: adapt to multiple skeletons instances
+        this.skeletonSprite.setPosition(skeleton.getBody.getWorldCenter.x,
+          skeleton.getBody.getWorldCenter.y, false)
+        this.skeletonSprite.update(delta, skeleton.getState, skeleton.asInstanceOf[MobileEntity].isFacingRight)
+      }
     }
 
     val items: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Item])
@@ -166,9 +167,6 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     batch.begin()
     // render objects inside
 
-    this.heroSprite.setSize(0.85f * 6.47f,1.4f * 2.57f)
-    this.skeletonSprite.setSize(0.85f * 6.47f,1.4f * 2.57f)
-    this.itemSprite.setSize(0.5f * 2.57f,0.5f * 2.57f)
     this.heroSprite.draw(batch)
     this.skeletonSprite.draw(batch)
     this.itemSprite.draw(batch)
