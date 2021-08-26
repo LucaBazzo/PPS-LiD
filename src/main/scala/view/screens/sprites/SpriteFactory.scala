@@ -25,12 +25,14 @@ trait SpriteFactory {
 class SpriteFactoryImpl extends SpriteFactory {
 
   private val atlas: TextureAtlas = new TextureAtlas(SPRITES_PACK_LOCATION)
-  private var offset: Int = 0
+  private var offsetX: Int = 0
+  private var offsetY: Int = 0
 
   override def createHeroSprite(regionName: String, spriteWidth: Float, spriteHeight: Float): EntitySprite = {
     val sprite = new HeroEntitySprite(spriteWidth, spriteHeight)
     sprite.setRegion(this.atlas.findRegion(regionName))
-    this.offset = sprite.getRegionY - 1
+    this.offsetX = sprite.getRegionX - 1
+    this.offsetY = sprite.getRegionY - 1
     sprite.setBounds(0, 0, spriteWidth, spriteHeight)
     sprite
   }
@@ -40,7 +42,8 @@ class SpriteFactoryImpl extends SpriteFactory {
                                   sizeMultiplicative: Float = 1): EntitySprite = {
     val sprite = new EntitySpriteImpl(entitySpriteWidth * sizeMultiplicative, entitySpriteHeight * sizeMultiplicative)
     sprite.setRegion(this.atlas.findRegion(regionName))
-    this.offset = sprite.getRegionY - 1
+    this.offsetX = sprite.getRegionX - 1
+    this.offsetY = sprite.getRegionY - 1
     sprite.setBounds(0, 0, spriteWidth, spriteHeight)
     sprite
   }
@@ -52,8 +55,8 @@ class SpriteFactoryImpl extends SpriteFactory {
     val frames: Array[TextureRegion] = new Array[TextureRegion]()
 
     for(i <- startIndex to endIndex){
-      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth,
-        sprite.getIntHeight * rowNumber + this.offset , sprite.getIntWidth, sprite.getIntHeight))
+      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth + this.offsetX,
+        sprite.getIntHeight * rowNumber + this.offsetY , sprite.getIntWidth, sprite.getIntHeight))
     }
 
     new Animation(frameDuration, frames)
@@ -67,13 +70,13 @@ class SpriteFactoryImpl extends SpriteFactory {
     val frames: Array[TextureRegion] = new Array[TextureRegion]()
 
     for(i <- startIndex to endIndex){
-      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth,
-        sprite.getIntHeight * rowNumber + this.offset , sprite.getIntWidth, sprite.getIntHeight))
+      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth + this.offsetX,
+        sprite.getIntHeight * rowNumber + this.offsetY , sprite.getIntWidth, sprite.getIntHeight))
     }
 
     for(i <- startIndex2 to endIndex2){
-      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth,
-        sprite.getIntHeight * rowNumber2 + this.offset , sprite.getIntWidth, sprite.getIntHeight))
+      frames.add(new TextureRegion(sprite.getTexture, i * sprite.getIntWidth + this.offsetX,
+        sprite.getIntHeight * rowNumber2 + this.offsetY , sprite.getIntWidth, sprite.getIntHeight))
     }
 
     new Animation(frameDuration, frames)

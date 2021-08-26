@@ -20,6 +20,7 @@ object EntityType extends Enumeration {
   val Immobile: Short = getNextBitValue
   val Item: Short = getNextBitValue
   val Sword: Short = getNextBitValue
+  val Arrow: Short = getNextBitValue
 
   private def getNextBitValue: Short = {
     this.currentBitValue = this.currentBitValue * bitMulti
@@ -54,6 +55,8 @@ object ImplicitConversions {
     def *(mul: Float): (Float, Float) = (base._1 * mul, base._2 * mul)
 
     def +(tuple: (Float, Float)): (Float, Float) = (base._1 + tuple._1, base._2 + tuple._2)
+
+    def -(tuple: (Float, Float)): (Float, Float) = (base._1 - tuple._1, base._2 - tuple._2)
   }
 }
 

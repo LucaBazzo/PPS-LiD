@@ -1,7 +1,6 @@
 package model.collisions
 
 import model.entities.{Entity, HeroImpl, ItemImpl}
-import model.Level
 import model.helpers.EntitiesFactoryImpl
 
 trait CollisionStrategy {
@@ -31,11 +30,13 @@ class ApplyDamage(private val sourceEntity:Entity, private val targetEntity:Enti
   override def apply(entity: Entity): Unit = {
     if (entity equals targetEntity) {
       println("attacking target")
+    } else {
+      println("destroyed source")
     }
   }
 }
 
-class ApplyDamageAndDestroyEntity(private val sourceEntity:Entity, private val targetEntity:Entity)
+class ApplyDamageAndDestroyEntity(private val sourceEntity: Entity, private val targetEntity: Entity)
   extends ApplyDamage(sourceEntity, targetEntity) {
 
   override def apply(entity: Entity): Unit = {
@@ -44,3 +45,4 @@ class ApplyDamageAndDestroyEntity(private val sourceEntity:Entity, private val t
     EntitiesFactoryImpl.removeEntity(sourceEntity)
   }
 }
+

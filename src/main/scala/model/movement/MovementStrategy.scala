@@ -112,7 +112,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
 
 class ArrowMovementStrategy(private val entity: MobileEntity, private var speed: Float) extends MovementStrategy {
 
-  private val arrowForce: Float = 12000f.PPM
+  private val arrowForce: Float = 15000f.PPM
 
   override def apply(): Unit = {
     if (entity.isFacingRight) {

@@ -22,7 +22,7 @@ class EnemyImpl(private var entityBody: EntityBody, private val size: (Float, Fl
   val attackDamage = 10
 
   override def update(): Unit = {
-    this.move // movementStrategy.move()
+    this.move() // movementStrategy.move()
     attackStrategy.apply()
 
 

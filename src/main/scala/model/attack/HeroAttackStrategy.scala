@@ -2,11 +2,8 @@ package model.attack
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.entities.{Hero, MobileEntity, State, Statistic}
+import model.entities.{Hero, MobileEntity, State}
 import model.helpers.EntitiesFactoryImpl
-import model.movement.ArrowMovementStrategy
-import utils.ApplicationConstants.PIXELS_PER_METER
-import model.collisions.ImplicitConversions._
 
 class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Float) extends AttackStrategy {
 
@@ -91,13 +88,7 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
   private def setBowAttack(): Unit = {
     this.entity.stopMovement()
     this.entity.setState(State.BowAttack)
-    //TODO mettere a posto
-    val size: (Float, Float) = (10, 1)
-    val newPosition: (Float, Float) = this.entity.getPosition * PIXELS_PER_METER + (this.entity.getSize._1 * PIXELS_PER_METER + 10, 0)
-    this.attackPattern = EntitiesFactoryImpl.createMobileEntity(size, newPosition , useGravity = false)
-    this.attackPattern.setMovementStrategy(new ArrowMovementStrategy(this.attackPattern, this.entity.getStatistics(Statistic.MovementSpeed)))
     this.restartTimer(175)
-    println("Bow Attack")
   }
 
   override def checkTimeEvent(): Unit = {
@@ -114,6 +105,7 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
     //TODO riguardare in futuro per refactoring
     if (this.entity.getState == State.BowAttack && !timeEventPresent &&
       this.attackTimer <= 20 && this.attackTimer > 10) {
+      this.attackPattern = EntitiesFactoryImpl.createArrowProjectile(this.entity)
       this.attackPattern.move()
       this.timeEventPresent = true
     }

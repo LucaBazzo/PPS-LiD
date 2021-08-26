@@ -8,8 +8,9 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
+import model.collisions.EntityType
 import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Entity, Hero, Item, State, Statistic}
+import model.entities.{Entity, Hero, Item, MobileEntity, State, Statistic}
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
@@ -40,6 +41,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val heroSprite: EntitySprite = spriteFactory.createHeroSprite("hero", 50, 37)
   this.defineHeroSpriteAnimations()
+
+  private val arrowSprite: EntitySprite = spriteFactory.createEntitySprite("arrow", 40,
+    5, 10, 1, 2)
+  this.arrowSprite.addAnimation(State.Standing,
+    spriteFactory.createSpriteAnimation(arrowSprite, 0, 0, 0))
+
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
@@ -122,6 +129,17 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.itemSprite.update(delta, item)
     }
 
+    val mobileEntities: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[MobileEntity])
+    if(mobileEntities.nonEmpty){
+      if(mobileEntities.get.asInstanceOf[List[MobileEntity]].exists((x: MobileEntity) => x.getEntityType == EntityType.Arrow)){
+        val arrow: MobileEntity = mobileEntities.get.asInstanceOf[List[MobileEntity]].filter((x: MobileEntity) => x.getEntityType == EntityType.Arrow).head
+        this.arrowSprite.update(delta, arrow)
+      }
+
+
+    }
+
+
     this.camera.update()
 
     // render the map
@@ -136,6 +154,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     // render objects inside
     this.heroSprite.draw(batch)
     this.itemSprite.draw(batch)
+    this.arrowSprite.draw(batch)
     this.hud.drawHealthBar(batch)
 
     batch.end()

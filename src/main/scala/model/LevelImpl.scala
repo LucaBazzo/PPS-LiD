@@ -49,6 +49,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     this.entitiesList.foreach((entity: Entity) => entity.update())
 
     this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+
+    this.entitiesFactory.destroyBodies()
   }
 
   override def addEntity(entity: Entity): Unit = {

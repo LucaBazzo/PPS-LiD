@@ -1,17 +1,17 @@
 package model.helpers
 
-import _root_.utils.ApplicationConstants.HERO_SIZE
+import _root_.utils.ApplicationConstants._
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef
 import model._
 import model.attack.{HeroAttackStrategyImpl, RangedArrowAttack}
 import model.collisions.ImplicitConversions._
-import model.collisions.{CollisionStrategyImpl, DoNothingOnCollision, EntityType, ItemCollisionStrategy}
+import model.collisions.{ApplyDamageAndDestroyEntity, CollisionStrategyImpl, DoNothingOnCollision, EntityType, ItemCollisionStrategy}
 import model.entities.ItemPools.ItemPools
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, _}
-import model.movement.{CircularMovementStrategy, HeroMovementStrategy, PatrolAndStopIfFacingHero}
+import model.movement.{ArrowMovementStrategy, CircularMovementStrategy, HeroMovementStrategy, PatrolAndStopIfFacingHero}
 
 import scala.collection.immutable.HashMap
 
@@ -21,6 +21,8 @@ trait EntitiesFactory {
 
   def createMobileEntity(size: (Float, Float) = (10, 10),
                          position: (Float, Float) = (0, 0),
+                         entityType: Short = EntityType.Mobile,
+                         collisions: Short = 0,
                          gravity: Boolean = true): MobileEntity
 
   def createHeroEntity(): Hero
@@ -52,6 +54,8 @@ trait EntitiesFactory {
   def createEnemyProjectile(size: (Float, Float) = (10, 10),
                             position: (Float, Float) = (0, 0)): MobileEntity
 
+  def createArrowProjectile(entity: LivingEntity): MobileEntity
+
   def createJoint(pivotBody: Body, rotatingBody: Body): Joint
 
   def removeEntity(entity: Entity)
@@ -59,6 +63,8 @@ trait EntitiesFactory {
   def createBody(bodyDef: BodyDef): Body
   def destroyBody(body: Body)
   def destroyJoint(joint: Joint)
+
+  def destroyBodies()
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -74,11 +80,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createMobileEntity(size: (Float, Float) = (10, 10),
                                   position: (Float, Float) = (0, 0),
+                                  entityType: Short = EntityType.Mobile,
+                                  collisions: Short = 0,
                                   useGravity: Boolean = true): MobileEntity = {
 
-    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Mobile,
-      EntityType.Immobile | EntityType.Enemy | EntityType.Hero, createPolygonalShape(size.PPM), position.PPM,
-      gravity = useGravity)
+    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, entityType,
+      collisions, createPolygonalShape(size.PPM), position.PPM, gravity = useGravity)
 
     val mobileEntity: MobileEntity = new MobileEntityImpl(entityBody, size.PPM, new HashMap[Statistic, Float]())
     this.level.addEntity(mobileEntity)
@@ -204,7 +211,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     circularMobileEntity
   }
 
-override def createEnemyProjectile(size: (Float, Float) = (10, 10),
+  override def createEnemyProjectile(size: (Float, Float) = (10, 10),
                                   position: (Float, Float) = (0, 0)): MobileEntity = {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Mobile,
@@ -213,6 +220,25 @@ override def createEnemyProjectile(size: (Float, Float) = (10, 10),
     val arrowEntity: TimedAttack = new TimedAttack(entityBody, size.PPM, 1000, new HashMap[Statistic, Float]())
     this.level.addEntity(arrowEntity)
     arrowEntity
+  }
+
+
+  override def createArrowProjectile(entity: LivingEntity): MobileEntity = {
+    //TODO mettere a posto
+    val size: (Float, Float) = (8, 1)
+
+    var newPosition: (Float, Float) = entity.getPosition * PIXELS_PER_METER
+    if(entity.isFacingRight)
+      newPosition += (entity.getSize._1 * PIXELS_PER_METER + size._1, 0)
+    else
+      newPosition -= (entity.getSize._1 * PIXELS_PER_METER + size._1, 0)
+    val arrow: MobileEntity = EntitiesFactoryImpl.createMobileEntity(size, newPosition, EntityType.Arrow,
+      EntityType.Immobile | EntityType.Enemy , useGravity = false)
+    arrow.setFacing(entity.isFacingRight)
+    arrow.setType(EntityType.Arrow)
+    arrow.setMovementStrategy(new ArrowMovementStrategy(arrow, entity.getStatistics(Statistic.MovementSpeed)))
+    arrow.setCollisionStrategy(new ApplyDamageAndDestroyEntity(arrow, null))
+    arrow
   }
 
   override def createJoint(pivotBody: Body, rotatingBody: Body): Joint = {
@@ -225,12 +251,22 @@ override def createEnemyProjectile(size: (Float, Float) = (10, 10),
 
   override def removeEntity(entity: Entity): Unit = this.level.removeEntity(entity)
 
-  override def destroyBody(body: Body): Unit = this.level.getWorld.destroyBody(body)
-
   override def destroyJoint(joint: Joint): Unit = this.level.getWorld.destroyJoint(joint)
 
   override def createBody(bodyDef: BodyDef): Body = this.level.getWorld.createBody(bodyDef)
 
+  var bodiesToBeDestroyed: List[Body] = List.empty
+
+  override def destroyBody(body: Body): Unit = synchronized {
+    this.bodiesToBeDestroyed = body :: this.bodiesToBeDestroyed
+  }
+
+  override def destroyBodies(): Unit = synchronized {
+    for(body <- bodiesToBeDestroyed) {
+      this.level.getWorld.destroyBody(body)
+    }
+    this.bodiesToBeDestroyed = List.empty
+  }
 
   private def defineEntityBody(bodyType: BodyType,
                                entityType: Short,
@@ -255,7 +291,6 @@ override def createEnemyProjectile(size: (Float, Float) = (10, 10),
 
     entityBody
   }
-
 }
 
 //  override def createEnemyEntity(position: (Float, Float), size:Float): EnemyImpl = {

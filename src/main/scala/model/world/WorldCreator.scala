@@ -11,9 +11,9 @@ class WorldCreator(private val level: Level) {
   private val rectangle: Entity = EntitiesFactoryImpl.createImmobileEntity((120, 6f), (0, -20), EntityType.Hero | EntityType.Enemy)
   level.addEntity(rectangle)
 
-  private val enemy: Entity = EntitiesFactoryImpl.createImmobileEnemy((5f, 5f), (80, 10), EntityType.Hero | EntityType.Sword)
+  private val enemy: Entity = EntitiesFactoryImpl.createImmobileEnemy((5f, 50f), (80, 10), EntityType.Hero | EntityType.Sword | EntityType.Arrow)
   level.addEntity(enemy)
 
-  private val square: Entity = EntitiesFactoryImpl.createImmobileEnemy((5f, 10), (-80, 15f), EntityType.Hero)
+  private val square: Entity = EntitiesFactoryImpl.createImmobileEnemy((5f, 10), (-80, 15f), EntityType.Hero | EntityType.Arrow)
   level.addEntity(square)
 }

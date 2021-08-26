@@ -3,6 +3,7 @@ package model.entities
 import com.badlogic.gdx.physics.box2d.Joint
 import model.helpers.EntitiesFactoryImpl
 import model.EntityBody
+import model.collisions.EntityType
 import model.entities.Statistic.Statistic
 import model.movement.MovementStrategy
 
@@ -19,6 +20,9 @@ trait MobileEntity extends Entity {
   def stopMovement()
   def setFacing(right: Boolean)
   def isFacingRight: Boolean
+
+  def setType(entityType: Short)
+  def getEntityType: Short
 }
 
 class MobileEntityImpl(private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float]) extends EntityImpl(entityBody, size) with MobileEntity {
@@ -40,6 +44,11 @@ class MobileEntityImpl(private var entityBody: EntityBody, private val size: (Fl
   override def setFacing(right: Boolean): Unit = this.facingRight = right
 
   override def isFacingRight: Boolean = this.facingRight
+
+  //TODO temporaneo
+  private var entityType: Short = EntityType.Mobile
+  override def setType(entityType: Short): Unit = this.entityType = entityType
+  override def getEntityType: Short = this.entityType
 }
 
 
