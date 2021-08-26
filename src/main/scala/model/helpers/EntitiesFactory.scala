@@ -59,12 +59,13 @@ trait EntitiesFactory {
   def createBody(bodyDef: BodyDef): Body
   def destroyBody(body: Body)
   def destroyJoint(joint: Joint)
+  def destroyBodies(): Unit
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
 
   private var level: Level = _
-
+  private var bodiesToBeDestroyed: List[Body] = List.empty
   private var itemPool: ItemPool = _
 
   override def setLevel(level: Level, pool: ItemPool): Unit = {
@@ -216,7 +217,16 @@ override def createEnemyProjectile(size: (Float, Float) = (10, 10),
 
   override def removeEntity(entity: Entity): Unit = this.level.removeEntity(entity)
 
-  override def destroyBody(body: Body): Unit = this.level.getWorld.destroyBody(body)
+  override def destroyBody(body: Body): Unit = synchronized {
+    this.bodiesToBeDestroyed = body :: this.bodiesToBeDestroyed
+  }
+
+  override def destroyBodies(): Unit = synchronized {
+    for(body <- bodiesToBeDestroyed) {
+      this.level.getWorld.destroyBody(body)
+    }
+    this.bodiesToBeDestroyed = List.empty
+  }
 
   override def destroyJoint(joint: Joint): Unit = this.level.getWorld.destroyJoint(joint)
 

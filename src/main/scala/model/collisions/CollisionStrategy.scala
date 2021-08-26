@@ -19,7 +19,7 @@ class ItemCollisionStrategy(private val item: Item) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
     case h:Hero => println("Hero picked up item")
                    val effect = item.collect()
-                   println(effect._3 + "\n")
+                   println(effect._3 + "\n +" + item.getScore + " points")
                    h.alterStatistics(effect._1, effect._2)
     case _ => println("____")
   }
