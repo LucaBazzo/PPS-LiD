@@ -12,7 +12,8 @@ object State extends Enumeration {
   type State = Value
   val Standing, Crouch, Sliding,
       Running, Jumping, Falling, Somersault,
-      Attack01, Attack02, Attack03 = Value
+      Attack01, Attack02, Attack03,
+      BowAttack = Value
 }
 
 trait Entity {

@@ -3,7 +3,7 @@ package model.movement
 import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions.{RichFloat, _}
-import model.entities.{Hero, State}
+import model.entities.{Hero, MobileEntity, State}
 import utils.ApplicationConstants.HERO_SIZE_SMALL
 
 trait MovementStrategy {
@@ -37,7 +37,8 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
 
   private def checkCommand(command: GameEvent): Boolean = {
     if(entity.getState != State.Sliding && entity.getState != State.Attack01 &&
-      entity.getState != State.Attack02 && entity.getState != State.Attack03) {
+      entity.getState != State.Attack02 && entity.getState != State.Attack03 &&
+      entity.getState != State.BowAttack) {
       command match {
         case GameEvent.Jump => return entity.getState != State.Falling &&
                 entity.getState != State.Somersault && entity.getState != State.Crouch
@@ -107,4 +108,27 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   private def setSpeed(force: (Float, Float)): (Float, Float) = force * speed
 
   override def apply(): Unit = ???
+}
+
+class ArrowMovementStrategy(private val entity: MobileEntity, private var speed: Float) extends MovementStrategy {
+
+  private val arrowForce: Float = 12000f.PPM
+
+  override def apply(): Unit = {
+    if (entity.isFacingRight) {
+      this.applyLinearImpulse(this.setSpeed(arrowForce, 0))
+    }
+    else {
+      this.applyLinearImpulse(this.setSpeed(-arrowForce, 0))
+    }
+  }
+
+  override def apply(command: GameEvent): Unit = ???
+
+  override def stopMovement(): Unit = this.entity.getBody.setLinearVelocity(0,0)
+
+  private def setSpeed(force: (Float, Float)): (Float, Float) = force * speed
+
+  private def applyLinearImpulse(vector: (Float, Float)): Unit =
+    entity.getBody.applyLinearImpulse(entity.vectorScalar(vector), entity.getBody.getWorldCenter, true)
 }

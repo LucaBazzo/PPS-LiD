@@ -20,7 +20,8 @@ trait EntitiesFactory {
   def setLevel(level: Level, pool: ItemPool)
 
   def createMobileEntity(size: (Float, Float) = (10, 10),
-                         position: (Float, Float) = (0, 0)): Entity
+                         position: (Float, Float) = (0, 0),
+                         gravity: Boolean = true): MobileEntity
 
   def createHeroEntity(): Hero
 
@@ -72,10 +73,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createMobileEntity(size: (Float, Float) = (10, 10),
-                                  position: (Float, Float) = (0, 0)): Entity = {
+                                  position: (Float, Float) = (0, 0),
+                                  useGravity: Boolean = true): MobileEntity = {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Mobile,
-      EntityType.Immobile | EntityType.Enemy | EntityType.Hero, createPolygonalShape(size.PPM), position.PPM)
+      EntityType.Immobile | EntityType.Enemy | EntityType.Hero, createPolygonalShape(size.PPM), position.PPM,
+      gravity = useGravity)
 
     val mobileEntity: MobileEntity = new MobileEntityImpl(entityBody, size.PPM, new HashMap[Statistic, Float]())
     this.level.addEntity(mobileEntity)

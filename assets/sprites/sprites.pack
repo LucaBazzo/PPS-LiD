@@ -6,8 +6,8 @@ repeat: none
 hero
   rotate: false
   xy: 1, 99
-  size: 385, 592
-  orig: 385, 592
+  size: 385, 666
+  orig: 385, 666
   offset: 0, 0
   index: -1
 items
@@ -15,5 +15,12 @@ items
   xy: 1, 1
   size: 224, 96
   orig: 224, 96
+  offset: 0, 0
+  index: -1
+arrow
+  rotate: false
+  xy: 388, 760
+  size: 40, 5
+  orig: 40, 5
   offset: 0, 0
   index: -1

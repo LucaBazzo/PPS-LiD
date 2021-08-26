@@ -38,7 +38,7 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
     case GameEvent.Jump | GameEvent.MoveRight | GameEvent.MoveLeft | GameEvent.Slide => move(command)
     case GameEvent.Crouch => this.crouch()
     case GameEvent.StopCrouch => if(this.state == State.Crouch) this.state = State.Standing
-    case GameEvent.Attack => attack(command)
+    case GameEvent.Attack | GameEvent.BowAttack => attack(command)
     case _ => throw new UnsupportedOperationException
   }
 
@@ -104,8 +104,9 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
         && (this.state == State.Jumping || this.state == State.Falling))
         this.state = State.Running
       else if((this.entityBody.getBody.getLinearVelocity.y == 0 && this.entityBody.getBody.getLinearVelocity.x == 0)
-        && this.state != State.Crouch &&
-        this.state != State.Attack01 && this.state != State.Attack02 && this.state != State.Attack03)
+        && this.state != State.Crouch
+        && this.state != State.Attack01 && this.state != State.Attack02 && this.state != State.Attack03
+        && this.state != State.BowAttack)
         this.state = State.Standing
 
       if(this.state != State.Sliding && this.state != State.Crouch && isLittle) {
@@ -121,6 +122,10 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
       if((this.state == State.Attack01 || this.state == State.Attack02 || this.state == State.Attack03)
             && this.attackStrategy.isAttackFinished){
         this.attackStrategy.stopAttack()
+        this.state = State.Standing
+      }
+
+      if(this.state == State.BowAttack && this.attackStrategy.isAttackFinished){
         this.state = State.Standing
       }
     }
