@@ -7,7 +7,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
-import controller.{GameEvent, ObserverManager}
+import controller.{GameEvent, ObserverManager, SoundManager}
 import model.collisions.ImplicitConversions.RichInt
 import model.entities.{Entity, Hero, Item, State}
 import model.helpers.EntitiesGetter
