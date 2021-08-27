@@ -20,6 +20,7 @@ object ApplicationConstants {
   val SPRITES_PACK_LOCATION = "assets/sprites/sprites.pack"
 
   val LEVEL_MUSIC_LOCATION = "assets/audio/music.mp3"
+  val JUMP_SOUND_LOCATION = "assets/audio/stomp.wav"
 
   val HERO_SIZE: (Float, Float) = (8.5f, 15f)
 

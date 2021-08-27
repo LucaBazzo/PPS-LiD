@@ -1,7 +1,7 @@
 package model.movement
 
 import com.badlogic.gdx.math.Vector2
-import controller.GameEvent
+import controller.{GameEvent, SoundManager}
 import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions.RichFloat
 import model.entities.{Hero, State}
@@ -15,6 +15,8 @@ trait MovementStrategy {
 }
 
 class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
+
+  private val soundManager: SoundManager = new SoundManager()
 
   override def apply(command: GameEvent): Unit = {
     if(checkCommand(command)) {
@@ -45,6 +47,7 @@ class HeroMovementStrategy(private val entity: Hero) extends MovementStrategy {
 
   private def jump(): Unit = {
     this.applyLinearImpulse(new Vector2(0, 7500f.PPM))
+    this.soundManager.jumpSound()
     if(this.entity.getState == State.Jumping)
       this.entity.setState(State.Somersault)
     else
