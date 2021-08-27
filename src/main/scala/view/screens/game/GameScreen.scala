@@ -30,9 +30,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val viewPort: FitViewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  TileMapHelper.setWorld(world, level, "assets/maps/map1.tmx")
+  TileMapHelper.setWorld(world, level, "assets/maps/map2.tmx")
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map1.tmx")
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map2.tmx")
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 

@@ -41,21 +41,18 @@ object TileMapHelper {
         var entity: Entity = null
 
         layer.getName() match {
-          case "ground" => {
+          case "ground" | "bridge" => {
             entity = EntitiesFactoryImpl.createImmobileEntity(size, position, (EntityType.Hero | EntityType.Enemy).asInstanceOf[Short] )
-            level.addEntity(entity)
           }
-          case "lava" => {
+          case "water" | "lava" | "ladder" => {
             entity = EntitiesFactoryImpl.createImmobileEntity(size, position)
-            level.addEntity(entity)
           }
-          case "bridge" => {
-            entity = EntitiesFactoryImpl.createImmobileEntity(size, position, (EntityType.Hero | EntityType.Enemy).asInstanceOf[Short] )
-            level.addEntity(entity)
+          case _ => {
+            println("not supported layer: " + layer.getName())
           }
-          //case "ladder" => {}
-          case _ => {}
         }
+
+        if (entity != null) level.addEntity(entity)
 
       })
 
