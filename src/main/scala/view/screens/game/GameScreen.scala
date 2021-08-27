@@ -131,12 +131,11 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     }
 
     val skeletonEntities: Option[List[Entity]] = entitiesGetter.getEntities(
-      (x: Entity) => x.isInstanceOf[Enemy] && x.asInstanceOf[EnemyImpl].getType().equals(EnemyType.Skeleton))
+      (x: Entity) => x.isInstanceOf[Enemy] && x.asInstanceOf[EnemyImpl].getType.equals(EnemyType.Skeleton))
     if (skeletonEntities.nonEmpty) {
       for (skeletonEntity <- skeletonEntities.get) {
         val skeleton = skeletonEntity.asInstanceOf[MobileEntity]
         // TODO: adapt to multiple skeletons instances
-//        this.skeletonSprite.update(delta, skeleton.getState, skeleton.asInstanceOf[MobileEntity].isFacingRight)
         this.skeletonSprite.update(delta, skeleton)
       }
     }

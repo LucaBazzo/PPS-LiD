@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Vector2
 import _root_.utils.ApplicationConstants.PIXELS_PER_METER
 
 object EntityType extends Enumeration {
-
   private var currentBitValue: Short = 1
   private val bitMulti: Int = 2
 

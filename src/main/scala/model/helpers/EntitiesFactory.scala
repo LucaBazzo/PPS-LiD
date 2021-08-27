@@ -5,14 +5,16 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.{RevoluteJointDef, WeldJointDef}
 import model._
-import model.attack.{DoNotAttack, HeroAttackStrategyImpl, MeleeAttackStrategy}
+import model.attack.{AttackStrategy, ContactAttack, HeroAttackStrategyImpl, MeleeAttack}
 import model.collisions.ImplicitConversions._
-import model.collisions.{CollisionStrategyImpl, DoNothingOnCollision, EntityType, ItemCollisionStrategy}
+import model.collisions._
+import model.entities.EnemyType.EnemyType
 import model.entities.ItemPools.ItemPools
+import model.entities.Statistic.Statistic
 import model.entities.{Entity, _}
-import model.movement.{CircularMovementStrategy, HeroMovementStrategy, PatrolAndStopIfFacingHero}
+import model.movement.{CircularMovementStrategy, HeroMovementStrategy, MovementStrategy, PatrolAndStop}
 
-import scala.collection.immutable.HashMap
+import scala.collection.mutable
 
 trait EntitiesFactory {
 
@@ -23,7 +25,15 @@ trait EntitiesFactory {
 
   def createHeroEntity(): Hero
 
-  def createEnemyEntity(position: (Float, Float) = (0, 0)): Enemy
+  def createEnemyEntity(position: (Float, Float),
+                        size: (Float, Float),
+                        statistics: mutable.Map[Statistic, Float],
+                        score: Int,
+                        enemyType: EnemyType): Enemy
+
+  def createSlimeEnemy(position: (Float, Float)): Enemy
+
+  def createSkeletonEnemy(position: (Float, Float)): Enemy
 
   def createItem(PoolName: ItemPools,
                  size: (Float, Float) = (5f, 5f),
@@ -38,22 +48,23 @@ trait EntitiesFactory {
                            position: (Float, Float) = (0, 0),
                            collisions: Short = 0): Entity
 
-  def createImmobileEnemy(size: (Float, Float) = (10, 10),
-                          position: (Float, Float) = (0, 0),
-                          collisions: Short = 0): Entity
-
   def createAttackPattern(rotatingBodySize: (Float, Float),
                           pivotPoint: (Float, Float),
                           rotatingBodyDistance: (Float, Float),
                           angularVelocity: Float,
-                          startingAngle: Float): MobileEntity
+                          startingAngle: Float,
+                          owner: LivingEntity): MobileEntity
 
   def createEnemyProjectile(size: (Float, Float) = (10, 10),
-                            position: (Float, Float) = (0, 0)): MobileEntity
+                            position: (Float, Float) = (0, 0),
+                            owner: LivingEntity): MobileEntity
 
   def createEnemySwordAttack(size: (Float, Float) = (1, 1),
                              position: (Float, Float) = (0, 0),
-                             originBody: Body): MobileEntity
+                             owner: LivingEntity): MobileEntity
+
+  def createEnemyContactAttack(radius: Float,
+                               owner: LivingEntity): MobileEntity
 
   def createJoint(pivotBody: Body, rotatingBody: Body): Joint
 
@@ -66,15 +77,17 @@ trait EntitiesFactory {
   def destroyJoint(joint: Joint)
 
   def destroyBodies(): Unit
+
+  def destroyJoints(): Unit
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
-
   private var level: Level = _
 
   private var itemPool: ItemPool = _
 
   private var bodiesToBeDestroyed: List[Body] = List.empty
+  private var jointsToBeDestroyed: List[Joint] = List.empty
 
   override def setLevel(level: Level, pool: ItemPool): Unit = {
     this.level = level
@@ -87,7 +100,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Mobile,
       EntityType.Immobile | EntityType.Enemy | EntityType.Hero, createPolygonalShape(size.PPM), position.PPM)
 
-    val mobileEntity: MobileEntity = new MobileEntityImpl(entityBody, size.PPM, new HashMap[Statistic, Float]())
+    val mobileEntity: MobileEntity = new MobileEntityImpl(entityBody, size.PPM)
     this.level.addEntity(mobileEntity)
     mobileEntity
   }
@@ -96,10 +109,18 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val position: (Float, Float) = (10, 10)
     val size: (Float, Float) = HERO_SIZE
 
+    val stats:mutable.Map[Statistic, Float] = mutable.Map(
+      Statistic.Strength -> 10f,
+      Statistic.MaxMovementSpeed -> 10f,
+      Statistic.Acceleration -> 2f,
+      Statistic.AttackSpeed -> 1f,
+      Statistic.Health -> 10f
+    )
+
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Hero,
       EntityType.Immobile | EntityType.Enemy | EntityType.Item, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
-    val hero: Hero = new HeroImpl(entityBody, size.PPM, new HashMap[Statistic, Float]())
+    val hero: Hero = new HeroImpl(entityBody, size.PPM, stats)
 
     hero.setCollisionStrategy(new CollisionStrategyImpl())
     hero.setMovementStrategy(new HeroMovementStrategy(hero))
@@ -109,29 +130,65 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     hero
   }
 
-  override def createEnemyEntity(position: (Float, Float) = (0, 0)): Enemy = {
-    val position: (Float, Float) = (40f, 150f)
-    val size: (Float, Float) = (10f, 17.5f)
+  override def createSkeletonEnemy(position: (Float, Float)): Enemy = {
+    val stats:mutable.Map[Statistic, Float] = mutable.Map(
+      Statistic.Strength -> 10f,
+      Statistic.MaxMovementSpeed -> 10f,
+      Statistic.Acceleration -> 2f,
+      Statistic.AttackSpeed -> 1f,
+      Statistic.Health -> 100f
+    )
+    val size:(Float, Float) = (10f, 17.5f)
+    val score: Int = 100
+
+    val enemy:Enemy = createEnemyEntity(position, size, stats, score, EnemyType.Skeleton)
+
+    val collisionStrategy:CollisionStrategy = new DoNothingOnCollision()
+    val attackStrategy:AttackStrategy = new MeleeAttack(enemy, this.level, mutable.Map.empty,
+      (e:Entity) => e.isInstanceOf[Hero])
+    val movementStrategy:MovementStrategy = new PatrolAndStop(enemy, this.level, mutable.Map.empty,
+      (e:Entity) => e.isInstanceOf[Hero])
+
+    enemy.setMovementStrategy(movementStrategy)
+    enemy.setCollisionStrategy(collisionStrategy)
+    enemy.setAttackStrategy(attackStrategy)
+    enemy
+  }
+
+  override def createSlimeEnemy(position: (Float, Float)): Enemy = {
+    val stats:mutable.Map[Statistic, Float] = mutable.Map(
+      Statistic.Strength -> 10f,
+      Statistic.MaxMovementSpeed -> 10f,
+      Statistic.Acceleration -> 2f,
+      Statistic.AttackSpeed -> 1f,
+      Statistic.Health -> 11f
+    )
+    val size:(Float, Float) = (9f, 7f)
+    val score: Int = 100
+
+    val enemy:Enemy = createEnemyEntity(position, size, stats, score, EnemyType.Slime)
+
+    val collisionStrategy:CollisionStrategy = new DoNothingOnCollision()
+    val attackStrategy:AttackStrategy = new ContactAttack(enemy, stats,
+      (e:Entity) => e.isInstanceOf[Hero])
+    val movementStrategy:MovementStrategy = new PatrolAndStop(enemy, this.level, stats,
+      (e:Entity) => e.isInstanceOf[Hero])
+
+    enemy.setMovementStrategy(movementStrategy)
+    enemy.setCollisionStrategy(collisionStrategy)
+    enemy.setAttackStrategy(attackStrategy)
+    enemy
+  }
+
+  override def createEnemyEntity(position: (Float, Float),
+                                 size: (Float, Float),
+                                 stats:mutable.Map[Statistic, Float],
+                                 score: Int,
+                                 enemyType: EnemyType): Enemy = {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Enemy,
-      EntityType.Immobile | EntityType.Sword | EntityType.Hero, createPolygonalShape(size.PPM), position.PPM)
-
-    val enemy:Enemy = new EnemyImpl(entityBody, size.PPM, new HashMap[Statistic, Float](), 0, EnemyType.Skeleton)
-
-    enemy.setCollisionStrategy(new DoNothingOnCollision())
-
-    enemy.setAttackStrategy(new DoNotAttack())
-    //    enemy.setAttackStrategy(new ContactAttackStrategy(enemy, level.getEntity(e => e.isInstanceOf[HeroImpl]), world, level))
-    enemy.setAttackStrategy(new MeleeAttackStrategy(enemy,
-      level.getEntity(e => e.isInstanceOf[HeroImpl]), this.level.getWorld))
-    //    enemy.setAttackStrategy(new RangedArrowAttack(enemy,
-    //      level.getEntity(e => e.isInstanceOf[Hero]), this.level.getWorld))
-
-    enemy.setMovementStrategy(new PatrolAndStopIfFacingHero(enemy, this.level.getWorld,
-      level.getEntity(e => e.isInstanceOf[Hero]) ))
-    //    enemy.setMovementStrategy(new PatrolPlatform(enemy, this.level.getWorld))
-    //    enemy.setMovementStrategy(new DoNotMove())
-
+      EntityType.Immobile | EntityType.Sword, createPolygonalShape(size.PPM), position.PPM)
+    val enemy:Enemy = new EnemyImpl(entityBody, size.PPM, stats, score, enemyType)
     this.level.addEntity(enemy)
     enemy
   }
@@ -173,69 +230,78 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     immobileEntity
   }
 
-  //TODO temporanero, solo per test sulle collisioni
-  override def createImmobileEnemy(size: (Float, Float) = (10, 10),
-                                   position: (Float, Float) = (0, 0),
-                                   collisions: Short = 0): Entity = {
-
-    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Enemy,
-      collisions, createPolygonalShape(size.PPM), position.PPM)
-
-    val immobileEntity: Entity = ImmobileEntity(entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
-    immobileEntity
-  }
-
   override def createAttackPattern(rotatingBodySize: (Float, Float),
                                    pivotPoint: (Float, Float),
                                    rotatingBodyDistance: (Float, Float),
                                    angularVelocity: Float,
-                                   startingAngle: Float = 0): MobileEntity = {
+                                   startingAngle: Float = 0,
+                                   owner:LivingEntity): MobileEntity = {
 
     val pivotSize = (2f, 2f)
 
     val pivotBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Immobile,
-      0, createPolygonalShape(pivotSize.PPM), pivotPoint)
+      0, createPolygonalShape(pivotSize.PPM), pivotPoint, isSensor = true)
 
     val rotatingBodyPosition = (pivotPoint._1 + rotatingBodyDistance._1.PPM, pivotPoint._2 + rotatingBodyDistance._2.PPM)
     val rotatingBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Sword,
       EntityType.Enemy, createPolygonalShape(rotatingBodySize.PPM), rotatingBodyPosition,
-      startingAngle, gravity = false, 1, 0.3f, 0.5f)
+      startingAngle, gravity = false, 1, 0.3f, 0.5f, isSensor = true)
 
-    val circularMobileEntity = new CircularMobileEntity(rotatingBody, rotatingBodySize.PPM, new HashMap[Statistic, Float](), pivotBody)
-    circularMobileEntity.setMovementStrategy(new CircularMovementStrategy(circularMobileEntity, angularVelocity))
-    circularMobileEntity.setCollisionStrategy(new CollisionStrategyImpl)
+    val circularMobileEntity = new CircularMobileEntity(rotatingBody, rotatingBodySize.PPM, pivotBody)
+    circularMobileEntity.setMovementStrategy(
+      new CircularMovementStrategy(circularMobileEntity, angularVelocity))
+    circularMobileEntity.setCollisionStrategy(
+      new ApplyDamage(owner, (e:Entity) => e.isInstanceOf[Enemy]))
 
     this.level.addEntity(circularMobileEntity)
     circularMobileEntity
   }
 
   override def createEnemyProjectile(size: (Float, Float) = (10, 10),
-                                     position: (Float, Float) = (0, 0)): MobileEntity = {
+                                     position: (Float, Float) = (0, 0),
+                                     owner:LivingEntity): MobileEntity = {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Mobile,
-      EntityType.Immobile | EntityType.Hero | EntityType.Sword, this.createCircleShape(size._1.PPM), position, isSensor = true)
+      EntityType.Immobile | EntityType.Hero | EntityType.Sword, this.createCircleShape(size._1.PPM),
+      position, isSensor = true)
 
     val arrowEntity: MobileEntity = new MobileEntityImpl(entityBody, size.PPM)
+    arrowEntity.setCollisionStrategy(new ApplyDamage(owner, (e:Entity) => e.isInstanceOf[Hero]))
     this.level.addEntity(arrowEntity)
     arrowEntity
   }
 
   override def createEnemySwordAttack(size: (Float, Float) = (1, 1),
                                       position: (Float, Float) = (0, 0),
-                                      originBody: Body): MobileEntity = {
+                                      owner:LivingEntity): MobileEntity = {
 
-    val attackBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Sword,
+    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Sword,
       EntityType.Hero, this.createPolygonalShape(size.PPM), position, isSensor = true)
 
     val jointDef:WeldJointDef = new WeldJointDef()
-    jointDef.initialize(originBody, attackBody.getBody, originBody.getPosition)
+    jointDef.initialize(owner.getBody, entityBody.getBody, owner.getBody.getPosition)
     this.level.getWorld.createJoint(jointDef)
 
-    val swordAttackEntity: MobileEntity = new MobileEntityImpl(attackBody, size, new HashMap[Statistic, Float]())
+    val swordAttack: MobileEntity = new MobileEntityImpl(entityBody, size)
+    swordAttack.setCollisionStrategy(new ApplyDamage(owner, e => e.isInstanceOf[Hero]))
+    this.level.addEntity(swordAttack)
+    swordAttack
+  }
 
-    this.level.addEntity(swordAttackEntity)
-    swordAttackEntity
+  override def createEnemyContactAttack(radius: Float,
+                                        owner:LivingEntity): MobileEntity = {
+    val entityBody:EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Enemy,
+      EntityType.Immobile | EntityType.Hero, this.createCircleShape(radius),
+      (owner.getBody.getPosition.x, owner.getBody.getPosition.y), isSensor=true)
+
+    val jointDef:WeldJointDef = new WeldJointDef()
+    jointDef.initialize(owner.getBody, entityBody.getBody, owner.getBody.getPosition)
+    this.level.getWorld.createJoint(jointDef)
+
+    val contactAttack:MobileEntity = new MobileEntityImpl(entityBody, (radius, radius))
+    contactAttack.setCollisionStrategy(new ApplyDamage(owner, e => e.isInstanceOf[Hero]))
+    level.addEntity(contactAttack)
+    contactAttack
   }
 
   override def createJoint(pivotBody: Body, rotatingBody: Body): Joint = {
@@ -249,7 +315,9 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def removeEntity(entity: Entity): Unit = this.level.removeEntity(entity)
 
 
-  override def destroyJoint(joint: Joint): Unit = this.level.getWorld.destroyJoint(joint)
+  override def destroyJoint(joint: Joint): Unit = synchronized {
+    this.jointsToBeDestroyed = joint :: this.jointsToBeDestroyed
+  }
 
   override def destroyBody(body: Body): Unit = synchronized {
     this.bodiesToBeDestroyed = body :: this.bodiesToBeDestroyed
@@ -262,8 +330,14 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     this.bodiesToBeDestroyed = List.empty
   }
 
-  override def createBody(bodyDef: BodyDef): Body = this.level.getWorld.createBody(bodyDef)
+  override def destroyJoints(): Unit = synchronized {
+    for(joint <- jointsToBeDestroyed) {
+      this.level.getWorld.destroyJoint(joint)
+    }
+    this.jointsToBeDestroyed = List.empty
+  }
 
+  override def createBody(bodyDef: BodyDef): Body = this.level.getWorld.createBody(bodyDef)
 
   private def defineEntityBody(bodyType: BodyType,
                                entityType: Short,

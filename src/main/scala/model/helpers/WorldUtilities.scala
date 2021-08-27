@@ -35,7 +35,7 @@ object WorldUtilities {
 
   def checkAABBCollision(world:World, x1:Float, y1:Float, x2:Float, y2:Float): Boolean = {
     var output: Boolean = false
-    world.QueryAABB((_) => {
+    world.QueryAABB(_ => {
       output = true
       false // automatically stop consecutive queries
     },x1, y1, x2, y2)
@@ -78,7 +78,9 @@ object WorldUtilities {
       }
 
       // an entity who can collides with the source is obstructing the visual
-      if ((sourceBody.getFixtureList.toArray().head.getFilterData.maskBits & fixture.getFilterData.categoryBits) != 0)
+
+      if ((sourceBody.getFixtureList.toArray().head.getFilterData.maskBits & fixture.getFilterData.categoryBits) != 0 &&
+        !fixture.isSensor )
         preemptiveStop = true
     }
     isTargetVisible

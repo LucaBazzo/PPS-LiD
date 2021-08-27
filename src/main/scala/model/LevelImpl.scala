@@ -4,24 +4,30 @@ import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TI
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
 import model.collisions.CollisionManager
+import model.collisions.ImplicitConversions._
 import model.entities.ItemPools.ItemPools
-import model.entities.{Enemy, Entity, Hero, Item, ItemPools}
+import model.entities._
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl}
 import model.world.WorldCreator
-import model.collisions.ImplicitConversions._
 
 trait Level {
 
   def updateEntities(actions: List[GameEvent])
 
   def addEntity(entity: Entity)
+
   def removeEntity(entity: Entity)
+
   def getEntity(predicate: Entity => Boolean): Entity
+
   def spawnItem(pool: ItemPools.ItemPools)
+
   def getWorld: World
 }
 
 class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
+
+  private var score: Int = 0
 
   private val world: World = new World(GRAVITY_FORCE, true)
 
@@ -31,13 +37,17 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val enemy: Enemy = entitiesFactory.createEnemyEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,20))
+
+  //  EntitiesFactoryImpl.createSkeletonEnemy((-10, 10))
+  EntitiesFactoryImpl.createSlimeEnemy((-50,10))
+//  EntitiesFactoryImpl.createSlimeEnemy((70,20))
+  private val item: Item = EntitiesFactoryImpl.createItem(ItemPools.Level_1, (10f, 10f), (40,20))
 
   new WorldCreator(this)
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)
+  this.entitiesSetter.setScore(0)
 
   this.world.setContactListener(new CollisionManager(this))
 
@@ -49,6 +59,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     this.entitiesList.foreach((entity: Entity) => entity.update())
 
     this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+
+    this.entitiesFactory.destroyJoints()
     this.entitiesFactory.destroyBodies()
   }
 
@@ -62,6 +74,12 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   override def removeEntity(entity: Entity): Unit = {
     this.entitiesList = this.entitiesList.filterNot((e: Entity) => e.equals(entity))
     this.entitiesSetter.setEntities(this.entitiesList)
+
+    // update score if the removed entity's type is Enemy
+    if (entity.isInstanceOf[Enemy]) {
+      this.score += entity.asInstanceOf[Score].getScore
+      this.entitiesSetter.setScore(this.score)
+    }
   }
 
   override def getWorld: World = this.world

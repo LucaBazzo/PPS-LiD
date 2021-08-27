@@ -1,7 +1,6 @@
 package model.collisions
 
-import model.entities.{Entity, HeroImpl, ItemImpl}
-import model.Level
+import model.entities._
 import model.helpers.EntitiesFactoryImpl
 
 trait CollisionStrategy {
@@ -22,25 +21,27 @@ class ItemCollisionStrategy extends CollisionStrategy {
   }
 }
 
-
 class DoNothingOnCollision() extends CollisionStrategy {
   override def apply(entity: Entity): Unit = {}
 }
 
-class ApplyDamage(private val sourceEntity:Entity, private val targetEntity:Entity) extends CollisionStrategy {
+class ApplyDamage(private val origin:Entity, private val target:Entity => Boolean)
+  extends CollisionStrategy {
+
   override def apply(entity: Entity): Unit = {
-    if (entity equals targetEntity) {
-      println("attacking target")
+    if (target(entity)) {
+      entity.asInstanceOf[LivingEntity].sufferDamage(
+        origin.asInstanceOf[LivingEntity].getStatistic(Statistic.Strength))
     }
   }
 }
 
-class ApplyDamageAndDestroyEntity(private val sourceEntity:Entity, private val targetEntity:Entity)
-  extends ApplyDamage(sourceEntity, targetEntity) {
+class ApplyDamageAndDestroyEntity(private val origin:Entity, private val target:Entity => Boolean)
+  extends ApplyDamage(origin, target) {
 
   override def apply(entity: Entity): Unit = {
     super.apply(entity)
-    EntitiesFactoryImpl.destroyBody(sourceEntity.getBody)
-    EntitiesFactoryImpl.removeEntity(sourceEntity)
+    EntitiesFactoryImpl.destroyBody(origin.getBody)
+    EntitiesFactoryImpl.removeEntity(origin)
   }
 }

@@ -1,41 +1,44 @@
 package model.entities
 
-import model.EntityBody
 import model.entities.EnemyType.EnemyType
+import model.entities.Statistic.Statistic
+import model.{EntityBody, Level, Score}
+
+import scala.collection.mutable
 
 object EnemyType extends Enumeration {
   type EnemyType = Value
   val Skeleton, Slime = Value
 }
 
-
 trait Enemy extends LivingEntity {
-  def getType(): EnemyType
-}
-
-trait Score {
-  def getScore: Int
+  def getType: EnemyType
 }
 
 class EnemyImpl(private var entityBody: EntityBody,
                 private val size: (Float, Float),
-                private val statistics:Map[Statistic, Float],
+                private val stats:mutable.Map[Statistic, Float],
                 private val score: Int = 100,
-                private val enemyType: EnemyType) extends LivingEntityImpl(entityBody, size, statistics)
+                private val enemyType: EnemyType) extends LivingEntityImpl(entityBody, size, stats)
           with Enemy with Score {
 
-  val attackDamage = 10
-
-  override def getType(): EnemyType = this.enemyType
+  override def getType: EnemyType = this.enemyType
 
   override def getScore: Int = this.score
 
   override def update(): Unit = {
-    this.move // movementStrategy.move()
-    attackStrategy.apply()
+    super.update()
+    if (state != State.Dying) {
+      movementStrategy.apply()
+      attackStrategy.apply()
 
-    if (!attackStrategy.isAttackFinished) this.state = State.Attack01
-    else if (this.entityBody.getBody.getLinearVelocity.x != 0) this.state = State.Running
-    else this.state = State.Standing
+      if (!attackStrategy.isAttackFinished) this.state = State.Attack01
+      else if (this.entityBody.getBody.getLinearVelocity.x != 0) this.state = State.Running
+      else this.state = State.Standing
+    }
+  }
+
+  override def destroyEntity(): Unit = {
+    super.destroyEntity()
   }
 }

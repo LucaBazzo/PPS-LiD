@@ -64,22 +64,22 @@ class HeroAttackStrategyImpl(private val entity: Hero) extends AttackStrategy {
   private def setAttackPattern(): Unit = this.entity.getState match {
     case State.Attack01 if this.entity.isFacingRight =>
       this.attackPattern = EntitiesFactoryImpl.createAttackPattern((1f, 10f),
-        this.entity.getPosition, (0, -15f), 60, 100)
+        this.entity.getPosition, (0, -15f), 60, 100, entity)
     case State.Attack01 if !this.entity.isFacingRight =>
       this.attackPattern = EntitiesFactoryImpl.createAttackPattern((1f, 10f),
-        this.entity.getPosition, (0, -15f), -60, -100)
+        this.entity.getPosition, (0, -15f), -60, -100, entity)
     case State.Attack02 if this.entity.isFacingRight =>
       this.attackPattern = EntitiesFactoryImpl.createAttackPattern((1f, 10f),
-        this.entity.getPosition, (0, 15f), -60, 10)
+        this.entity.getPosition, (0, 15f), -60, 10, entity)
     case State.Attack02 if !this.entity.isFacingRight =>
       this.attackPattern = EntitiesFactoryImpl.createAttackPattern((1f, 10f),
-        this.entity.getPosition, (0, 15f), 60, 10)
+        this.entity.getPosition, (0, 15f), 60, 10, entity)
     case State.Attack03 if this.entity.isFacingRight =>
       this.attackPattern = EntitiesFactoryImpl.createAttackPattern((10f, 2f),
-        this.entity.getPosition, (15f, 0), -80)
+        this.entity.getPosition, (15f, 0), -80, owner=entity)
     case State.Attack03 if !this.entity.isFacingRight =>
       this.attackPattern = EntitiesFactoryImpl.createAttackPattern((10f, 2f),
-        this.entity.getPosition, (-15f, 0), 80)
+        this.entity.getPosition, (-15f, 0), 80, owner=entity)
     case _ => throw new UnsupportedOperationException
   }
 

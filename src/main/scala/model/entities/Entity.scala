@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import model.EntityBody
-import model.collisions.CollisionStrategy
+import model.collisions.{CollisionStrategy, DoNothingOnCollision}
 import model.entities.State.State
 import model.helpers.EntitiesFactoryImpl
 
@@ -12,7 +12,7 @@ object State extends Enumeration {
   type State = Value
   val Standing, Crouch, Sliding,
       Running, Jumping, Falling, Somersault,
-      Attack01, Attack02, Attack03 = Value
+      Attack01, Attack02, Attack03, Dying = Value
 }
 
 trait Entity {
@@ -43,7 +43,7 @@ trait Entity {
 abstract class EntityImpl(private var entityBody: EntityBody, private val size: (Float, Float)) extends Entity {
 
   protected var state: State = State.Standing
-  protected var collisionStrategy: CollisionStrategy = _
+  protected var collisionStrategy: CollisionStrategy = new DoNothingOnCollision()
 
   override def getState: State = this.state
 
@@ -55,14 +55,19 @@ abstract class EntityImpl(private var entityBody: EntityBody, private val size: 
 
   override def getSize: (Float, Float) = this.size
 
-  override def setCollisionStrategy(collisionStrategy: CollisionStrategy): Unit = this.collisionStrategy = collisionStrategy
+  override def setCollisionStrategy(collisionStrategy: CollisionStrategy): Unit =
+    this.collisionStrategy = collisionStrategy
 
   override def collisionDetected(entity: Entity): Unit = {
-    if(this.collisionStrategy != null) this.collisionStrategy.apply(entity)
+    this.collisionStrategy.apply(entity)
   }
 
   override def destroyEntity(): Unit = {
-    EntitiesFactoryImpl.destroyBody(this.entityBody.getBody)
+    EntitiesFactoryImpl.destroyBody(this.getBody)
+    this.getBody.getJointList.toArray().foreach(j => {
+      EntitiesFactoryImpl.destroyJoint(j.joint)
+      EntitiesFactoryImpl.destroyBody(j.other)
+    })
     EntitiesFactoryImpl.removeEntity(this)
   }
 

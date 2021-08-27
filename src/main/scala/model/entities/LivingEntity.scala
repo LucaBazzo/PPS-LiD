@@ -1,24 +1,49 @@
 package model.entities
 
 import model.EntityBody
-import model.attack.AttackStrategy
+import model.attack.{AttackStrategy, DoNotAttack}
+import model.entities.Statistic.Statistic
+
+import scala.collection.mutable
 
 trait LivingEntity extends MobileEntity {
 
   def sufferDamage(damage: Float)
-  def getLife(): Float
+  def getLife: Float
   def setAttackStrategy(strategy: AttackStrategy)
-  def getStatistics(): Map[Statistic, Float]
+  def getStatistics: mutable.Map[Statistic, Float]
+  def getStatistic(statistic: Statistic): Float
   def alterStatistics(statistic: Statistic, alteration: Float)
 }
 
-class LivingEntityImpl(private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float]) extends MobileEntityImpl(entityBody, size, statistics) with LivingEntity {
+class LivingEntityImpl(private var entityBody: EntityBody,
+                       private val size: (Float, Float),
+                       private var stats:scala.collection.mutable.Map[Statistic, Float])
+  extends MobileEntityImpl(entityBody, size) with LivingEntity {
 
-  protected var attackStrategy: AttackStrategy = _
+  protected var attackStrategy: AttackStrategy = new DoNotAttack()
 
-  override def sufferDamage(damage: Float): Unit = {}
+  protected var deathTimer:Long = 0
+  protected val dyingDuration:Long = 1000
 
-  override def getLife(): Float = ???
+  override def update(): Unit = {
+    if (this.state == State.Dying) {
+      if (deathTimer == 0) {
+        this.deathTimer = System.currentTimeMillis()
+      } else if (System.currentTimeMillis() - deathTimer > dyingDuration) {
+        this.destroyEntity()
+      }
+    }
+  }
+
+  override def sufferDamage(damage: Float): Unit = {
+    this.alterStatistics(Statistic.Health, this.stats(Statistic.Health) - damage)
+    if (this.stats(Statistic.Health) <= 0) {
+      this.state = State.Dying
+    }
+  }
+
+  override def getLife: Float = this.stats(Statistic.Health)
 
   override def setAttackStrategy(strategy: AttackStrategy): Unit = this.attackStrategy = strategy
 
@@ -26,8 +51,14 @@ class LivingEntityImpl(private var entityBody: EntityBody, private val size: (Fl
   //
   //  override def alterStatistics[A <: Int](statistic: Statistic, alteration: A): Unit = statistics(statistic) -> alteration
 
-    override def getStatistics(): Map[Statistic, Float] = statistics
+  override def getStatistics: mutable.Map[Statistic, Float] = stats
 
-    override def alterStatistics(statistic: Statistic, alteration: Float): Unit = statistics(statistic) -> alteration
+  override def alterStatistics(statistic: Statistic, alteration: Float): Unit = stats(statistic) = alteration
 
+  override def getStatistic(statistic:Statistic): Float = {
+    if (stats.contains(statistic))
+      stats(statistic)
+    else
+      throw new IllegalArgumentException
+  }
 }
