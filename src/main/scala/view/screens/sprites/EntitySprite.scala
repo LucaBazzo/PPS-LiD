@@ -2,9 +2,8 @@ package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.{Animation, Batch, Sprite, TextureRegion}
 import model.collisions.ImplicitConversions.RichFloat
-import model.entities.{Entity, Hero, MobileEntity, State}
 import model.entities.State.State
-import utils.ApplicationConstants.PIXELS_PER_METER
+import model.entities.{Entity, Hero, MobileEntity, State}
 
 trait EntitySprite extends Sprite {
 
@@ -19,13 +18,17 @@ trait EntitySprite extends Sprite {
   def getIntHeight: Int = super.getHeight.asInstanceOf[Int]
 }
 
-class EntitySpriteImpl(width: Float, height: Float) extends EntitySprite {
+class EntitySpriteImpl(regionName: String, width: Float, height: Float) extends EntitySprite {
 
   private var animations: Map[State, Animation[TextureRegion]] = Map()
   private var loops: Map[State, Boolean] = Map()
 
   private var stateTimer: Float = 0
   private var previousState: State = State.Standing
+
+  /*private val atlas: TextureAtlas = new TextureAtlas(SPRITES_PACK_LOCATION)
+  this.setRegion(this.atlas.findRegion(regionName))
+  this.setBounds(0, 0, width, height)*/
 
   override def addAnimation(state: State, animation: Animation[TextureRegion], loop: Boolean = false): Unit = {
     this.animations += (state -> animation)
@@ -74,7 +77,7 @@ class EntitySpriteImpl(width: Float, height: Float) extends EntitySprite {
 
 }
 
-class HeroEntitySprite(width: Float, height: Float) extends EntitySpriteImpl(width, height) {
+class HeroEntitySprite(regionName: String, width: Float, height: Float) extends EntitySpriteImpl(regionName, width, height) {
 
   override def setPosition(entity: Entity): Unit = {
     if(entity.asInstanceOf[Hero].isLittle)

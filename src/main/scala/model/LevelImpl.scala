@@ -3,12 +3,12 @@ package model
 import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
-import model.collisions.CollisionManager
+import model.collisions.{CollisionManager, EntityType}
+import model.collisions.ImplicitConversions._
 import model.entities.ItemPools.ItemPools
-import model.entities.{Enemy, Entity, Hero, Item, ItemPools}
+import model.entities._
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl}
 import model.world.WorldCreator
-import model.collisions.ImplicitConversions._
 
 trait Level {
 
@@ -32,7 +32,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
   private val enemy: Enemy = entitiesFactory.createEnemyEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,20))
+  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,20), EntityType.ArmorItem)
 
   new WorldCreator(this)
 

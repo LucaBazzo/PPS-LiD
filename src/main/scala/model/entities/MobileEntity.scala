@@ -1,10 +1,9 @@
 package model.entities
 
 import com.badlogic.gdx.physics.box2d.Joint
-import model.helpers.EntitiesFactoryImpl
 import model.EntityBody
-import model.collisions.EntityType
 import model.entities.Statistic.Statistic
+import model.helpers.EntitiesFactoryImpl
 import model.movement.MovementStrategy
 
 object Statistic extends Enumeration {
@@ -20,12 +19,9 @@ trait MobileEntity extends Entity {
   def stopMovement()
   def setFacing(right: Boolean)
   def isFacingRight: Boolean
-
-  def setType(entityType: Short)
-  def getEntityType: Short
 }
 
-class MobileEntityImpl(private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float]) extends EntityImpl(entityBody, size) with MobileEntity {
+class MobileEntityImpl(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float]) extends EntityImpl(entityType, entityBody, size) with MobileEntity {
 
   private var facingRight: Boolean = true
 
@@ -44,18 +40,14 @@ class MobileEntityImpl(private var entityBody: EntityBody, private val size: (Fl
   override def setFacing(right: Boolean): Unit = this.facingRight = right
 
   override def isFacingRight: Boolean = this.facingRight
-
-  //TODO temporaneo
-  private var entityType: Short = EntityType.Mobile
-  override def setType(entityType: Short): Unit = this.entityType = entityType
-  override def getEntityType: Short = this.entityType
 }
 
 
-class CircularMobileEntity(private var entityBody: EntityBody,
+class CircularMobileEntity(private val entityType: Short,
+                           private var entityBody: EntityBody,
                            private val size: (Float, Float),
                            private val statistics:Map[Statistic, Float],
-                           private val pivotBody: EntityBody) extends MobileEntityImpl(entityBody, size, statistics) {
+                           private val pivotBody: EntityBody) extends MobileEntityImpl(entityType, entityBody, size, statistics) {
 
   private val joint: Joint = EntitiesFactoryImpl.createJoint(this.pivotBody.getBody, this.entityBody.getBody)
 

@@ -1,10 +1,10 @@
 package model.helpers
 
-import com.badlogic.gdx.physics.box2d.Body
 import model.EntityBody
+import model.collisions.EntityType
 import model.entities.ItemPools.ItemPools
 import model.entities.Items.Items
-import model.entities.{ArmorItem, BFSwordItem, BootsItem, BowItem, CakeItem, HugePotionItem, ItemImpl, ItemPools, Items, KeyItem, LargePotionItem, MapItem, PotionItem, ShieldItem, SkeletonKeyItem, SmallPotionItem, WrenchItem}
+import model.entities._
 
 import scala.util.Random
 
@@ -24,21 +24,21 @@ class ItemPoolImpl extends ItemPool {
   override def getItem(entityBody: EntityBody, size: (Float, Float), poolName: ItemPools): ItemImpl = {
     val pickedItem: Items = pickItemFromPool(poolName)
     pickedItem match {
-      case Items.Cake => new CakeItem(entityBody, size)
-      case Items.Wrench => new WrenchItem(entityBody, size)
-      case Items.Map => new MapItem(entityBody, size)
-      case Items.PotionS => new SmallPotionItem(entityBody, size)
-      case Items.PotionM => new PotionItem(entityBody, size)
-      case Items.PotionL => new LargePotionItem(entityBody, size)
-      case Items.PotionXL => new HugePotionItem(entityBody, size)
-      case Items.Armor => new ArmorItem(entityBody, size)
-      case Items.Boots => new BootsItem(entityBody, size)
-      case Items.BFSword => new BFSwordItem(entityBody, size)
-      case Items.Key => new KeyItem(entityBody, size)
-      case Items.SkeletonKey => new SkeletonKeyItem(entityBody, size)
-      case Items.Bow => new BowItem(entityBody, size)
-      case Items.Shield => new ShieldItem(entityBody, size)
-      case _ => new CakeItem(entityBody, size)
+      case Items.Cake => new CakeItem(EntityType.Item, entityBody, size)
+      case Items.Wrench => new WrenchItem(EntityType.Item, entityBody, size)
+      case Items.Map => new MapItem(EntityType.Item, entityBody, size)
+      case Items.PotionS => new SmallPotionItem(EntityType.Item, entityBody, size)
+      case Items.PotionM => new PotionItem(EntityType.Item, entityBody, size)
+      case Items.PotionL => new LargePotionItem(EntityType.Item, entityBody, size)
+      case Items.PotionXL => new HugePotionItem(EntityType.Item, entityBody, size)
+      case Items.Armor => new ArmorItem(EntityType.ArmorItem, entityBody, size)
+      case Items.Boots => new BootsItem(EntityType.Item, entityBody, size)
+      case Items.BFSword => new BFSwordItem(EntityType.Item, entityBody, size)
+      case Items.Key => new KeyItem(EntityType.Item, entityBody, size)
+      case Items.SkeletonKey => new SkeletonKeyItem(EntityType.Item, entityBody, size)
+      case Items.Bow => new BowItem(EntityType.Item, entityBody, size)
+      case Items.Shield => new ShieldItem(EntityType.Item, entityBody, size)
+      case _ => new CakeItem(EntityType.Item, entityBody, size)
     }
   }
 
@@ -64,7 +64,7 @@ class ItemPoolImpl extends ItemPool {
   }
 
   private def pickRandomItemFromList(itemList: List[Items]): Items = {
-    if(itemList.length > 0)
+    if(itemList.nonEmpty)
       itemList(rand.nextInt(itemList.length))
     else
       Items.Cake

@@ -19,93 +19,93 @@ trait Item extends Entity {
   def getEnumVal: Items
 }
 
-abstract class ItemImpl(private val itemName: Items, private var entityBody: EntityBody, private val size: (Float, Float))
-      extends ImmobileEntity(entityBody, size) with Item {
+abstract class ItemImpl(private val entityType: Short, private val itemName: Items, private var entityBody: EntityBody, private val size: (Float, Float))
+      extends ImmobileEntity(entityType, entityBody, size) with Item {
 
   def collect(): Unit
 
   override def getEnumVal: Items = itemName
 }
 
-class CakeItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.Cake, entityBody, size) {
+class CakeItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Cake, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class WrenchItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.Wrench, entityBody, size) {
+class WrenchItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Wrench, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class MapItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.Map, entityBody, size) {
+class MapItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Map, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class SmallPotionItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.PotionS, entityBody, size) {
+class SmallPotionItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionS, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class PotionItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.PotionM, entityBody, size) {
+class PotionItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionM, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class LargePotionItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.PotionL, entityBody, size) {
+class LargePotionItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionL, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class HugePotionItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.PotionXL, entityBody, size) {
+class HugePotionItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionXL, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class ArmorItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.Armor, entityBody, size) {
+class ArmorItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Armor, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class BootsItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.Boots, entityBody, size) {
+class BootsItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Boots, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class BFSwordItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.BFSword, entityBody, size) {
+class BFSwordItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.BFSword, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class KeyItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.Key, entityBody, size) {
+class KeyItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Key, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class SkeletonKeyItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.SkeletonKey, entityBody, size) {
+class SkeletonKeyItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.SkeletonKey, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class BowItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.Bow, entityBody, size) {
+class BowItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Bow, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}
 }
 
-class ShieldItem(private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(Items.Shield, entityBody, size) {
+class ShieldItem(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Shield, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): Unit = {}

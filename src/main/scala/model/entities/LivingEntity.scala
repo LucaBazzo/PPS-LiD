@@ -13,7 +13,7 @@ trait LivingEntity extends MobileEntity {
   def alterStatistics(statistic: Statistic, alteration: Float)
 }
 
-class LivingEntityImpl(private var entityBody: EntityBody, private val size: (Float, Float), private var statistics:Map[Statistic, Float]) extends MobileEntityImpl(entityBody, size, statistics) with LivingEntity {
+class LivingEntityImpl(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float), private var statistics:Map[Statistic, Float]) extends MobileEntityImpl(entityType, entityBody, size, statistics) with LivingEntity {
 
   protected var attackStrategy: AttackStrategy = _
 

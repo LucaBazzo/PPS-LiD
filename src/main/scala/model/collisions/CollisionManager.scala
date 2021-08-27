@@ -7,7 +7,7 @@ import ImplicitConversions._
 import com.badlogic.gdx.math.Vector2
 import _root_.utils.ApplicationConstants.PIXELS_PER_METER
 
-object EntityType extends Enumeration {
+object EntityType {
 
   private var currentBitValue: Short = 1
   private val bitMulti: Int = 2
@@ -20,7 +20,9 @@ object EntityType extends Enumeration {
   val Immobile: Short = getNextBitValue
   val Item: Short = getNextBitValue
   val Sword: Short = getNextBitValue
+
   val Arrow: Short = getNextBitValue
+  val ArmorItem : Short = getNextBitValue
 
   private def getNextBitValue: Short = {
     this.currentBitValue = this.currentBitValue * bitMulti

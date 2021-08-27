@@ -20,6 +20,8 @@ trait Entity {
 
   def update()
 
+  def getType: Short
+
   def getState: State
 
   def setPosition(position: (Float, Float))
@@ -41,7 +43,7 @@ trait Entity {
   def destroyEntity(): Unit
 }
 
-abstract class EntityImpl(private var entityBody: EntityBody, private val size: (Float, Float)) extends Entity {
+abstract class EntityImpl(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends Entity {
 
   protected var state: State = State.Standing
   protected var collisionStrategy: CollisionStrategy = _
@@ -68,8 +70,10 @@ abstract class EntityImpl(private var entityBody: EntityBody, private val size: 
   }
 
   override def getBody: Body = this.entityBody.getBody
+
+  override def getType: Short = this.entityType
 }
 
-case class ImmobileEntity(private var entityBody: EntityBody, private val size: (Float, Float)) extends EntityImpl(entityBody, size) {
+case class ImmobileEntity(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends EntityImpl(entityType, entityBody, size) {
   override def update(): Unit = {}
 }

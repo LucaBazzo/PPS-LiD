@@ -4,7 +4,7 @@ import model.EntityBody
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl
 
-class TimedAttack(private var entityBody: EntityBody, private val size: (Float, Float), private val duration:Long, private val statistics:Map[Statistic, Float]) extends MobileEntityImpl(entityBody, size, statistics) {
+class TimedAttack(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float), private val duration:Long, private val statistics:Map[Statistic, Float]) extends MobileEntityImpl(entityType, entityBody, size, statistics) {
 
   private val startTime:Long = System.currentTimeMillis()
 
