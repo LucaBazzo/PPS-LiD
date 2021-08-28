@@ -20,8 +20,9 @@ trait MobileEntity extends Entity {
   def isFacingRight: Boolean
 }
 
-class MobileEntityImpl(private var entityBody: EntityBody,
-                       private val size: (Float, Float)) extends EntityImpl(entityBody, size) with MobileEntity {
+class MobileEntityImpl(private val entityType:Short,
+                       private var entityBody: EntityBody,
+                       private val size: (Float, Float)) extends EntityImpl(entityType, entityBody, size) with MobileEntity {
 
   private var facingRight: Boolean = true
 
@@ -43,9 +44,10 @@ class MobileEntityImpl(private var entityBody: EntityBody,
 }
 
 
-class CircularMobileEntity(private var entityBody: EntityBody,
+class CircularMobileEntity(private val entityType:Short,
+                           private var entityBody: EntityBody,
                            private val size: (Float, Float),
-                           private val pivotBody: EntityBody) extends MobileEntityImpl(entityBody, size) {
+                           private val pivotBody: EntityBody) extends MobileEntityImpl(entityType, entityBody, size) {
 
   private val joint: Joint = EntitiesFactoryImpl.createJoint(this.pivotBody.getBody, this.entityBody.getBody)
 

@@ -19,12 +19,12 @@ object EntityType extends Enumeration {
   val Immobile: Short = getNextBitValue
   val Item: Short = getNextBitValue
   val Sword: Short = getNextBitValue
+  val EnemyAttack: Short = getNextBitValue
 
   private def getNextBitValue: Short = {
     this.currentBitValue = this.currentBitValue * bitMulti
     this.currentBitValue
   }
-
 }
 
 object ImplicitConversions {

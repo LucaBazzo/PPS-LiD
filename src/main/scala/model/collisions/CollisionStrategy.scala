@@ -29,6 +29,7 @@ class ApplyDamage(private val origin:Entity, private val target:Entity => Boolea
   extends CollisionStrategy {
 
   override def apply(entity: Entity): Unit = {
+    println("ASD", target(entity), entity)
     if (target(entity)) {
       entity.asInstanceOf[LivingEntity].sufferDamage(
         origin.asInstanceOf[LivingEntity].getStatistic(Statistic.Strength))

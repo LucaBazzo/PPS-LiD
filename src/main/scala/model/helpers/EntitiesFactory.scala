@@ -11,7 +11,7 @@ import model.collisions._
 import model.entities.EnemyType.EnemyType
 import model.entities.ItemPools.ItemPools
 import model.entities.Statistic.Statistic
-import model.entities.{Entity, _}
+import model.entities.{Entity, Statistic, _}
 import model.movement.{CircularMovementStrategy, HeroMovementStrategy, MovementStrategy, PatrolAndStop}
 
 import scala.collection.mutable
@@ -79,6 +79,8 @@ trait EntitiesFactory {
   def destroyBodies(): Unit
 
   def destroyJoints(): Unit
+
+  def createFireWormEnemy(position: (Float, Float)): Enemy
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -100,7 +102,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Mobile,
       EntityType.Immobile | EntityType.Enemy | EntityType.Hero, createPolygonalShape(size.PPM), position.PPM)
 
-    val mobileEntity: MobileEntity = new MobileEntityImpl(entityBody, size.PPM)
+    val mobileEntity: MobileEntity = new MobileEntityImpl(EntityType.Mobile, entityBody, size.PPM)
     this.level.addEntity(mobileEntity)
     mobileEntity
   }
@@ -114,11 +116,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       Statistic.MaxMovementSpeed -> 10f,
       Statistic.Acceleration -> 2f,
       Statistic.AttackSpeed -> 1f,
-      Statistic.Health -> 10f
+      Statistic.Health -> 100f,
+      Statistic.CurrentHealth -> 100f
     )
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Hero,
-      EntityType.Immobile | EntityType.Enemy | EntityType.Item, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
+      EntityType.Immobile | EntityType.EnemyAttack | EntityType.Item, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
     val hero: Hero = new HeroImpl(entityBody, size.PPM, stats)
 
@@ -136,17 +139,18 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       Statistic.MaxMovementSpeed -> 10f,
       Statistic.Acceleration -> 2f,
       Statistic.AttackSpeed -> 1f,
-      Statistic.Health -> 100f
+      Statistic.Health -> 11f,
+      Statistic.CurrentHealth -> 11f
     )
-    val size:(Float, Float) = (10f, 17.5f)
+    val size:(Float, Float) = (10f, 17f)
     val score: Int = 100
 
     val enemy:Enemy = createEnemyEntity(position, size, stats, score, EnemyType.Skeleton)
 
     val collisionStrategy:CollisionStrategy = new DoNothingOnCollision()
-    val attackStrategy:AttackStrategy = new MeleeAttack(enemy, this.level, mutable.Map.empty,
+    val attackStrategy:AttackStrategy = new MeleeAttack(enemy, this.level, stats,
       (e:Entity) => e.isInstanceOf[Hero])
-    val movementStrategy:MovementStrategy = new PatrolAndStop(enemy, this.level, mutable.Map.empty,
+    val movementStrategy:MovementStrategy = new PatrolAndStop(enemy, this.level, stats,
       (e:Entity) => e.isInstanceOf[Hero])
 
     enemy.setMovementStrategy(movementStrategy)
@@ -161,16 +165,41 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       Statistic.MaxMovementSpeed -> 10f,
       Statistic.Acceleration -> 2f,
       Statistic.AttackSpeed -> 1f,
-      Statistic.Health -> 11f
+      Statistic.Health -> 11f,
+      Statistic.CurrentHealth -> 11f
     )
-    val size:(Float, Float) = (9f, 7f)
+    val size:(Float, Float) = (13f, 13f)
     val score: Int = 100
 
     val enemy:Enemy = createEnemyEntity(position, size, stats, score, EnemyType.Slime)
 
     val collisionStrategy:CollisionStrategy = new DoNothingOnCollision()
-    val attackStrategy:AttackStrategy = new ContactAttack(enemy, stats,
+    val attackStrategy:AttackStrategy = new ContactAttack(enemy, stats, (e:Entity) => e.isInstanceOf[Hero])
+    val movementStrategy:MovementStrategy = new PatrolAndStop(enemy, this.level, stats,
       (e:Entity) => e.isInstanceOf[Hero])
+
+    enemy.setMovementStrategy(movementStrategy)
+    enemy.setCollisionStrategy(collisionStrategy)
+    enemy.setAttackStrategy(attackStrategy)
+    enemy
+  }
+
+  override def createFireWormEnemy(position: (Float, Float)): Enemy = {
+    val stats:mutable.Map[Statistic, Float] = mutable.Map(
+      Statistic.Strength -> 10f,
+      Statistic.MaxMovementSpeed -> 10f,
+      Statistic.Acceleration -> 2f,
+      Statistic.AttackSpeed -> 1f,
+      Statistic.Health -> 11f,
+      Statistic.CurrentHealth -> 11f
+    )
+    val size:(Float, Float) = (13f, 19f)
+    val score: Int = 100
+
+    val enemy:Enemy = createEnemyEntity(position, size, stats, score, EnemyType.FireWorm)
+
+    val collisionStrategy:CollisionStrategy = new DoNothingOnCollision()
+    val attackStrategy:AttackStrategy = new ContactAttack(enemy, stats, (e:Entity) => e.isInstanceOf[Hero])
     val movementStrategy:MovementStrategy = new PatrolAndStop(enemy, this.level, stats,
       (e:Entity) => e.isInstanceOf[Hero])
 
@@ -211,7 +240,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     shape
   }
 
-
   override def createCircleShape(radius: Float): Shape = {
     val shape: CircleShape = new CircleShape()
     shape.setRadius(radius)
@@ -225,7 +253,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Immobile,
       collisions, createPolygonalShape(size.PPM), position.PPM)
 
-    val immobileEntity: Entity = ImmobileEntity(entityBody, size.PPM)
+    val immobileEntity: Entity = ImmobileEntity(EntityType.Immobile, entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
     immobileEntity
   }
@@ -247,7 +275,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       EntityType.Enemy, createPolygonalShape(rotatingBodySize.PPM), rotatingBodyPosition,
       startingAngle, gravity = false, 1, 0.3f, 0.5f, isSensor = true)
 
-    val circularMobileEntity = new CircularMobileEntity(rotatingBody, rotatingBodySize.PPM, pivotBody)
+    val circularMobileEntity = new CircularMobileEntity(EntityType.Sword, rotatingBody, rotatingBodySize.PPM, pivotBody)
     circularMobileEntity.setMovementStrategy(
       new CircularMovementStrategy(circularMobileEntity, angularVelocity))
     circularMobileEntity.setCollisionStrategy(
@@ -261,11 +289,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                                      position: (Float, Float) = (0, 0),
                                      owner:LivingEntity): MobileEntity = {
 
-    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Mobile,
+    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.EnemyAttack,
       EntityType.Immobile | EntityType.Hero | EntityType.Sword, this.createCircleShape(size._1.PPM),
       position, isSensor = true)
 
-    val arrowEntity: MobileEntity = new MobileEntityImpl(entityBody, size.PPM)
+    val arrowEntity: MobileEntity = new MobileEntityImpl(EntityType.EnemyAttack, entityBody, size.PPM)
     arrowEntity.setCollisionStrategy(new ApplyDamage(owner, (e:Entity) => e.isInstanceOf[Hero]))
     this.level.addEntity(arrowEntity)
     arrowEntity
@@ -275,14 +303,14 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                                       position: (Float, Float) = (0, 0),
                                       owner:LivingEntity): MobileEntity = {
 
-    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Sword,
+    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.EnemyAttack,
       EntityType.Hero, this.createPolygonalShape(size.PPM), position, isSensor = true)
 
     val jointDef:WeldJointDef = new WeldJointDef()
     jointDef.initialize(owner.getBody, entityBody.getBody, owner.getBody.getPosition)
     this.level.getWorld.createJoint(jointDef)
 
-    val swordAttack: MobileEntity = new MobileEntityImpl(entityBody, size)
+    val swordAttack: MobileEntity = new MobileEntityImpl(EntityType.EnemyAttack, entityBody, size)
     swordAttack.setCollisionStrategy(new ApplyDamage(owner, e => e.isInstanceOf[Hero]))
     this.level.addEntity(swordAttack)
     swordAttack
@@ -290,7 +318,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createEnemyContactAttack(radius: Float,
                                         owner:LivingEntity): MobileEntity = {
-    val entityBody:EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Enemy,
+    val entityBody:EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.EnemyAttack,
       EntityType.Immobile | EntityType.Hero, this.createCircleShape(radius),
       (owner.getBody.getPosition.x, owner.getBody.getPosition.y), isSensor=true)
 
@@ -298,7 +326,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     jointDef.initialize(owner.getBody, entityBody.getBody, owner.getBody.getPosition)
     this.level.getWorld.createJoint(jointDef)
 
-    val contactAttack:MobileEntity = new MobileEntityImpl(entityBody, (radius, radius))
+    val contactAttack:MobileEntity = new MobileEntityImpl(EntityType.EnemyAttack, entityBody, (radius, radius))
     contactAttack.setCollisionStrategy(new ApplyDamage(owner, e => e.isInstanceOf[Hero]))
     level.addEntity(contactAttack)
     contactAttack

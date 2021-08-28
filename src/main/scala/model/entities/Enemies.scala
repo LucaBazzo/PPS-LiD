@@ -1,28 +1,29 @@
 package model.entities
 
+import model.collisions.EntityType
 import model.entities.EnemyType.EnemyType
 import model.entities.Statistic.Statistic
-import model.{EntityBody, Level, Score}
+import model.{EntityBody, Score}
 
 import scala.collection.mutable
 
 object EnemyType extends Enumeration {
   type EnemyType = Value
-  val Skeleton, Slime = Value
+  val Skeleton, Slime, FireWorm = Value
 }
 
 trait Enemy extends LivingEntity {
-  def getType: EnemyType
+  def getEnemyType: EnemyType
 }
 
 class EnemyImpl(private var entityBody: EntityBody,
                 private val size: (Float, Float),
                 private val stats:mutable.Map[Statistic, Float],
                 private val score: Int = 100,
-                private val enemyType: EnemyType) extends LivingEntityImpl(entityBody, size, stats)
+                private val enemyType: EnemyType) extends LivingEntityImpl(EntityType.Enemy, entityBody, size, stats)
           with Enemy with Score {
 
-  override def getType: EnemyType = this.enemyType
+  override def getEnemyType: EnemyType = this.enemyType
 
   override def getScore: Int = this.score
 

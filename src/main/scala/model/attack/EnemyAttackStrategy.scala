@@ -27,12 +27,8 @@ class ContactAttack(owner: LivingEntity, val stats:mutable.Map[Statistic, Float]
   extends AttackStrategy {
 
   // the attack itself is created once and "attached" to the owner body
-  spawnAttack()
-
-  def spawnAttack(): Unit = {
-    val entity:MobileEntity = EntitiesFactoryImpl.createEnemyContactAttack(owner.getSize._1, owner)
-    entity.setCollisionStrategy(new ApplyDamage(owner, target))
-  }
+  val entity:MobileEntity = EntitiesFactoryImpl.createEnemyContactAttack(owner.getSize._1, owner)
+  entity.setCollisionStrategy(new ApplyDamage(owner, target))
 
   override def apply(): Unit = { }
 
@@ -48,8 +44,8 @@ class MeleeAttack(owner: LivingEntity, level:Level, val stats:mutable.Map[Statis
 
   protected val targetEntity:LivingEntity = level.getEntity(target).asInstanceOf[LivingEntity]
 
-  protected val maxDistance:Float = 4
-  protected val visibilityMaxHorizontalAngle:Int = 80
+  protected val maxDistance:Float = 40.PPM
+  protected val visibilityMaxHorizontalAngle:Int = 30
   protected val attackFrequency:Int = 2000
   protected val attackDuration:Int = 1200
 
@@ -84,15 +80,13 @@ class MeleeAttack(owner: LivingEntity, level:Level, val stats:mutable.Map[Statis
       if (isTargetOnTheRight(owner.getBody, targetEntity.getBody))
         owner.getSize._1 else -owner.getSize._1, 0)
 
-    val entity:MobileEntity = createEnemySwordAttack((10f, 10f), (spawnCoordinates.x, spawnCoordinates.y), owner)
-
-    entity.setCollisionStrategy(new ApplyDamage(entity, (e:Entity) => e.isInstanceOf[Enemy]))
+    val entity:MobileEntity = createEnemySwordAttack((20, 20), (spawnCoordinates.x, spawnCoordinates.y), owner)
     entity.getBody.setBullet(true)
     entity
   }
 }
 
-class RangedArrowAttack(owner: LivingEntity, level:Level, val stats:mutable.Map[Statistic, Float], val target:Entity => Boolean)
+class RangedAttack(owner: LivingEntity, level:Level, val stats:mutable.Map[Statistic, Float], val target:Entity => Boolean)
   extends AttackStrategy {
 
   protected val targetEntity:LivingEntity = level.getEntity(target).asInstanceOf[LivingEntity]

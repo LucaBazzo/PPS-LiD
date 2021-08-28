@@ -16,10 +16,11 @@ trait LivingEntity extends MobileEntity {
   def alterStatistics(statistic: Statistic, alteration: Float)
 }
 
-class LivingEntityImpl(private var entityBody: EntityBody,
+class LivingEntityImpl(private val entityType:Short,
+                       private var entityBody: EntityBody,
                        private val size: (Float, Float),
                        private var stats:scala.collection.mutable.Map[Statistic, Float])
-  extends MobileEntityImpl(entityBody, size) with LivingEntity {
+  extends MobileEntityImpl(entityType, entityBody, size) with LivingEntity {
 
   protected var attackStrategy: AttackStrategy = new DoNotAttack()
 
@@ -37,13 +38,13 @@ class LivingEntityImpl(private var entityBody: EntityBody,
   }
 
   override def sufferDamage(damage: Float): Unit = {
-    this.alterStatistics(Statistic.Health, this.stats(Statistic.Health) - damage)
-    if (this.stats(Statistic.Health) <= 0) {
+    this.alterStatistics(Statistic.CurrentHealth, this.stats(Statistic.CurrentHealth) - damage)
+    if (this.stats(Statistic.CurrentHealth) <= 0) {
       this.state = State.Dying
     }
   }
 
-  override def getLife: Float = this.stats(Statistic.Health)
+  override def getLife: Float = this.stats(Statistic.CurrentHealth)
 
   override def setAttackStrategy(strategy: AttackStrategy): Unit = this.attackStrategy = strategy
 

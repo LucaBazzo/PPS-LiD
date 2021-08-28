@@ -3,6 +3,7 @@ package model.entities
 import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.EntityBody
+import model.collisions.EntityType
 import model.collisions.ImplicitConversions._
 import model.entities.State.State
 import model.entities.Statistic.Statistic
@@ -25,7 +26,10 @@ trait Hero extends LivingEntity {
   def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0))
 }
 
-class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:mutable.Map[Statistic, Float]) extends LivingEntityImpl(entityBody, size, statistics) with Hero{
+class HeroImpl(private var entityBody: EntityBody,
+               private val size: (Float, Float),
+               private val statistics:mutable.Map[Statistic, Float])
+  extends LivingEntityImpl(EntityType.Hero, entityBody, size, statistics) with Hero{
 
   private var previousState: State = State.Standing
   private var little: Boolean = false
