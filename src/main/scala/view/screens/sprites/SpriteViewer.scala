@@ -1,8 +1,7 @@
 package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.Batch
-import model.collisions.EntityType
-import model.entities.{Entity, State}
+import model.entities.{Entity, EntityId, State}
 
 trait SpriteViewer {
 
@@ -30,27 +29,22 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
   override def drawSprites(): Unit = this.sprites.values.foreach((sprite: EntitySprite) => if(sprite != null) sprite.draw(this.batch))
 
   private def createEntitySprite(entity: Entity): Unit = {
-    println("added sprite for " + entity.toString + " type: " + entity.getType)
     sprites += (entity -> getSprite(entity))
   }
 
   private def getSprite(entity: Entity): EntitySprite = entity.getType match {
-    case EntityType.Hero => spriteFactory.createHeroSprite("hero", 50, 37)
-    case EntityType.Enemy => null
-    case EntityType.Mobile => null
-    case EntityType.Sword => null
-    case EntityType.Immobile => null
-    case EntityType.Item => null
-    case EntityType.Arrow =>
+    case EntityId.Hero => spriteFactory.createHeroSprite("hero", 50, 37)
+    case EntityId.Arrow =>
       val sprite = spriteFactory.createEntitySprite("arrow", 40, 5, 10, 1, 2)
       sprite.addAnimation(State.Standing, spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
       sprite
-    case EntityType.ArmorItem =>
+    case EntityId.ArmorItem =>
       val sprite = spriteFactory.createEntitySprite("items", 32,
         32, entity.getSize._1, entity.getSize._2, 2)
       sprite.addAnimation(State.Standing,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 0, 0.20f))
       sprite
+    case EntityId.Enemy | EntityId.Immobile | EntityId.Mobile => null
     case _ => null
   }
 }

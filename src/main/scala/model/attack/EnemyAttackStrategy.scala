@@ -3,7 +3,7 @@ package model.attack
 import com.badlogic.gdx.physics.box2d._
 import model.collisions.ApplyDamage
 import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Entity, MobileEntity, MobileEntityImpl}
+import model.entities.{Entity, EntityId, MobileEntity, MobileEntityImpl}
 import model.helpers.EntitiesFactoryImpl.createEnemyProjectile
 import model.helpers.WorldUtilities.{checkBodyIsVisible, getBodiesDistance, isTargetOnTheRight}
 import model.movement.ProjectileTrajectory
@@ -135,7 +135,7 @@ class RangedArrowAttack(sourceEntity: Entity, targetEntity:Entity, world:World) 
       if (isTargetOnTheRight(sourceEntity.getBody, targetEntity.getBody))
         sourceEntity.getSize._1 else -sourceEntity.getSize._1, 0)
 
-    val entity:MobileEntity = createEnemyProjectile((5, 5), (spawnCoordinates.x, spawnCoordinates.y))
+    val entity:MobileEntity = createEnemyProjectile(EntityId.Mobile, (5, 5), (spawnCoordinates.x, spawnCoordinates.y))
 
     entity.setMovementStrategy(new ProjectileTrajectory(entity, sourceEntity, targetEntity))
     entity.setCollisionStrategy(new ApplyDamage(entity, targetEntity))

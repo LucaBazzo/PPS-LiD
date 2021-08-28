@@ -4,6 +4,7 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.EntityBody
 import model.collisions.ImplicitConversions._
+import model.entities.EntityId.EntityId
 import model.entities.Items.Items
 import model.entities.State.State
 import model.entities.Statistic.Statistic
@@ -27,7 +28,7 @@ trait Hero extends LivingEntity {
   def getItemsPicked: List[Items]
 }
 
-class HeroImpl(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float]) extends LivingEntityImpl(entityType, entityBody, size, statistics) with Hero{
+class HeroImpl(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float]) extends LivingEntityImpl(entityType, entityBody, size, statistics) with Hero{
 
   private var previousState: State = State.Standing
   private var little: Boolean = false

@@ -32,7 +32,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
   private val enemy: Enemy = entitiesFactory.createEnemyEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,20), EntityType.ArmorItem)
+  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,20), EntityType.Hero)
 
   new WorldCreator(this)
 

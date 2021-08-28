@@ -22,7 +22,6 @@ object EntityType {
   val Sword: Short = getNextBitValue
 
   val Arrow: Short = getNextBitValue
-  val ArmorItem : Short = getNextBitValue
 
   private def getNextBitValue: Short = {
     this.currentBitValue = this.currentBitValue * bitMulti
