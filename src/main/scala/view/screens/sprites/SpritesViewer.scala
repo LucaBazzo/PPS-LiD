@@ -58,10 +58,11 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
         "slime", 31, 20, 13.PPM, 13.PPM, 100)
       spriteFactory.defineEnemySlimeAnimation(e)
       e
-//    case EnemyType.FireWorm =>
-//      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/fire_worm.pack",
-//        "fire_worm", 31, 20, 13.PPM, 13.PPM, 100)
-//      spriteFactory.defineEnemyFireWormAnimation(e)
-//      e
+    case EnemyType.Worm =>
+      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/worm.pack",
+        "worm", 90, 90, 15.PPM, 15.PPM, 200)
+      spriteFactory.defineEnemyWormAnimation(e)
+      e
+    case _ => null
   }
 }

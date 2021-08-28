@@ -8,7 +8,8 @@ import model.helpers.EntitiesFactoryImpl
 
 class WorldCreator(private val level: Level) {
 
-  private val rectangle: Entity = EntitiesFactoryImpl.createImmobileEntity((120, 6f), (0, -20), EntityType.Hero | EntityType.Enemy)
+  private val rectangle: Entity = EntitiesFactoryImpl.createImmobileEntity((120, 6f), (0, -20),
+    EntityType.Hero | EntityType.Enemy | EntityType.EnemyAttack)
   level.addEntity(rectangle)
 
 

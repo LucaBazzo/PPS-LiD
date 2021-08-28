@@ -12,7 +12,6 @@ object Statistic extends Enumeration {
 }
 
 trait MobileEntity extends Entity {
-
   def setMovementStrategy(strategy: MovementStrategy)
   def move()
   def stopMovement()
@@ -28,7 +27,9 @@ class MobileEntityImpl(private val entityType:Short,
 
   protected var movementStrategy: MovementStrategy = new DoNotMove()
 
-  override def update(): Unit = {}
+  override def update(): Unit = {
+    this.move()
+  }
 
   override def setMovementStrategy(strategy: MovementStrategy): Unit = this.movementStrategy = strategy
 

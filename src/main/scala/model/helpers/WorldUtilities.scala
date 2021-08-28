@@ -7,6 +7,7 @@ import model.entities.Entity
 import scala.collection.immutable.ListMap
 
 object WorldUtilities {
+
   def computePointsDistance(sourcePoint: Vector2, targetPoint: Vector2): Float =
     Math.sqrt(Math.pow(sourcePoint.x - targetPoint.x, 2) +
       Math.pow(sourcePoint.y - targetPoint.y, 2)).toFloat

@@ -9,7 +9,7 @@ import scala.collection.mutable
 
 object EnemyType extends Enumeration {
   type EnemyType = Value
-  val Skeleton, Slime, FireWorm = Value
+  val Skeleton, Slime, Worm = Value
 }
 
 trait Enemy extends LivingEntity {

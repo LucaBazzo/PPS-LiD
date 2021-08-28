@@ -2,14 +2,12 @@ package model.attack
 
 import com.badlogic.gdx.math.Vector2
 import model.Level
-import model.collisions.ApplyDamage
 import model.collisions.ImplicitConversions.RichInt
 import model.entities.Statistic.Statistic
 import model.entities._
 import model.helpers.EntitiesFactoryImpl
-import model.helpers.EntitiesFactoryImpl.{createEnemyProjectile, createEnemySwordAttack}
+import model.helpers.EntitiesFactoryImpl.{createEnemyProjectileAttack, createEnemySwordAttack}
 import model.helpers.WorldUtilities.{checkBodyIsVisible, getBodiesDistance, isTargetOnTheRight}
-import model.movement.ProjectileTrajectory
 
 import scala.collection.mutable
 
@@ -23,12 +21,13 @@ class DoNotAttack() extends AttackStrategy {
 
 }
 
-class ContactAttack(owner: LivingEntity, val stats:mutable.Map[Statistic, Float], val target:Entity => Boolean)
+class ContactAttack(val owner: LivingEntity,
+                    val stats:mutable.Map[Statistic, Float],
+                    val target:Entity => Boolean)
   extends AttackStrategy {
 
   // the attack itself is created once and "attached" to the owner body
   val entity:MobileEntity = EntitiesFactoryImpl.createEnemyContactAttack(owner.getSize._1, owner)
-  entity.setCollisionStrategy(new ApplyDamage(owner, target))
 
   override def apply(): Unit = { }
 
@@ -39,7 +38,10 @@ class ContactAttack(owner: LivingEntity, val stats:mutable.Map[Statistic, Float]
   }
 }
 
-class MeleeAttack(owner: LivingEntity, level:Level, val stats:mutable.Map[Statistic, Float], val target:Entity => Boolean)
+class MeleeAttack(val owner: LivingEntity,
+                  val level:Level,
+                  val stats:mutable.Map[Statistic, Float],
+                  val target:Entity => Boolean)
   extends AttackStrategy {
 
   protected val targetEntity:LivingEntity = level.getEntity(target).asInstanceOf[LivingEntity]
@@ -86,13 +88,16 @@ class MeleeAttack(owner: LivingEntity, level:Level, val stats:mutable.Map[Statis
   }
 }
 
-class RangedAttack(owner: LivingEntity, level:Level, val stats:mutable.Map[Statistic, Float], val target:Entity => Boolean)
+class RangedAttack(val owner: LivingEntity,
+                   val level:Level,
+                   val stats:mutable.Map[Statistic, Float],
+                   val target:Entity => Boolean)
   extends AttackStrategy {
 
-  protected val targetEntity:LivingEntity = level.getEntity(target).asInstanceOf[LivingEntity]
+  protected val targetEntity:Entity = this.level.getEntity(target)
 
-  protected val maxDistance:Float = 50.PPM
-  protected val visibilityMaxHorizontalAngle:Int = 10
+  protected val maxDistance:Float = 100.PPM
+  protected val visibilityMaxHorizontalAngle:Int = 90
   protected val attackFrequency:Int = 2000
   protected val attackDuration:Int = 1500
 
@@ -102,8 +107,8 @@ class RangedAttack(owner: LivingEntity, level:Level, val stats:mutable.Map[Stati
 
   private def canAttack: Boolean =  {
     System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
-      checkBodyIsVisible(level.getWorld, owner.getBody, targetEntity.getBody, this.visibilityMaxHorizontalAngle) &&
-      getBodiesDistance(owner.getBody, targetEntity.getBody) <= this.maxDistance
+      checkBodyIsVisible(this.level.getWorld, owner.getBody, targetEntity.getBody, this.visibilityMaxHorizontalAngle) &&
+      getBodiesDistance(this.owner.getBody, targetEntity.getBody) <= this.maxDistance
   }
 
   override def apply(): Unit = {
@@ -114,11 +119,10 @@ class RangedAttack(owner: LivingEntity, level:Level, val stats:mutable.Map[Stati
 
     // remove attack entities
     val currentTime:Long = System.currentTimeMillis()
-    this.activeAttacks.find(item => currentTime - item._2 >= this.attackDuration).map(item => item._1).foreach(e => {
-      EntitiesFactoryImpl.destroyBody(e.getBody)
-      EntitiesFactoryImpl.removeEntity(e)
-    })
-    this.activeAttacks = this.activeAttacks.filter(item => currentTime - item._2 < this.attackDuration)
+//    this.activeAttacks.find(item => currentTime - item._2 >= this.attackDuration).map(item => item._1).foreach(e => {
+//      e.destroyEntity()
+//    })
+//    this.activeAttacks = this.activeAttacks.filter(item => currentTime - item._2 < this.attackDuration)
   }
 
   override def isAttackFinished: Boolean = System.currentTimeMillis() - this.lastAttackTime >= this.attackDuration
@@ -127,13 +131,8 @@ class RangedAttack(owner: LivingEntity, level:Level, val stats:mutable.Map[Stati
     val spawnCoordinates = owner.getBody.getWorldCenter.add(
       if (isTargetOnTheRight(owner.getBody, targetEntity.getBody))
         owner.getSize._1 else -owner.getSize._1, 0)
-
-    val entity:MobileEntity = createEnemyProjectile((5, 5), (spawnCoordinates.x, spawnCoordinates.y), owner)
-
-    entity.setMovementStrategy(new ProjectileTrajectory(entity, owner, targetEntity))
-    entity.setCollisionStrategy(new ApplyDamage(entity, (e:Entity) => e.isInstanceOf[Hero]))
-//    entity.setCollisionStrategy(new ApplyDamageAndDestroyEntity(entity, targetEntity))
-    entity.getBody.setBullet(true)
+    val entity:MobileEntity = createEnemyProjectileAttack((5, 5), (spawnCoordinates.x, spawnCoordinates.y),
+      targetEntity.getPosition, owner, this)
     entity
   }
 }

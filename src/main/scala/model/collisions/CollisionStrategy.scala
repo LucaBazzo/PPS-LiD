@@ -1,7 +1,10 @@
 package model.collisions
 
+import model.entities.Statistic.Statistic
 import model.entities._
 import model.helpers.EntitiesFactoryImpl
+
+import scala.collection.mutable
 
 trait CollisionStrategy {
   def apply(entity: Entity)
@@ -25,24 +28,32 @@ class DoNothingOnCollision() extends CollisionStrategy {
   override def apply(entity: Entity): Unit = {}
 }
 
-class ApplyDamage(private val origin:Entity, private val target:Entity => Boolean)
+class ApplyDamage(private val owner:Entity,
+                  private val target:Entity => Boolean,
+                  private val stats:mutable.Map[Statistic, Float])
   extends CollisionStrategy {
 
   override def apply(entity: Entity): Unit = {
-    println("ASD", target(entity), entity)
     if (target(entity)) {
-      entity.asInstanceOf[LivingEntity].sufferDamage(
-        origin.asInstanceOf[LivingEntity].getStatistic(Statistic.Strength))
+      entity.asInstanceOf[LivingEntity].sufferDamage(stats(Statistic.Strength))
     }
   }
 }
 
-class ApplyDamageAndDestroyEntity(private val origin:Entity, private val target:Entity => Boolean)
-  extends ApplyDamage(origin, target) {
+class ApplyDamageAndDestroyOwner(private val owner:Entity,
+                                 private val target:Entity => Boolean,
+                                 private val stats:mutable.Map[Statistic, Float])
+  extends ApplyDamage(owner, target, stats) {
 
   override def apply(entity: Entity): Unit = {
     super.apply(entity)
-    EntitiesFactoryImpl.destroyBody(origin.getBody)
-    EntitiesFactoryImpl.removeEntity(origin)
+    if ((entity.getBody.getFixtureList.toArray().head.getFilterData.maskBits & owner.getType) != 0) {
+      // start destroy animation
+
+
+      // then delete the arrow
+      EntitiesFactoryImpl.destroyBody(owner.getBody)
+      EntitiesFactoryImpl.removeEntity(owner)
+    }
   }
 }
