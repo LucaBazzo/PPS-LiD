@@ -38,9 +38,9 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
 
-//  EntitiesFactoryImpl.createSkeletonEnemy((+50, 10))
-//  EntitiesFactoryImpl.createSlimeEnemy((-50,10))
+//  EntitiesFactoryImpl.createSkeletonEnemy((+90, 10a
   EntitiesFactoryImpl.createWormEnemy((-50,10))
+//  EntitiesFactoryImpl.createWormEnemy((-40,10))
 //  EntitiesFactoryImpl.createSlimeEnemy((70,20))
 //  private val item: Item = EntitiesFactoryImpl.createItem(ItemPools.Level_1, (10f, 10f), (40,20))
 
