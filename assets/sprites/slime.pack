@@ -1,12 +1,12 @@
 
-skeleton.png
+slime.png
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-skeleton
+slime
   rotate: false
   xy: 0, 0
-  size: 1050, 600
-  orig: 1050, 600
+  size: 224, 75
+  orig: 224, 75
   offset: 0, 0
   index: -1

@@ -1,6 +1,5 @@
 
 worm.png
-size: 1871, 924
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
