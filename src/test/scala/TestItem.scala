@@ -1,7 +1,4 @@
 
-import com.badlogic.gdx.physics.box2d.World
-import controller.GameEvent
-import controller.GameEvent.GameEvent
 import model.entities.Items.Items
 import model.{Level, LevelImpl}
 import model.entities._

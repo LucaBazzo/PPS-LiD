@@ -1,6 +1,6 @@
 package model.collisions
 
-import model.entities.{Entity, Hero, HeroImpl, ImmobileEntity, Item, ItemImpl}
+import model.entities.{CircularMobileEntity, Entity, Hero, HeroImpl, ImmobileEntity, Item, ItemImpl}
 import model.Level
 import model.helpers.EntitiesFactoryImpl
 
@@ -28,8 +28,9 @@ class ItemCollisionStrategy(private val item: Item) extends CollisionStrategy {
 class DoorCollisionStrategy(private val door: ImmobileEntity) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => print("Hero opened door")
-                    this.door.getEntityBody.setCollisions(EntityType.Sword)
-                    this.door.getEntityBody.createFixture()
+                    this.door.changeCollisions(EntityType.OpenedDoor)
+    case s: CircularMobileEntity => print("Hero destroyed door")
+                    this.door.changeCollisions(EntityType.DestroyedDoor)
   }
 }
 

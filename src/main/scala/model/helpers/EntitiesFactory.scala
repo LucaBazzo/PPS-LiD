@@ -64,12 +64,15 @@ trait EntitiesFactory {
   def destroyBody(body: Body)
   def destroyJoint(joint: Joint)
   def destroyBodies(): Unit
+  def changeCollisions(entity: Entity, entityType: Short): Unit
+  def applyEntityCollisionChanges(): Unit
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
 
   private var level: Level = _
   private var bodiesToBeDestroyed: List[Body] = List.empty
+  private var entitiesToBeChanged: List[(Entity, Short)] = List.empty
   private var itemPool: ItemPool = _
 
   override def setLevel(level: Level, pool: ItemPool): Unit = {
@@ -93,7 +96,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val size: (Float, Float) = HERO_SIZE
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Hero,
-      EntityType.Immobile | EntityType.Enemy | EntityType.Item, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
+      EntityType.Immobile | EntityType.Enemy | EntityType.Item | EntityType.Door, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
     val hero: Hero = new HeroImpl(entityBody, size.PPM, HashMap[Statistic, Float](Defence -> 2f))
 
@@ -110,7 +113,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val size: (Float, Float) = (10f, 10f)
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Enemy,
-      EntityType.Immobile | EntityType.Sword | EntityType.Hero, createPolygonalShape(size.PPM), position.PPM)
+      EntityType.Immobile | EntityType.Sword | EntityType.Hero | EntityType.Door, createPolygonalShape(size.PPM), position.PPM)
 
     val enemy:Enemy = new EnemyImpl(entityBody, size.PPM, new HashMap[Statistic, Float]())
     enemy.setCollisionStrategy(new DoNothingOnCollision())
@@ -167,8 +170,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                           position: (Float, Float) = (0, 0),
                           collisions: Short = 0): Entity = {
 
-    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Immobile,
-      EntityType.Hero, createPolygonalShape(size.PPM), position.PPM)
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Door,
+      EntityType.Hero | EntityType.Sword, createPolygonalShape(size.PPM), position.PPM)
 
     val immobileEntity: Entity = ImmobileEntity(entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new DoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
@@ -274,6 +277,17 @@ override def createEnemyProjectile(size: (Float, Float) = (10, 10),
     entityBody
   }
 
+  override def changeCollisions(entity: Entity, entityType: Short): Unit = synchronized {
+    this.entitiesToBeChanged = (entity, entityType) :: this.entitiesToBeChanged
+  }
+
+  override def applyEntityCollisionChanges(): Unit = synchronized {
+    for (change <- this.entitiesToBeChanged) {
+      change._1.getEntityBody.setCollisions(change._2)
+      change._1.getEntityBody.createFixture()
+    }
+    this.entitiesToBeChanged = List.empty
+  }
 }
 
 //  override def createEnemyEntity(position: (Float, Float), size:Float): EnemyImpl = {

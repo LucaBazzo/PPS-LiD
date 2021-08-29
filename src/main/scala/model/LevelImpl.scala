@@ -3,7 +3,7 @@ package model
 import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
-import model.collisions.CollisionManager
+import model.collisions.{CollisionManager, EntityType}
 import model.entities.ItemPools.ItemPools
 import model.entities.{Enemy, Entity, Hero, Item, ItemPools}
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl}
@@ -52,6 +52,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
     this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
     this.entitiesFactory.destroyBodies()
+    this.entitiesFactory.applyEntityCollisionChanges()
   }
 
   override def addEntity(entity: Entity): Unit = {

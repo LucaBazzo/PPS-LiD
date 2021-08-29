@@ -20,6 +20,9 @@ object EntityType extends Enumeration {
   val Immobile: Short = getNextBitValue
   val Item: Short = getNextBitValue
   val Sword: Short = getNextBitValue
+  val Door: Short = getNextBitValue
+  val OpenedDoor: Short = getNextBitValue
+  val DestroyedDoor: Short = getNextBitValue
 
   private def getNextBitValue: Short = {
     this.currentBitValue = this.currentBitValue * bitMulti
