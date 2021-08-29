@@ -2,11 +2,10 @@ package model.attack
 
 import com.badlogic.gdx.math.Vector2
 import model.Level
-import model.collisions.ImplicitConversions.RichInt
 import model.entities.Statistic.Statistic
 import model.entities._
 import model.helpers.EntitiesFactoryImpl
-import model.helpers.EntitiesFactoryImpl.{createEnemyProjectileAttack, createEnemySwordAttack}
+import model.helpers.EntitiesFactoryImpl.{createEnemyProjectileAttack, createMeleeSwordAttack}
 import model.helpers.WorldUtilities.{checkBodyIsVisible, getBodiesDistance, isTargetOnTheRight}
 
 import scala.collection.mutable
@@ -31,7 +30,7 @@ class ContactAttack(val owner: LivingEntity,
 
   override def apply(): Unit = { }
 
-  override def isAttackFinished: Boolean = false
+  override def isAttackFinished: Boolean = true
 
   override def stopAttack(): Unit = {
 
@@ -45,15 +44,21 @@ class MeleeAttack(val owner: LivingEntity,
   extends AttackStrategy {
 
   protected val targetEntity:LivingEntity = level.getEntity(target).asInstanceOf[LivingEntity]
-
-  protected val maxDistance:Float = 40.PPM
-  protected val visibilityMaxHorizontalAngle:Int = 30
-  protected val attackFrequency:Int = 2000
-  protected val attackDuration:Int = 1200
+  protected val maxDistance:Float = stats(Statistic.HorizontalVisionDistance)
+  protected val visibilityMaxHorizontalAngle:Float = stats(Statistic.HorizontalVisionAngle)
+  protected val attackFrequency:Float = stats(Statistic.AttackFrequency)
+  protected val attackDuration:Float = stats(Statistic.AttackDuration)
 
   protected var lastAttackTime:Long = 0
 
-  protected var attackInstance: Option[MobileEntity] = Option.empty
+  override def apply(): Unit = {
+    if (canAttack && isAttackFinished) {
+      this.lastAttackTime = System.currentTimeMillis()
+      spawnAttack()
+    }
+  }
+
+  override def isAttackFinished: Boolean = System.currentTimeMillis() - this.lastAttackTime > this.attackDuration
 
   private def canAttack: Boolean =  {
     System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
@@ -61,28 +66,12 @@ class MeleeAttack(val owner: LivingEntity,
       getBodiesDistance(owner.getBody, targetEntity.getBody) <= this.maxDistance
   }
 
-  override def apply(): Unit = {
-    if (canAttack) {
-      this.lastAttackTime = System.currentTimeMillis()
-      this.attackInstance = Option(spawnAttack())
-    }
-
-    // delete the attack entity
-    if (attackInstance.isDefined && System.currentTimeMillis() - this.lastAttackTime >= this.attackDuration) {
-      EntitiesFactoryImpl.destroyBody(this.attackInstance.get.getBody)
-      EntitiesFactoryImpl.removeEntity(this.attackInstance.get)
-      this.attackInstance = Option.empty
-    }
-  }
-
-  override def isAttackFinished: Boolean = this.attackInstance.isEmpty
-
   private def spawnAttack(): MobileEntity = {
     val spawnCoordinates: Vector2 = owner.getBody.getWorldCenter.add(
       if (isTargetOnTheRight(owner.getBody, targetEntity.getBody))
         owner.getSize._1 else -owner.getSize._1, 0)
 
-    val entity:MobileEntity = createEnemySwordAttack((20, 20), (spawnCoordinates.x, spawnCoordinates.y), owner)
+    val entity:MobileEntity = createMeleeSwordAttack((15, 15), (spawnCoordinates.x, spawnCoordinates.y), owner)
     entity.getBody.setBullet(true)
     entity
   }
@@ -95,44 +84,36 @@ class RangedAttack(val owner: LivingEntity,
   extends AttackStrategy {
 
   protected val targetEntity:Entity = this.level.getEntity(target)
-
-  protected val maxDistance:Float = 100.PPM
-  protected val visibilityMaxHorizontalAngle:Int = 90
-  protected val attackFrequency:Int = 2000
-  protected val attackDuration:Int = 1500
+  protected val maxDistance:Float = stats(Statistic.HorizontalVisionDistance)
+  protected val visibilityMaxHorizontalAngle:Float = stats(Statistic.HorizontalVisionAngle)
+  protected val attackFrequency:Float = stats(Statistic.AttackFrequency)
+  protected val attackDuration:Float = stats(Statistic.AttackDuration)
 
   protected var lastAttackTime:Long = 0
 
-  protected var activeAttacks: mutable.Map[MobileEntity, Long] = mutable.Map.empty
+  override def apply(): Unit = {
+    if (canAttack && isAttackFinished) {
+      this.lastAttackTime = System.currentTimeMillis()
+      spawnAttack()
+    }
+  }
+
+  override def isAttackFinished: Boolean =
+    System.currentTimeMillis() - this.lastAttackTime >= this.attackDuration
 
   private def canAttack: Boolean =  {
     System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
-      checkBodyIsVisible(this.level.getWorld, owner.getBody, targetEntity.getBody, this.visibilityMaxHorizontalAngle) &&
+      checkBodyIsVisible(this.level.getWorld, owner.getBody, targetEntity.getBody,
+        this.visibilityMaxHorizontalAngle) &&
       getBodiesDistance(this.owner.getBody, targetEntity.getBody) <= this.maxDistance
   }
 
-  override def apply(): Unit = {
-    if (canAttack) {
-      this.lastAttackTime = System.currentTimeMillis()
-      this.activeAttacks += (spawnAttack() -> this.lastAttackTime)
-    }
-
-    // remove attack entities
-    val currentTime:Long = System.currentTimeMillis()
-//    this.activeAttacks.find(item => currentTime - item._2 >= this.attackDuration).map(item => item._1).foreach(e => {
-//      e.destroyEntity()
-//    })
-//    this.activeAttacks = this.activeAttacks.filter(item => currentTime - item._2 < this.attackDuration)
-  }
-
-  override def isAttackFinished: Boolean = System.currentTimeMillis() - this.lastAttackTime >= this.attackDuration
-
-  private def spawnAttack(): MobileEntity = {
+  private def spawnAttack(): Attack = {
     val spawnCoordinates = owner.getBody.getWorldCenter.add(
       if (isTargetOnTheRight(owner.getBody, targetEntity.getBody))
         owner.getSize._1 else -owner.getSize._1, 0)
-    val entity:MobileEntity = createEnemyProjectileAttack((5, 5), (spawnCoordinates.x, spawnCoordinates.y),
-      targetEntity.getPosition, owner, this)
+    val entity:Attack = createEnemyProjectileAttack((5, 5),
+      (spawnCoordinates.x, spawnCoordinates.y), targetEntity.getPosition, owner)
     entity
   }
 }
