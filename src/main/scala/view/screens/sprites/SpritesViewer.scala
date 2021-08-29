@@ -3,7 +3,7 @@ package view.screens.sprites
 import com.badlogic.gdx.graphics.g2d.Batch
 import model.collisions.EntityType
 import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Enemy, EnemyType, Entity}
+import model.entities.{Attack, AttackType, Enemy, EnemyType, Entity}
 import utils.ApplicationConstants
 
 trait SpriteViewer {
@@ -40,6 +40,7 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
     case EntityType.Hero => spriteFactory.createHeroSprite(ApplicationConstants.SPRITES_PACK_LOCATION,
       "hero", 50, 37)
     case EntityType.Enemy => getEnemySprite(entity)
+    case EntityType.EnemyAttack => getAttackSprite(entity)
     case EntityType.Mobile => null
     case EntityType.Sword => null
     case EntityType.Immobile => null
@@ -50,18 +51,27 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
   private def getEnemySprite(entity: Entity): EntitySprite = entity.asInstanceOf[Enemy].getEnemyType match {
     case EnemyType.Skeleton =>
       val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/skeleton.pack",
-        "skeleton", 150, 150, 10.PPM, 17.PPM, 300)
+        "skeleton", 150, 150, 19.PPM, 23.PPM, 300)
       spriteFactory.defineEnemySkeletonAnimation(e)
       e
     case EnemyType.Slime =>
-      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/enemies_sprites.pack",
-        "slime", 31, 20, 13.PPM, 13.PPM, 100)
+      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/slime.pack",
+        "slime", 32, 25, 13.PPM, 13.PPM, 100)
       spriteFactory.defineEnemySlimeAnimation(e)
       e
     case EnemyType.Worm =>
       val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/worm.pack",
         "worm", 90, 90, 15.PPM, 15.PPM, 200)
       spriteFactory.defineEnemyWormAnimation(e)
+      e
+    case _ => null
+  }
+
+  private def getAttackSprite(entity: Entity): EntitySprite = entity.asInstanceOf[Attack].getAttackType match {
+    case AttackType.FireBallAttack =>
+      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/fireball.pack",
+        "fireball", 46, 46, 5.PPM, 5.PPM, 200)
+      spriteFactory.defineAttackFireballAnimation(e)
       e
     case _ => null
   }

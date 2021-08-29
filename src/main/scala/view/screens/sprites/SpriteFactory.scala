@@ -5,8 +5,8 @@ import com.badlogic.gdx.utils.Array
 import model.entities.State
 
 trait SpriteFactory {
-
   def createHeroSprite(spriteSheetName: String, regionName: String, spriteWidth: Float, spriteHeight: Float): EntitySprite
+
 
   def createEntitySprite(spritePackName: String, regionName: String, spriteWidth: Float, spriteHeight: Float,
                          entitySpriteWidth: Float, entitySpriteHeight: Float,
@@ -24,6 +24,7 @@ trait SpriteFactory {
   def defineEnemySkeletonAnimation(sprite:EntitySprite): Unit
   def defineEnemySlimeAnimation(sprite:EntitySprite): Unit
   def defineEnemyWormAnimation(sprite: EntitySprite):Unit
+  def defineAttackFireballAnimation(sprite: EntitySprite):Unit
 }
 
 class SpriteFactoryImpl extends SpriteFactory {
@@ -143,7 +144,7 @@ class SpriteFactoryImpl extends SpriteFactory {
         6, 0, 2, 0.18f), loop = true)
   }
 
-  def defineEnemyFireProjectileAnimations(sprite:EntitySprite): Unit = {
+  def defineAttackFireballAnimation(sprite: EntitySprite):Unit = {
     sprite.addAnimation(State.Running,
       this.createSpriteAnimation(sprite,
         1, 0, 5,0.15f), loop = true)
