@@ -7,10 +7,10 @@ import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef
 import model._
 import model.attack.{HeroAttackStrategyImpl, RangedArrowAttack}
 import model.collisions.ImplicitConversions._
-import model.collisions.{CollisionStrategyImpl, DoNothingOnCollision, EntityType, ItemCollisionStrategy}
+import model.collisions.{CollisionStrategyImpl, DoNothingOnCollision, DoorCollisionStrategy, EntityType, ItemCollisionStrategy}
 import model.entities.ItemPools.ItemPools
 import model.entities.Statistic
-import model.entities.Statistic.Statistic
+import model.entities.Statistic.{Defence, Statistic}
 import model.entities.{Entity, _}
 import model.movement.{CircularMovementStrategy, HeroMovementStrategy, PatrolAndStopIfFacingHero}
 
@@ -40,6 +40,10 @@ trait EntitiesFactory {
                            collisions: Short = 0): Entity
 
   def createImmobileEnemy(size: (Float, Float) = (10, 10),
+                          position: (Float, Float) = (0, 0),
+                          collisions: Short = 0): Entity
+
+  def createDoor(size: (Float, Float) = (10, 10),
                           position: (Float, Float) = (0, 0),
                           collisions: Short = 0): Entity
 
@@ -91,7 +95,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Hero,
       EntityType.Immobile | EntityType.Enemy | EntityType.Item, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
-    val hero: Hero = new HeroImpl(entityBody, size.PPM, new HashMap[Statistic, Float]())
+    val hero: Hero = new HeroImpl(entityBody, size.PPM, HashMap[Statistic, Float](Defence -> 2f))
 
     hero.setCollisionStrategy(new CollisionStrategyImpl())
     hero.setMovementStrategy(new HeroMovementStrategy(hero))
@@ -156,6 +160,19 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val immobileEntity: Entity = ImmobileEntity(entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
+    immobileEntity
+  }
+
+  override def createDoor(size: (Float, Float) = (10, 10),
+                          position: (Float, Float) = (0, 0),
+                          collisions: Short = 0): Entity = {
+
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Immobile,
+      EntityType.Hero, createPolygonalShape(size.PPM), position.PPM)
+
+    val immobileEntity: Entity = ImmobileEntity(entityBody, size.PPM)
+    immobileEntity.setCollisionStrategy(new DoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
+    this.level.addEntity(immobileEntity)
     immobileEntity
   }
 

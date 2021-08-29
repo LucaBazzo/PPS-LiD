@@ -34,6 +34,8 @@ trait Entity {
   //TODO ricontrollare in futuro
   def getBody: Body
 
+  def getEntityBody: EntityBody
+
   //TODO vedere dove metterlo
   def vectorScalar(vector: Vector2, scalar: Float = Gdx.graphics.getDeltaTime) = new Vector2(vector.x * scalar, vector.y * scalar)
 
@@ -67,6 +69,8 @@ abstract class EntityImpl(private var entityBody: EntityBody, private val size: 
   }
 
   override def getBody: Body = this.entityBody.getBody
+
+  override def getEntityBody: EntityBody = this.entityBody
 }
 
 case class ImmobileEntity(private var entityBody: EntityBody, private val size: (Float, Float)) extends EntityImpl(entityBody, size) {

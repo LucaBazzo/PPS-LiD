@@ -1,6 +1,6 @@
 package model.collisions
 
-import model.entities.{Entity, Hero, HeroImpl, Item, ItemImpl}
+import model.entities.{Entity, Hero, HeroImpl, ImmobileEntity, Item, ItemImpl}
 import model.Level
 import model.helpers.EntitiesFactoryImpl
 
@@ -22,6 +22,14 @@ class ItemCollisionStrategy(private val item: Item) extends CollisionStrategy {
                    println(effect._3 + "\n +" + item.getScore + " points")
                    h.alterStatistics(effect._1, effect._2)
     case _ => println("____")
+  }
+}
+
+class DoorCollisionStrategy(private val door: ImmobileEntity) extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => print("Hero opened door")
+                    this.door.getEntityBody.setCollisions(EntityType.Sword)
+                    this.door.getEntityBody.createFixture()
   }
 }
 

@@ -4,6 +4,9 @@ import model.EntityBody
 import model.attack.AttackStrategy
 import model.entities.Statistic.Statistic
 
+import java.util
+import scala.collection.immutable.HashMap
+
 trait LivingEntity extends MobileEntity {
 
   def sufferDamage(damage: Float)
@@ -13,7 +16,7 @@ trait LivingEntity extends MobileEntity {
   def alterStatistics(statistic: Statistic, alteration: Float)
 }
 
-class LivingEntityImpl(private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float]) extends MobileEntityImpl(entityBody, size, statistics) with LivingEntity {
+class LivingEntityImpl(private var entityBody: EntityBody, private val size: (Float, Float), private var statistics:Map[Statistic, Float]) extends MobileEntityImpl(entityBody, size, statistics) with LivingEntity {
 
   protected var attackStrategy: AttackStrategy = _
 
@@ -29,6 +32,9 @@ class LivingEntityImpl(private var entityBody: EntityBody, private val size: (Fl
 
     override def getStatistics(): Map[Statistic, Float] = statistics
 
-    override def alterStatistics(statistic: Statistic, alteration: Float): Unit = printf("Hero's " + statistic + " +" + alteration.toString + "\n")//statistics(statistic) -> alteration
+    override def alterStatistics(statistic: Statistic, alteration: Float): Unit = {
+      printf("Hero's " + statistic + " +" + alteration.toString + "\n")
+      statistics = statistics + (statistic -> (statistics.get(statistic).get + alteration))
+    }
 
 }
