@@ -9,6 +9,8 @@ object Statistic extends Enumeration {
   type Statistic = Value
 
   val CurrentHealth, Health, Strength, Defence, MovementSpeed, MaxMovementSpeed, Acceleration, AttackSpeed = Value
+
+  val HorizontalVisionDistance, HorizontalVisionAngle, AttackFrequency, AttackDuration    = Value
 }
 
 trait MobileEntity extends Entity {
@@ -28,7 +30,7 @@ class MobileEntityImpl(private val entityType:Short,
   protected var movementStrategy: MovementStrategy = new DoNotMove()
 
   override def update(): Unit = {
-    this.move()
+
   }
 
   override def setMovementStrategy(strategy: MovementStrategy): Unit = this.movementStrategy = strategy

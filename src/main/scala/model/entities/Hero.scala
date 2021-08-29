@@ -19,7 +19,6 @@ trait Hero extends LivingEntity {
   def getPreviousState: State
   def getLinearVelocityX: Float
 
-  def setState(state: State)
   def isLittle: Boolean
   def setLittle(little: Boolean)
 
@@ -162,8 +161,8 @@ class HeroImpl(private var entityBody: EntityBody,
   override def getPreviousState: State = this.previousState
 
   override def setState(state: State): Unit = {
+    super.setState(state)
     this.previousState = state
-    this.state = state
   }
 
   override def setLittle(little: Boolean): Unit = {

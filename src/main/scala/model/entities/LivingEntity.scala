@@ -24,14 +24,14 @@ class LivingEntityImpl(private val entityType:Short,
 
   protected var attackStrategy: AttackStrategy = new DoNotAttack()
 
-  protected var deathTimer:Long = 0
-  protected val dyingDuration:Long = 1000
+  protected var dyingStateTimer:Long = 0
+  protected val dyingStateDuration:Long = 1000
 
   override def update(): Unit = {
     if (this.state == State.Dying) {
-      if (deathTimer == 0) {
-        this.deathTimer = System.currentTimeMillis()
-      } else if (System.currentTimeMillis() - deathTimer > dyingDuration) {
+      if (dyingStateTimer == 0) {
+        this.dyingStateTimer = System.currentTimeMillis()
+      } else if (System.currentTimeMillis() - dyingStateTimer > dyingStateDuration) {
         this.destroyEntity()
       }
     }

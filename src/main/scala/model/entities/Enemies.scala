@@ -30,13 +30,23 @@ class EnemyImpl(private var entityBody: EntityBody,
   override def update(): Unit = {
     super.update()
     if (state != State.Dying) {
-      movementStrategy.apply()
-      attackStrategy.apply()
 
-      if (!attackStrategy.isAttackFinished) this.state = State.Attack01
-      else if (this.entityBody.getBody.getLinearVelocity.x != 0) this.state = State.Running
-      else this.state = State.Standing
+      this.attackStrategy.apply()
+      if (!this.attackStrategy.isAttackFinished) {
+        this.state = State.Attack01
+      } else {
+        this.movementStrategy.apply()
+        if (this.entityBody.getBody.getLinearVelocity.x != 0) {
+          this.state = State.Running
+        } else {
+          this.state = State.Standing
+        }
+      }
     }
+  }
+
+  override def sufferDamage(damage: Float): Unit = {
+    super.sufferDamage(damage)
   }
 
   override def destroyEntity(): Unit = {

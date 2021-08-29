@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import model.EntityBody
-import model.collisions.{CollisionStrategy, DoNothingOnCollision}
+import model.collisions.{CollisionStrategy, DoNotCollide}
 import model.entities.State.State
 import model.helpers.EntitiesFactoryImpl
 
@@ -22,6 +22,8 @@ trait Entity {
   def getType: Short
 
   def getState: State
+
+  def setState(state:State): Unit
 
   def setPosition(position: (Float, Float))
 
@@ -45,9 +47,11 @@ trait Entity {
 abstract class EntityImpl(private val entityType: Short, private var entityBody: EntityBody, private val size: (Float, Float)) extends Entity {
 
   protected var state: State = State.Standing
-  protected var collisionStrategy: CollisionStrategy = new DoNothingOnCollision()
+  protected var collisionStrategy: CollisionStrategy = new DoNotCollide()
 
   override def getState: State = this.state
+
+  override def setState(state:State):Unit = this.state = state
 
   override def setPosition(position: (Float, Float)): Unit = {
     this.entityBody.getBody.setTransform(new Vector2(position._1, position._2), 0)
