@@ -22,7 +22,9 @@ trait Level {
   def getWorld: World
 }
 
-class LevelImpl(private val entitiesSetter: EntitiesSetter, private val world: World) extends Level {
+class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
+
+  private val world: World = new World(GRAVITY_FORCE, true)
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
   entitiesFactory.setLevel(this, new ItemPoolImpl())

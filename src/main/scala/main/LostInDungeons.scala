@@ -9,11 +9,10 @@ import view.screens.game.GameScreen
 
 class LostInDungeons(private val entitiesGetter: EntitiesGetter,
                      private val observerManager: ObserverManager,
-                     private val world: World,
                      private val level: Level) extends Game {
 
   override def create(): Unit = {
-    this.setScreen(new GameScreen(entitiesGetter, observerManager, world, level))
+    this.setScreen(new GameScreen(entitiesGetter, observerManager, level))
   }
 
   override def dispose(): Unit = {

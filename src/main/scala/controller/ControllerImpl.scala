@@ -30,14 +30,9 @@ class ControllerImpl extends Controller with Observer {
   private val observerManager: ObserverManager = new ObserverManagerImpl()
   this.observerManager.addObserver(this)
 
-  //TODO non riesco a passare GRAVITY_FORCE al costruttore di World
-  private val vector2: Vector2 = new Vector2(0f,-5f)
-  private val world: World = new World(vector2, true)
-  //private val world: World = new World(GRAVITY_FORCE, true)
+  private var level: Level = new LevelImpl(entitiesContainer)
 
-  private var level: Level = new LevelImpl(entitiesContainer, world)
-
-  private val view: View = new ViewImpl(entitiesContainer, observerManager, world, level)
+  private val view: View = new ViewImpl(entitiesContainer, observerManager, level)
   private val model: Model = new ModelImpl(entitiesContainer, level)
 
   private val executorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()

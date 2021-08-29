@@ -10,6 +10,7 @@ import model.collisions.EntityType
 import model.entities.Entity
 import model.helpers.EntitiesFactoryImpl
 import utils.ApplicationConstants.PIXELS_PER_METER
+import view.screens.game.GameScreen
 
 object TileMapHelper {
 
@@ -23,7 +24,7 @@ object TileMapHelper {
     new TmxMapLoader().load(path)
   }
 
-  def setWorld(world: World, level: Level, path: String): Unit = {
+  def setWorld(level: Level, path: String): Unit = {
 
     var rect: Rectangle = new Rectangle()
 
