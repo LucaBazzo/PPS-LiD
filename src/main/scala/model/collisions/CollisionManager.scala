@@ -20,6 +20,9 @@ object EntityType {
   val Immobile: Short = getNextBitValue
   val Item: Short = getNextBitValue
   val Sword: Short = getNextBitValue
+  val Door: Short = getNextBitValue
+  val OpenedDoor: Short = getNextBitValue
+  val DestroyedDoor: Short = getNextBitValue
 
   val Arrow: Short = getNextBitValue
 

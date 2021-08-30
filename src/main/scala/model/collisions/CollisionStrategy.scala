@@ -1,6 +1,6 @@
 package model.collisions
 
-import model.entities.{Entity, HeroImpl, ItemImpl}
+import model.entities.{CircularMobileEntity, Entity, Hero, HeroImpl, ImmobileEntity, Item, ItemImpl}
 import model.helpers.EntitiesFactoryImpl
 
 trait CollisionStrategy {
@@ -9,15 +9,27 @@ trait CollisionStrategy {
 
 class CollisionStrategyImpl extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
-    case i:ItemImpl => println("Collect item: " + entity.toString)
+    case i:Item =>  println("Collect item: " + i.getEnumVal)
     case _ => println("Collision Detected with" + entity.toString)
   }
 }
 
-class ItemCollisionStrategy extends CollisionStrategy {
+class ItemCollisionStrategy(private val item: Item) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
-    case h:HeroImpl => println("Hero picked up item")
+    case h:Hero => println("Hero picked up item")
+                   val effect = item.collect()
+                   println(effect._3 + "\n +" + item.getScore + " points")
+                   h.alterStatistics(effect._1, effect._2)
     case _ => println("____")
+  }
+}
+
+class DoorCollisionStrategy(private val door: ImmobileEntity) extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => print("Hero opened door")
+                    this.door.changeCollisions(EntityType.OpenedDoor)
+    case s: CircularMobileEntity => print("Hero destroyed door")
+                    this.door.changeCollisions(EntityType.DestroyedDoor)
   }
 }
 

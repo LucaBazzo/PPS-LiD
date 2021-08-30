@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import model.EntityBody
-import model.collisions.CollisionStrategy
+import model.collisions.{CollisionStrategy, EntityType}
 import model.entities.EntityId.EntityId
 import model.entities.State.State
 import model.helpers.EntitiesFactoryImpl
@@ -44,11 +44,14 @@ trait Entity {
 
   //TODO ricontrollare in futuro
   def getBody: Body
+  def getEntityBody: EntityBody
 
   //TODO vedere dove metterlo
   def vectorScalar(vector: Vector2, scalar: Float = Gdx.graphics.getDeltaTime) = new Vector2(vector.x * scalar, vector.y * scalar)
 
   def destroyEntity(): Unit
+
+  def changeCollisions(entityType: Short): Unit
 }
 
 abstract class EntityImpl(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends Entity {
@@ -78,6 +81,10 @@ abstract class EntityImpl(private val entityType: EntityId, private var entityBo
   }
 
   override def getBody: Body = this.entityBody.getBody
+
+  override def getEntityBody: EntityBody = this.entityBody
+
+  override def changeCollisions(entityType: Short): Unit = EntitiesFactoryImpl.changeCollisions(this, entityType)
 
   override def getType: EntityId = this.entityType
 }

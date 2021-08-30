@@ -9,8 +9,11 @@ import model.attack.{HeroAttackStrategyImpl, RangedArrowAttack}
 import model.collisions.ImplicitConversions._
 import model.collisions.{ApplyDamageAndDestroyEntity, CollisionStrategyImpl, DoNothingOnCollision, EntityType, ItemCollisionStrategy}
 import model.entities.EntityId.EntityId
+import model.collisions.{CollisionStrategyImpl, DoNothingOnCollision, DoorCollisionStrategy, EntityType, ItemCollisionStrategy}
 import model.entities.ItemPools.ItemPools
 import model.entities.Statistic.Statistic
+import model.entities.Statistic
+import model.entities.Statistic.{Defence, Statistic}
 import model.entities.{Entity, _}
 import model.movement.{ArrowMovementStrategy, CircularMovementStrategy, HeroMovementStrategy, PatrolAndStopIfFacingHero}
 
@@ -51,6 +54,10 @@ trait EntitiesFactory {
                           entityCollisionBit: Short = EntityType.Enemy,
                           collisions: Short = 0): Entity
 
+  def createDoor(size: (Float, Float) = (10, 10),
+                          position: (Float, Float) = (0, 0),
+                          collisions: Short = 0): Entity
+
   def createAttackPattern(entityType: EntityId = EntityId.Mobile,
                           rotatingBodySize: (Float, Float) = (1,1),
                           pivotPoint: (Float, Float) = (0,0),
@@ -71,14 +78,16 @@ trait EntitiesFactory {
   def createBody(bodyDef: BodyDef): Body
   def destroyBody(body: Body)
   def destroyJoint(joint: Joint)
-
-  def destroyBodies()
+  def destroyBodies(): Unit
+  def changeCollisions(entity: Entity, entityType: Short): Unit
+  def applyEntityCollisionChanges(): Unit
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
 
   private var level: Level = _
-
+  private var bodiesToBeDestroyed: List[Body] = List.empty
+  private var entitiesToBeChanged: List[(Entity, Short)] = List.empty
   private var itemPool: ItemPool = _
 
   override def setLevel(level: Level, pool: ItemPool): Unit = {
@@ -113,7 +122,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       Statistic.Defence -> 0)
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Hero,
-      EntityType.Immobile | EntityType.Enemy | EntityType.Item, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
+      EntityType.Immobile | EntityType.Enemy | EntityType.Item | EntityType.Door, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
     val hero: Hero = new HeroImpl(EntityId.Hero, entityBody, size.PPM, statistic)
 
@@ -130,7 +139,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val size: (Float, Float) = (10f, 10f)
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityType.Enemy,
-      EntityType.Immobile | EntityType.Sword | EntityType.Hero, createPolygonalShape(size.PPM), position.PPM)
+      EntityType.Immobile | EntityType.Sword | EntityType.Hero | EntityType.Door, createPolygonalShape(size.PPM), position.PPM)
 
     val enemy:Enemy = new EnemyImpl(EntityId.Enemy, entityBody, size.PPM, new HashMap[Statistic, Float]())
     enemy.setCollisionStrategy(new DoNothingOnCollision())
@@ -152,9 +161,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                           collisions: Short = EntityType.Hero): Item = {
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Item,
       collisions, createPolygonalShape(size.PPM), position.PPM)
-    val item: Item = new ArmorItem(EntityId.ArmorItem, entityBody, size)
-    //val item: Item = itemPool.getItem(entityBody, size.PPM, PoolName)
-    item.setCollisionStrategy(new ItemCollisionStrategy())
+    val item: Item = itemPool.getItem(entityBody, size.PPM, PoolName)
+    item.setCollisionStrategy(new ItemCollisionStrategy(item))
     this.level.addEntity(item)
     item
   }
@@ -183,6 +191,19 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val immobileEntity: Entity = ImmobileEntity(entityType, entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
+    immobileEntity
+  }
+
+  override def createDoor(size: (Float, Float) = (10, 10),
+                          position: (Float, Float) = (0, 0),
+                          collisions: Short = 0): Entity = {
+
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Door,
+      EntityType.Hero | EntityType.Sword, createPolygonalShape(size.PPM), position.PPM)
+
+    val immobileEntity: Entity = ImmobileEntity(entityBody, size.PPM)
+    immobileEntity.setCollisionStrategy(new DoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
+    this.level.addEntity(immobileEntity)
     immobileEntity
   }
 
@@ -266,12 +287,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def removeEntity(entity: Entity): Unit = this.level.removeEntity(entity)
 
-  override def destroyJoint(joint: Joint): Unit = this.level.getWorld.destroyJoint(joint)
-
-  override def createBody(bodyDef: BodyDef): Body = this.level.getWorld.createBody(bodyDef)
-
-  var bodiesToBeDestroyed: List[Body] = List.empty
-
   override def destroyBody(body: Body): Unit = synchronized {
     this.bodiesToBeDestroyed = body :: this.bodiesToBeDestroyed
   }
@@ -282,6 +297,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     }
     this.bodiesToBeDestroyed = List.empty
   }
+
+  override def destroyJoint(joint: Joint): Unit = this.level.getWorld.destroyJoint(joint)
+
+  override def createBody(bodyDef: BodyDef): Body = this.level.getWorld.createBody(bodyDef)
+
 
   private def defineEntityBody(bodyType: BodyType,
                                entityType: Short,
@@ -305,6 +325,18 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       .createFixture()
 
     entityBody
+  }
+
+  override def changeCollisions(entity: Entity, entityType: Short): Unit = synchronized {
+    this.entitiesToBeChanged = (entity, entityType) :: this.entitiesToBeChanged
+  }
+
+  override def applyEntityCollisionChanges(): Unit = synchronized {
+    for (change <- this.entitiesToBeChanged) {
+      change._1.getEntityBody.setCollisions(change._2)
+      change._1.getEntityBody.createFixture()
+    }
+    this.entitiesToBeChanged = List.empty
   }
 }
 
