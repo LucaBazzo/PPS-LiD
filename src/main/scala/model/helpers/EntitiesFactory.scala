@@ -215,7 +215,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       Statistic.AttackFrequency -> 1500,
       Statistic.AttackDuration -> 900,
     )
-    val size:(Float, Float) = (15f, 15f)
+    val size:(Float, Float) = (15f, 11f)
     val score: Int = 100
 
     val enemy:Enemy = createEnemyEntity(position, size, stats, score, EnemyType.Worm)
