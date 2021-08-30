@@ -11,6 +11,8 @@ import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
 import utils.ApplicationConstants.{HERO_SIZE, HERO_SIZE_SMALL}
 
+import scala.collection.mutable
+
 trait Hero extends LivingEntity {
 
   def notifyCommand(command: GameEvent)
@@ -18,7 +20,6 @@ trait Hero extends LivingEntity {
   def getPreviousState: State
   def getLinearVelocityX: Float
 
-  def setState(state: State)
   def isLittle: Boolean
   def setLittle(little: Boolean)
 
@@ -28,7 +29,11 @@ trait Hero extends LivingEntity {
   def getItemsPicked: List[Items]
 }
 
-class HeroImpl(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float]) extends LivingEntityImpl(entityType, entityBody, size, statistics) with Hero{
+class HeroImpl(private val entityType: EntityId,
+               private var entityBody: EntityBody,
+               private val size: (Float, Float),
+               private val stats: Map[Statistic, Float])
+  extends LivingEntityImpl(entityType, entityBody, size, stats) with Hero{
 
   private var previousState: State = State.Standing
   private var little: Boolean = false
@@ -166,8 +171,8 @@ class HeroImpl(private val entityType: EntityId, private var entityBody: EntityB
   override def getPreviousState: State = this.previousState
 
   override def setState(state: State): Unit = {
+    super.setState(state)
     this.previousState = state
-    this.state = state
   }
 
   override def setLittle(little: Boolean): Unit = {

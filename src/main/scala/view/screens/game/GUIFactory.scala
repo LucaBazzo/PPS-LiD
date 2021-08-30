@@ -29,3 +29,4 @@ object GUIFactoryImpl extends GUIFactory {
       new LabelStyle(Objects.requireNonNull(bitmapFont), Objects.requireNonNull(color)))
   }
 }
+

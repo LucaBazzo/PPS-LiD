@@ -138,4 +138,3 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
 
 
 
-

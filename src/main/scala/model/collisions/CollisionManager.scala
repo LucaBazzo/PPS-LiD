@@ -23,14 +23,13 @@ object EntityType {
   val Door: Short = getNextBitValue
   val OpenedDoor: Short = getNextBitValue
   val DestroyedDoor: Short = getNextBitValue
-
   val Arrow: Short = getNextBitValue
+  val EnemyAttack: Short = getNextBitValue
 
   private def getNextBitValue: Short = {
     this.currentBitValue = this.currentBitValue * bitMulti
     this.currentBitValue
   }
-
 }
 
 object ImplicitConversions {

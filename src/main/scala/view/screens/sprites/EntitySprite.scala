@@ -50,7 +50,6 @@ class EntitySpriteImpl(regionName: String, width: Float, height: Float) extends 
     this.previousState = state
 
     this.setPosition(entity)
-    //println(state)
   }
 
   override def setPosition(entity: Entity): Unit = {
@@ -88,4 +87,3 @@ class HeroEntitySprite(regionName: String, width: Float, height: Float) extends 
         entity.getPosition._2 - this.getHeight / 2 + 4f.PPM)
   }
 }
-

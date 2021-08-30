@@ -1,13 +1,12 @@
 package view.screens.game
 
-import com.badlogic.gdx.{Gdx, Screen, ScreenAdapter}
-import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.scenes.scene2d.{InputEvent, Stage}
+import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.scenes.scene2d.ui.{Table, TextButton}
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
-import com.badlogic.gdx.utils.viewport.FitViewport
-import com.badlogic.gdx.utils.viewport.Viewport
+import com.badlogic.gdx.scenes.scene2d.{InputEvent, Stage}
+import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
+import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import utils.ApplicationConstants
 
 class InitializationScreen extends ScreenAdapter {

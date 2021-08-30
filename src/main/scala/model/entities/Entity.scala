@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import model.EntityBody
-import model.collisions.{CollisionStrategy, EntityType}
+import model.collisions.{CollisionStrategy, DoNothingOnCollision, EntityType}
 import model.entities.EntityId.EntityId
 import model.entities.State.State
 import model.helpers.EntitiesFactoryImpl
@@ -13,16 +13,18 @@ object State extends Enumeration {
   type State = Value
   val Standing, Crouch, Sliding,
       Running, Jumping, Falling, Somersault,
-      Attack01, Attack02, Attack03,
-      BowAttack = Value
+      Attack01, Attack02, Attack03, BowAttack,
+      Dying, Hurt = Value
 }
 
 object EntityId extends Enumeration {
   type EntityId = Value
   val Hero,
-      Enemy, Mobile, Immobile,  //this values will not show any sprite
+      Mobile, Immobile, Enemy, //this values will not show any sprite
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
-      SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem = Value
+      SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
+      EnemySkeleton, EnemySlime, EnemyWorm,
+      AttackFireBall, AttackArrow = Value
 }
 
 trait Entity {
@@ -32,6 +34,8 @@ trait Entity {
   def getType: EntityId
 
   def getState: State
+
+  def setState(state:State): Unit
 
   def setPosition(position: (Float, Float))
 
@@ -55,12 +59,16 @@ trait Entity {
   def changeCollisions(entityType: Short): Unit
 }
 
-abstract class EntityImpl(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends Entity {
+abstract class EntityImpl(private val entityType: EntityId,
+                          private var entityBody: EntityBody,
+                          private val size: (Float, Float)) extends Entity {
 
   protected var state: State = State.Standing
-  protected var collisionStrategy: CollisionStrategy = _
+  protected var collisionStrategy: CollisionStrategy = new DoNothingOnCollision()
 
   override def getState: State = this.state
+
+  override def setState(state:State):Unit = this.state = state
 
   override def setPosition(position: (Float, Float)): Unit = {
     this.entityBody.getBody.setTransform(new Vector2(position._1, position._2), 0)
@@ -70,14 +78,20 @@ abstract class EntityImpl(private val entityType: EntityId, private var entityBo
 
   override def getSize: (Float, Float) = this.size
 
-  override def setCollisionStrategy(collisionStrategy: CollisionStrategy): Unit = this.collisionStrategy = collisionStrategy
+  override def setCollisionStrategy(collisionStrategy: CollisionStrategy): Unit =
+    this.collisionStrategy = collisionStrategy
 
   override def collisionDetected(entity: Entity): Unit = {
-    if(this.collisionStrategy != null) this.collisionStrategy.apply(entity)
+    this.collisionStrategy.apply(entity)
   }
 
   override def destroyEntity(): Unit = {
-    EntitiesFactoryImpl.destroyBody(this.entityBody.getBody)
+    EntitiesFactoryImpl.destroyBody(this.getBody)
+    this.getBody.getJointList.toArray().foreach(j => {
+      // TODO: to be removed
+//      EntitiesFactoryImpl.destroyJoint(j.joint)
+      EntitiesFactoryImpl.destroyBody(j.other)
+    })
     EntitiesFactoryImpl.removeEntity(this)
   }
 
@@ -90,6 +104,10 @@ abstract class EntityImpl(private val entityType: EntityId, private var entityBo
   override def getType: EntityId = this.entityType
 }
 
-case class ImmobileEntity(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends EntityImpl(entityType, entityBody, size) {
+case class ImmobileEntity(private var entityType: EntityId,
+                          private var entityBody: EntityBody,
+                          private val size: (Float, Float))
+  extends EntityImpl(entityType, entityBody, size) {
+
   override def update(): Unit = {}
 }

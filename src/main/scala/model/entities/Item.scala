@@ -22,7 +22,10 @@ trait Item extends Entity with Score {
   def getEnumVal: Items
 }
 
-abstract class ItemImpl(private val entityType: EntityId, private val itemName: Items, private var entityBody: EntityBody, private val size: (Float, Float))
+abstract class ItemImpl(private val entityType:EntityId,
+                        private val itemName: Items,
+                        private var entityBody: EntityBody,
+                        private val size: (Float, Float))
       extends ImmobileEntity(entityType, entityBody, size) with Item {
 
   def collect(): (Statistic, Float, String)
@@ -30,7 +33,6 @@ abstract class ItemImpl(private val entityType: EntityId, private val itemName: 
   override def getEnumVal: Items = itemName
 
   override def getScore: Int = 1000
-
 }
 
 class CakeItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Cake, entityBody, size) {

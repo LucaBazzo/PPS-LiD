@@ -5,30 +5,46 @@ import model.EntityBody
 import model.entities.EntityId.EntityId
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl
-import model.movement.MovementStrategy
+import model.movement.{DoNotMove, MovementStrategy}
 
 object Statistic extends Enumeration {
   type Statistic = Value
 
   val CurrentHealth, Health, Strength, Defence, MovementSpeed, MaxMovementSpeed, Acceleration, AttackSpeed = Value
+
+  val HorizontalVisionDistance, HorizontalVisionAngle, AttackFrequency, AttackDuration    = Value
 }
 
 trait MobileEntity extends Entity {
-
   def setMovementStrategy(strategy: MovementStrategy)
+
   def move()
+
   def stopMovement()
+
   def setFacing(right: Boolean)
+
   def isFacingRight: Boolean
+
+  def getStatistics: Map[Statistic, Float]
+
+  def alterStatistics(statistic: Statistic, alteration: Float)
+
+  def getStatistic(statistic: Statistic): Float
 }
 
-class MobileEntityImpl(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float]) extends EntityImpl(entityType, entityBody, size) with MobileEntity {
+class MobileEntityImpl(private val entityType: EntityId ,
+                       private var entityBody: EntityBody,
+                       private val size: (Float, Float),
+                       private var stats: Map[Statistic, Float]) extends EntityImpl(entityType, entityBody, size) with MobileEntity {
 
   private var facingRight: Boolean = true
 
-  protected var movementStrategy: MovementStrategy = _
+  protected var movementStrategy: MovementStrategy = new DoNotMove()
 
-  override def update(): Unit = {}
+  override def update(): Unit = {
+
+  }
 
   override def setMovementStrategy(strategy: MovementStrategy): Unit = this.movementStrategy = strategy
 
@@ -41,6 +57,26 @@ class MobileEntityImpl(private val entityType: EntityId, private var entityBody:
   override def setFacing(right: Boolean): Unit = this.facingRight = right
 
   override def isFacingRight: Boolean = this.facingRight
+
+  override def getStatistics: Map[Statistic, Float] = stats
+
+  override def alterStatistics(statistic: Statistic, alteration: Float): Unit = {
+
+    val newValue = stats(statistic) + alteration
+    this.stats += (statistic -> newValue)
+    println(this.stats)
+    statistic match {
+      case Statistic.MovementSpeed => this.movementStrategy.alterSpeed(alteration)
+      case _ =>
+    }
+  }
+
+  override def getStatistic(statistic:Statistic): Float = {
+    if (this.stats.contains(statistic))
+      this.stats(statistic)
+    else
+      throw new IllegalArgumentException
+  }
 }
 
 
@@ -52,11 +88,10 @@ class CircularMobileEntity(private val entityType: EntityId,
 
   private val joint: Joint = EntitiesFactoryImpl.createJoint(this.pivotBody.getBody, this.entityBody.getBody)
 
-  override def destroyEntity(): Unit = {
-    EntitiesFactoryImpl.destroyJoint(this.joint)
-    EntitiesFactoryImpl.destroyBody(this.pivotBody.getBody)
-    EntitiesFactoryImpl.destroyBody(this.entityBody.getBody)
-    EntitiesFactoryImpl.removeEntity(this)
-  }
-
+//  override def destroyEntity(): Unit = {
+//    EntitiesFactoryImpl.destroyJoint(this.joint)
+//    EntitiesFactoryImpl.destroyBody(this.pivotBody.getBody)
+//    EntitiesFactoryImpl.destroyBody(this.entityBody.getBody)
+//    EntitiesFactoryImpl.removeEntity(this)
+//  }
 }

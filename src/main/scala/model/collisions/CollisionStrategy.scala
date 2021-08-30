@@ -2,6 +2,9 @@ package model.collisions
 
 import model.entities.{CircularMobileEntity, Entity, Hero, HeroImpl, ImmobileEntity, Item, ItemImpl}
 import model.helpers.EntitiesFactoryImpl
+import model.entities.Statistic.Statistic
+import model.entities._
+
 
 trait CollisionStrategy {
   def apply(entity: Entity)
@@ -33,28 +36,33 @@ class DoorCollisionStrategy(private val door: ImmobileEntity) extends CollisionS
   }
 }
 
-
 class DoNothingOnCollision() extends CollisionStrategy {
   override def apply(entity: Entity): Unit = {}
 }
 
-class ApplyDamage(private val sourceEntity:Entity, private val targetEntity:Entity) extends CollisionStrategy {
+class ApplyDamage(private val target: Entity => Boolean,
+                  private val stats: Map[Statistic, Float])
+  extends CollisionStrategy {
+
   override def apply(entity: Entity): Unit = {
-    if (entity equals targetEntity) {
-      println("attacking target")
-    } else {
-      println("destroyed source")
+    if (target(entity)) {
+      entity.asInstanceOf[LivingEntity].sufferDamage(stats(Statistic.Strength))
     }
   }
 }
 
-class ApplyDamageAndDestroyEntity(private val sourceEntity: Entity, private val targetEntity: Entity)
-  extends ApplyDamage(sourceEntity, targetEntity) {
+class ApplyDamageAndDestroyEntity(private val sourceEntity: Entity,
+                                 private val target: Entity => Boolean,
+                                 private val stats: Map[Statistic, Float])
+  extends ApplyDamage(target, stats) {
 
   override def apply(entity: Entity): Unit = {
     super.apply(entity)
-    EntitiesFactoryImpl.destroyBody(sourceEntity.getBody)
-    EntitiesFactoryImpl.removeEntity(sourceEntity)
+
+    if ((entity.getBody.getFixtureList.toArray().head.getFilterData.maskBits
+      & this.sourceEntity.getBody.getFixtureList.toArray().head.getFilterData.categoryBits) != 0) {
+      this.sourceEntity.setState(State.Dying)
+    }
   }
 }
 

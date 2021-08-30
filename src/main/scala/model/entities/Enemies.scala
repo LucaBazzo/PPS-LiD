@@ -1,28 +1,45 @@
 package model.entities
 
-import model.EntityBody
 import model.entities.EntityId.EntityId
 import model.entities.Statistic.Statistic
-
-trait Enemy extends LivingEntity {
-
-}
+import model.EntityBody
 
 trait Score {
   def getScore: Int
 }
 
-class EnemyImpl(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float), private val statistics:Map[Statistic, Float], private val score: Int = 100)
-                  extends LivingEntityImpl(entityType, entityBody, size, statistics) with Enemy with Score {
+class Enemy(private val entityType: EntityId,
+            private var entityBody: EntityBody,
+            private val size: (Float, Float),
+            private val stats: Map[Statistic, Float],
+            private val score: Int = 100) extends LivingEntityImpl(entityType, entityBody, size, stats)
+          with LivingEntity with Score {
 
   override def getScore: Int = this.score
 
-  val attackDamage = 10
-
   override def update(): Unit = {
-    this.move() // movementStrategy.move()
-    attackStrategy.apply()
+    super.update()
+    if (state != State.Dying) {
 
-
+      this.attackStrategy.apply()
+      if (!this.attackStrategy.isAttackFinished) {
+        this.state = State.Attack01
+      } else {
+        this.movementStrategy.apply()
+        if (this.entityBody.getBody.getLinearVelocity.x != 0) {
+          this.state = State.Running
+        } else {
+          this.state = State.Standing
+        }
+      }
+    }
   }
+
+//  override def sufferDamage(damage: Float): Unit = {
+//    super.sufferDamage(damage)
+//  }
+//
+//  override def destroyEntity(): Unit = {
+//    super.destroyEntity()
+//  }
 }
