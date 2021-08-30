@@ -97,8 +97,8 @@ class TestItem extends AnyFlatSpec {
     val item: Item = level.getEntity(x => x.isInstanceOf[Item]).asInstanceOf[Item]
     val hero: Hero = level.getEntity(x => x.isInstanceOf[Hero]).asInstanceOf[Hero]
     val effect = item.collect()
-    val preStat: Float = hero.getStatistics().get(Statistic.Defence).get
+    val preStat: Float = hero.getStatistics(Statistic.Defence)
     item.collisionDetected(hero)
-    assert(hero.getStatistics().get(effect._1).get == preStat + effect._2)
+    assert(hero.getStatistics(effect._1) == preStat + effect._2)
   }
 }

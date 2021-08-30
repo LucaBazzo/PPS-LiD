@@ -21,7 +21,8 @@ object EntityId extends Enumeration {
   type EntityId = Value
   val Hero,
       Enemy, Mobile, Immobile,  //this values will not show any sprite
-      Arrow, ArmorItem = Value
+      Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
+      SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem = Value
 }
 
 trait Entity {
