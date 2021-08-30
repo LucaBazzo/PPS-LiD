@@ -2,6 +2,7 @@ package model.entities
 
 import com.badlogic.gdx.physics.box2d.Joint
 import model.EntityBody
+import model.entities.EntityId.EntityId
 import model.helpers.EntitiesFactoryImpl
 import model.movement.{DoNotMove, MovementStrategy}
 
@@ -21,7 +22,7 @@ trait MobileEntity extends Entity {
   def isFacingRight: Boolean
 }
 
-class MobileEntityImpl(private val entityType:Short,
+class MobileEntityImpl(private val entityType: EntityId ,
                        private var entityBody: EntityBody,
                        private val size: (Float, Float)) extends EntityImpl(entityType, entityBody, size) with MobileEntity {
 
@@ -47,7 +48,7 @@ class MobileEntityImpl(private val entityType:Short,
 }
 
 
-class CircularMobileEntity(private val entityType:Short,
+class CircularMobileEntity(private val entityType: EntityId,
                            private var entityBody: EntityBody,
                            private val size: (Float, Float),
                            private val pivotBody: EntityBody) extends MobileEntityImpl(entityType, entityBody, size) {

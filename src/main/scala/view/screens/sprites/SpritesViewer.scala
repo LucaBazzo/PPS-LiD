@@ -1,9 +1,8 @@
 package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.Batch
-import model.collisions.EntityType
 import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Attack, AttackType, Enemy, EnemyType, Entity}
+import model.entities.{Entity, EntityId}
 import utils.ApplicationConstants
 
 trait SpriteViewer {
@@ -37,42 +36,31 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
   }
 
   private def getSprite(entity: Entity): EntitySprite = entity.getType match {
-    case EntityType.Hero => spriteFactory.createHeroSprite(ApplicationConstants.SPRITES_PACK_LOCATION,
+    case EntityId.Hero => spriteFactory.createHeroSprite(ApplicationConstants.SPRITES_PACK_LOCATION,
       "hero", 50, 37)
-    case EntityType.Enemy => getEnemySprite(entity)
-    case EntityType.EnemyAttack => getAttackSprite(entity)
-    case EntityType.Mobile => null
-    case EntityType.Sword => null
-    case EntityType.Immobile => null
-    case EntityType.Item => null
-    case _ => null
-  }
-
-  private def getEnemySprite(entity: Entity): EntitySprite = entity.asInstanceOf[Enemy].getEnemyType match {
-    case EnemyType.Skeleton =>
+    case EntityId.EnemySkeleton =>
       val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/skeleton.pack",
         "skeleton", 150, 150, 19.PPM, 23.PPM, 300)
       spriteFactory.defineEnemySkeletonAnimation(e)
       e
-    case EnemyType.Slime =>
+    case EntityId.EnemySlime =>
       val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/slime.pack",
         "slime", 32, 25, 13.PPM, 13.PPM, 100)
       spriteFactory.defineEnemySlimeAnimation(e)
       e
-    case EnemyType.Worm =>
+    case EntityId.EnemyWorm =>
       val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/worm.pack",
         "worm", 90, 90, 15.PPM, 15.PPM, 200)
       spriteFactory.defineEnemyWormAnimation(e)
       e
-    case _ => null
-  }
-
-  private def getAttackSprite(entity: Entity): EntitySprite = entity.asInstanceOf[Attack].getAttackType match {
-    case AttackType.FireBallAttack =>
+    case EntityId.AttackFireBall =>
       val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/fireball.pack",
         "fireball", 46, 46, 5.PPM, 5.PPM, 200)
       spriteFactory.defineAttackFireballAnimation(e)
       e
+    case EntityId.Mobile => null
+    case EntityId.Attack => null
+    case EntityId.Immobile => null
     case _ => null
   }
 }

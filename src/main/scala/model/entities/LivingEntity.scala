@@ -2,6 +2,7 @@ package model.entities
 
 import model.EntityBody
 import model.attack.{AttackStrategy, DoNotAttack}
+import model.entities.EntityId.EntityId
 import model.entities.Statistic.Statistic
 
 import scala.collection.mutable
@@ -16,7 +17,7 @@ trait LivingEntity extends MobileEntity {
   def alterStatistics(statistic: Statistic, alteration: Float)
 }
 
-class LivingEntityImpl(private val entityType:Short,
+class LivingEntityImpl(private val entityType: EntityId,
                        private var entityBody: EntityBody,
                        private val size: (Float, Float),
                        private var stats:scala.collection.mutable.Map[Statistic, Float])

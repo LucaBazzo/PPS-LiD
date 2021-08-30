@@ -47,7 +47,8 @@ class ApplyDamageAndDestroyOwner(private val owner:Entity,
   override def apply(entity: Entity): Unit = {
     super.apply(entity)
 
-    if ((entity.getBody.getFixtureList.toArray().head.getFilterData.maskBits & owner.getType) != 0) {
+    if ((entity.getBody.getFixtureList.toArray().head.getFilterData.maskBits
+      & owner.getBody.getFixtureList.toArray().head.getFilterData.categoryBits) != 0) {
       this.owner.setState(State.Dying)
     }
   }
