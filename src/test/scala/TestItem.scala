@@ -1,3 +1,4 @@
+package scala
 
 import model.entities.Items.Items
 import model.{Level, LevelImpl}

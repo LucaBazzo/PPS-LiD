@@ -1,3 +1,4 @@
+package scala
 
 import model.collisions.EntityType
 import model.{Level, LevelImpl}
