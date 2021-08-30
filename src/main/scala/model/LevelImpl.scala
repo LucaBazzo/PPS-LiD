@@ -37,7 +37,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,20), EntityType.Hero)
+  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,50), EntityType.Hero)
 
   private val door: Entity = entitiesFactory.createDoor((5, 30), (-20f, 10f))
 

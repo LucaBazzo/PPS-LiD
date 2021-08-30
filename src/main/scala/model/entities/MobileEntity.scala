@@ -64,7 +64,7 @@ class MobileEntityImpl(private val entityType: EntityId ,
 
     val newValue = stats(statistic) + alteration
     this.stats += (statistic -> newValue)
-    println(this.stats)
+
     statistic match {
       case Statistic.MovementSpeed => this.movementStrategy.alterSpeed(alteration)
       case _ =>

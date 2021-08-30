@@ -267,7 +267,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                           collisions: Short = EntityType.Hero): Item = {
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityType.Item,
       collisions, createPolygonalShape(size.PPM), position.PPM)
-    val item: Item = itemPool.getItem(entityBody, size.PPM, PoolName)
+    val item: Item = itemPool.getItem(entityBody, size, PoolName)
     item.setCollisionStrategy(new ItemCollisionStrategy(item))
     this.level.addEntity(item)
     item
