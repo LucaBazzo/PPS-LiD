@@ -1,14 +1,20 @@
 package model
 
 import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.physics.box2d._
+import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.collisions.{CollisionManager, EntityType}
 import model.collisions.ImplicitConversions._
 import model.entities.ItemPools.ItemPools
 import model.entities._
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl}
-import model.world.WorldCreator
+import view.screens.game.GameScreen
+import view.screens.helpers.TileMapHelper
+
+import java.util.concurrent.{ExecutorService, Executors}
 
 trait Level {
 
@@ -41,11 +47,11 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private val door: Entity = entitiesFactory.createDoor((5, 30), (-20f, 10f))
 
-  EntitiesFactoryImpl.createSkeletonEnemy((+90, 10))
-  EntitiesFactoryImpl.createWormEnemy((-50,10))
-  EntitiesFactoryImpl.createSlimeEnemy((70,20))
+  private var isWorldSetted: Boolean = false
 
-  new WorldCreator(this)
+  EntitiesFactoryImpl.createSkeletonEnemy((+200, 300))
+  EntitiesFactoryImpl.createWormEnemy((+250,300))
+  EntitiesFactoryImpl.createSlimeEnemy((270,300))
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)
@@ -55,16 +61,28 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
     if(actions.nonEmpty) {
-      for(command <- actions) this.hero.notifyCommand(command)
+      for(command <- actions){
+        if(command.equals(GameEvent.SetMap)) {
+          this.isWorldSetted = true
+
+          val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+          val task: Runnable = () => Gdx.app.postRunnable(() => TileMapHelper.setWorld(this, "assets/maps/map2.tmx"))
+          executorService.submit(task)
+
+        } else this.hero.notifyCommand(command)
+      }
     }
 
-    this.entitiesList.foreach((entity: Entity) => entity.update())
+    if(this.isWorldSetted){
+      this.entitiesList.foreach((entity: Entity) => entity.update())
 
-    this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+      this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
 
-    this.entitiesFactory.destroyBodies()
+      this.entitiesFactory.destroyBodies()
 
-    this.entitiesFactory.applyEntityCollisionChanges()
+      this.entitiesFactory.applyEntityCollisionChanges()
+    }
+
   }
 
   override def addEntity(entity: Entity): Unit = {

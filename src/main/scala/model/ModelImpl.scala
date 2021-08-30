@@ -1,5 +1,6 @@
 package model
 
+import com.badlogic.gdx.physics.box2d.World
 import controller.GameEvent.GameEvent
 import model.entities.{Hero, LivingEntity}
 import model.helpers.EntitiesSetter
@@ -13,11 +14,9 @@ trait Model {
   def isGameOver: Boolean
 }
 
-class ModelImpl(private val entitiesSetter: EntitiesSetter) extends Model {
+class ModelImpl(private val entitiesSetter: EntitiesSetter, private val level: Level) extends Model {
 
   private var levelNumber: Int = 1
-
-  private var level: Level = new LevelImpl(entitiesSetter)
 
   override def update(actions: List[GameEvent]): Unit = {
     this.level.updateEntities(actions)

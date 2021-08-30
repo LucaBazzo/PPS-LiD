@@ -62,7 +62,7 @@ class HeroImpl(private val entityType: EntityId,
     this.state match {
       case State.Standing | State.Running =>
         this.stopMovement()
-        this.changeHeroFixture(HERO_SIZE_SMALL, (0, -6f))
+        this.changeHeroFixture(HERO_SIZE_SMALL, (200f, 300f))
         this.state = State.Crouch
         this.setLittle(true)
       case _ =>

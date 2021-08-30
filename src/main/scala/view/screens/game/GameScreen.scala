@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
+import model.Level
 import model.collisions.ImplicitConversions.RichInt
 import model.entities.{Entity, Hero, Statistic}
 import model.helpers.EntitiesGetter
@@ -26,7 +27,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map0.tmx")
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map2.tmx")
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
@@ -35,6 +36,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   private val spriteViewer: SpriteViewer = new SpriteViewerImpl(this.batch)
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
+
+  this.observerManager.notifyEvent(GameEvent.SetMap)
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()

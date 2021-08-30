@@ -2,7 +2,7 @@ name: Scala CI
 
 on:
   push:
-    branches: 
+    branches:
       - master
       - develop
       - feature-ci
