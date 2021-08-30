@@ -18,15 +18,15 @@ import java.util.concurrent.{ExecutorService, Executors}
 
 trait Level {
 
-  def updateEntities(actions: List[GameEvent])
+  def updateEntities(actions: List[GameEvent]): Unit
 
-  def addEntity(entity: Entity)
+  def addEntity(entity: Entity): Unit
 
-  def removeEntity(entity: Entity)
+  def removeEntity(entity: Entity): Unit
 
   def getEntity(predicate: Entity => Boolean): Entity
 
-  def spawnItem(pool: ItemPools.ItemPools)
+  def spawnItem(pool: ItemPools.ItemPools): Unit
 
   def getWorld: World
 }
@@ -106,6 +106,6 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   override def getWorld: World = this.world
 
   override def spawnItem(pool: ItemPools): Unit = {
-    this.addEntity(entitiesFactory.createItem(pool))
+    entitiesFactory.createItem(pool)
   }
 }
