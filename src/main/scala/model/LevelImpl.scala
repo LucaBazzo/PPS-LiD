@@ -39,7 +39,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private val hero: Hero = entitiesFactory.createHeroEntity()
   private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,50), EntityCollisionBit.Hero)
 
-  private val door: Entity = entitiesFactory.createDoor((5, 30), (-20f, 10f))
+  private val door: Entity = entitiesFactory.createDoor((10, 30), (290, 300))
 
   private var isWorldSetted: Boolean = false
   private var platform: Entity = entitiesFactory.createPlatform((300, 330), (60,1))

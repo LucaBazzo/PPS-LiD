@@ -1,0 +1,26 @@
+
+ironDoor.png
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+ironDoor1
+  rotate: false
+  xy: 1, 1
+  size: 80, 67
+  orig: 80, 67
+  offset: 0, 0
+  index: -1
+ironDoor2
+  rotate: false
+  xy: 83, 1
+  size: 80, 67
+  orig: 80, 67
+  offset: 0, 0
+  index: -1
+ironDoor3
+  rotate: false
+  xy: 165, 1
+  size: 80, 67
+  orig: 80, 67
+  offset: 0, 0
+  index: -1

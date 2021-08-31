@@ -348,7 +348,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Door,
       EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(size.PPM), position.PPM)
 
-    val immobileEntity: Entity = ImmobileEntity(EntityType.Immobile, entityBody, size.PPM)
+    val immobileEntity: Entity = ImmobileEntity(EntityType.Door, entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new DoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
     this.level.addEntity(immobileEntity)
     immobileEntity

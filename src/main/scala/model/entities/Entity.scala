@@ -14,7 +14,7 @@ object State extends Enumeration {
   val Standing, Crouch, Sliding,
       Running, Jumping, Falling, Somersault,
       Attack01, Attack02, Attack03, BowAttack,
-      Dying, Hurt = Value
+      Dying, Hurt, Opening = Value
 }
 
 object EntityType extends Enumeration {
@@ -23,7 +23,7 @@ object EntityType extends Enumeration {
       Mobile, Immobile, Enemy, //this values will not show any sprite
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
-      EnemySkeleton, EnemySlime, EnemyWorm, Platform,
+      EnemySkeleton, EnemySlime, EnemyWorm, Platform, Door,
       AttackFireBall, AttackArrow = Value
 }
 

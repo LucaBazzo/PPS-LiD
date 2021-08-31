@@ -32,6 +32,7 @@ class DoorCollisionStrategy(private val door: ImmobileEntity) extends CollisionS
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => print("Hero opened door")
                     this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
+                    this.door.setState(State.Opening)
     case s: CircularMobileEntity => print("Hero destroyed door")
                     this.door.changeCollisions(EntityCollisionBit.DestroyedDoor)
   }
