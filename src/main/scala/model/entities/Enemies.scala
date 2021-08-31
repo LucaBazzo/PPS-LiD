@@ -1,6 +1,6 @@
 package model.entities
 
-import model.entities.EntityId.EntityId
+import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
 import model.EntityBody
 
@@ -8,7 +8,7 @@ trait Score {
   def getScore: Int
 }
 
-class Enemy(private val entityType: EntityId,
+class Enemy(private val entityType: EntityType,
             private var entityBody: EntityBody,
             private val size: (Float, Float),
             private val stats: Map[Statistic, Float],

@@ -2,7 +2,7 @@ package model.entities
 
 import model.EntityBody
 import model.attack.{AttackStrategy, DoNotAttack}
-import model.entities.EntityId.EntityId
+import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
 
 trait LivingEntity extends MobileEntity {
@@ -15,7 +15,7 @@ trait LivingEntity extends MobileEntity {
   def alterStatistics(statistic: Statistic, alteration: Float)
 }
 
-class LivingEntityImpl(private val entityType: EntityId,
+class LivingEntityImpl(private val entityType: EntityType,
                        private var entityBody: EntityBody,
                        private val size: (Float, Float),
                        private var stats: Map[Statistic, Float])

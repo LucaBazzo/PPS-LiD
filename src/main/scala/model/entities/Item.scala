@@ -1,7 +1,7 @@
 package model.entities
 
 import model.EntityBody
-import model.entities.EntityId.EntityId
+import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl
@@ -22,7 +22,7 @@ trait Item extends Entity with Score {
   def getEnumVal: Items
 }
 
-abstract class ItemImpl(private val entityType:EntityId,
+abstract class ItemImpl(private val entityType:EntityType,
                         private val itemName: Items,
                         private var entityBody: EntityBody,
                         private val size: (Float, Float))
@@ -35,7 +35,7 @@ abstract class ItemImpl(private val entityType:EntityId,
   override def getScore: Int = 1000
 }
 
-class CakeItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Cake, entityBody, size) {
+class CakeItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Cake, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -45,7 +45,7 @@ class CakeItem(private val entityType: EntityId, private var entityBody: EntityB
 
 }
 
-class WrenchItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Wrench, entityBody, size) {
+class WrenchItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Wrench, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -54,7 +54,7 @@ class WrenchItem(private val entityType: EntityId, private var entityBody: Entit
   }
 }
 
-class MapItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Map, entityBody, size) {
+class MapItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Map, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -63,7 +63,7 @@ class MapItem(private val entityType: EntityId, private var entityBody: EntityBo
   }
 }
 
-class SmallPotionItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionS, entityBody, size) {
+class SmallPotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionS, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -72,7 +72,7 @@ class SmallPotionItem(private val entityType: EntityId, private var entityBody: 
   }
 }
 
-class PotionItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionM, entityBody, size) {
+class PotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionM, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -81,7 +81,7 @@ class PotionItem(private val entityType: EntityId, private var entityBody: Entit
   }
 }
 
-class LargePotionItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionL, entityBody, size) {
+class LargePotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionL, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -90,7 +90,7 @@ class LargePotionItem(private val entityType: EntityId, private var entityBody: 
   }
 }
 
-class HugePotionItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionXL, entityBody, size) {
+class HugePotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionXL, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -99,7 +99,7 @@ class HugePotionItem(private val entityType: EntityId, private var entityBody: E
   }
 }
 
-class ArmorItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Armor, entityBody, size) {
+class ArmorItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Armor, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -108,7 +108,7 @@ class ArmorItem(private val entityType: EntityId, private var entityBody: Entity
   }
 }
 
-class BootsItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Boots, entityBody, size) {
+class BootsItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Boots, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -117,7 +117,7 @@ class BootsItem(private val entityType: EntityId, private var entityBody: Entity
   }
 }
 
-class BFSwordItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.BFSword, entityBody, size) {
+class BFSwordItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.BFSword, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -126,7 +126,7 @@ class BFSwordItem(private val entityType: EntityId, private var entityBody: Enti
   }
 }
 
-class KeyItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Key, entityBody, size) {
+class KeyItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Key, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -135,7 +135,7 @@ class KeyItem(private val entityType: EntityId, private var entityBody: EntityBo
   }
 }
 
-class SkeletonKeyItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.SkeletonKey, entityBody, size) {
+class SkeletonKeyItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.SkeletonKey, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -144,7 +144,7 @@ class SkeletonKeyItem(private val entityType: EntityId, private var entityBody: 
   }
 }
 
-class BowItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Bow, entityBody, size) {
+class BowItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Bow, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {
@@ -153,7 +153,7 @@ class BowItem(private val entityType: EntityId, private var entityBody: EntityBo
   }
 }
 
-class ShieldItem(private val entityType: EntityId, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Shield, entityBody, size) {
+class ShieldItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Shield, entityBody, size) {
   override def update(): Unit = {}
 
   override def collect(): (Statistic, Float, String) = {

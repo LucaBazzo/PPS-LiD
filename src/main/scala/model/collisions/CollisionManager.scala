@@ -1,13 +1,13 @@
 package model.collisions
 
+import _root_.utils.ApplicationConstants.PIXELS_PER_METER
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.Level
+import model.collisions.ImplicitConversions._
 import model.entities.Entity
-import ImplicitConversions._
-import com.badlogic.gdx.math.Vector2
-import _root_.utils.ApplicationConstants.PIXELS_PER_METER
 
-object EntityType {
+object EntityCollisionBit {
 
   private var currentBitValue: Short = 1
   private val bitMulti: Int = 2
@@ -67,6 +67,8 @@ object ImplicitConversions {
 // TODO: come gestire collissioni continue?
 
 class CollisionManager(private val level: Level) extends ContactListener {
+
+
 
   override def beginContact(contact: Contact): Unit = {
     val bodyA: Body = contact.getFixtureA.getBody

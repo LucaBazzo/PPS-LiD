@@ -2,7 +2,7 @@ package model.entities
 
 import com.badlogic.gdx.physics.box2d.Joint
 import model.EntityBody
-import model.entities.EntityId.EntityId
+import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl
 import model.movement.{DoNotMove, MovementStrategy}
@@ -33,7 +33,7 @@ trait MobileEntity extends Entity {
   def getStatistic(statistic: Statistic): Float
 }
 
-class MobileEntityImpl(private val entityType: EntityId ,
+class MobileEntityImpl(private val entityType: EntityType,
                        private var entityBody: EntityBody,
                        private val size: (Float, Float),
                        private var stats: Map[Statistic, Float]) extends EntityImpl(entityType, entityBody, size) with MobileEntity {
@@ -80,7 +80,7 @@ class MobileEntityImpl(private val entityType: EntityId ,
 }
 
 
-class CircularMobileEntity(private val entityType: EntityId,
+class CircularMobileEntity(private val entityType: EntityType,
                            private var entityBody: EntityBody,
                            private val size: (Float, Float),
                            private val statistics:Map[Statistic, Float],

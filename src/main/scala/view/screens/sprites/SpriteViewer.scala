@@ -2,7 +2,7 @@ package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Entity, EntityId, State}
+import model.entities.{Entity, EntityType, State}
 import utils.ApplicationConstants
 
 trait SpriteViewer {
@@ -35,61 +35,61 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
   }
 
   private def getSprite(entity: Entity): EntitySprite = entity.getType match {
-    case EntityId.Hero => spriteFactory.createHeroSprite(ApplicationConstants.SPRITES_PACK_LOCATION, "hero", 50, 37)
-    case EntityId.Arrow =>
+    case EntityType.Hero => spriteFactory.createHeroSprite(ApplicationConstants.SPRITES_PACK_LOCATION, "hero", 50, 37)
+    case EntityType.Arrow =>
       val sprite = spriteFactory.createEntitySprite(ApplicationConstants.SPRITES_PACK_LOCATION, "arrow", 40, 5, 10, 1, 2)
       sprite.addAnimation(State.Standing, spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
       sprite
-    case EntityId.Enemy | EntityId.Immobile | EntityId.Mobile => null
-    case EntityId.EnemySkeleton =>
+    case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile => null
+    case EntityType.EnemySkeleton =>
       val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/skeleton.pack",
         "skeleton", 150, 150, 19.PPM, 23.PPM, 300)
       spriteFactory.defineEnemySkeletonAnimation(e)
       e
-    case EntityId.EnemySlime =>
+    case EntityType.EnemySlime =>
       val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/slime.pack",
         "slime", 32, 25, 13.PPM, 13.PPM, 100)
       spriteFactory.defineEnemySlimeAnimation(e)
       e
-    case EntityId.EnemyWorm =>
+    case EntityType.EnemyWorm =>
       val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/worm.pack",
         "worm", 90, 90, 15.PPM, 15.PPM, 200)
       spriteFactory.defineEnemyWormAnimation(e)
       e
-    case EntityId.AttackFireBall =>
+    case EntityType.AttackFireBall =>
       val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/fireball.pack",
         "fireball", 46, 46, 5.PPM, 5.PPM, 200)
       spriteFactory.defineAttackFireballAnimation(e)
       e
-    case EntityId.ArmorItem =>
+    case EntityType.ArmorItem =>
       createItemSprite(entity, 0, 0)
-    case EntityId.CakeItem =>
+    case EntityType.CakeItem =>
       createItemSprite(entity, 0, 1)
-    case EntityId.BootsItem =>
+    case EntityType.BootsItem =>
       createItemSprite(entity, 0, 2)
-    case EntityId.ShieldItem =>
+    case EntityType.ShieldItem =>
       createItemSprite(entity, 0, 3)
-    case EntityId.MapItem =>
+    case EntityType.MapItem =>
       createItemSprite(entity, 0, 4)
-    case EntityId.WrenchItem =>
+    case EntityType.WrenchItem =>
       createItemSprite(entity, 0, 5)
-    case EntityId.KeyItem =>
+    case EntityType.KeyItem =>
       createItemSprite(entity, 0, 6)
-    case EntityId.SmallPotionItem =>
+    case EntityType.SmallPotionItem =>
       createItemSprite(entity, 1, 0)
-    case EntityId.PotionItem =>
+    case EntityType.PotionItem =>
       createItemSprite(entity, 1, 1)
-    case EntityId.LargePotionItem =>
+    case EntityType.LargePotionItem =>
       createItemSprite(entity, 1, 2)
-    case EntityId.HugePotionItem =>
+    case EntityType.HugePotionItem =>
       createItemSprite(entity, 1, 3)
-    case EntityId.SkeletonKeyItem =>
+    case EntityType.SkeletonKeyItem =>
       createItemSprite(entity, 1, 4)
-    case EntityId.BowItem =>
+    case EntityType.BowItem =>
       createItemSprite(entity, 1, 5)
-    case EntityId.BFSwordItem =>
+    case EntityType.BFSwordItem =>
       createItemSprite(entity, 1, 6)
-    case EntityId.Enemy | EntityId.Immobile | EntityId.Mobile => null
+    case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile => null
     case _ => null
   }
 

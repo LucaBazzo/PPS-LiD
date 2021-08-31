@@ -4,14 +4,12 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.EntityBody
 import model.collisions.ImplicitConversions._
-import model.entities.EntityId.EntityId
+import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State.State
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
 import utils.ApplicationConstants.{HERO_SIZE, HERO_SIZE_SMALL}
-
-import scala.collection.mutable
 
 trait Hero extends LivingEntity {
 
@@ -29,7 +27,7 @@ trait Hero extends LivingEntity {
   def getItemsPicked: List[Items]
 }
 
-class HeroImpl(private val entityType: EntityId,
+class HeroImpl(private val entityType: EntityType,
                private var entityBody: EntityBody,
                private val size: (Float, Float),
                private val stats: Map[Statistic, Float])
@@ -62,7 +60,7 @@ class HeroImpl(private val entityType: EntityId,
     this.state match {
       case State.Standing | State.Running =>
         this.stopMovement()
-        this.changeHeroFixture(HERO_SIZE_SMALL, (0, -6f))
+        this.changeHeroFixture(HERO_SIZE_SMALL, (0f, -6f))
         this.state = State.Crouch
         this.setLittle(true)
       case _ =>
