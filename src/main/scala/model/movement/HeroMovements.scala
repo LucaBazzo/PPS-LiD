@@ -16,10 +16,12 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   override def apply(command: GameEvent): Unit = {
     if(checkCommand(command)) {
       command match {
-        case GameEvent.Jump => jump()
-        case GameEvent.MoveRight => moveRight()
-        case GameEvent.MoveLeft => moveLeft()
-        case GameEvent.Slide => slide()
+        case GameEvent.Up => this.jump()
+        case GameEvent.MoveRight => this.moveRight()
+        case GameEvent.MoveLeft => this.moveLeft()
+        case GameEvent.Slide => this.slide()
+        case GameEvent.Down => this.crouch()
+        case GameEvent.DownReleased => this.entity.setState(State.Standing)
       }
     }
   }
@@ -31,10 +33,14 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
       entity.getState != State.Attack02 && entity.getState != State.Attack03 &&
       entity.getState != State.BowAttack) {
       command match {
-        case GameEvent.Jump => return entity.getState != State.Falling &&
+        case GameEvent.Up => return entity.getState != State.Falling &&
           entity.getState != State.Somersault && entity.getState != State.Crouch
         case GameEvent.MoveRight | GameEvent.MoveLeft => return true
+        case GameEvent.Down => return entity.getState == State.Running ||
+          entity.getState == State.Standing
+        case GameEvent.DownReleased => return entity.getState == State.Crouch
         case GameEvent.Slide => return entity.getState != State.Jumping && entity.getState != State.Falling && entity.getState != State.Somersault
+        case GameEvent.UpReleased => return false
         case _ => throw new UnsupportedOperationException
       }
     }
@@ -71,6 +77,13 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
         this.entity.setState(State.Running)
     }
     entity.setFacing(right = false)
+  }
+
+  private def crouch(): Unit = {
+    this.stopMovement()
+    entity.changeHeroFixture(HERO_SIZE_SMALL, (0f, -6f))
+    entity.setState(State.Crouch)
+    entity.setLittle(true)
   }
 
   private def slide(): Unit = {

@@ -43,6 +43,7 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
 
   private def setAttack(): Unit = {
     this.entity.stopMovement()
+    //this.entity.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(this.entity))))
     if (this.entity.getState == State.Attack01 && this.attackTimer < 75) {
       this.entity.setState(State.Attack02)
       stopAttack()

@@ -13,6 +13,7 @@ object State extends Enumeration {
   type State = Value
   val Standing, Crouch, Sliding,
       Running, Jumping, Falling, Somersault,
+      LadderClimb, LadderDescend, LadderIdle,
       Attack01, Attack02, Attack03, BowAttack,
       Dying, Hurt = Value
 }
