@@ -1,7 +1,7 @@
 package model.helpers
 
 import model.EntityBody
-import model.collisions.EntityType
+import model.collisions.EntityCollisionBit
 import model.entities.ItemPools.ItemPools
 import model.entities.Items.Items
 import model.entities._
@@ -24,21 +24,21 @@ class ItemPoolImpl extends ItemPool {
   override def getItem(entityBody: EntityBody, size: (Float, Float), poolName: ItemPools): ItemImpl = {
     val pickedItem: Items = pickItemFromPool(poolName)
     pickedItem match {
-      case Items.Cake => new CakeItem(EntityId.CakeItem, entityBody, size)
-      case Items.Wrench => new WrenchItem(EntityId.WrenchItem, entityBody, size)
-      case Items.Map => new MapItem(EntityId.MapItem, entityBody, size)
-      case Items.PotionS => new SmallPotionItem(EntityId.SmallPotionItem, entityBody, size)
-      case Items.PotionM => new PotionItem(EntityId.PotionItem, entityBody, size)
-      case Items.PotionL => new LargePotionItem(EntityId.LargePotionItem, entityBody, size)
-      case Items.PotionXL => new HugePotionItem(EntityId.HugePotionItem, entityBody, size)
-      case Items.Armor => new ArmorItem(EntityId.ArmorItem, entityBody, size)
-      case Items.Boots => new BootsItem(EntityId.BootsItem, entityBody, size)
-      case Items.BFSword => new BFSwordItem(EntityId.BFSwordItem, entityBody, size)
-      case Items.Key => new KeyItem(EntityId.KeyItem, entityBody, size)
-      case Items.SkeletonKey => new SkeletonKeyItem(EntityId.SkeletonKeyItem, entityBody, size)
-      case Items.Bow => new BowItem(EntityId.BowItem, entityBody, size)
-      case Items.Shield => new ShieldItem(EntityId.ShieldItem, entityBody, size)
-      case _ => new CakeItem(EntityId.CakeItem, entityBody, size)
+      case Items.Cake => new CakeItem(EntityType.CakeItem, entityBody, size)
+      case Items.Wrench => new WrenchItem(EntityType.WrenchItem, entityBody, size)
+      case Items.Map => new MapItem(EntityType.MapItem, entityBody, size)
+      case Items.PotionS => new SmallPotionItem(EntityType.SmallPotionItem, entityBody, size)
+      case Items.PotionM => new PotionItem(EntityType.PotionItem, entityBody, size)
+      case Items.PotionL => new LargePotionItem(EntityType.LargePotionItem, entityBody, size)
+      case Items.PotionXL => new HugePotionItem(EntityType.HugePotionItem, entityBody, size)
+      case Items.Armor => new ArmorItem(EntityType.ArmorItem, entityBody, size)
+      case Items.Boots => new BootsItem(EntityType.BootsItem, entityBody, size)
+      case Items.BFSword => new BFSwordItem(EntityType.BFSwordItem, entityBody, size)
+      case Items.Key => new KeyItem(EntityType.KeyItem, entityBody, size)
+      case Items.SkeletonKey => new SkeletonKeyItem(EntityType.SkeletonKeyItem, entityBody, size)
+      case Items.Bow => new BowItem(EntityType.BowItem, entityBody, size)
+      case Items.Shield => new ShieldItem(EntityType.ShieldItem, entityBody, size)
+      case _ => new CakeItem(EntityType.CakeItem, entityBody, size)
     }
   }
 

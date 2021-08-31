@@ -3,7 +3,7 @@ package model.movement
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.Level
-import model.collisions.EntityType
+import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions.RichInt
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, MobileEntity, State, Statistic}
@@ -52,20 +52,20 @@ class PatrolPlatform(val owner: MobileEntity,
   protected def checkMoveToTheLeft: Boolean =
     !checkPointCollision(world,
       this.owner.getPosition._1 - this.owner.getSize._1 - this.patrolSensorsOffset,
-      this.owner.getPosition._2, EntityType.Immobile) &&
+      this.owner.getPosition._2, EntityCollisionBit.Immobile) &&
       checkPointCollision(world,
         this.owner.getPosition._1 - this.owner.getSize._1 - this.patrolSensorsOffset,
         this.owner.getPosition._2 - this.owner.getSize._2 - this.patrolSensorsOffset,
-        EntityType.Immobile)
+        EntityCollisionBit.Immobile)
 
   protected def checkMoveToTheRight: Boolean =
     !checkPointCollision(world,
       this.owner.getPosition._1 + this.owner.getSize._1 + this.patrolSensorsOffset,
-      this.owner.getPosition._2, EntityType.Immobile) &&
+      this.owner.getPosition._2, EntityCollisionBit.Immobile) &&
       checkPointCollision(world,
         this.owner.getPosition._1 + this.owner.getSize._1 + this.patrolSensorsOffset,
         this.owner.getPosition._2 - this.owner.getSize._2 - this.patrolSensorsOffset,
-        EntityType.Immobile)
+        EntityCollisionBit.Immobile)
 
   protected def stopMoving: Unit = {
     this.owner.getBody.setLinearVelocity(0, this.owner.getBody.getLinearVelocity.y)

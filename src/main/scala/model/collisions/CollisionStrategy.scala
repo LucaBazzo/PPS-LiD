@@ -1,9 +1,7 @@
 package model.collisions
 
-import model.entities.{CircularMobileEntity, Entity, Hero, HeroImpl, ImmobileEntity, Item, ItemImpl}
-import model.helpers.EntitiesFactoryImpl
 import model.entities.Statistic.Statistic
-import model.entities._
+import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
 
 
 trait CollisionStrategy {
@@ -30,9 +28,9 @@ class ItemCollisionStrategy(private val item: Item) extends CollisionStrategy {
 class DoorCollisionStrategy(private val door: ImmobileEntity) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => print("Hero opened door")
-                    this.door.changeCollisions(EntityType.OpenedDoor)
+                    this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
     case s: CircularMobileEntity => print("Hero destroyed door")
-                    this.door.changeCollisions(EntityType.DestroyedDoor)
+                    this.door.changeCollisions(EntityCollisionBit.DestroyedDoor)
   }
 }
 
@@ -61,7 +59,8 @@ class ApplyDamageAndDestroyEntity(private val sourceEntity: Entity,
 
     if ((entity.getBody.getFixtureList.toArray().head.getFilterData.maskBits
       & this.sourceEntity.getBody.getFixtureList.toArray().head.getFilterData.categoryBits) != 0) {
-      this.sourceEntity.setState(State.Dying)
+//      this.sourceEntity.setState(State.Dying)
+      this.sourceEntity.destroyEntity()
     }
   }
 }
