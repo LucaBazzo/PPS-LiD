@@ -1,3 +1,5 @@
+package scala
+
 import controller.GameEvent
 import model.collisions.EntityType
 import model.{Level, LevelImpl}

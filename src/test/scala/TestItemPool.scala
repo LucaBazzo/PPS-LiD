@@ -1,3 +1,5 @@
+package scala
+
 import model.{Level, LevelImpl}
 import model.entities.{Item, ItemPools, Items}
 import model.entities.Items.Items

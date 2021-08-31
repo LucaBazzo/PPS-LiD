@@ -1,3 +1,5 @@
+package scala
+
 import controller.GameEvent
 import model.entities.Items.Items
 import model.{Level, LevelImpl}
