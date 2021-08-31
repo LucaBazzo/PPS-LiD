@@ -1,7 +1,10 @@
 package model.collisions
 
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import model.entities.Statistic.Statistic
 import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
+
+import java.util.concurrent.{ExecutorService, Executors}
 
 
 trait CollisionStrategy {
@@ -31,6 +34,44 @@ class DoorCollisionStrategy(private val door: ImmobileEntity) extends CollisionS
                     this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
     case s: CircularMobileEntity => print("Hero destroyed door")
                     this.door.changeCollisions(EntityCollisionBit.DestroyedDoor)
+  }
+}
+
+class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
+                                private val upperPlatform: ImmobileEntity,
+                                private val lowerPlatform: ImmobileEntity) extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => print("Hero standing on Platform" + "\n")
+                    platform.changeCollisions(EntityCollisionBit.Enemy)
+                    upperPlatform.changeCollisions(EntityCollisionBit.Enemy)
+                    lowerPlatform.changeCollisions(EntityCollisionBit.Enemy)
+  }
+}
+
+class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
+                                private val upperPlatform: ImmobileEntity,
+                                private val lowerPlatform: ImmobileEntity) extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => print("Hero standing on Platform" + "\n")
+      platform.changeCollisions(EntityCollisionBit.Enemy)
+      upperPlatform.changeCollisions(EntityCollisionBit.Enemy)
+      lowerPlatform.changeCollisions(EntityCollisionBit.Enemy)
+  }
+}
+
+class PlatformEndCollisionStrategy(private val platform: ImmobileEntity,
+                                   private val upperPlatform: ImmobileEntity,
+                                   private val lowerPlatform: ImmobileEntity) extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => print("Hero leaving Platform" + "\n")
+                    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+                    executorService.execute(() => {
+                      Thread.sleep(2000)
+                      platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+                      upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+                      lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+                      println("Enabled platform collisions")
+                    })
   }
 }
 

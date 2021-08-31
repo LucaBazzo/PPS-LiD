@@ -56,10 +56,12 @@ trait EntitiesFactory {
                            entityCollisionBit: Short = EntityCollisionBit.Immobile,
                            collisions: Short = 0): Entity
 
-
   def createDoor(size: (Float, Float) = (10, 10),
                           position: (Float, Float) = (0, 0),
                           collisions: Short = 0): Entity
+
+  def createPlatform(position: (Float, Float),
+                     size: (Float, Float)): Entity
 
   def createAttackPattern(entityType: EntityType = EntityType.Mobile,
                           rotatingBodySize: (Float, Float) = (1,1),
@@ -153,6 +155,46 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     this.level.addEntity(hero)
     hero
+  }
+
+  override def createPlatform(position: (Float, Float),
+                              size: (Float, Float)): Entity = {
+
+    val upperSize = (size._1 - 2, size._2)
+    val upperPosition = (position._1, position._2 + 1)
+
+    val lowerSize = (size._1 - 2, size._2)
+    val lowerPosition = (position._1, position._2 - 3)
+
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Immobile,
+      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(size.PPM), position.PPM)
+
+    val entityBodyUpper: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Immobile,
+      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(upperSize.PPM), upperPosition.PPM, isSensor = true)
+
+    val entityBodyLower: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Immobile,
+      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(lowerSize.PPM), lowerPosition.PPM, isSensor = true)
+
+    val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBody, size.PPM)
+    immobileEntity.setCollisionStrategy(new DoNothingOnCollision)
+    immobileEntity.setEndCollisionStrategy(new DoNothingOnCollision)
+    this.level.addEntity(immobileEntity)
+
+    val immobileEntityUpper: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBodyUpper, upperSize.PPM)
+    val immobileEntityLower: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBodyLower, lowerSize.PPM)
+
+    val platformEndCollision: CollisionStrategy = new PlatformEndCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower)
+
+    immobileEntityUpper.setCollisionStrategy(new DoNothingOnCollision/*UpperPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower)*/)
+    immobileEntityUpper.setEndCollisionStrategy(platformEndCollision)
+    this.level.addEntity(immobileEntityUpper)
+
+
+    immobileEntityLower.setCollisionStrategy(new LowerPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower))
+    immobileEntityLower.setEndCollisionStrategy(platformEndCollision)
+    this.level.addEntity(immobileEntityLower)
+
+    immobileEntity
   }
 
   override def createSkeletonEnemy(position: (Float, Float)): Enemy = {

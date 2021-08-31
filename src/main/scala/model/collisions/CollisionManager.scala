@@ -26,6 +26,7 @@ object EntityCollisionBit {
   val DestroyedDoor: Short = getNextBitValue
   val Arrow: Short = getNextBitValue
   val EnemyAttack: Short = getNextBitValue
+  val Platform: Short = getNextBitValue
 
   private def getNextBitValue: Short = {
     this.currentBitValue = this.currentBitValue * bitMulti
@@ -82,6 +83,14 @@ class CollisionManager(private val level: Level) extends ContactListener {
   }
 
   override def endContact(contact: Contact): Unit = {
+    val bodyA: Body = contact.getFixtureA.getBody
+    val bodyB: Body = contact.getFixtureB.getBody
+
+    val entityA: Entity = level.getEntity((x: Entity) => x.getBody equals bodyA)
+    val entityB: Entity = level.getEntity((x: Entity) => x.getBody equals bodyB)
+
+    entityA.collisionEnded(entityB)
+    entityB.collisionEnded(entityA)
   }
 
   override def preSolve(contact: Contact, manifold: Manifold): Unit = {

@@ -23,7 +23,7 @@ object EntityType extends Enumeration {
       Mobile, Immobile, Enemy, //this values will not show any sprite
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
-      EnemySkeleton, EnemySlime, EnemyWorm,
+      EnemySkeleton, EnemySlime, EnemyWorm, Platform,
       AttackFireBall, AttackArrow = Value
 }
 
@@ -47,6 +47,10 @@ trait Entity {
 
   def collisionDetected(entity: Entity)
 
+  def setEndCollisionStrategy(endCollisionStrategy: CollisionStrategy)
+
+  def collisionEnded(entity: Entity)
+
   //TODO ricontrollare in futuro
   def getBody: Body
   def getEntityBody: EntityBody
@@ -65,6 +69,7 @@ abstract class EntityImpl(private val entityType: EntityType,
 
   protected var state: State = State.Standing
   protected var collisionStrategy: CollisionStrategy = new DoNothingOnCollision()
+  protected var endCollisionStrategy: CollisionStrategy = new DoNothingOnCollision()
 
   override def getState: State = this.state
 
@@ -84,6 +89,12 @@ abstract class EntityImpl(private val entityType: EntityType,
   override def collisionDetected(entity: Entity): Unit = {
     this.collisionStrategy.apply(entity)
   }
+
+  override def setEndCollisionStrategy(endCollisionStrategy: CollisionStrategy): Unit =
+    this.endCollisionStrategy = endCollisionStrategy
+
+  override def collisionEnded(entity: Entity): Unit =
+    this.endCollisionStrategy.apply(entity)
 
   override def destroyEntity(): Unit = {
     EntitiesFactoryImpl.destroyBody(this.getBody)
