@@ -1,8 +1,10 @@
 package view.screens.helpers
 
+import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.maps.MapProperties
 import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
-import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
+import com.badlogic.gdx.maps.tiled.{TiledMap, TiledMapRenderer, TmxMapLoader}
 import com.badlogic.gdx.math.Rectangle
 import model.Level
 import model.collisions.EntityCollisionBit
@@ -15,15 +17,27 @@ object TileMapHelper {
 
   private val scale: Float = 1/(PIXELS_PER_METER/2)
 
+  private var xOffset: Float = 0f
+
   def getMap(path: String): OrthogonalTiledMapRenderer = {
     new OrthogonalTiledMapRenderer(new TmxMapLoader().load(path), scale)
   }
 
-  def getTiledMap(path: String): TiledMap = {
-    new TmxMapLoader().load(path)
+  def setWorld(level: Level): Unit = {
+
+    this.xOffset = 0f
+
+    val path: String = "assets/maps/room1.tmx"
+
+    val rooms: Seq[Int] = Seq(1,2,3)
+    for (n <- rooms){
+      loadRoomObjects(level, path)
+    }
+
   }
 
-  def setWorld(level: Level, path: String): Unit = {
+
+  def loadRoomObjects(level: Level, path: String): Unit = {
 
     var rect: Rectangle = new Rectangle()
 
@@ -36,7 +50,7 @@ object TileMapHelper {
 
         val size: (Float, Float) = (rect.getWidth, rect.getHeight)
 
-        val position: (Float, Float) = ((rect.getX*2 + rect.getWidth) , (rect.getY*2 + rect.getHeight) )
+        val position: (Float, Float) = ((rect.getX*2 + rect.getWidth + (this.xOffset*16)) , (rect.getY*2 + rect.getHeight) )
 
         var entity: Entity = null
 
@@ -57,6 +71,11 @@ object TileMapHelper {
       })
 
     })
+
+    //update x offset
+    val mapProperties: MapProperties = tiledMap.getProperties
+    val width: Integer = mapProperties.get("width", classOf[Integer])
+    this.xOffset = this.xOffset + width
 
   }
 

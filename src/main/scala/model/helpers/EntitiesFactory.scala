@@ -132,7 +132,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createHeroEntity(): Hero = {
-    val position: (Float, Float) = (200f, 400f)
+    val position: (Float, Float) = (200f, 200f)
     val size: (Float, Float) = HERO_SIZE
 
     val statistic: Map[Statistic, Float] = Map(

@@ -25,7 +25,8 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter, private val level: L
       if(action.equals(GameEvent.SetMap)) {
 
         Gdx.app.postRunnable(
-          () => TileMapHelper.setWorld(this.level, "assets/maps/map2.tmx"))
+          () => TileMapHelper.setWorld(this.level)
+        )
       }
 
     }
