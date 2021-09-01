@@ -50,18 +50,15 @@ class ApplyDamage(private val target: Entity => Boolean,
 }
 
 class ApplyDamageAndDestroyEntity(private val sourceEntity: Entity,
-                                 private val target: Entity => Boolean,
-                                 private val stats: Map[Statistic, Float])
+                                  private val target: Entity => Boolean,
+                                  private val stats: Map[Statistic, Float])
   extends ApplyDamage(target, stats) {
 
   override def apply(entity: Entity): Unit = {
     super.apply(entity)
 
-    if ((entity.getBody.getFixtureList.toArray().head.getFilterData.maskBits
-      & this.sourceEntity.getBody.getFixtureList.toArray().head.getFilterData.categoryBits) != 0) {
-//      this.sourceEntity.setState(State.Dying)
-      this.sourceEntity.destroyEntity()
-    }
+    // source entity should be destroyed in any case
+    this.sourceEntity.destroyEntity()
   }
 }
 

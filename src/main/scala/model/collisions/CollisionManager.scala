@@ -64,11 +64,7 @@ object ImplicitConversions {
   }
 }
 
-// TODO: come gestire collissioni continue?
-
 class CollisionManager(private val level: Level) extends ContactListener {
-
-
 
   override def beginContact(contact: Contact): Unit = {
     val bodyA: Body = contact.getFixtureA.getBody
