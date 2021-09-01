@@ -1,7 +1,6 @@
 package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.Batch
-import model.collisions.ImplicitConversions.RichInt
 import model.entities.{Entity, EntityType, State}
 import utils.ApplicationConstants
 
@@ -31,36 +30,28 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
   override def drawSprites(): Unit = this.sprites.values.foreach((sprite: EntitySprite) => if(sprite != null) sprite.draw(this.batch))
 
   private def createEntitySprite(entity: Entity): Unit = {
-    sprites += (entity -> getSprite(entity))
+    sprites += (entity -> {
+      println(entity.getType, entity.getSize)
+      getSprite(entity)
+    })
   }
 
+  // TODO: rimuovere magic numbers
+
   private def getSprite(entity: Entity): EntitySprite = entity.getType match {
-    case EntityType.Hero => spriteFactory.createHeroSprite(ApplicationConstants.SPRITES_PACK_LOCATION, "hero", 50, 37)
-    case EntityType.Arrow =>
-      val sprite = spriteFactory.createEntitySprite(ApplicationConstants.SPRITES_PACK_LOCATION, "arrow", 40, 5, 10, 1, 2)
-      sprite.addAnimation(State.Standing, spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
-      sprite
     case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile => null
-    case EntityType.EnemySkeleton =>
-      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/skeleton.pack",
-        "skeleton", 150, 150, 19.PPM, 23.PPM, 300)
-      spriteFactory.defineEnemySkeletonAnimation(e)
-      e
-    case EntityType.EnemySlime =>
-      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/slime.pack",
-        "slime", 32, 25, 13.PPM, 13.PPM, 100)
-      spriteFactory.defineEnemySlimeAnimation(e)
-      e
-    case EntityType.EnemyWorm =>
-      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/worm.pack",
-        "worm", 90, 90, 15.PPM, 15.PPM, 200)
-      spriteFactory.defineEnemyWormAnimation(e)
-      e
-    case EntityType.AttackFireBall =>
-      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/fireball.pack",
-        "fireball", 46, 46, 5.PPM, 5.PPM, 200)
-      spriteFactory.defineAttackFireballAnimation(e)
-      e
+    case EntityType.Hero => spriteFactory.createHeroSprite(ApplicationConstants.SPRITES_PACK_LOCATION,
+      "hero", 50, 37)
+    case EntityType.Arrow => spriteFactory.createEntitySprite(entity.getType, ApplicationConstants.SPRITES_PACK_LOCATION,
+      "arrow", 40, 5, 10, 1, 2)
+    case EntityType.EnemySkeleton => spriteFactory.createEntitySprite(entity.getType, "assets/sprites/skeleton.pack",
+      "skeleton", 150, 150, entity.getSize._1, entity.getSize._2, 1)
+    case EntityType.EnemySlime => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/slime.pack",
+      "slime", 32, 25, entity.getSize._1, entity.getSize._2, 1)
+    case EntityType.EnemyWorm => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/worm.pack",
+      "worm", 90, 90, entity.getSize._1, entity.getSize._2, 1)
+    case EntityType.AttackFireBall => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/fireball.pack",
+      "fireball", 46, 46, entity.getSize._1, entity.getSize._2, 1)
     case EntityType.ArmorItem =>
       createItemSprite(entity, 0, 0)
     case EntityType.CakeItem =>
@@ -89,12 +80,12 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
       createItemSprite(entity, 1, 5)
     case EntityType.BFSwordItem =>
       createItemSprite(entity, 1, 6)
-    case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile => null
     case _ => null
   }
 
   private def createItemSprite(entity: Entity, row: Int, column: Int): EntitySprite = {
-    val sprite = spriteFactory.createEntitySprite(ApplicationConstants.SPRITES_PACK_LOCATION, "items", 32,
+    val sprite = spriteFactory.createEntitySprite(entity.getType,
+      ApplicationConstants.SPRITES_PACK_LOCATION, "items", 32,
       32, entity.getSize._1, entity.getSize._2, 2)
     sprite.addAnimation(State.Standing,
       spriteFactory.createSpriteAnimation(sprite, row, column, column))
