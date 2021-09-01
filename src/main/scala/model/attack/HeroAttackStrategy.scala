@@ -2,7 +2,7 @@ package model.attack
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.entities.{EntityId, Hero, MobileEntity, State}
+import model.entities.{EntityType, Hero, MobileEntity, State}
 import model.helpers.EntitiesFactoryImpl
 
 class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Float) extends AttackStrategy {
@@ -68,22 +68,22 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
 
   private def setAttackPattern(): Unit = this.entity.getState match {
     case State.Attack01 if this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityId.Mobile, (1f, 10f),
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
         this.entity.getPosition, (0, -15f), 60, 100, this.entity)
     case State.Attack01 if !this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityId.Mobile, (1f, 10f),
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
         this.entity.getPosition, (0, -15f), -60, -100, this.entity)
     case State.Attack02 if this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityId.Mobile, (1f, 10f),
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
         this.entity.getPosition, (0, 15f), -60, 10, this.entity)
     case State.Attack02 if !this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityId.Mobile, (1f, 10f),
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
         this.entity.getPosition, (0, 15f), 60, 10, this.entity)
     case State.Attack03 if this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityId.Mobile, (10f, 2f),
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (10f, 2f),
         this.entity.getPosition, (15f, 0), -80, sourceEntity=this.entity)
     case State.Attack03 if !this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityId.Mobile, (10f, 2f),
+      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (10f, 2f),
         this.entity.getPosition, (-15f, 0), 80, sourceEntity=this.entity)
     case _ => throw new UnsupportedOperationException
   }

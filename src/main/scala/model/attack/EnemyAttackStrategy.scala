@@ -71,7 +71,7 @@ class MeleeAttack(val owner: LivingEntity,
       if (isTargetOnTheRight(owner.getBody, targetEntity.getBody))
         owner.getSize._1 else -owner.getSize._1, 0)
 
-    val entity:MobileEntity = createMeleeSwordAttack(EntityId.Mobile, (15, 15), (spawnCoordinates.x, spawnCoordinates.y), owner)
+    val entity:MobileEntity = createMeleeSwordAttack(EntityType.Mobile, (15, 15), (spawnCoordinates.x, spawnCoordinates.y), owner)
     entity.getBody.setBullet(true)
     entity
   }
@@ -112,7 +112,7 @@ class RangedAttack(val owner: LivingEntity,
     val spawnCoordinates = owner.getBody.getWorldCenter.add(
       if (isTargetOnTheRight(owner.getBody, targetEntity.getBody))
         owner.getSize._1 else -owner.getSize._1, 0)
-    val entity:Attack = createEnemyProjectileAttack(EntityId.AttackFireBall, (5, 5),
+    val entity:Attack = createEnemyProjectileAttack(EntityType.AttackFireBall, (5, 5),
       (spawnCoordinates.x, spawnCoordinates.y), targetEntity.getPosition, owner)
     entity
   }

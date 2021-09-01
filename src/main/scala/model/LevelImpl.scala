@@ -1,20 +1,14 @@
 package model
 
 import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.collisions.{CollisionManager, EntityType}
 import model.collisions.ImplicitConversions._
+import model.collisions.{CollisionManager, EntityCollisionBit}
 import model.entities.ItemPools.ItemPools
 import model.entities._
 import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl}
-import view.screens.game.GameScreen
-import view.screens.helpers.TileMapHelper
-
-import java.util.concurrent.{ExecutorService, Executors}
 
 trait Level {
 
@@ -43,7 +37,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,50), EntityType.Hero)
+  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,50), EntityCollisionBit.Hero)
 
   private val door: Entity = entitiesFactory.createDoor((5, 30), (-20f, 10f))
 
@@ -51,7 +45,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   EntitiesFactoryImpl.createSkeletonEnemy((+200, 300))
   EntitiesFactoryImpl.createWormEnemy((+250,300))
-  EntitiesFactoryImpl.createSlimeEnemy((270,300))
+//  EntitiesFactoryImpl.createSlimeEnemy((270,300))
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)
@@ -64,10 +58,6 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
       for(command <- actions){
         if(command.equals(GameEvent.SetMap)) {
           this.isWorldSetted = true
-
-          val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-          val task: Runnable = () => Gdx.app.postRunnable(() => TileMapHelper.setWorld(this, "assets/maps/map2.tmx"))
-          executorService.submit(task)
 
         } else this.hero.notifyCommand(command)
       }

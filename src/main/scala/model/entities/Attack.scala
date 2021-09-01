@@ -3,11 +3,11 @@ package model.entities
 import model.EntityBody
 import model.entities.Statistic.Statistic
 import model.collisions.{DoNothingOnCollision}
-import model.entities.EntityId.EntityId
+import model.entities.EntityType.EntityType
 import model.helpers.EntitiesFactoryImpl
 import model.movement.StopMoving
 
-class Attack(private val entityType: EntityId,
+class Attack(private val entityType: EntityType,
              private var entityBody: EntityBody,
              private val size: (Float, Float),
              private val stats: Map[Statistic, Float],
@@ -32,6 +32,7 @@ class Attack(private val entityType: EntityId,
       if (dyingStateTimer == 0) {
         this.dyingStateTimer = System.currentTimeMillis()
       } else if (System.currentTimeMillis() - dyingStateTimer > dyingStateDuration) {
+//        this.destroyEntity()
         EntitiesFactoryImpl.destroyBody(this.getBody)
         EntitiesFactoryImpl.removeEntity(this)
       }

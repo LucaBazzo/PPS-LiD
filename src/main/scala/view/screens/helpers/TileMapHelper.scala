@@ -1,17 +1,15 @@
 package view.screens.helpers
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.maps.objects.RectangleMapObject
-import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
+import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
 import com.badlogic.gdx.math.Rectangle
 import model.Level
-import model.collisions.EntityType
+import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
-import model.entities.{Entity, EntityId, ImmobileEntity}
+import model.entities.{Entity, EntityType}
 import model.helpers.EntitiesFactoryImpl
 import utils.ApplicationConstants.PIXELS_PER_METER
-import view.screens.game.GameScreen
 
 object TileMapHelper {
 
@@ -44,10 +42,10 @@ object TileMapHelper {
 
         layer.getName() match {
           case "ground" | "bridge" => {
-            entity = EntitiesFactoryImpl.createImmobileEntity(EntityId.Immobile, size, position, EntityType.Immobile, EntityType.Hero | EntityType.Enemy)
+            entity = EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack)
           }
           case "water" | "lava" | "ladder" => {
-            entity = EntitiesFactoryImpl.createImmobileEntity(EntityId.Immobile, size, position, EntityType.Immobile)
+            entity = EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile)
           }
           case _ => {
             println("not supported layer: " + layer.getName())

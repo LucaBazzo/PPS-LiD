@@ -4,8 +4,8 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import model.EntityBody
-import model.collisions.{CollisionStrategy, DoNothingOnCollision, EntityType}
-import model.entities.EntityId.EntityId
+import model.collisions.{CollisionStrategy, DoNothingOnCollision}
+import model.entities.EntityType.EntityType
 import model.entities.State.State
 import model.helpers.EntitiesFactoryImpl
 
@@ -17,8 +17,8 @@ object State extends Enumeration {
       Dying, Hurt = Value
 }
 
-object EntityId extends Enumeration {
-  type EntityId = Value
+object EntityType extends Enumeration {
+  type EntityType = Value
   val Hero,
       Mobile, Immobile, Enemy, //this values will not show any sprite
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
@@ -31,7 +31,7 @@ trait Entity {
 
   def update()
 
-  def getType: EntityId
+  def getType: EntityType
 
   def getState: State
 
@@ -59,7 +59,7 @@ trait Entity {
   def changeCollisions(entityType: Short): Unit
 }
 
-abstract class EntityImpl(private val entityType: EntityId,
+abstract class EntityImpl(private val entityType: EntityType,
                           private var entityBody: EntityBody,
                           private val size: (Float, Float)) extends Entity {
 
@@ -101,10 +101,10 @@ abstract class EntityImpl(private val entityType: EntityId,
 
   override def changeCollisions(entityType: Short): Unit = EntitiesFactoryImpl.changeCollisions(this, entityType)
 
-  override def getType: EntityId = this.entityType
+  override def getType: EntityType = this.entityType
 }
 
-case class ImmobileEntity(private var entityType: EntityId,
+case class ImmobileEntity(private var entityType: EntityType,
                           private var entityBody: EntityBody,
                           private val size: (Float, Float))
   extends EntityImpl(entityType, entityBody, size) {
