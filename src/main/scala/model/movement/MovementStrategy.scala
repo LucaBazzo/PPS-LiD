@@ -11,3 +11,13 @@ trait MovementStrategy {
   def alterSpeed(alteration: Float): Unit = ???
 }
 
+case class DoNothingMovementStrategy() extends MovementStrategy {
+
+  override def apply(): Unit = {}
+
+  override def apply(command: GameEvent): Unit = {}
+
+  override def stopMovement(): Unit = {}
+
+  override def alterSpeed(alteration: Float): Unit = {}
+}

@@ -2,14 +2,16 @@ package model.entities
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.EntityBody
+import model.attack.DoNothingAttackStrategy
 import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State.State
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
-import utils.ApplicationConstants.{HERO_SIZE, HERO_SIZE_SMALL}
+import model.movement.DoNothingMovementStrategy
+import model.{EntityBody, HeroInteraction}
+import utils.ApplicationConstants.HERO_SIZE
 
 trait Hero extends LivingEntity {
 
@@ -25,6 +27,10 @@ trait Hero extends LivingEntity {
 
   def itemPicked(itemType: Items)
   def getItemsPicked: List[Items]
+
+  def setEnvironmentInteraction(interaction: Option[HeroInteraction])
+
+  def stopHero(time: Float)
 }
 
 class HeroImpl(private val entityType: EntityType,
@@ -38,12 +44,18 @@ class HeroImpl(private val entityType: EntityType,
 
   private var waitTimer: Float = 0
 
-  override def notifyCommand(command: GameEvent): Unit = command match {
-    case GameEvent.Jump | GameEvent.MoveRight | GameEvent.MoveLeft | GameEvent.Slide => move(command)
-    case GameEvent.Crouch => this.crouch()
-    case GameEvent.StopCrouch => if(this.state == State.Crouch) this.state = State.Standing
-    case GameEvent.Attack | GameEvent.BowAttack => attack(command)
-    case _ => throw new UnsupportedOperationException
+  override def notifyCommand(command: GameEvent): Unit = {
+    if(this.interaction.nonEmpty && this.interaction.get.command == command)
+      this.interaction.get.environmentInteraction.apply()
+    else {
+      command match {
+        case GameEvent.Up | GameEvent.UpReleased | GameEvent.MoveRight | GameEvent.MoveLeft
+             | GameEvent.Slide | GameEvent.Down | GameEvent.DownReleased => move(command)
+        case GameEvent.Attack | GameEvent.BowAttack => attack(command)
+        case GameEvent.Interaction =>
+        case _ => throw new UnsupportedOperationException
+      }
+    }
   }
 
   def move(command: GameEvent): Unit = {
@@ -56,39 +68,9 @@ class HeroImpl(private val entityType: EntityType,
       this.attackStrategy.apply(command)
   }
 
-  private def crouch(): Unit = {
-    this.state match {
-      case State.Standing | State.Running =>
-        this.stopMovement()
-        this.changeHeroFixture(HERO_SIZE_SMALL, (0f, -6f))
-        this.state = State.Crouch
-        this.setLittle(true)
-      case _ =>
-    }
-  }
+
 
   override def update(): Unit = {
-    /*this.state match {
-      case model.entities.State.Running => {
-        if(this.body.getLinearVelocity.y == 0 && this.body.getLinearVelocity.x == 0)
-          this.state = State.Standing
-        else if(this.body.getLinearVelocity.y < 0) {
-          this.state = State.Falling
-        }
-      }
-      case model.entities.State.Jumping => {
-        if(this.body.getLinearVelocity.y == 0)
-          this.state = State.Standing
-      }
-      case model.entities.State.Falling => {
-        if(this.body.getLinearVelocity.y == 0)
-          this.state = State.Standing
-      }
-      case model.entities.State.Sliding =>
-      case model.entities.State.Crouch =>
-      case _ =>
-    }*/
-
 
     //for sliding and crouch redefinition of body
     if(waitTimer > 0) {
@@ -102,7 +84,11 @@ class HeroImpl(private val entityType: EntityType,
 
       //println(this.getState, this.attackTimer)
 
-      if(this.entityBody.getBody.getLinearVelocity.y < 0 && this.state != State.Jumping)
+      if (this.getStatistic(Statistic.CurrentHealth) <= 0) {
+        this.setState(State.Dying)
+      }
+      else if(this.entityBody.getBody.getLinearVelocity.y < 0
+        && (this.state != State.Jumping && this.state != State.LadderDescend))
         this.state = State.Falling
       else if(this.entityBody.getBody.getLinearVelocity.y == 0 && this.entityBody.getBody.getLinearVelocity.x != 0
         && (this.state == State.Jumping || this.state == State.Falling))
@@ -110,7 +96,8 @@ class HeroImpl(private val entityType: EntityType,
       else if((this.entityBody.getBody.getLinearVelocity.y == 0 && this.entityBody.getBody.getLinearVelocity.x == 0)
         && this.state != State.Crouch
         && this.state != State.Attack01 && this.state != State.Attack02 && this.state != State.Attack03
-        && this.state != State.BowAttack)
+        && this.state != State.BowAttack
+        && this.state != State.LadderIdle)
         this.state = State.Standing
 
       if(this.state != State.Sliding && this.state != State.Crouch && isLittle) {
@@ -134,35 +121,6 @@ class HeroImpl(private val entityType: EntityType,
       }
     }
   }
-
-  /*override def update(): Unit = {
-    /*if(this.body.getLinearVelocity.y != 0 || this.body.getLinearVelocity.x == 0)
-      setSliding(false)*/
-
-    if((this.body.getLinearVelocity.x <= 1 && isSliding && isFacingRight) ||
-        this.body.getLinearVelocity.x >= -1 && isSliding && !isFacingRight) {
-      this.stopMovement()
-      setSliding(false)
-    }
-
-    if((this.isLittle && !this.isSliding) && (this.isLittle && this.state != State.Crouch)) {
-      EntitiesFactoryImpl.defineNormalHero(this)
-      this.isLittle = false
-    }
-
-    if(this.body.getLinearVelocity.y > 0 || (this.body.getLinearVelocity.y < 0 && this.previousState == State.Jumping))
-      this.state = State.Jumping
-    else if(this.body.getLinearVelocity.y < 0)
-      this.state = State.Falling
-    else if(this.body.getLinearVelocity.x != 0 && !isSliding)
-      this.state = State.Running
-    else if(this.body.getLinearVelocity.x != 0 && isSliding)
-      this.state = State.Sliding
-    else if(this.body.getLinearVelocity.x == 0 && isLittle && this.state == State.Crouch)
-      this.state = State.Crouch
-    else
-      this.state = State.Standing
-  }*/
 
   override def getLinearVelocityX: Float = this.entityBody.getBody.getLinearVelocity.x
 
@@ -190,7 +148,32 @@ class HeroImpl(private val entityType: EntityType,
 
   private var itemsPicked: List[Items] = List.empty
 
-  override def itemPicked(itemType: Items): Unit = this.itemsPicked = itemType :: this.itemsPicked
+  override def itemPicked(itemType: Items): Unit = {
+    this.stopHero(300)
+    this.stopMovement()
+    this.setState(State.ItemPicked)
+    this.itemsPicked = itemType :: this.itemsPicked
+  }
 
   override def getItemsPicked: List[Items] = this.itemsPicked
+
+  private var interaction: Option[HeroInteraction] = Option.empty
+
+  override def setEnvironmentInteraction(interaction: Option[HeroInteraction]): Unit =
+    this.interaction = interaction
+
+  override def stopHero(time: Float): Unit = this.waitTimer = time
+
+  override def sufferDamage(damage: Float): Unit = {
+    super.sufferDamage(damage)
+    if (this.getStatistic(Statistic.CurrentHealth) <= 0) {
+      this.attackStrategy.stopAttack()
+      this.setAttackStrategy(DoNothingAttackStrategy())
+      this.setMovementStrategy(DoNothingMovementStrategy())
+    }
+    else {
+      this.stopHero(150)
+      this.setState(State.Hurt)
+    }
+  }
 }

@@ -37,9 +37,13 @@ class LivingEntityImpl(private val entityType: EntityType,
   }
 
   override def sufferDamage(damage: Float): Unit = {
-    val trueDamage = damage - this.stats(Statistic.Defence)
-    if(trueDamage > 0)
+    var trueDamage = damage - this.stats(Statistic.Defence)
+    if(trueDamage > 0) {
+      if(this.getStatistic(Statistic.CurrentHealth) < trueDamage) {
+        trueDamage = this.getStatistic(Statistic.CurrentHealth)
+      }
       this.alterStatistics(Statistic.CurrentHealth, -trueDamage)
+    }
     if (this.getStatistic(Statistic.CurrentHealth) <= 0) {
       this.state = State.Dying
     }

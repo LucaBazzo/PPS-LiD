@@ -3,9 +3,9 @@ package model.collisions
 import _root_.utils.ApplicationConstants.PIXELS_PER_METER
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
-import model.Level
 import model.collisions.ImplicitConversions._
 import model.entities.Entity
+import model.helpers.EntitiesGetter
 
 object EntityCollisionBit {
 
@@ -67,19 +67,19 @@ object ImplicitConversions {
 
 // TODO: come gestire collissioni continue?
 
-class CollisionManager(private val level: Level) extends ContactListener {
-
-
+class CollisionManager(private val entitiesGetter: EntitiesGetter) extends ContactListener {
 
   override def beginContact(contact: Contact): Unit = {
-    val bodyA: Body = contact.getFixtureA.getBody
-    val bodyB: Body = contact.getFixtureB.getBody
+    val firstBody: Body = contact.getFixtureA.getBody
+    val secondBody: Body = contact.getFixtureB.getBody
 
-    val entityA: Entity = level.getEntity((x: Entity) => x.getBody equals bodyA)
-    val entityB: Entity = level.getEntity((x: Entity) => x.getBody equals bodyB)
+    val firstEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals firstBody).get
+    val secondEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals secondBody).get
 
-    entityA.collisionDetected(entityB)
-    entityB.collisionDetected(entityA)
+    if(firstEntities.nonEmpty && secondEntities.nonEmpty) {
+      firstEntities.head.collisionDetected(secondEntities.head)
+      secondEntities.head.collisionDetected(firstEntities.head)
+    }
   }
 
   override def endContact(contact: Contact): Unit = {
