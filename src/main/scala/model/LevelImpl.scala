@@ -8,7 +8,7 @@ import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionManager, EntityCollisionBit}
 import model.entities.ItemPools.ItemPools
 import model.entities._
-import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl}
+import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter, ItemPoolImpl}
 
 trait Level {
 
@@ -51,7 +51,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   this.entitiesSetter.setWorld(this.world)
   this.entitiesSetter.setScore(0)
 
-  this.world.setContactListener(new CollisionManager(this))
+  this.world.setContactListener(new CollisionManager(this.entitiesSetter.asInstanceOf[EntitiesGetter]))
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
     if(actions.nonEmpty) {
