@@ -15,3 +15,16 @@ trait AttackStrategy {
 
   def alterStrength(alteration: Float): Unit = ???
 }
+
+case class DoNothingAttackStrategy() extends AttackStrategy {
+
+  override def apply(command: GameEvent): Unit = {}
+
+  override def stopAttack(): Unit = {}
+
+  override def isAttackFinished: Boolean = true
+
+  override def checkTimeEvent(): Unit = {}
+
+  override def alterStrength(alteration: Float): Unit = {}
+}

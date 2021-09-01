@@ -2,12 +2,14 @@ package model.entities
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
+import model.attack.DoNothingAttackStrategy
 import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State.State
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
+import model.movement.DoNothingMovementStrategy
 import model.{EntityBody, HeroInteraction}
 import utils.ApplicationConstants.HERO_SIZE
 
@@ -27,6 +29,8 @@ trait Hero extends LivingEntity {
   def getItemsPicked: List[Items]
 
   def setEnvironmentInteraction(interaction: Option[HeroInteraction])
+
+  def stopHero(time: Float)
 }
 
 class HeroImpl(private val entityType: EntityType,
@@ -80,7 +84,10 @@ class HeroImpl(private val entityType: EntityType,
 
       //println(this.getState, this.attackTimer)
 
-      if(this.entityBody.getBody.getLinearVelocity.y < 0
+      if (this.getStatistic(Statistic.CurrentHealth) <= 0) {
+        this.setState(State.Dying)
+      }
+      else if(this.entityBody.getBody.getLinearVelocity.y < 0
         && (this.state != State.Jumping && this.state != State.LadderDescend))
         this.state = State.Falling
       else if(this.entityBody.getBody.getLinearVelocity.y == 0 && this.entityBody.getBody.getLinearVelocity.x != 0
@@ -141,7 +148,12 @@ class HeroImpl(private val entityType: EntityType,
 
   private var itemsPicked: List[Items] = List.empty
 
-  override def itemPicked(itemType: Items): Unit = this.itemsPicked = itemType :: this.itemsPicked
+  override def itemPicked(itemType: Items): Unit = {
+    this.stopHero(300)
+    this.stopMovement()
+    this.setState(State.ItemPicked)
+    this.itemsPicked = itemType :: this.itemsPicked
+  }
 
   override def getItemsPicked: List[Items] = this.itemsPicked
 
@@ -149,4 +161,19 @@ class HeroImpl(private val entityType: EntityType,
 
   override def setEnvironmentInteraction(interaction: Option[HeroInteraction]): Unit =
     this.interaction = interaction
+
+  override def stopHero(time: Float): Unit = this.waitTimer = time
+
+  override def sufferDamage(damage: Float): Unit = {
+    super.sufferDamage(damage)
+    if (this.getStatistic(Statistic.CurrentHealth) <= 0) {
+      this.attackStrategy.stopAttack()
+      this.setAttackStrategy(DoNothingAttackStrategy())
+      this.setMovementStrategy(DoNothingMovementStrategy())
+    }
+    else {
+      this.stopHero(150)
+      this.setState(State.Hurt)
+    }
+  }
 }

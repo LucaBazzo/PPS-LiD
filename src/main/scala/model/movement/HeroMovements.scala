@@ -31,7 +31,8 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   private def checkCommand(command: GameEvent): Boolean = {
     if(entity.getState != State.Sliding && entity.getState != State.Attack01 &&
       entity.getState != State.Attack02 && entity.getState != State.Attack03 &&
-      entity.getState != State.BowAttack) {
+      entity.getState != State.BowAttack && entity.getState != State.Hurt &&
+      entity.getState != State.ItemPicked) {
       command match {
         case GameEvent.Up => return entity.getState != State.Falling &&
           entity.getState != State.Somersault && entity.getState != State.Crouch

@@ -194,6 +194,13 @@ class SpriteFactoryImpl extends SpriteFactory {
         12, 0, 0, reverse = true), loop = true)
     heroSprite.addAnimation(State.LadderIdle,
       this.createSpriteAnimation(heroSprite, 11, 6, 6))
+    heroSprite.addAnimation(State.ItemPicked,
+      this.createSpriteAnimation(heroSprite, 13, 2, 4,0.15f))
+    heroSprite.addAnimation(State.Hurt,
+      this.createSpriteAnimation(heroSprite, 8, 3, 5))
+    heroSprite.addAnimation(State.Dying,
+      this.createSpriteAnimationFromTwoRows(heroSprite, 8, 6, 6,
+        9, 0, 5,0.18f))
   }
 
   override def defineEnemySkeletonAnimation(sprite:EntitySprite): Unit = {

@@ -7,7 +7,7 @@ import model.helpers.EntitiesFactoryImpl
 
 class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Float) extends AttackStrategy {
 
-  private var attackPattern: MobileEntity = _
+  private var attackPattern: Option[MobileEntity] = Option.empty
   private var attackTimer: Float = 0
   private var timeEventPresent: Boolean = false
 
@@ -21,8 +21,10 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
   }
 
   override def stopAttack(): Unit = {
-    this.attackPattern.destroyEntity()
-    this.attackPattern = null
+    if(this.attackPattern.nonEmpty) {
+      this.attackPattern.get.destroyEntity()
+      this.attackPattern = Option.empty
+    }
   }
 
   override def isAttackFinished: Boolean = this.attackTimer <= 0
@@ -48,7 +50,7 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
       this.entity.setState(State.Attack02)
       stopAttack()
       this.setAttackPattern()
-      this.attackPattern.move()
+      this.attackPattern.get.move()
       this.restartTimer(130)
     }
     else if (this.entity.getState == State.Attack02 && this.attackTimer < 75) {
@@ -62,30 +64,30 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
       && this.isAttackFinished) {
       this.entity.setState(State.Attack01)
       this.setAttackPattern()
-      this.attackPattern.move()
+      this.attackPattern.get.move()
       this.restartTimer(100)
     }
   }
 
   private def setAttackPattern(): Unit = this.entity.getState match {
     case State.Attack01 if this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
-        this.entity.getPosition, (0, -15f), 60, 100, this.entity)
+      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
+        this.entity.getPosition, (0, -15f), 60, 100, this.entity))
     case State.Attack01 if !this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
-        this.entity.getPosition, (0, -15f), -60, -100, this.entity)
+      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
+        this.entity.getPosition, (0, -15f), -60, -100, this.entity))
     case State.Attack02 if this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
-        this.entity.getPosition, (0, 15f), -60, 10, this.entity)
+      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
+        this.entity.getPosition, (0, 15f), -60, 10, this.entity))
     case State.Attack02 if !this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
-        this.entity.getPosition, (0, 15f), 60, 10, this.entity)
+      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
+        this.entity.getPosition, (0, 15f), 60, 10, this.entity))
     case State.Attack03 if this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (10f, 2f),
-        this.entity.getPosition, (15f, 0), -80, sourceEntity=this.entity)
+      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (10f, 2f),
+        this.entity.getPosition, (15f, 0), -80, sourceEntity=this.entity))
     case State.Attack03 if !this.entity.isFacingRight =>
-      this.attackPattern = EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (10f, 2f),
-        this.entity.getPosition, (-15f, 0), 80, sourceEntity=this.entity)
+      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (10f, 2f),
+        this.entity.getPosition, (-15f, 0), 80, sourceEntity=this.entity))
     case _ => throw new UnsupportedOperationException
   }
 
@@ -98,19 +100,19 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
   override def checkTimeEvent(): Unit = {
     if (this.entity.getState == State.Attack03 && !timeEventPresent &&
       this.attackTimer <= 120 && this.attackTimer > 60) {
-      this.attackPattern.move()
+      this.attackPattern.get.move()
       this.timeEventPresent = true
     }
     if (timeEventPresent && this.entity.getState == State.Attack03 && this.attackTimer <= 60) {
-      this.attackPattern.stopMovement()
+      this.attackPattern.get.stopMovement()
       this.timeEventPresent = false
     }
 
     //TODO riguardare in futuro per refactoring
     if (this.entity.getState == State.BowAttack && !timeEventPresent &&
       this.attackTimer <= 20 && this.attackTimer > 10) {
-      this.attackPattern = EntitiesFactoryImpl.createArrowProjectile(this.entity)
-      this.attackPattern.move()
+      this.attackPattern = Option.apply(EntitiesFactoryImpl.createArrowProjectile(this.entity))
+      this.attackPattern.get.move()
       this.timeEventPresent = true
     }
     if (timeEventPresent && this.entity.getState == State.BowAttack && this.attackTimer <= 10) {
