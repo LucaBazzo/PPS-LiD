@@ -34,12 +34,4 @@ class Enemy(private val entityType: EntityType,
       }
     }
   }
-
-//  override def sufferDamage(damage: Float): Unit = {
-//    super.sufferDamage(damage)
-//  }
-//
-//  override def destroyEntity(): Unit = {
-//    super.destroyEntity()
-//  }
 }

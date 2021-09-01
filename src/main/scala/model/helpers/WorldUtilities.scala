@@ -61,6 +61,8 @@ trait WorldUtilities {
 
 object WorldUtilities extends WorldUtilities {
 
+  // TODO: fattorizzare world.QueryAABB
+
   private var world:World = _
 
   def setWorld(world:World): Unit = this.world = world

@@ -12,6 +12,7 @@ import model.entities.EntityType.EntityType
 import model.entities.ItemPools.ItemPools
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, Statistic, _}
+import model.helpers.EntitiesUtilities.isEntityOnTheLeft
 import model.movement._
 
 import scala.collection.immutable.HashMap
@@ -68,16 +69,12 @@ trait EntitiesFactory {
                           startingAngle: Float = 0,
                           sourceEntity: LivingEntity): MobileEntity
 
-  def createEnemyProjectileAttack(entityType: EntityType = EntityType.AttackFireBall,
-                                  size: (Float, Float) = (10, 10),
-                                  position: (Float, Float) = (0, 0),
-                                  targetPosition: (Float, Float) = (0, 0),
-                                  sourceEntity: LivingEntity): Attack
+  def createEnemyFireballAttack(targetEntity: Entity, sourceEntity: LivingEntity): MobileEntity
 
   def createMeleeSwordAttack(entityType: EntityType,
                              size: (Float, Float) = (1, 1),
                              position: (Float, Float) = (0, 0),
-                             sourceEntity: LivingEntity): Attack
+                             sourceEntity: LivingEntity): MobileEntity
 
   def createArrowProjectile(entity: LivingEntity): MobileEntity
 
@@ -314,7 +311,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       EntityCollisionBit.Enemy, createPolygonalShape(rotatingBodySize.PPM), rotatingBodyPosition,
       startingAngle, gravity = false, 1, 0.3f, 0.5f, isSensor = true)
 
-
     val circularMobileEntity =
       new CircularMobileEntity(entityType, rotatingBody, rotatingBodySize.PPM, sourceEntity.getStatistics, pivotBody)
     circularMobileEntity.setMovementStrategy(
@@ -322,28 +318,36 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     circularMobileEntity.setCollisionStrategy(
       new ApplyDamage((e:Entity) => e.isInstanceOf[Enemy], sourceEntity.getStatistics))
 
-
     this.level.addEntity(circularMobileEntity)
     circularMobileEntity
   }
 
-  override def createEnemyProjectileAttack(entityType: EntityType = EntityType.AttackFireBall,
-                                           size: (Float, Float) = (5, 5),
-                                           position: (Float, Float) = (0, 0),
-                                           targetPosition: (Float, Float) = (0, 0),
-                                           sourceEntity: LivingEntity): Attack = {
+  override def createEnemyFireballAttack(targetEntity: Entity,
+                                         sourceEntity: LivingEntity): MobileEntity = {
 
+    val size = (10f, 10f)
+
+    // compute bullet spawn point
+    val offset:Float = if (isEntityOnTheLeft(sourceEntity, targetEntity))
+      sourceEntity.getSize._1.PPM else -sourceEntity.getSize._1.PPM
+    val position = sourceEntity.getBody.getWorldCenter.add(offset, 0)
+
+    // create a body inside the game world
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.EnemyAttack,
       EntityCollisionBit.Immobile | EntityCollisionBit.Hero | EntityCollisionBit.Door,
-      this.createCircleShape(size._1.PPM), position, isSensor = true)
+      this.createCircleShape(size._1.PPM), (position.x, position.y), isSensor = true)
     entityBody.getBody.setBullet(true)
 
-    val arrowAttack: Attack = new Attack(entityType, entityBody, size, sourceEntity.getStatistics)
+    // create an entity representing the bullet
+    val arrowAttack: MobileEntity = new MobileEntityImpl(EntityType.AttackFireBall, entityBody,
+      size, sourceEntity.getStatistics)
+    arrowAttack.setFacing(arrowAttack.isFacingRight)
 
+    // set entity behaviours
     arrowAttack.setCollisionStrategy(new ApplyDamageAndDestroyEntity(arrowAttack, (e:Entity) => e.isInstanceOf[Hero],
       sourceEntity.getStatistics))
-    arrowAttack.setMovementStrategy(new WeightlessProjectileTrajectory(arrowAttack, position,
-      targetPosition, sourceEntity.getStatistics))
+    arrowAttack.setMovementStrategy(new WeightlessProjectileTrajectory(arrowAttack, (position.x, position.y),
+      (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), sourceEntity.getStatistics))
 
     this.level.addEntity(arrowAttack)
     arrowAttack
@@ -352,7 +356,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createMeleeSwordAttack(entityType: EntityType,
                                       size: (Float, Float) = (1, 1),
                                       position: (Float, Float) = (0, 0),
-                                      sourceEntity:LivingEntity): Attack = {
+                                      sourceEntity:LivingEntity): MobileEntity = {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.EnemyAttack,
       EntityCollisionBit.Hero, this.createPolygonalShape(size.PPM), position, isSensor = true)
@@ -361,7 +365,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     jointDef.initialize(sourceEntity.getBody, entityBody.getBody, sourceEntity.getBody.getPosition)
     this.level.getWorld.createJoint(jointDef)
 
-    val swordAttack: Attack = new Attack(entityType, entityBody, size, sourceEntity.getStatistics)
+    val swordAttack: MobileEntity = new MobileEntityImpl(entityType, entityBody, size, sourceEntity.getStatistics)
     swordAttack.setCollisionStrategy(new ApplyDamage(e => e.isInstanceOf[Hero], sourceEntity.getStatistics))
     this.level.addEntity(swordAttack)
     swordAttack
