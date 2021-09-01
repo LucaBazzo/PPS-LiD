@@ -8,7 +8,7 @@ import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionManager, EntityCollisionBit}
 import model.entities.ItemPools.ItemPools
 import model.entities._
-import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl}
+import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl, WorldUtilities}
 
 trait Level {
 
@@ -19,6 +19,7 @@ trait Level {
   def removeEntity(entity: Entity): Unit
 
   def getEntity(predicate: Entity => Boolean): Entity
+  def getEntities(predicate: Entity => Boolean): List[Entity]
 
   def spawnItem(pool: ItemPools.ItemPools): Unit
 
@@ -30,6 +31,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var score: Int = 0
 
   private val world: World = new World(GRAVITY_FORCE, true)
+  WorldUtilities.setWorld(world)
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
   entitiesFactory.setLevel(this, new ItemPoolImpl())
@@ -43,8 +45,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private var isWorldSetted: Boolean = false
 
-  EntitiesFactoryImpl.createSkeletonEnemy((+200, 300))
-  EntitiesFactoryImpl.createWormEnemy((+250,300))
+//  EntitiesFactoryImpl.createSkeletonEnemy((+200, 300))
+  EntitiesFactoryImpl.createWormEnemy((280f, 550f))
 //  EntitiesFactoryImpl.createSlimeEnemy((270,300))
 
   this.entitiesSetter.setEntities(entitiesList)
@@ -81,6 +83,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   }
 
   override def getEntity(predicate: Entity => Boolean): Entity = entitiesList.filter(predicate).head
+  override def getEntities(predicate: Entity => Boolean): List[Entity] = entitiesList.filter(predicate)
 
   override def removeEntity(entity: Entity): Unit = {
     this.entitiesList = this.entitiesList.filterNot((e: Entity) => e.equals(entity))
