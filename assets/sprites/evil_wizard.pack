@@ -1,0 +1,12 @@
+
+evil_wizard.png
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+evil_wizard
+  rotate: false
+  xy: 0, 0
+  size: 1750, 1500
+  orig: 1750, 1500
+  offset: 0, 0
+  index: -1
