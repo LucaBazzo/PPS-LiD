@@ -69,12 +69,10 @@ trait EntitiesFactory {
                           startingAngle: Float = 0,
                           sourceEntity: LivingEntity): MobileEntity
 
-  def createEnemyFireballAttack(targetEntity: Entity, sourceEntity: LivingEntity): MobileEntity
+  def createFireballAttack(sourceEntity: LivingEntity, targetEntity: Entity): MobileEntity
 
-  def createMeleeSwordAttack(entityType: EntityType,
-                             size: (Float, Float) = (1, 1),
-                             position: (Float, Float) = (0, 0),
-                             sourceEntity: LivingEntity): MobileEntity
+  def createMeleeAttack(sourceEntity:LivingEntity,
+                        targetEntity:Entity): MobileEntity
 
   def createArrowProjectile(entity: LivingEntity): MobileEntity
 
@@ -233,7 +231,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                                  score: Int,
                                  entityId: EntityType): Enemy = {
 
-
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
       EntityCollisionBit.Immobile | EntityCollisionBit.Sword | EntityCollisionBit.Arrow,
       createPolygonalShape(size.PPM), position.PPM)
@@ -322,8 +319,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     circularMobileEntity
   }
 
-  override def createEnemyFireballAttack(targetEntity: Entity,
-                                         sourceEntity: LivingEntity): MobileEntity = {
+  override def createFireballAttack(sourceEntity: LivingEntity, targetEntity: Entity): MobileEntity = {
 
     val size = (10f, 10f)
 
@@ -339,36 +335,45 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     entityBody.getBody.setBullet(true)
 
     // create an entity representing the bullet
-    val arrowAttack: MobileEntity = new MobileEntityImpl(EntityType.AttackFireBall, entityBody,
-      size, sourceEntity.getStatistics)
-    arrowAttack.setFacing(arrowAttack.isFacingRight)
+    val attack: MobileEntity = new MobileEntityImpl(EntityType.AttackFireBall, entityBody,
+      size.PPM, sourceEntity.getStatistics)
+    attack.setFacing(attack.isFacingRight)
 
     // set entity behaviours
-    arrowAttack.setCollisionStrategy(new ApplyDamageAndDestroyEntity(arrowAttack, (e:Entity) => e.isInstanceOf[Hero],
+    attack.setCollisionStrategy(new ApplyDamageAndDestroyEntity(attack, (e:Entity) => e.isInstanceOf[Hero],
       sourceEntity.getStatistics))
-    arrowAttack.setMovementStrategy(new WeightlessProjectileTrajectory(arrowAttack, (position.x, position.y),
+    attack.setMovementStrategy(new WeightlessProjectileTrajectory(attack, (position.x, position.y),
       (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), sourceEntity.getStatistics))
 
-    this.level.addEntity(arrowAttack)
-    arrowAttack
+    this.level.addEntity(attack)
+    attack
   }
 
-  override def createMeleeSwordAttack(entityType: EntityType,
-                                      size: (Float, Float) = (1, 1),
-                                      position: (Float, Float) = (0, 0),
-                                      sourceEntity:LivingEntity): MobileEntity = {
+  override def createMeleeAttack(sourceEntity:LivingEntity,
+                                 targetEntity:Entity): MobileEntity = {
 
+    val size: (Float, Float) = (15, 15)
+
+    // compute bullet spawn point
+    val offset:Float = if (isEntityOnTheLeft(sourceEntity, targetEntity))
+      sourceEntity.getSize._1 else -sourceEntity.getSize._1
+    val position = sourceEntity.getBody.getWorldCenter.add(offset, 0)
+
+    // create a body inside the game world
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.EnemyAttack,
-      EntityCollisionBit.Hero, this.createPolygonalShape(size.PPM), position, isSensor = true)
-
+      EntityCollisionBit.Hero, this.createPolygonalShape(size.PPM), (position.x, position.y), isSensor = true)
     val jointDef:WeldJointDef = new WeldJointDef()
     jointDef.initialize(sourceEntity.getBody, entityBody.getBody, sourceEntity.getBody.getPosition)
     this.level.getWorld.createJoint(jointDef)
 
-    val swordAttack: MobileEntity = new MobileEntityImpl(entityType, entityBody, size, sourceEntity.getStatistics)
-    swordAttack.setCollisionStrategy(new ApplyDamage(e => e.isInstanceOf[Hero], sourceEntity.getStatistics))
-    this.level.addEntity(swordAttack)
-    swordAttack
+    // create an entity representing the melee attack
+    val attack: MobileEntity = new MobileEntityImpl(EntityType.Mobile, entityBody, size.PPM, sourceEntity.getStatistics)
+
+    // set entity behaviours
+    attack.setCollisionStrategy(new ApplyDamage(e => e.isInstanceOf[Hero], sourceEntity.getStatistics))
+
+    this.level.addEntity(attack)
+    attack
   }
 
   override def createArrowProjectile(entity: LivingEntity): MobileEntity = {
