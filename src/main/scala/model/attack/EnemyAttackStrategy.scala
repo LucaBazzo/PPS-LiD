@@ -1,10 +1,9 @@
 package model.attack
 
-import com.badlogic.gdx.math.Vector2
 import model.Level
 import model.entities.Statistic.Statistic
-import model.entities.{Entity, MobileEntity, _}
-import model.helpers.EntitiesFactoryImpl.{createEnemyFireballAttack, createMeleeSwordAttack}
+import model.entities.{Entity, _}
+import model.helpers.EntitiesFactoryImpl.{createFireballAttack, createMeleeAttack}
 import model.helpers.EntitiesUtilities._
 
 
@@ -35,7 +34,7 @@ class MeleeAttack(val sourceEntity: LivingEntity,
   override def apply(): Unit = {
     if (canAttack && isAttackFinished) {
       this.lastAttackTime = System.currentTimeMillis()
-      spawnAttack()
+      createMeleeAttack(sourceEntity, targetEntity)
     }
   }
 
@@ -45,18 +44,6 @@ class MeleeAttack(val sourceEntity: LivingEntity,
     System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
       isEntityVisible(sourceEntity, targetEntity, this.visibilityMaxHorizontalAngle) &&
       getEntitiesDistance(sourceEntity, targetEntity) <= this.maxDistance
-  }
-
-  private def spawnAttack(): MobileEntity = {
-    val spawnCoordinates: Vector2 = sourceEntity.getBody.getWorldCenter.add(
-      if (isEntityOnTheRight(sourceEntity, targetEntity))
-        sourceEntity.getSize._1 else -sourceEntity.getSize._1, 0)
-
-    val entity:MobileEntity = createMeleeSwordAttack(EntityType.Mobile, (15, 15),
-      (spawnCoordinates.x, spawnCoordinates.y), sourceEntity)
-
-    entity.getBody.setBullet(true)
-    entity
   }
 }
 
@@ -77,7 +64,7 @@ class RangedAttack(val sourceEntity: LivingEntity,
   override def apply(): Unit = {
     if (canAttack && isAttackFinished) {
       this.lastAttackTime = System.currentTimeMillis()
-      createEnemyFireballAttack(this.targetEntity, this.sourceEntity)
+      createFireballAttack(this.sourceEntity, this.targetEntity)
     }
   }
 

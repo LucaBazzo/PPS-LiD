@@ -3,12 +3,9 @@ package model.movement
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.Level
-import model.collisions.EntityCollisionBit
-import model.collisions.ImplicitConversions.RichFloat
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, MobileEntity, State, Statistic}
-
-import model.helpers.WorldUtilities._
+import model.helpers.EntitiesUtilities.{getEntitiesDistance, isEntityOnTheLeft, isEntityOnTheRight, isEntityVisible, isFloorPresentOnTheLeft, isFloorPresentOnTheRight, isPathClearOnTheLeft, isPathClearOnTheRight}
 
 class DoNotMove() extends MovementStrategy {
   override def apply(): Unit = { }
@@ -29,56 +26,40 @@ class PatrolPlatform(val sourceEntity: MobileEntity,
   protected val maxMovementSpeed: Float = stats(Statistic.MaxMovementSpeed)
   protected val acceleration: Float = stats(Statistic.Acceleration)
 
-  protected val patrolSensorsOffset: Float = 5.PPM
-  protected var isMovingLeft: Boolean = true
+  protected val patrolSensorsOffset: Float = 5
+  protected var isMovingLeft: Boolean = false
 
   sourceEntity.setFacing(right = !isMovingLeft)
 
   override def apply(): Unit = {
-    val canMoveToTheLeft: Boolean = this.checkMoveToTheLeft
-    val canMoveToTheRight: Boolean = this.checkMoveToTheRight
 
+    val canMoveToTheLeft: Boolean = isPathClearOnTheLeft(this.sourceEntity) && isFloorPresentOnTheLeft(this.sourceEntity)
+    val canMoveToTheRight: Boolean = isPathClearOnTheRight(this.sourceEntity) && isFloorPresentOnTheRight(this.sourceEntity)
+    println(this,
+      isPathClearOnTheLeft(this.sourceEntity), isFloorPresentOnTheLeft(this.sourceEntity))
     if (!canMoveToTheLeft && isMovingLeft || !canMoveToTheRight && !isMovingLeft) {
-      this.stopMoving
-      this.changeDirection(canMoveToTheLeft, canMoveToTheRight)
+      this.stopMoving()
+      this.changeDirection()
     }
 
      if (canMoveToTheLeft || canMoveToTheRight ) {
-       this.move
+       this.move()
        this.sourceEntity.setState(State.Running)
      } else
        this.sourceEntity.setState(State.Standing)
   }
 
-  protected def checkMoveToTheLeft: Boolean =
-    !checkCollision(
-      this.sourceEntity.getPosition._1 - this.sourceEntity.getSize._1 / 2 - this.patrolSensorsOffset,
-      this.sourceEntity.getPosition._2, EntityCollisionBit.Immobile) &&
-      checkCollision(
-        this.sourceEntity.getPosition._1 - this.sourceEntity.getSize._1 / 2  - this.patrolSensorsOffset,
-        this.sourceEntity.getPosition._2 - this.sourceEntity.getSize._2 / 2  - this.patrolSensorsOffset,
-        EntityCollisionBit.Immobile)
-
-  protected def checkMoveToTheRight: Boolean =
-    !checkCollision(
-      this.sourceEntity.getPosition._1 + this.sourceEntity.getSize._1 / 2  + this.patrolSensorsOffset,
-      this.sourceEntity.getPosition._2, EntityCollisionBit.Immobile) &&
-      checkCollision(
-        this.sourceEntity.getPosition._1 + this.sourceEntity.getSize._1 / 2  + this.patrolSensorsOffset,
-        this.sourceEntity.getPosition._2 - this.sourceEntity.getSize._2 / 2  - this.patrolSensorsOffset,
-        EntityCollisionBit.Immobile)
-
-  protected def stopMoving: Unit = {
+  protected def stopMoving(): Unit = {
     this.sourceEntity.getBody.setLinearVelocity(0, this.sourceEntity.getBody.getLinearVelocity.y)
     this.sourceEntity.setState(State.Standing)
   }
 
-  protected def changeDirection(canMoveToTheLeft:Boolean, canMoveToTheRight:Boolean) = {
+  protected def changeDirection(): Unit = {
     this.isMovingLeft = !this.isMovingLeft
     this.sourceEntity.setFacing(right = !this.isMovingLeft)
   }
 
-  protected def move = {
+  protected def move(): Unit = {
     if (this.isMovingLeft) {
       this.sourceEntity.getBody.applyLinearImpulse(
       new Vector2(-this.acceleration, 0), this.sourceEntity.getBody.getWorldCenter, true)
@@ -107,18 +88,18 @@ class PatrolAndStop(override val sourceEntity:MobileEntity,
   protected var targetIsAhead: Boolean = false
 
   override def apply(): Unit = {
-    if (this.isTargetNear &&
-      (isBodyOnTheRight(sourceEntity.getBody, this.targetEntity.getBody) && !this.isMovingLeft ||
-      !isBodyOnTheRight(sourceEntity.getBody, this.targetEntity.getBody) && this.isMovingLeft)) {
-      this.stopMoving
+    if (this.isTargetNearby &&
+      isEntityOnTheRight(sourceEntity, this.targetEntity) && !this.isMovingLeft ||
+      isEntityOnTheLeft(sourceEntity, this.targetEntity) && this.isMovingLeft) {
+      this.stopMoving()
     } else {
       super.apply()
     }
   }
 
-  protected def isTargetNear: Boolean = {
-    isBodyVisible(sourceEntity.getBody, this.targetEntity.getBody, this.visibilityMaxHorizontalAngle) &&
-      getBodiesDistance(sourceEntity.getBody, this.targetEntity.getBody) <= this.maxDistance
+  protected def isTargetNearby: Boolean = {
+    isEntityVisible(sourceEntity, this.targetEntity, this.visibilityMaxHorizontalAngle) &&
+      getEntitiesDistance(sourceEntity, this.targetEntity) <= this.maxDistance
   }
 }
 
