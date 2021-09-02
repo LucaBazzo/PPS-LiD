@@ -11,7 +11,7 @@ trait EntityBody {
 
   def createBody(bodyType: BodyType = BodyType.StaticBody,
                  position: (Float, Float) = (0,0),
-                 angle: Float = 0, useGravity: Boolean = true): EntityBody
+                 angle: Float = 0, gravityScale: Float = 1.0f): EntityBody
 
   def setEntityCollisionBit(entityCollisionBit: Short): EntityBody
   def getEntityCollisionBit(): Short
@@ -72,14 +72,13 @@ class EntityBodyImpl extends EntityBody {
 
   override def createBody(bodyType: BodyType = BodyType.StaticBody,
                           position: (Float, Float) = (0,0),
-                          angle: Float = 0, useGravity: Boolean = true): EntityBody = {
+                          angle: Float = 0, gravityScale: Float = 1.0f): EntityBody = {
     val bodyDef: BodyDef = new BodyDef()
 
     bodyDef.position.set(position)
     bodyDef.`type` = bodyType
     bodyDef.angle = angle
-
-    if(!useGravity) bodyDef.gravityScale = 0
+    bodyDef.gravityScale = gravityScale
 
     if(this.body != null) EntitiesFactoryImpl.destroyBody(this.body)
     this.body = EntitiesFactoryImpl.createBody(bodyDef)

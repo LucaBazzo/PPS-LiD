@@ -58,24 +58,28 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
 
   private def moveRight(): Unit = {
     if(entity.getState != State.Crouch) {
-      if (entity.getBody.getLinearVelocity.x <= maxRunningVelocity) {
-        this.applyLinearImpulse(this.setSpeed(runningForce, 0))
-      }
+      if(this.entity.isTouchingGround || (!this.entity.isTouchingGround && !this.entity.isColliding)) {
+        if (entity.getBody.getLinearVelocity.x <= maxRunningVelocity) {
+          this.applyLinearImpulse(this.setSpeed(runningForce, 0))
+        }
 
-      if(this.entity.getState == State.Standing)
-        this.entity.setState(State.Running)
+        if(this.entity.getState == State.Standing)
+          this.entity.setState(State.Running)
+      }
     }
     entity.setFacing(right = true)
   }
 
   private def moveLeft(): Unit = {
     if(entity.getState != State.Crouch) {
-      if (entity.getBody.getLinearVelocity.x >= -maxRunningVelocity) {
-        this.applyLinearImpulse(this.setSpeed(-runningForce, 0))
-      }
+      if(this.entity.isTouchingGround || (!this.entity.isTouchingGround && !this.entity.isColliding)) {
+        if (entity.getBody.getLinearVelocity.x >= -maxRunningVelocity) {
+          this.applyLinearImpulse(this.setSpeed(-runningForce, 0))
+        }
 
-      if(this.entity.getState == State.Standing)
-        this.entity.setState(State.Running)
+        if(this.entity.getState == State.Standing)
+          this.entity.setState(State.Running)
+      }
     }
     entity.setFacing(right = false)
   }

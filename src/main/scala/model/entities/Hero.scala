@@ -17,9 +17,6 @@ trait Hero extends LivingEntity {
 
   def notifyCommand(command: GameEvent)
 
-  def getPreviousState: State
-  def getLinearVelocityX: Float
-
   def isLittle: Boolean
   def setLittle(little: Boolean)
 
@@ -31,12 +28,15 @@ trait Hero extends LivingEntity {
   def setEnvironmentInteraction(interaction: Option[HeroInteraction])
 
   def stopHero(time: Float)
+
+  def isTouchingGround: Boolean
 }
 
 class HeroImpl(private val entityType: EntityType,
                private var entityBody: EntityBody,
                private val size: (Float, Float),
-               private val stats: Map[Statistic, Float])
+               private val stats: Map[Statistic, Float],
+               private val feet: Entity)
   extends LivingEntityImpl(entityType, entityBody, size, stats) with Hero{
 
   private var previousState: State = State.Standing
@@ -68,63 +68,39 @@ class HeroImpl(private val entityType: EntityType,
       this.attackStrategy.apply(command)
   }
 
-
-
   override def update(): Unit = {
 
-    //for sliding and crouch redefinition of body
-    if(waitTimer > 0) {
-      waitTimer -= 10
-    }
-    else {
-      if((this.entityBody.getBody.getLinearVelocity.x <= 1 && this.state == State.Sliding && isFacingRight) ||
-        this.entityBody.getBody.getLinearVelocity.x >= -1 && this.state == State.Sliding && !isFacingRight) {
+    if(isNotWaiting) {
+      if(this.isSlidingFinished)
         this.stopMovement()
-      }
 
-      //println(this.getState, this.attackTimer)
-
-      if (this.getStatistic(Statistic.CurrentHealth) <= 0) {
+      if(isDead)
         this.setState(State.Dying)
-      }
-      else if(this.entityBody.getBody.getLinearVelocity.y < 0
-        && (this.state != State.Jumping && this.state != State.LadderDescend))
-        this.state = State.Falling
-      else if(this.entityBody.getBody.getLinearVelocity.y == 0 && this.entityBody.getBody.getLinearVelocity.x != 0
-        && (this.state == State.Jumping || this.state == State.Falling))
-        this.state = State.Running
-      else if((this.entityBody.getBody.getLinearVelocity.y == 0 && this.entityBody.getBody.getLinearVelocity.x == 0)
-        && this.state != State.Crouch
-        && this.state != State.Attack01 && this.state != State.Attack02 && this.state != State.Attack03
-        && this.state != State.BowAttack
-        && this.state != State.LadderIdle)
-        this.state = State.Standing
+      else if(checkFalling)
+        this.setState(State.Falling)
+      else if(checkRunning)
+        this.setState(State.Running)
+      else if(checkIdle)
+        this.setState(State.Standing)
 
-      if(this.state != State.Sliding && this.state != State.Crouch && isLittle) {
+      if(checkNotLittle) {
         this.changeHeroFixture(HERO_SIZE, (0, 5f))
         this.setLittle(false)
       }
 
-      if(!this.attackStrategy.isAttackFinished) {
+      if(this.isSwordAttackFinished){
+        this.attackStrategy.stopAttack()
+        this.setState(State.Standing)
+      }
+      else if(this.isBowAttackFinished){
+        this.setState(State.Standing)
+      }
+      else {
         this.attackStrategy.checkTimeEvent()
         this.attackStrategy.decrementAttackTimer()
       }
-
-      if((this.state == State.Attack01 || this.state == State.Attack02 || this.state == State.Attack03)
-            && this.attackStrategy.isAttackFinished){
-        this.attackStrategy.stopAttack()
-        this.state = State.Standing
-      }
-
-      if(this.state == State.BowAttack && this.attackStrategy.isAttackFinished){
-        this.state = State.Standing
-      }
-    }
+    } else this.decrementWaiting(10)  //for sliding and crouch redefinition of body
   }
-
-  override def getLinearVelocityX: Float = this.entityBody.getBody.getLinearVelocity.x
-
-  override def getPreviousState: State = this.previousState
 
   override def setState(state: State): Unit = {
     super.setState(state)
@@ -133,7 +109,7 @@ class HeroImpl(private val entityType: EntityType,
 
   override def setLittle(little: Boolean): Unit = {
     this.little = little
-    this.waitTimer = 150
+    this.stopHero(150)
   }
 
   override def isLittle: Boolean = this.little
@@ -144,6 +120,7 @@ class HeroImpl(private val entityType: EntityType,
       .createFixture()
 
     this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
+    this.feet.getEntityBody.addCoordinates(0,0)
   }
 
   private var itemsPicked: List[Items] = List.empty
@@ -175,5 +152,31 @@ class HeroImpl(private val entityType: EntityType,
       this.stopHero(150)
       this.setState(State.Hurt)
     }
+  }
+
+  override def isTouchingGround: Boolean = this.feet.isColliding
+
+  private def isNotWaiting: Boolean = this.waitTimer <= 0
+  private def decrementWaiting(value: Float): Unit = this.waitTimer -= value
+
+  private def isDead: Boolean = this.getStatistic(Statistic.CurrentHealth) <= 0
+  private def isFalling: Boolean = !this.isTouchingGround && this.entityBody.getBody.getLinearVelocity.y < 0
+  private def isMovingHorizontally: Boolean = this.entityBody.getBody.getLinearVelocity.x != 0 && this.entityBody.getBody.getLinearVelocity.y == 0
+  private def isIdle = this.entityBody.getBody.getLinearVelocity.x == 0 && this.entityBody.getBody.getLinearVelocity.y == 0
+
+  private def checkFalling: Boolean = isFalling && this.state != State.Jumping && this.state != State.LadderDescend
+  private def checkRunning: Boolean = isMovingHorizontally && (this.getState == State.Jumping || this.getState == State.Falling)
+  private def checkIdle: Boolean = {
+    isIdle && !isSwordAttacking && this.getState != State.Crouch &&
+      this.getState != State.BowAttack && this.getState != State.LadderIdle
+  }
+
+  private def checkNotLittle: Boolean = this.getState != State.Sliding && this.getState != State.Crouch && isLittle
+  private def isSwordAttacking: Boolean = this.getState == State.Attack01 || this.getState == State.Attack02 || this.getState == State.Attack03
+  private def isSwordAttackFinished: Boolean = this.isSwordAttacking && this.attackStrategy.isAttackFinished
+  private def isBowAttackFinished: Boolean = this.getState == State.BowAttack && this.attackStrategy.isAttackFinished
+  private def isSlidingFinished: Boolean = {
+    (this.entityBody.getBody.getLinearVelocity.x <= 1 && this.getState == State.Sliding && isFacingRight) ||
+      (this.entityBody.getBody.getLinearVelocity.x >= -1 && this.getState == State.Sliding && !isFacingRight)
   }
 }

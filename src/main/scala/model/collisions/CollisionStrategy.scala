@@ -15,6 +15,16 @@ class DoNothingOnCollision() extends CollisionStrategy {
   override def release(entity: Entity): Unit = {}
 }
 
+class FeetCollisionStrategy extends DoNothingOnCollision {
+  override def apply(entity: Entity): Unit = entity match {
+    case _ => println("Foot Collision Detected with" + entity.toString)
+  }
+
+  override def release(entity: Entity): Unit = entity match {
+    case _ => println("Foot Release Detected with" + entity.toString)
+  }
+}
+
 class CollisionStrategyImpl extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
     case i:Item =>  println("Collect item: " + i.getEnumVal)

@@ -19,7 +19,7 @@ object ApplicationConstants {
 
   val SPRITES_PACK_LOCATION = "assets/sprites/sprites.pack"
 
-  val HERO_SIZE: (Float, Float) = (8.5f, 15f)
+  val HERO_SIZE: (Float, Float) = (8.5f, 14.9f)
 
-  val HERO_SIZE_SMALL: (Float, Float) = (8.5f, 8f)
+  val HERO_SIZE_SMALL: (Float, Float) = (8.5f, 9f)
 }
