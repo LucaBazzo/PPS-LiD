@@ -28,6 +28,7 @@ object EntityCollisionBit {
   val EnemyAttack: Short = getNextBitValue
   val Platform: Short = getNextBitValue
   val Ladder: Short = getNextBitValue
+  val Pool: Short = getNextBitValue
 
   private def getNextBitValue: Short = {
     this.currentBitValue = this.currentBitValue * bitMulti

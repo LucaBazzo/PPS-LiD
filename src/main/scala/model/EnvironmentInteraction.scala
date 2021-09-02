@@ -5,11 +5,13 @@ import model.collisions.EntityCollisionBit
 import model.entities.{Entity, Hero, State, Statistic}
 import model.movement.{HeroMovementStrategy, LadderClimbMovementStrategy}
 
+import java.util.concurrent.{ExecutorService, Executors}
+
 case class HeroInteraction(command: GameEvent, environmentInteraction: EnvironmentInteraction)
 
 trait EnvironmentInteraction {
 
-  def apply()
+  def apply(): Unit
 
 }
 
@@ -44,5 +46,23 @@ class DoorInteraction(hero: Hero, door: Entity) extends EnvironmentInteraction {
     this.door.setState(State.Opening)
     this.hero.setEnvironmentInteraction(Option.empty)
     print("Hero opened door")
+  }
+}
+
+class PlatformInteraction(hero: Hero, upperPlatform: Entity, platform: Entity, lowerPlatform: Entity) extends EnvironmentInteraction {
+
+  override def apply(): Unit = {
+    hero.setEnvironmentInteraction(Option.empty)
+    platform.changeCollisions(EntityCollisionBit.Enemy)
+    upperPlatform.changeCollisions(EntityCollisionBit.Enemy)
+    lowerPlatform.changeCollisions(EntityCollisionBit.Enemy)
+    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+    executorService.execute(() => {
+      Thread.sleep(1000)
+      platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      println("Enabled platform collisions")
+    })
   }
 }

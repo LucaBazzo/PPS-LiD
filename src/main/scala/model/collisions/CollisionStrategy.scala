@@ -1,7 +1,7 @@
 package model.collisions
 
 import controller.GameEvent
-import model.{DoorInteraction, HeroInteraction, LadderInteraction}
+import model.{DoorInteraction, HeroInteraction, LadderInteraction, PlatformInteraction}
 import model.entities.Statistic.Statistic
 import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
 
@@ -9,7 +9,7 @@ import java.util.concurrent.{ExecutorService, Executors}
 
 
 trait CollisionStrategy {
-  def apply(entity: Entity)
+  def apply(entity: Entity): Unit
 }
 
 class CollisionStrategyImpl extends CollisionStrategy {
@@ -44,14 +44,49 @@ class EndDoorCollisionStrategy(private val door: ImmobileEntity) extends Collisi
   }
 }
 
+class WaterCollisionStrategy() extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => printf("Hero stands in water")
+      h.alterStatistics(Statistic.MovementSpeed, -0.7f)
+  }
+}
+
+class EndWaterCollisionStrategy() extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => printf("Hero out of water")
+      h.alterStatistics(Statistic.MovementSpeed, +0.7f)
+  }
+}
+
+class LavaCollisionStrategy(private val collisMonitor: CollisionMonitor) extends CollisionStrategy {
+  val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => printf("Hero stands in lava")
+      collisMonitor.playerInLava()
+      executorService.execute(() => {
+        while(collisMonitor.isPlayerInsideLava) {
+          h.sufferDamage(100)
+          println("Enabled platform collisions")
+          Thread.sleep(1000)
+        }
+      })
+  }
+}
+
+class EndLavaCollisionStrategy(private val collisMonitor: CollisionMonitor) extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => printf("Hero out of lava")
+                    collisMonitor.playerOutOfLava()
+  }
+}
+
 class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
                                 private val upperPlatform: ImmobileEntity,
                                 private val lowerPlatform: ImmobileEntity) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => print("Hero standing on Platform" + "\n")
-                    platform.changeCollisions(EntityCollisionBit.Enemy)
-                    upperPlatform.changeCollisions(EntityCollisionBit.Enemy)
-                    lowerPlatform.changeCollisions(EntityCollisionBit.Enemy)
+                    h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new PlatformInteraction(h,
+                      this.upperPlatform, this.platform, this.lowerPlatform))))
   }
 }
 
@@ -59,7 +94,7 @@ class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
                                 private val upperPlatform: ImmobileEntity,
                                 private val lowerPlatform: ImmobileEntity) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => print("Hero standing on Platform" + "\n")
+    case h: Hero => print("Hero touching lower Platform" + "\n")
       platform.changeCollisions(EntityCollisionBit.Enemy)
       upperPlatform.changeCollisions(EntityCollisionBit.Enemy)
       lowerPlatform.changeCollisions(EntityCollisionBit.Enemy)

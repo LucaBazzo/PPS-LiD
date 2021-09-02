@@ -18,7 +18,7 @@ import scala.collection.immutable.HashMap
 
 trait EntitiesFactory {
 
-  def setLevel(level: Level, pool: ItemPool)
+  def setLevel(level: Level, pool: ItemPool): Unit
 
   def createMobileEntity(entityType: EntityType = EntityType.Mobile,
                          size: (Float, Float) = (10, 10),
@@ -66,6 +66,12 @@ trait EntitiesFactory {
   def createLadder(position: (Float, Float),
                      size: (Float, Float)): Entity
 
+  def createWaterPool(position: (Float, Float),
+                      size: (Float, Float)): Entity
+
+  def createLavaPool(position: (Float, Float),
+                      size: (Float, Float)): Entity
+
   def createAttackPattern(entityType: EntityType = EntityType.Mobile,
                           rotatingBodySize: (Float, Float) = (1,1),
                           pivotPoint: (Float, Float) = (0,0),
@@ -92,13 +98,13 @@ trait EntitiesFactory {
 
   def createJoint(pivotBody: Body, rotatingBody: Body): Joint
 
-  def removeEntity(entity: Entity)
+  def removeEntity(entity: Entity): Unit
 
   def createBody(bodyDef: BodyDef): Body
 
-  def destroyBody(body: Body)
+  def destroyBody(body: Body): Unit
 
-  def destroyJoint(joint: Joint)
+  def destroyJoint(joint: Joint): Unit
 
   def destroyBodies(): Unit
 
@@ -115,6 +121,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   private var itemPool: ItemPool = _
   private var bodiesToBeDestroyed: List[Body] = List.empty
   private var jointsToBeDestroyed: List[Joint] = List.empty
+  private val collisonMonitor: CollisionMonitor = new CollisionMonitorImpl
 
   override def setLevel(level: Level, pool: ItemPool): Unit = {
     this.level = level
@@ -148,7 +155,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       Statistic.Defence -> 0)
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Enemy | EntityCollisionBit.Platform |
+      EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Enemy | EntityCollisionBit.Platform | EntityCollisionBit.Pool |
         EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, statistic)
@@ -189,7 +196,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val platformEndCollision: CollisionStrategy = new PlatformEndCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower)
 
-    immobileEntityUpper.setCollisionStrategy(new DoNothingOnCollision)
+    immobileEntityUpper.setCollisionStrategy(new UpperPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower))
     immobileEntityUpper.setEndCollisionStrategy(platformEndCollision)
     this.level.addEntity(immobileEntityUpper)
 
@@ -368,6 +375,31 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val immobileEntity: Entity = ImmobileEntity(EntityType.Door, entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new DoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
     immobileEntity.setEndCollisionStrategy(new EndDoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
+    this.level.addEntity(immobileEntity)
+    immobileEntity
+  }
+
+  override def createWaterPool(position: (Float, Float),
+                               size: (Float, Float)): Entity = {
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Pool,
+      EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(size.PPM), position.PPM, isSensor = true)
+
+    val immobileEntity: Entity = ImmobileEntity(EntityType.Water, entityBody, size.PPM)
+    immobileEntity.setCollisionStrategy(new WaterCollisionStrategy)
+    immobileEntity.setEndCollisionStrategy(new EndWaterCollisionStrategy)
+    this.level.addEntity(immobileEntity)
+    immobileEntity
+  }
+
+  override def createLavaPool(position: (Float, Float),
+                               size: (Float, Float)): Entity = {
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Pool,
+      EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(size.PPM), position.PPM, isSensor = true)
+
+    val immobileEntity: Entity = ImmobileEntity(EntityType.Lava, entityBody, size.PPM)
+
+    immobileEntity.setCollisionStrategy(new LavaCollisionStrategy(this.collisonMonitor))
+    immobileEntity.setEndCollisionStrategy(new EndLavaCollisionStrategy(this.collisonMonitor))
     this.level.addEntity(immobileEntity)
     immobileEntity
   }
