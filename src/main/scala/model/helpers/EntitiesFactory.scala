@@ -63,6 +63,9 @@ trait EntitiesFactory {
   def createPlatform(position: (Float, Float),
                      size: (Float, Float)): Entity
 
+  def createLadder(position: (Float, Float),
+                     size: (Float, Float)): Entity
+
   def createAttackPattern(entityType: EntityType = EntityType.Mobile,
                           rotatingBodySize: (Float, Float) = (1,1),
                           pivotPoint: (Float, Float) = (0,0),
@@ -145,7 +148,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       Statistic.Defence -> 0)
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Immobile | EntityCollisionBit.Enemy | EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
+      EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Enemy | EntityCollisionBit.Platform |
+        EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, statistic)
 
@@ -164,15 +168,15 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val upperPosition = (position._1, position._2 + 1)
 
     val lowerSize = (size._1 - 2, size._2)
-    val lowerPosition = (position._1, position._2 - 3)
+    val lowerPosition = (position._1, position._2 - 5)
 
-    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Immobile,
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
       EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(size.PPM), position.PPM)
 
-    val entityBodyUpper: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Immobile,
+    val entityBodyUpper: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
       EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(upperSize.PPM), upperPosition.PPM, isSensor = true)
 
-    val entityBodyLower: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Immobile,
+    val entityBodyLower: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
       EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(lowerSize.PPM), lowerPosition.PPM, isSensor = true)
 
     val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBody, size.PPM)
@@ -185,7 +189,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val platformEndCollision: CollisionStrategy = new PlatformEndCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower)
 
-    immobileEntityUpper.setCollisionStrategy(new DoNothingOnCollision/*UpperPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower)*/)
+    immobileEntityUpper.setCollisionStrategy(new DoNothingOnCollision)
     immobileEntityUpper.setEndCollisionStrategy(platformEndCollision)
     this.level.addEntity(immobileEntityUpper)
 
@@ -193,6 +197,19 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     immobileEntityLower.setCollisionStrategy(new LowerPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower))
     immobileEntityLower.setEndCollisionStrategy(platformEndCollision)
     this.level.addEntity(immobileEntityLower)
+
+    immobileEntity
+  }
+
+  override def createLadder(position: (Float, Float),
+                            size: (Float, Float)): Entity = {
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Ladder,
+      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(size.PPM), position.PPM, isSensor = true)
+
+    val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Ladder, entityBody, size.PPM)
+    immobileEntity.setCollisionStrategy(new LadderCollisionStrategy)
+    immobileEntity.setEndCollisionStrategy(new EndLadderCollisionStrategy)
+    this.level.addEntity(immobileEntity)
 
     immobileEntity
   }
@@ -350,6 +367,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val immobileEntity: Entity = ImmobileEntity(EntityType.Door, entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new DoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
+    immobileEntity.setEndCollisionStrategy(new EndDoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
     this.level.addEntity(immobileEntity)
     immobileEntity
   }

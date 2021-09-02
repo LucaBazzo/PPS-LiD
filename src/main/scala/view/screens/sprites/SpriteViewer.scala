@@ -97,6 +97,18 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
       sprite.addAnimation(State.Opening,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 2))
       sprite
+    case EntityType.Ladder =>
+      val sprite = spriteFactory.createEntitySprite("assets/sprites/bigLadder.pack", "bigLadder", 32, 212,
+        entity.getSize._1, entity.getSize._2, 100)
+      sprite.addAnimation(State.Standing,
+        spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
+      sprite
+    case EntityType.Platform =>
+      val sprite = spriteFactory.createEntitySprite("assets/sprites/platform.pack", "platform", 79, 4,
+        entity.getSize._1, entity.getSize._2, 100)
+      sprite.addAnimation(State.Standing,
+        spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
+      sprite
     case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile => null
     case _ => null
   }

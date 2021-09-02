@@ -1,6 +1,7 @@
 package model.collisions
 
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
+import controller.GameEvent
+import model.{DoorInteraction, HeroInteraction, LadderInteraction}
 import model.entities.Statistic.Statistic
 import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
 
@@ -30,11 +31,16 @@ class ItemCollisionStrategy(private val item: Item) extends CollisionStrategy {
 
 class DoorCollisionStrategy(private val door: ImmobileEntity) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => print("Hero opened door")
-                    this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
-                    this.door.setState(State.Opening)
+    case h: Hero => h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new DoorInteraction(h,this.door))))
     case s: CircularMobileEntity => print("Hero destroyed door")
                     this.door.changeCollisions(EntityCollisionBit.DestroyedDoor)
+  }
+}
+
+class EndDoorCollisionStrategy(private val door: ImmobileEntity) extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => h.setEnvironmentInteraction(Option.empty)
+
   }
 }
 
@@ -67,12 +73,28 @@ class PlatformEndCollisionStrategy(private val platform: ImmobileEntity,
     case h: Hero => print("Hero leaving Platform" + "\n")
                     val executorService: ExecutorService = Executors.newSingleThreadExecutor()
                     executorService.execute(() => {
-                      Thread.sleep(2000)
+                      Thread.sleep(1000)
                       platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
                       upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
                       lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
                       println("Enabled platform collisions")
                     })
+  }
+}
+
+class LadderCollisionStrategy() extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => print("Hero touches ladder")
+                    h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(h))))
+  }
+}
+
+class EndLadderCollisionStrategy() extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h:Hero => print("Hero leaving ladder")
+                   h.setEnvironmentInteraction(Option.empty)
+                   /*h.changeCollisions((EntityCollisionBit.Immobile | EntityCollisionBit.Enemy | EntityCollisionBit.Ladder |
+                     EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack).toShort)*/
   }
 }
 

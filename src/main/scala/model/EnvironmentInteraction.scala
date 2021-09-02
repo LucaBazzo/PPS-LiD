@@ -1,7 +1,8 @@
 package model
 
 import controller.GameEvent.GameEvent
-import model.entities.{Hero, State, Statistic}
+import model.collisions.EntityCollisionBit
+import model.entities.{Entity, Hero, State, Statistic}
 import model.movement.{HeroMovementStrategy, LadderClimbMovementStrategy}
 
 case class HeroInteraction(command: GameEvent, environmentInteraction: EnvironmentInteraction)
@@ -23,13 +24,25 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
       this.entity.setMovementStrategy(new LadderClimbMovementStrategy(this.entity, this.entity.getStatistic(Statistic.MovementSpeed)))
       this.entity.setState(State.LadderIdle)
       this.entity.getEntityBody.setGravityScale(0)
+      //this.entity.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.EnemyAttack | EntityCollisionBit.Ladder).toShort)
     }
     else {
       this.entity.setMovementStrategy(new HeroMovementStrategy(this.entity, this.entity.getStatistic(Statistic.MovementSpeed)))
       this.entity.getEntityBody.setGravityScale()
       this.entity.setState(State.Falling)
       this.entity.getBody.setAwake(true)
+      /*this.entity.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.EnemyAttack).toShort)*/
     }
     this.applied = !applied
+  }
+}
+
+class DoorInteraction(hero: Hero, door: Entity) extends EnvironmentInteraction {
+
+  override def apply(): Unit = {
+    this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
+    this.door.setState(State.Opening)
+    this.hero.setEnvironmentInteraction(Option.empty)
+    print("Hero opened door")
   }
 }

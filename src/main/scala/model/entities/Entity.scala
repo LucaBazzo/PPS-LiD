@@ -24,7 +24,7 @@ object EntityType extends Enumeration {
       Mobile, Immobile, Enemy, //this values will not show any sprite
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
-      EnemySkeleton, EnemySlime, EnemyWorm, Platform, Door,
+      EnemySkeleton, EnemySlime, EnemyWorm, Platform, Door, Ladder,
       AttackFireBall, AttackArrow = Value
 }
 

@@ -42,7 +42,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private val door: Entity = entitiesFactory.createDoor((10, 30), (290, 300))
 
   private var isWorldSetted: Boolean = false
-  private var platform: Entity = entitiesFactory.createPlatform((300, 330), (60,1))
+  private var platform: Entity = entitiesFactory.createPlatform((280, 100), (60,2))
+  private var ladder: Entity = entitiesFactory.createLadder((280,120),(10,100))
 //  EntitiesFactoryImpl.createSkeletonEnemy((+200, 300))
 //  EntitiesFactoryImpl.createWormEnemy((+250,300))
 //  EntitiesFactoryImpl.createSlimeEnemy((270,300))
