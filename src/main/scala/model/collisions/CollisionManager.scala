@@ -64,29 +64,48 @@ object ImplicitConversions {
   }
 }
 
+case class CollidingEntities(firstEntity: Option[Entity], secondEntity: Option[Entity])
+
 // TODO: come gestire collissioni continue?
 
 class CollisionManager(private val entitiesGetter: EntitiesGetter) extends ContactListener {
 
   override def beginContact(contact: Contact): Unit = {
-    val firstBody: Body = contact.getFixtureA.getBody
-    val secondBody: Body = contact.getFixtureB.getBody
+    val collidingEntities: CollidingEntities = getCollidingEntities(contact)
 
-    val firstEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals firstBody).get
-    val secondEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals secondBody).get
-
-    if(firstEntities.nonEmpty && secondEntities.nonEmpty) {
-      firstEntities.head.collisionDetected(secondEntities.head)
-      secondEntities.head.collisionDetected(firstEntities.head)
-    }
+    if(collidingEntities.firstEntity.nonEmpty)
+      collidingEntities.firstEntity.get.collisionDetected(collidingEntities.secondEntity)
+    if(collidingEntities.secondEntity.nonEmpty)
+      collidingEntities.secondEntity.get.collisionDetected(collidingEntities.firstEntity)
   }
 
   override def endContact(contact: Contact): Unit = {
+    val collidingEntities: CollidingEntities = getCollidingEntities(contact)
+
+    if(collidingEntities.firstEntity.nonEmpty)
+      collidingEntities.firstEntity.get.collisionReleased(collidingEntities.secondEntity)
+    if(collidingEntities.secondEntity.nonEmpty)
+      collidingEntities.secondEntity.get.collisionReleased(collidingEntities.firstEntity)
   }
 
   override def preSolve(contact: Contact, manifold: Manifold): Unit = {
   }
 
   override def postSolve(contact: Contact, contactImpulse: ContactImpulse): Unit = {
+  }
+
+  private def getCollidingEntities(contact: Contact): CollidingEntities = {
+    val firstBody: Body = contact.getFixtureA.getBody
+    val secondBody: Body = contact.getFixtureB.getBody
+
+    val firstEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals firstBody).get
+    val secondEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals secondBody).get
+
+    (firstEntities, secondEntities) match {
+      case (List(), List()) => CollidingEntities(Option.empty, Option.empty)
+      case (List(), _) => CollidingEntities(Option.empty, Option.apply(secondEntities.head))
+      case (_, List()) => CollidingEntities(Option.apply(firstEntities.head), Option.empty)
+      case (_, _) => CollidingEntities(Option.apply(firstEntities.head), Option.apply(secondEntities.head))
+    }
   }
 }

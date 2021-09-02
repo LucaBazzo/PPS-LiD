@@ -46,7 +46,9 @@ trait Entity {
 
   def setCollisionStrategy(collisionStrategy: CollisionStrategy)
 
-  def collisionDetected(entity: Entity)
+  def collisionDetected(entity: Option[Entity])
+
+  def collisionReleased(entity: Option[Entity])
 
   //TODO ricontrollare in futuro
   def getBody: Body
@@ -58,6 +60,8 @@ trait Entity {
   def destroyEntity(): Unit
 
   def changeCollisions(entityType: Short): Unit
+
+  def isColliding: Boolean
 }
 
 abstract class EntityImpl(private val entityType: EntityType,
@@ -66,6 +70,7 @@ abstract class EntityImpl(private val entityType: EntityType,
 
   protected var state: State = State.Standing
   protected var collisionStrategy: CollisionStrategy = new DoNothingOnCollision()
+  private var collidingEntities: Int = 0
 
   override def getState: State = this.state
 
@@ -82,9 +87,19 @@ abstract class EntityImpl(private val entityType: EntityType,
   override def setCollisionStrategy(collisionStrategy: CollisionStrategy): Unit =
     this.collisionStrategy = collisionStrategy
 
-  override def collisionDetected(entity: Entity): Unit = {
-    this.collisionStrategy.apply(entity)
+  override def collisionDetected(entity: Option[Entity]): Unit = {
+    if(entity.nonEmpty)
+      this.collisionStrategy.apply(entity.get)
+    this.collidingEntities += 1
   }
+
+  override def collisionReleased(entity: Option[Entity]): Unit = {
+    if(entity.nonEmpty)
+      this.collisionStrategy.release(entity.get)
+    this.collidingEntities -= 1
+  }
+
+  override def isColliding: Boolean = this.collidingEntities > 0
 
   override def destroyEntity(): Unit = {
     EntitiesFactoryImpl.destroyBody(this.getBody)
