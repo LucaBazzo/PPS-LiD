@@ -1,8 +1,9 @@
 package model.helpers
 
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d._
-import model.helpers.GeometricUtilities._
+import com.badlogic.gdx.physics.box2d.{CircleShape, PolygonShape, _}
+import model.collisions.EntityCollisionBit
+import model.collisions.ImplicitConversions.RichFloat
 
 import scala.collection.immutable.ListMap
 
@@ -12,16 +13,6 @@ trait WorldUtilities {
 
   def isBodyVisible(sourceBody: Body, targetBody: Body, angle: Float = 90): Boolean
 
-  def isBodyBelow(sourceBody: Body, targetBody: Body): Boolean
-
-  def isBodyAbove(sourceBody: Body, targetBody: Body): Boolean
-
-  def isBodyOnTheLeft(sourceBody: Body, targetBody: Body): Boolean
-
-  def isBodyOnTheRight(sourceBody: Body, targetBody: Body): Boolean
-
-  def getBodiesDistance(sourceBody: Body, targetBody: Body): Float
-
   def checkCollision(x1: Float, y1: Float, x2: Float, y2: Float, entityBit: Short): Boolean
 
   def checkCollision(x1: Float, y1: Float, x2: Float, y2: Float, body: Body): Boolean
@@ -29,6 +20,16 @@ trait WorldUtilities {
   def checkCollision(x1: Float, y1: Float, x2: Float, y2: Float): Boolean
 
   def bodiesCanCollide(body1: Body, body2: Body): Boolean
+
+  def isFloorPresentOnTheLeft(body: Body, offset: Float = 5f.PPM): Boolean
+
+  def isFloorPresentOnTheRight(body: Body, offset: Float = 5f.PPM): Boolean
+
+  def isPathClearOnTheLeft(body: Body, offset: Float = 5f.PPM): Boolean
+
+  def isPathClearOnTheRight(body: Body, offset: Float = 5f.PPM): Boolean
+
+  def getBodySizes(body: Body): (Float, Float)
 
   def checkCollision(point1: Vector2, point2: Vector2, targetBody: Body): Boolean =
     checkCollision(point1.x, point1.y, point2.x, point2.y, targetBody)
@@ -56,6 +57,10 @@ trait WorldUtilities {
 
   def checkCollision(point: Vector2): Boolean =
     checkCollision(point.x, point.y, point.x, point.y)
+
+  def getBodyWidth(body: Body): Float = getBodySizes(body)._1
+
+  def getBodyHeight(body: Body): Float = getBodySizes(body)._2
 
 }
 
@@ -125,23 +130,95 @@ object WorldUtilities extends WorldUtilities {
     isTargetVisible
   }
 
-  override def isBodyBelow(sourceBody:Body, targetBody:Body): Boolean =
-    isTargetPointBelow(sourceBody.getWorldCenter, targetBody.getWorldCenter)
-
-  override def isBodyAbove(sourceBody:Body, targetBody:Body): Boolean =
-    isTargetPointAbove(sourceBody.getWorldCenter, targetBody.getWorldCenter)
-
-  override def isBodyOnTheLeft(sourceBody:Body, targetBody:Body): Boolean =
-    isTargetPointOnTheLeft(sourceBody.getWorldCenter, targetBody.getWorldCenter)
-
-  override def isBodyOnTheRight(sourceBody:Body, targetBody:Body): Boolean =
-    isTargetPointOnTheRight(sourceBody.getWorldCenter, targetBody.getWorldCenter)
-
-  override def getBodiesDistance(sourceBody:Body, targetBody:Body): Float =
-    getPointsDistance(sourceBody.getWorldCenter, targetBody.getWorldCenter)
-
   override def bodiesCanCollide(body1:Body, body2:Body):Boolean =
     (body1.getFixtureList.toArray().head.getFilterData.maskBits &
       body2.getFixtureList.toArray().head.getFilterData.categoryBits) != 0
 
+  override def isFloorPresentOnTheLeft(body: Body, offset:Float = 5f.PPM): Boolean = {
+    val position = body.getWorldCenter
+    val bodyWidth = getBodyWidth(body)
+    val bodyHeight = getBodyHeight(body)
+
+    checkCollision(
+      position.x - -bodyWidth / 2 - offset, position.y - bodyHeight / 2,
+      EntityCollisionBit.Immobile)
+  }
+
+  override def isFloorPresentOnTheRight(body: Body, offset:Float = 5f.PPM): Boolean = {
+    val position = body.getWorldCenter
+    val bodyWidth = getBodyWidth(body)
+    val bodyHeight = getBodyHeight(body)
+
+    checkCollision(
+      position.x - +bodyWidth / 2 + offset, position.y - bodyHeight / 2,
+      EntityCollisionBit.Immobile)
+  }
+
+  override def isPathClearOnTheLeft(body: Body, offset:Float = 5f.PPM): Boolean = {
+    val position = body.getWorldCenter
+    val bodyWidth = getBodyWidth(body)
+    val bodyHeight = getBodyHeight(body)
+
+    checkCollision(
+      position.x + -bodyWidth / 2 - offset, position.y - bodyHeight / 2,
+      position.x + -bodyWidth / 2 - offset, position.y + bodyHeight / 2,
+      EntityCollisionBit.Immobile)
+  }
+
+  override def isPathClearOnTheRight(body: Body, offset:Float = 5f.PPM): Boolean = {
+    val position = body.getWorldCenter
+    val bodyWidth = getBodyWidth(body)
+    val bodyHeight = getBodyHeight(body)
+
+    checkCollision(
+      position.x + bodyWidth / 2 + offset, position.y - bodyHeight / 2,
+      position.x + bodyWidth / 2 + offset, position.y + bodyHeight / 2,
+      EntityCollisionBit.Immobile)
+  }
+
+  override def getBodySizes(body:Body): (Float, Float) = {
+    // TODO: considerare tutte le fixture del body invece che solo la prima
+    val fixture = body.getFixtureList.toArray().head
+
+    fixture.getShape match {
+      case shape: CircleShape =>
+        val diameter = shape.getRadius * 2
+        (diameter, diameter)
+      case shape: PolygonShape => (getPolygonWidth(shape), getPolygonHeight(shape))
+    }
+  }
+
+  private def getPolygonWidth(shape:PolygonShape): Float  = {
+    var vertex = new Vector2()
+    shape.getVertex(0, vertex)
+
+    var lowerX:Float = vertex.x
+    var higherX:Float = vertex.x
+
+    for (i <- 1 until shape.getVertexCount) {
+      shape.getVertex(i, vertex)
+
+      if (vertex.x < lowerX)
+        lowerX = vertex.x
+      if (vertex.x > higherX)
+        higherX = vertex.x
+    }
+    higherX - lowerX
+  }
+
+  private def getPolygonHeight(shape:PolygonShape): Float  = {
+    var vertex = new Vector2()
+    shape.getVertex(0, vertex)
+
+    var lowerY:Float = vertex.y
+    var higherY:Float = vertex.y
+
+    for (i <- 1 until shape.getVertexCount) {
+      shape.getVertex(i, vertex)
+
+      if (vertex.y < lowerY) lowerY = vertex.y
+      if (vertex.y > higherY) higherY = vertex.y
+    }
+    higherY - lowerY
+  }
 }
