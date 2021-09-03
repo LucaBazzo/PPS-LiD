@@ -21,9 +21,9 @@ trait View {
 
 class ViewImpl(private val entitiesGetter: EntitiesGetter,
                private val observerManager: ObserverManager,
-               private val level: Level) extends View {
+               private val rooms: Array[String]) extends View {
 
-  private val screenSetter: LostInDungeons = new LostInDungeons(this.entitiesGetter, this.observerManager, this.level)
+  private val screenSetter: LostInDungeons = new LostInDungeons(this.entitiesGetter, this.observerManager, this.rooms)
 
   val config = new Lwjgl3ApplicationConfiguration
   config.setTitle(TITLE)
@@ -35,7 +35,7 @@ class ViewImpl(private val entitiesGetter: EntitiesGetter,
   })
 
   override def startGame(): Unit = {
-    Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager)))
+    Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager, this.rooms)))
   }
 
   override def endGame(): Unit = ???

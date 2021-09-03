@@ -44,26 +44,16 @@ object TileMapHelper {
     tiledMap
   }
 
-  def clearXOffsetRenderer(): Unit = {
-    this.xOffsetRenderer = 0
-  }
-
-
-  def setWorld(level: Level): Unit = {
+  def setWorld(level: Level, rooms: Array[String]): Unit = {
 
     this.xOffset = 0f
 
-    val path: String = "assets/maps/room1.tmx"
-
-    val rooms: Seq[Int] = Seq(1,2,3)
-    for (n <- rooms){
-      loadRoomObjects(level, path)
-    }
-
+    rooms.foreach(room => {
+      loadRoomObjects(level, "assets/maps/" + room + ".tmx")
+    })
   }
 
   def loadRoomObjects(level: Level, path: String): Unit = {
-
     var rect: Rectangle = new Rectangle()
     val tiledMap: TiledMap = new TmxMapLoader().load(path)
 

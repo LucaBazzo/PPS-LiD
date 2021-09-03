@@ -2,8 +2,7 @@ package view.screens.game
 
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
-import com.badlogic.gdx.graphics.{GL20, OrthographicCamera, Texture}
-import com.badlogic.gdx.maps.MapProperties
+import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
@@ -19,7 +18,8 @@ import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
-                 private val observerManager: ObserverManager) extends ScreenAdapter{
+                 private val observerManager: ObserverManager,
+                 private val rooms: Array[String]) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   camera.translate(300f, 300f)
@@ -29,8 +29,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private var tiledMap: TiledMap = TileMapHelper.getTiledMap("room1")
-  private var orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMapRenderer(null)
+  private var tiledMaps: Array[TiledMap] = Array()
+  rooms.foreach(room => {
+    tiledMaps = tiledMaps :+ TileMapHelper.getTiledMap(room)
+  })
+
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMapRenderer(null)
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
@@ -87,13 +91,10 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
     this.camera.update()
 
-    val rooms: Array[String] = Array("room1", "room1", "room1")
-    rooms.foreach(room => {
-      this.tiledMap = TileMapHelper.getTiledMap(room)
-      this.orthogonalTiledMapRenderer.setMap(this.tiledMap)
+    this.tiledMaps.foreach(tiledMap => {
+      this.orthogonalTiledMapRenderer.setMap(tiledMap)
       orthogonalTiledMapRenderer.render()
     })
-    TileMapHelper.clearXOffsetRenderer()
 
     //what will be shown by the camera
     batch.setProjectionMatrix(camera.combined)
