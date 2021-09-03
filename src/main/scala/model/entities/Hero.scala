@@ -8,6 +8,7 @@ import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State.State
 import model.entities.Statistic.Statistic
+import model.helpers.EntitiesFactoryImpl
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
 import model.movement.DoNothingMovementStrategy
 import model.{EntityBody, HeroInteraction}
@@ -29,15 +30,19 @@ trait Hero extends LivingEntity {
 
   def stopHero(time: Float)
 
+  def setFeet(feet: ImmobileEntity)
+  def getFeet: Option[ImmobileEntity]
+
   def isTouchingGround: Boolean
 }
 
 class HeroImpl(private val entityType: EntityType,
                private var entityBody: EntityBody,
-               private val size: (Float, Float),
-               private val stats: Map[Statistic, Float],
-               private val feet: Entity)
+               private var size: (Float, Float),
+               private val stats: Map[Statistic, Float])
   extends LivingEntityImpl(entityType, entityBody, size, stats) with Hero{
+
+  private var feet: Option[ImmobileEntity] = Option.empty
 
   private var previousState: State = State.Standing
   private var little: Boolean = false
@@ -84,7 +89,7 @@ class HeroImpl(private val entityType: EntityType,
         this.setState(State.Standing)
 
       if(checkNotLittle) {
-        this.changeHeroFixture(HERO_SIZE, (0, 5f))
+        this.changeHeroFixture(HERO_SIZE, (0, 6f))
         this.setLittle(false)
       }
 
@@ -115,12 +120,17 @@ class HeroImpl(private val entityType: EntityType,
   override def isLittle: Boolean = this.little
 
   override def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit = {
+
     this.entityBody
       .setShape(createPolygonalShape(newSize.PPM))
       .createFixture()
 
+    this.setSize(newSize.PPM)
+
+    EntitiesFactoryImpl.createHeroFeet(this)
+
     this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
-    this.feet.getEntityBody.addCoordinates(0,0)
+
   }
 
   private var itemsPicked: List[Items] = List.empty
@@ -154,7 +164,7 @@ class HeroImpl(private val entityType: EntityType,
     }
   }
 
-  override def isTouchingGround: Boolean = this.feet.isColliding
+  override def isTouchingGround: Boolean = if(this.feet.nonEmpty) this.feet.get.isColliding else false
 
   private def isNotWaiting: Boolean = this.waitTimer <= 0
   private def decrementWaiting(value: Float): Unit = this.waitTimer -= value
@@ -179,4 +189,8 @@ class HeroImpl(private val entityType: EntityType,
     (this.entityBody.getBody.getLinearVelocity.x <= 1 && this.getState == State.Sliding && isFacingRight) ||
       (this.entityBody.getBody.getLinearVelocity.x >= -1 && this.getState == State.Sliding && !isFacingRight)
   }
+
+  override def setFeet(feet: ImmobileEntity): Unit = this.feet = Option.apply(feet)
+
+  override def getFeet: Option[ImmobileEntity] = this.feet
 }

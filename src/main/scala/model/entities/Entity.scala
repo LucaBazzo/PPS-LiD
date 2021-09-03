@@ -42,6 +42,8 @@ trait Entity {
 
   def getPosition: (Float, Float)
 
+  def setSize(size: (Float, Float))
+
   def getSize: (Float, Float)
 
   def setCollisionStrategy(collisionStrategy: CollisionStrategy)
@@ -66,7 +68,7 @@ trait Entity {
 
 abstract class EntityImpl(private val entityType: EntityType,
                           private var entityBody: EntityBody,
-                          private val size: (Float, Float)) extends Entity {
+                          private var size: (Float, Float)) extends Entity {
 
   protected var state: State = State.Standing
   protected var collisionStrategy: CollisionStrategy = new DoNothingOnCollision()
@@ -77,10 +79,12 @@ abstract class EntityImpl(private val entityType: EntityType,
   override def setState(state:State):Unit = this.state = state
 
   override def setPosition(position: (Float, Float)): Unit = {
-    this.entityBody.getBody.setTransform(new Vector2(position._1, position._2), 0)
+    this.entityBody.setPosition(position)
   }
 
   override def getPosition: (Float, Float) = (this.entityBody.getBody.getPosition.x, this.entityBody.getBody.getPosition.y)
+
+  override def setSize(size: (Float, Float)): Unit = this.size = size
 
   override def getSize: (Float, Float) = this.size
 

@@ -29,6 +29,8 @@ trait EntitiesFactory {
 
   def createHeroEntity(): Hero
 
+  def createHeroFeet(hero: Hero)
+
   def createEnemyEntity(position: (Float, Float),
                         size: (Float, Float),
                         stats: Map[Statistic, Float],
@@ -146,26 +148,36 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       EntityCollisionBit.Immobile | EntityCollisionBit.Enemy | EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack,
       createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
-    val feetSize: (Float, Float) = (8.0f, 0.1f)
-    val feetOffset: (Float, Float) = (0, -15f)
-    val bodyPosition = position + feetOffset
-    val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Enemy | EntityCollisionBit.Immobile, createPolygonalShape(feetSize.PPM),
-      bodyPosition.PPM, gravityScale = 0, friction = 0.8f)
-    EntitiesFactoryImpl.createJoint(entityBody.getBody, feetBody.getBody)
-
-    val heroFeet: Entity = ImmobileEntity(EntityType.Immobile, feetBody, size.PPM)
-    heroFeet.setCollisionStrategy(new FeetCollisionStrategy())
-    this.level.addEntity(heroFeet)
-
-    val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, statistic, heroFeet)
+    val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, statistic)
 
     hero.setCollisionStrategy(new CollisionStrategyImpl())
     hero.setMovementStrategy(new HeroMovementStrategy(hero, statistic(Statistic.MovementSpeed)))
     hero.setAttackStrategy(new HeroAttackStrategyImpl(hero, statistic(Statistic.Strength)))
 
+    this.createHeroFeet(hero)
+
     this.level.addEntity(hero)
     hero
+  }
+
+  override def createHeroFeet(hero: Hero): Unit = {
+    if(hero.getFeet.nonEmpty) {
+      EntitiesFactoryImpl.destroyBody(hero.getFeet.get.getBody)
+      EntitiesFactoryImpl.removeEntity(hero.getFeet.get)
+    }
+
+    val feetSize: (Float, Float) = (8.0f, 0.1f)
+    val bodyPosition = hero.getPosition - (0, hero.getSize._2)
+    val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
+      EntityCollisionBit.Enemy | EntityCollisionBit.Immobile, createPolygonalShape(feetSize.PPM),
+      bodyPosition, gravityScale = 0, friction = 0.8f)
+    EntitiesFactoryImpl.createJoint(hero.getBody, feetBody.getBody)
+
+    val heroFeet: ImmobileEntity = ImmobileEntity(EntityType.Immobile, feetBody, feetSize.PPM)
+    heroFeet.setCollisionStrategy(new FeetCollisionStrategy())
+
+    hero.setFeet(heroFeet)
+    this.level.addEntity(heroFeet)
   }
 
   override def createSkeletonEnemy(position: (Float, Float)): Enemy = {

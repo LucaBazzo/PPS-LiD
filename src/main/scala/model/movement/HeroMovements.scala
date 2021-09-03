@@ -86,7 +86,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
 
   private def crouch(): Unit = {
     this.stopMovement()
-    entity.changeHeroFixture(HERO_SIZE_SMALL, (0f, -6f))
+    entity.changeHeroFixture(HERO_SIZE_SMALL, (0f, -20f))
     entity.setState(State.Crouch)
     entity.setLittle(true)
   }
@@ -95,7 +95,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
     this.entity.stopMovement()
 
     if(entity.getState != State.Crouch) {
-      this.entity.changeHeroFixture(HERO_SIZE_SMALL, (0, -6f))
+      this.entity.changeHeroFixture(HERO_SIZE_SMALL, (0, -20f))
       this.entity.setLittle(true)
     }
 
