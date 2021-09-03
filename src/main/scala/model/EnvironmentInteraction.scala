@@ -1,7 +1,8 @@
 package model
 
+import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.collisions.EntityCollisionBit
+import model.collisions.{CollisionMonitor, EntityCollisionBit}
 import model.entities.{Entity, Hero, State, Statistic}
 import model.movement.{HeroMovementStrategy, LadderClimbMovementStrategy}
 
@@ -49,10 +50,17 @@ class DoorInteraction(hero: Hero, door: Entity) extends EnvironmentInteraction {
   }
 }
 
-class PlatformInteraction(hero: Hero, upperPlatform: Entity, platform: Entity, lowerPlatform: Entity) extends EnvironmentInteraction {
+class PlatformInteraction(private val hero: Hero,
+                          private val upperPlatform: Entity,
+                          private val platform: Entity,
+                          private val lowerPlatform: Entity,
+                          private val monitor: CollisionMonitor) extends EnvironmentInteraction {
 
   override def apply(): Unit = {
-    hero.setEnvironmentInteraction(Option.empty)
+    if(monitor.isPlayerOnLadder)
+      hero.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(hero))))
+    else
+      hero.setEnvironmentInteraction(Option.empty)
     platform.changeCollisions(EntityCollisionBit.Enemy)
     upperPlatform.changeCollisions(EntityCollisionBit.Enemy)
     lowerPlatform.changeCollisions(EntityCollisionBit.Enemy)

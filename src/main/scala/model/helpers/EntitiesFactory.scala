@@ -160,7 +160,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, statistic)
 
-    hero.setCollisionStrategy(new CollisionStrategyImpl())
+    hero.setCollisionStrategy(new HeroCollisionStrategy())
     hero.setMovementStrategy(new HeroMovementStrategy(hero, statistic(Statistic.MovementSpeed)))
     hero.setAttackStrategy(new HeroAttackStrategyImpl(hero, statistic(Statistic.Strength)))
 
@@ -196,7 +196,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val platformEndCollision: CollisionStrategy = new PlatformEndCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower)
 
-    immobileEntityUpper.setCollisionStrategy(new UpperPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower))
+    immobileEntityUpper.setCollisionStrategy(new UpperPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower, this.collisonMonitor))
     immobileEntityUpper.setEndCollisionStrategy(platformEndCollision)
     this.level.addEntity(immobileEntityUpper)
 
@@ -214,8 +214,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(size.PPM), position.PPM, isSensor = true)
 
     val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Ladder, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new LadderCollisionStrategy)
-    immobileEntity.setEndCollisionStrategy(new EndLadderCollisionStrategy)
+    immobileEntity.setCollisionStrategy(new LadderCollisionStrategy(this.collisonMonitor))
+    immobileEntity.setEndCollisionStrategy(new EndLadderCollisionStrategy(this.collisonMonitor))
     this.level.addEntity(immobileEntity)
 
     immobileEntity
@@ -361,7 +361,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       collisions, createPolygonalShape(size.PPM), position.PPM)
 
     val immobileEntity: Entity = ImmobileEntity(entityType, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
+    immobileEntity.setCollisionStrategy(new DoNothingOnCollision)
     immobileEntity
   }
 

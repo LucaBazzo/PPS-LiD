@@ -47,7 +47,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private var water: Entity = entitiesFactory.createWaterPool((200,30), (100,15))
 
-  //private var lava: Entity = entitiesFactory.createLavaPool((200,30), (100,15))
+  private var lava: Entity = entitiesFactory.createLavaPool((400,30), (100,15))
 //  EntitiesFactoryImpl.createSkeletonEnemy((+200, 300))
 //  EntitiesFactoryImpl.createWormEnemy((+250,300))
 //  EntitiesFactoryImpl.createSlimeEnemy((270,300))
