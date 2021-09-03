@@ -1,5 +1,5 @@
 package utils
 
-object SpritesConstants {
+object  SpritesConstants {
 
 }
