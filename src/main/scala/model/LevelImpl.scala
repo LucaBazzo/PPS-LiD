@@ -1,6 +1,7 @@
 package model
 
 import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent
 import controller.GameEvent.GameEvent
@@ -66,7 +67,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     if(this.isWorldSetted){
       this.entitiesList.foreach((entity: Entity) => entity.update())
 
-      this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+      //this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+      this.worldStep()
 
       this.entitiesFactory.destroyBodies()
 
@@ -97,5 +99,19 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   override def spawnItem(pool: ItemPools): Unit = {
     entitiesFactory.createItem(pool)
+  }
+
+  private var accumulator: Float = 0f
+
+  private def worldStep() {
+    val delta: Float = Gdx.graphics.getDeltaTime
+
+    accumulator += Math.min(delta, 0.25f)
+
+    while (accumulator >= TIME_STEP) {
+      accumulator -= TIME_STEP
+
+      world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+    }
   }
 }

@@ -93,17 +93,19 @@ class HeroImpl(private val entityType: EntityType,
         this.setLittle(false)
       }
 
-      if(this.isSwordAttackFinished){
-        this.attackStrategy.stopAttack()
-        this.setState(State.Standing)
-      }
-      else if(this.isBowAttackFinished){
-        this.setState(State.Standing)
-      }
-      else {
+      if(!this.attackStrategy.isAttackFinished) {
         this.attackStrategy.checkTimeEvent()
         this.attackStrategy.decrementAttackTimer()
+
+        if(this.isBowAttackFinished){
+          this.setState(State.Standing)
+        }
+        else if(this.attackStrategy.isAttackFinished){
+          this.attackStrategy.stopAttack()
+          this.setState(State.Standing)
+        }
       }
+
     } else this.decrementWaiting(10)  //for sliding and crouch redefinition of body
   }
 
@@ -163,6 +165,8 @@ class HeroImpl(private val entityType: EntityType,
       this.setState(State.Hurt)
     }
   }
+
+  override def stopMovement(): Unit = super.stopMovement()
 
   override def isTouchingGround: Boolean = if(this.feet.nonEmpty) this.feet.get.isColliding else false
 

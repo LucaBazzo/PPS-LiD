@@ -2,10 +2,11 @@ package model.attack
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
+import model.entities.State.State
 import model.entities.{EntityType, Hero, MobileEntity, State}
 import model.helpers.EntitiesFactoryImpl
 
-class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Float) extends AttackStrategy {
+class HeroAttackStrategy(private val entity: Hero, private var strength: Float) extends AttackStrategy {
 
   private var attackPattern: Option[MobileEntity] = Option.empty
   private var attackTimer: Float = 0
@@ -14,7 +15,7 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
   override def apply(command: GameEvent): Unit = {
     if (checkCommand(command)) {
       command match {
-        case GameEvent.Attack => this.setAttack()
+        case GameEvent.Attack => this.setSwordAttack()
         case GameEvent.BowAttack => this.setBowAttack()
       }
     }
@@ -31,6 +32,16 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
 
   override def decrementAttackTimer(): Unit = this.attackTimer -= 3
 
+  override def checkTimeEvent(): Unit = this.entity.getState match {
+    case State.Attack03 if !timeEventPresent && this.attackTimer <= 120 && this.attackTimer > 60 =>
+      this.startThirdSwordAttack()
+    case State.Attack03 if timeEventPresent && this.attackTimer <= 60 => this.stopThirdSwordAttack()
+    case State.BowAttack if this.attackTimer <= 20 && this.attackTimer > 10 => this.startBowAttack()
+    case _ =>
+  }
+
+  override def alterStrength(alteration: Float): Unit = this.strength += alteration
+
   private def restartTimer(value: Float): Unit = this.attackTimer = value
 
   private def checkCommand(command: GameEvent): Boolean = {
@@ -43,52 +54,72 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
     false
   }
 
-  private def setAttack(): Unit = {
+  private def setSwordAttack(): Unit = {
     this.entity.stopMovement()
     //this.entity.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(this.entity))))
-    if (this.entity.getState == State.Attack01 && this.attackTimer < 75) {
-      this.entity.setState(State.Attack02)
-      stopAttack()
-      this.setAttackPattern()
-      this.attackPattern.get.move()
-      this.restartTimer(130)
-    }
-    else if (this.entity.getState == State.Attack02 && this.attackTimer < 75) {
-      this.timeEventPresent = false
-      this.entity.setState(State.Attack03)
-      stopAttack()
-      this.setAttackPattern()
-      this.restartTimer(150)
-    }
-    else if (this.entity.getState != State.Attack02 && this.entity.getState != State.Attack03
-      && this.isAttackFinished) {
-      this.entity.setState(State.Attack01)
-      this.setAttackPattern()
-      this.attackPattern.get.move()
-      this.restartTimer(100)
+
+    this.entity.getState match {
+      case State.Attack01 if this.attackTimer < 75 => this.secondSwordAttack()
+      case State.Attack02 if this.attackTimer < 75 => this.thirdSwordAttack()
+      case s: State if s != State.Attack02 && s != State.Attack03 && this.isAttackFinished => this.firstSwordAttack()
+      case _ =>
     }
   }
 
-  private def setAttackPattern(): Unit = this.entity.getState match {
+  private def firstSwordAttack(): Unit = {
+    this.entity.setState(State.Attack01)
+    this.swordPatternChoice()
+    this.attackPattern.get.move()
+    this.restartTimer(100)
+  }
+
+  private def secondSwordAttack(): Unit = {
+    this.stopAttack()
+    this.entity.setState(State.Attack02)
+    this.swordPatternChoice()
+    this.attackPattern.get.move()
+    this.restartTimer(130)
+  }
+
+  private def thirdSwordAttack(): Unit = {
+    this.timeEventPresent = false
+    this.stopAttack()
+    this.entity.setState(State.Attack03)
+    this.swordPatternChoice()
+    this.restartTimer(150)
+  }
+
+  private def startThirdSwordAttack(): Unit = {
+    this.attackPattern.get.move()
+    this.timeEventPresent = true
+  }
+
+  private def stopThirdSwordAttack(): Unit = {
+    this.attackPattern.get.stopMovement()
+    this.timeEventPresent = false
+  }
+
+  private def swordPatternChoice(): Unit = this.entity.getState match {
     case State.Attack01 if this.entity.isFacingRight =>
-      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
-        this.entity.getPosition, (0, -15f), 60, 100, this.entity))
+      this.setSwordPattern((1f, 10f), (0, -15f), 60 ,100)
     case State.Attack01 if !this.entity.isFacingRight =>
-      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
-        this.entity.getPosition, (0, -15f), -60, -100, this.entity))
+      this.setSwordPattern((1f, 10f), (0, -15f), -60 ,-100)
     case State.Attack02 if this.entity.isFacingRight =>
-      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
-        this.entity.getPosition, (0, 15f), -60, 10, this.entity))
+      this.setSwordPattern((1f, 10f), (0, 15f), -60 ,10)
     case State.Attack02 if !this.entity.isFacingRight =>
-      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (1f, 10f),
-        this.entity.getPosition, (0, 15f), 60, 10, this.entity))
+      this.setSwordPattern((1f, 10f), (0, 15f), 60 ,10)
     case State.Attack03 if this.entity.isFacingRight =>
-      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (10f, 2f),
-        this.entity.getPosition, (15f, 0), -80, sourceEntity=this.entity))
+      this.setSwordPattern((10f, 2f), (15f, 0), -80)
     case State.Attack03 if !this.entity.isFacingRight =>
-      this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, (10f, 2f),
-        this.entity.getPosition, (-15f, 0), 80, sourceEntity=this.entity))
+      this.setSwordPattern((10f, 2f), (-15f, 0), 80)
     case _ => throw new UnsupportedOperationException
+  }
+
+  private def setSwordPattern(rotatingBodySize: (Float, Float),
+                              rotatingBodyDistance: (Float, Float),
+                              angularVelocity: Float, startingAngle: Float = 0): Unit = {
+    this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, rotatingBodySize,
+      this.entity.getPosition, rotatingBodyDistance, angularVelocity, startingAngle, this.entity))
   }
 
   private def setBowAttack(): Unit = {
@@ -97,28 +128,9 @@ class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Flo
     this.restartTimer(175)
   }
 
-  override def checkTimeEvent(): Unit = {
-    if (this.entity.getState == State.Attack03 && !timeEventPresent &&
-      this.attackTimer <= 120 && this.attackTimer > 60) {
-      this.attackPattern.get.move()
-      this.timeEventPresent = true
-    }
-    if (timeEventPresent && this.entity.getState == State.Attack03 && this.attackTimer <= 60) {
-      this.attackPattern.get.stopMovement()
-      this.timeEventPresent = false
-    }
-
-    //TODO riguardare in futuro per refactoring
-    if (this.entity.getState == State.BowAttack && !timeEventPresent &&
-      this.attackTimer <= 20 && this.attackTimer > 10) {
-      this.attackPattern = Option.apply(EntitiesFactoryImpl.createArrowProjectile(this.entity))
-      this.attackPattern.get.move()
-      this.timeEventPresent = true
-    }
-    if (timeEventPresent && this.entity.getState == State.BowAttack && this.attackTimer <= 10) {
-      this.timeEventPresent = false
-    }
+  private def startBowAttack(): Unit = {
+    this.attackPattern = Option.apply(EntitiesFactoryImpl.createArrowProjectile(this.entity))
+    this.attackPattern.get.move()
+    this.attackPattern = Option.empty
   }
-
-  override def alterStrength(alteration: Float): Unit = this.strength += alteration
 }

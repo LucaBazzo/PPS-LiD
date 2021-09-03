@@ -152,7 +152,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     hero.setCollisionStrategy(new CollisionStrategyImpl())
     hero.setMovementStrategy(new HeroMovementStrategy(hero, statistic(Statistic.MovementSpeed)))
-    hero.setAttackStrategy(new HeroAttackStrategyImpl(hero, statistic(Statistic.Strength)))
+    hero.setAttackStrategy(new HeroAttackStrategy(hero, statistic(Statistic.Strength)))
 
     this.createHeroFeet(hero)
 

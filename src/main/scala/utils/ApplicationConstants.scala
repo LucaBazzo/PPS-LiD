@@ -10,8 +10,8 @@ object ApplicationConstants {
   val PIXELS_PER_METER: Float = 50
 
   val TIME_STEP: Float = 1 / 60f
-  val VELOCITY_ITERATIONS: Int = 6
-  val POSITION_ITERATIONS: Int = 2
+  val VELOCITY_ITERATIONS: Int = 8
+  val POSITION_ITERATIONS: Int = 3
 
   val GRAVITY_FORCE: (Float, Float) = (0f, -5f)
 

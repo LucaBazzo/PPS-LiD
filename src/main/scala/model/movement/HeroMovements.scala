@@ -26,7 +26,11 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
     }
   }
 
-  override def stopMovement(): Unit = this.entity.getBody.setLinearVelocity(0,0)
+  override def stopMovement(): Unit = {
+    this.entity.getBody.setLinearVelocity(0,0)
+    if(this.entity.getFeet.nonEmpty)
+      this.entity.getFeet.get.getBody.setLinearVelocity(0,0)
+  }
 
   private def checkCommand(command: GameEvent): Boolean = {
     if(entity.getState != State.Sliding && entity.getState != State.Attack01 &&
