@@ -2,13 +2,14 @@ package view.screens.game
 
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
-import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
+import com.badlogic.gdx.graphics.{GL20, OrthographicCamera, Texture}
+import com.badlogic.gdx.maps.MapProperties
+import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model.Level
 import model.collisions.ImplicitConversions.RichInt
 import model.entities.{Entity, Hero, Statistic}
 import model.helpers.EntitiesGetter
@@ -21,13 +22,15 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
+  camera.translate(300f, 300f)
   private val batch: SpriteBatch = new SpriteBatch()
 
   private val box2DDebugRenderer: Box2DDebugRenderer = new Box2DDebugRenderer()
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/room1.tmx")
+  private var tiledMap: TiledMap = TileMapHelper.getTiledMap("room1")
+  private var orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMapRenderer(null)
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
@@ -84,14 +87,16 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
     this.camera.update()
 
-    // render the map
-    orthogonalTiledMapRenderer.render()
+    val rooms: Array[String] = Array("room1", "room1", "room1")
+    rooms.foreach(room => {
+      this.tiledMap = TileMapHelper.getTiledMap(room)
+      this.orthogonalTiledMapRenderer.setMap(this.tiledMap)
+      orthogonalTiledMapRenderer.render()
+    })
+    TileMapHelper.clearXOffsetRenderer()
 
     //what will be shown by the camera
-
     batch.setProjectionMatrix(camera.combined)
-
-
 
     batch.begin()
     // render objects inside

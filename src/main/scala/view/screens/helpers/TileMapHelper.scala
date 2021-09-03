@@ -1,27 +1,53 @@
 package view.screens.helpers
 
+import com.badlogic.gdx.{Gdx, utils}
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.maps.MapProperties
 import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.maps.tiled.{TiledMap, TiledMapRenderer, TmxMapLoader}
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.utils.XmlReader
+import com.badlogic.gdx.utils.XmlReader.Element
 import model.Level
 import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
 import model.entities.{Entity, EntityType}
 import model.helpers.EntitiesFactoryImpl
-import utils.ApplicationConstants.PIXELS_PER_METER
+import _root_.utils.ApplicationConstants.PIXELS_PER_METER
 
 object TileMapHelper {
 
   private val scale: Float = 1/(PIXELS_PER_METER/2)
 
   private var xOffset: Float = 0f
+  private var xOffsetRenderer: Float = 0f
 
-  def getMap(path: String): OrthogonalTiledMapRenderer = {
-    new OrthogonalTiledMapRenderer(new TmxMapLoader().load(path), scale)
+  def getMapRenderer(tiledMap: TiledMap): OrthogonalTiledMapRenderer = {
+    new OrthogonalTiledMapRenderer(tiledMap, scale)
   }
+
+  //restituisce la tiledMap settando l'offset di renderizzazione relativo all'asse x
+  def getTiledMap(mapName: String): TiledMap = {
+    val tiledMap: TiledMap = new TmxMapLoader().load("assets/maps/" + mapName + ".tmx")
+
+    tiledMap.getLayers().forEach(layer => {
+      layer.setOffsetX(xOffsetRenderer*8)
+    })
+
+    //update x offset
+    val mapProperties: MapProperties = tiledMap.getProperties
+    val width: Integer = mapProperties.get("width", classOf[Integer])
+    this.xOffsetRenderer = this.xOffsetRenderer + width
+
+    tiledMap
+  }
+
+  def clearXOffsetRenderer(): Unit = {
+    this.xOffsetRenderer = 0
+  }
+
 
   def setWorld(level: Level): Unit = {
 
@@ -36,11 +62,9 @@ object TileMapHelper {
 
   }
 
-
   def loadRoomObjects(level: Level, path: String): Unit = {
 
     var rect: Rectangle = new Rectangle()
-
     val tiledMap: TiledMap = new TmxMapLoader().load(path)
 
     tiledMap.getLayers().forEach(layer => {
@@ -49,7 +73,6 @@ object TileMapHelper {
         rect = obj.asInstanceOf[RectangleMapObject].getRectangle
 
         val size: (Float, Float) = (rect.getWidth, rect.getHeight)
-
         val position: (Float, Float) = ((rect.getX*2 + rect.getWidth + (this.xOffset*16)) , (rect.getY*2 + rect.getHeight) )
 
         var entity: Entity = null
@@ -69,7 +92,6 @@ object TileMapHelper {
         if (entity != null) level.addEntity(entity)
 
       })
-
     })
 
     //update x offset
