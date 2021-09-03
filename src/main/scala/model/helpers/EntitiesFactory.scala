@@ -1,6 +1,5 @@
 package model.helpers
 
-import _root_.utils.ApplicationConstants._
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.{RevoluteJointDef, WeldJointDef}
@@ -14,6 +13,8 @@ import model.entities.Statistic.Statistic
 import model.entities.{Entity, Statistic, _}
 import model.helpers.EntitiesUtilities.isEntityOnTheLeft
 import model.movement._
+import _root_.utils.EnemiesConstants._
+import _root_.utils.ApplicationConstants._
 
 import scala.collection.immutable.HashMap
 
@@ -84,11 +85,7 @@ trait EntitiesFactory {
 
   def destroyBody(body: Body)
 
-  def destroyJoint(joint: Joint)
-
   def destroyBodies(): Unit
-
-  def destroyJoints(): Unit
 
   def changeCollisions(entity: Entity, entityType: Short): Unit
 
@@ -100,7 +97,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   private var entitiesToBeChanged: List[(Entity, Short)] = List.empty
   private var itemPool: ItemPool = _
   private var bodiesToBeDestroyed: List[Body] = List.empty
-  private var jointsToBeDestroyed: List[Joint] = List.empty
 
   override def setLevel(level: Level, pool: ItemPool): Unit = {
     this.level = level
@@ -123,7 +119,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createHeroEntity(): Hero = {
-    val position: (Float, Float) = (150f, 500f)
+    val position: (Float, Float) = (+100f, 550f)
     val size: (Float, Float) = HERO_SIZE
 
     val statistic: Map[Statistic, Float] = Map(
@@ -148,80 +144,38 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createSkeletonEnemy(position: (Float, Float)): Enemy = {
-    val stats:Map[Statistic, Float] = Map(
-      Statistic.Strength -> 100f,
-      Statistic.Health -> 11f,
-      Statistic.CurrentHealth -> 11f,
-      Statistic.Defence -> 0f,
-
-      Statistic.MaxMovementSpeed -> 40f.PPM,
-      Statistic.Acceleration -> 5f.PPM,
-
-      Statistic.HorizontalVisionDistance -> 40.PPM,
-      Statistic.HorizontalVisionAngle -> 30,
-      Statistic.AttackFrequency -> 2000,
-      Statistic.AttackDuration -> 1200)
-
     val size: (Float, Float) = (13f, 23f)
     val score: Int = 100
 
-    val enemy:Enemy = createEnemyEntity(position, size, stats, score, EntityType.EnemySkeleton)
+    val enemy:Enemy = createEnemyEntity(position, size, SKELETON_STATS, score, EntityType.EnemySkeleton)
 
     enemy.setCollisionStrategy(new DoNothingOnCollision())
-    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level, stats, (e:Entity) => e.isInstanceOf[Hero]))
-    enemy.setAttackStrategy(new MeleeAttack(enemy, this.level, stats, (e:Entity) => e.isInstanceOf[Hero]))
+    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    enemy.setAttackStrategy(new MeleeAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
     enemy
   }
 
   override def createSlimeEnemy(position: (Float, Float)): Enemy = {
-    val stats:Map[Statistic, Float] = Map(
-      Statistic.Strength -> 10f,
-      Statistic.Health -> 11f,
-      Statistic.CurrentHealth -> 11f,
-      Statistic.Defence -> 0f,
-
-      Statistic.MaxMovementSpeed -> 40f.PPM,
-      Statistic.Acceleration -> 5f.PPM,
-
-      Statistic.HorizontalVisionDistance -> 20.PPM,
-      Statistic.HorizontalVisionAngle -> 20,
-      Statistic.AttackFrequency -> 2000,
-      Statistic.AttackDuration -> 1000,
-    )
     val size:(Float, Float) = (13f, 13f)
     val score: Int = 100
 
-    val enemy:Enemy = createEnemyEntity(position, size, stats, score, EntityType.EnemySlime)
+    val enemy:Enemy = createEnemyEntity(position, size, SLIME_STATS, score, EntityType.EnemySlime)
 
     enemy.setCollisionStrategy(new DoNothingOnCollision())
-    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level, stats, (e:Entity) => e.isInstanceOf[Hero]))
-    enemy.setAttackStrategy(new MeleeAttack(enemy, this.level, stats, (e:Entity) => e.isInstanceOf[Hero]))
+    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    enemy.setAttackStrategy(new MeleeAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
     enemy
   }
 
   override def createWormEnemy(position: (Float, Float)): Enemy = {
-    val stats:Map[Statistic, Float] = Map(
-      Statistic.Strength -> 5f,
-      Statistic.Health -> 11f,
-      Statistic.CurrentHealth -> 11f,
-      Statistic.Defence -> 0f,
-
-      Statistic.MaxMovementSpeed -> 40f.PPM,
-      Statistic.Acceleration -> 5f.PPM,
-
-      Statistic.HorizontalVisionDistance -> 100.PPM,
-      Statistic.HorizontalVisionAngle -> 70,
-      Statistic.AttackFrequency -> 1500,
-      Statistic.AttackDuration -> 900,
-    )
     val size:(Float, Float) = (15f, 11f)
     val score: Int = 100
 
-    val enemy:Enemy = createEnemyEntity(position, size, stats, score, EntityType.EnemyWorm)
+    val enemy:Enemy = createEnemyEntity(position, size, WORM_STATS, score, EntityType.EnemyWorm)
 
     enemy.setCollisionStrategy(new DoNothingOnCollision())
-    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level, stats, (e:Entity) => e.isInstanceOf[Hero]))
-    enemy.setAttackStrategy(new RangedAttack(enemy, this.level, stats, (e:Entity) => e.isInstanceOf[Hero]))
+    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    enemy.setAttackStrategy(new RangedAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
     enemy
   }
 
@@ -352,18 +306,21 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createMeleeAttack(sourceEntity:LivingEntity,
                                  targetEntity:Entity): MobileEntity = {
 
-    val size: (Float, Float) = (15, 15)
+    val size: (Float, Float) = (17, 23)
+    val pivotSize: (Float, Float) = (2f, 2f)
 
-    // compute bullet spawn point
-    val offset:Float = if (isEntityOnTheLeft(sourceEntity, targetEntity))
-      sourceEntity.getSize._1 else -sourceEntity.getSize._1
-    val position = sourceEntity.getBody.getWorldCenter.add(offset, 0)
+    // compute attack spawn point
+    val offset:Float = if (isEntityOnTheLeft(sourceEntity, targetEntity)) 20.PPM else -20.PPM
+    val position = (sourceEntity.getBody.getWorldCenter.x+offset,
+      sourceEntity.getBody.getWorldCenter.y)
 
     // create a body inside the game world
+    val pivotBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Immobile,
+      0, createPolygonalShape(pivotSize.PPM), sourceEntity.getPosition, isSensor = true)
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.EnemyAttack,
-      EntityCollisionBit.Hero, this.createPolygonalShape(size.PPM), (position.x, position.y), isSensor = true)
+      EntityCollisionBit.Hero, this.createPolygonalShape(size.PPM), (position.x-5.PPM, position.y+5.PPM), isSensor = true)
     val jointDef:WeldJointDef = new WeldJointDef()
-    jointDef.initialize(sourceEntity.getBody, entityBody.getBody, sourceEntity.getBody.getPosition)
+    jointDef.initialize(pivotBody.getBody, entityBody.getBody, pivotBody.getBody.getPosition)
     this.level.getWorld.createJoint(jointDef)
 
     // create an entity representing the melee attack
@@ -414,22 +371,10 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     this.bodiesToBeDestroyed = List.empty
   }
 
-  // TODO: to be removed
-  override def destroyJoint(joint: Joint): Unit = synchronized {
-    this.jointsToBeDestroyed = joint :: this.jointsToBeDestroyed
-    println(this.jointsToBeDestroyed)
-  }
-
-  override def destroyJoints(): Unit = synchronized {
-    for(joint <- jointsToBeDestroyed) {
-      this.level.getWorld.destroyJoint(joint)
-    }
-    this.jointsToBeDestroyed = List.empty
-  }
-
   override def createBody(bodyDef: BodyDef): Body = this.level.getWorld.createBody(bodyDef)
 
-  private def defineEntityBody(bodyType: BodyType,
+  // TODO: rimettere private
+  def defineEntityBody(bodyType: BodyType,
                                entityType: Short,
                                collisions: Short,
                                shape: Shape,

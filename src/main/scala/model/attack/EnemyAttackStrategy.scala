@@ -17,63 +17,81 @@ class DoNotAttack() extends AttackStrategy {
 
 }
 
-class MeleeAttack(val sourceEntity: LivingEntity,
-                  val level: Level,
-                  val stats: Map[Statistic, Float],
-                  val target: Entity => Boolean)
+abstract class AttackStrategyImpl(protected val sourceEntity: LivingEntity,
+                                  protected val targetEntity: Entity)
   extends AttackStrategy {
 
-  protected val targetEntity:LivingEntity = level.getEntity(target).asInstanceOf[LivingEntity]
-  protected val maxDistance:Float = stats(Statistic.HorizontalVisionDistance)
-  protected val visibilityMaxHorizontalAngle:Float = stats(Statistic.HorizontalVisionAngle)
-  protected val attackFrequency:Float = stats(Statistic.AttackFrequency)
-  protected val attackDuration:Float = stats(Statistic.AttackDuration)
+  protected val stats: Map[Statistic, Float] = this.sourceEntity.getStatistics
+  protected val attackFrequency: Float = this.stats(Statistic.AttackFrequency)
+  protected val attackDuration: Float = this.stats(Statistic.AttackDuration)
+  protected val visionAngle: Float = this.stats(Statistic.VisionAngle)
+  protected val visionDistance: Float = this.stats(Statistic.VisionDistance)
 
   protected var lastAttackTime:Long = 0
 
   override def apply(): Unit = {
-    if (canAttack && isAttackFinished) {
+    if (this.canAttack) {
       this.lastAttackTime = System.currentTimeMillis()
-      createMeleeAttack(sourceEntity, targetEntity)
-    }
-  }
-
-  override def isAttackFinished: Boolean = System.currentTimeMillis() - this.lastAttackTime > this.attackDuration
-
-  private def canAttack: Boolean =  {
-    System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
-      isEntityVisible(sourceEntity, targetEntity, this.visibilityMaxHorizontalAngle) &&
-      getEntitiesDistance(sourceEntity, targetEntity) <= this.maxDistance
-  }
-}
-
-class RangedAttack(val sourceEntity: LivingEntity,
-                   val level:Level,
-                   val stats: Map[Statistic, Float],
-                   val target:Entity => Boolean)
-  extends AttackStrategy {
-
-  protected val targetEntity: Entity = this.level.getEntity(target)
-  protected val maxDistance: Float = stats(Statistic.HorizontalVisionDistance)
-  protected val visibilityMaxHorizontalAngle: Float = stats(Statistic.HorizontalVisionAngle)
-  protected val attackFrequency: Float = stats(Statistic.AttackFrequency)
-  protected val attackDuration: Float = stats(Statistic.AttackDuration)
-
-  protected var lastAttackTime:Long = 0
-
-  override def apply(): Unit = {
-    if (canAttack && isAttackFinished) {
-      this.lastAttackTime = System.currentTimeMillis()
-      createFireballAttack(this.sourceEntity, this.targetEntity)
+      this.sourceEntity.setState(State.Attack01)
+      spawnAttack()
     }
   }
 
   override def isAttackFinished: Boolean =
-    System.currentTimeMillis() - this.lastAttackTime >= this.attackDuration
+    System.currentTimeMillis() - this.lastAttackTime > this.attackDuration
 
-  private def canAttack: Boolean =  {
+  protected def canAttack: Boolean = this.isAttackFinished &&
     System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
-      isEntityVisible(this.sourceEntity, this.targetEntity, this.visibilityMaxHorizontalAngle) &&
-      getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.maxDistance
+    isEntityVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
+    getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
+
+  protected def spawnAttack(): Unit
+}
+
+class MeleeAttack(override protected val sourceEntity: LivingEntity,
+                  override protected val targetEntity: Entity)
+  extends AttackStrategyImpl(sourceEntity, targetEntity) {
+
+  protected var attackInstance: Option[MobileEntity] = Option.empty
+
+  override def apply():Unit = {
+    if (this.isAttackFinished && this.attackInstance.isDefined) {
+      this.stopAttack()
+      this.sourceEntity.setState(State.Standing)
+    }
+
+    super.apply()
   }
+
+  override def stopAttack(): Unit = {
+    if (this.attackInstance.isDefined) {
+      this.attackInstance.get.destroyEntity()
+      this.attackInstance = Option.empty
+    }
+  }
+
+  override protected def spawnAttack(): Unit = {
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity))
+  }
+}
+
+class RangedAttack(override protected val sourceEntity: LivingEntity,
+                   override protected val targetEntity: Entity)
+  extends AttackStrategyImpl(sourceEntity, targetEntity) {
+
+  override protected def spawnAttack(): Unit = createFireballAttack(this.sourceEntity, this.targetEntity)
+}
+
+class ContactAttack(protected val sourceEntity: LivingEntity,
+                    protected val level: Level,
+                    protected val stats: Map[Statistic, Float],
+                    protected val target: Entity => Boolean) extends AttackStrategy {
+
+
+
+  override def apply(): Unit = {
+
+  }
+
+  override def isAttackFinished: Boolean = ???
 }

@@ -5,6 +5,8 @@ import controller.GameEvent.GameEvent
 import model.entities.{EntityType, Hero, MobileEntity, State}
 import model.helpers.EntitiesFactoryImpl
 
+// TODO - idea per luca : perchè non rendere l'attacco melee e ranged due attack strategy differenti?
+
 class HeroAttackStrategyImpl(private val entity: Hero, private var strength: Float) extends AttackStrategy {
 
   private var attackPattern: MobileEntity = _

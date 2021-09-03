@@ -8,7 +8,8 @@ trait AttackStrategy {
   def apply(command: GameEvent):Unit = ???
 
   def stopAttack():Unit = ???
-  def isAttackFinished: Boolean = ???
+
+  def isAttackFinished: Boolean
 
   def decrementAttackTimer():Unit = ???
   def checkTimeEvent():Unit = ???
