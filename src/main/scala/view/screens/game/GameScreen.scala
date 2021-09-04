@@ -3,18 +3,15 @@ package view.screens.game
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model.Level
 import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Entity, Hero, Statistic}
+import model.entities.{Entity, EntityType, Hero, LivingEntity, Statistic}
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
-import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
@@ -27,7 +24,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map2.tmx")
+//  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map2.tmx")
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
@@ -46,7 +43,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     this.hud.setCurrentScore(this.entitiesGetter.getScore)
 
     //it will render only what the camera can see
-    this.orthogonalTiledMapRenderer.setView(camera)
+//    this.orthogonalTiledMapRenderer.setView(camera)
   }
 
   private def handleHoldingInput(): Unit = {
@@ -67,6 +64,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     super.render(delta)
 
+    // TODO: Convertire Option[List[Entity]] in List[Entity] o Option[Entity]
     val heroEntity: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Hero])
     if(heroEntity.nonEmpty) {
       val hero: Hero = heroEntity.get.head.asInstanceOf[Hero]
@@ -74,6 +72,19 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.camera.position.y = hero.getPosition._2
 
       this.hud.changeHealth(hero.getStatistics(Statistic.CurrentHealth), hero.getStatistics(Statistic.Health))
+    }
+
+    val bossEntity: Option[List[Entity]] = entitiesGetter.getEntities(e => e.getType match {
+      case EntityType.EnemyBossWizard => true
+      case _ => false
+    })
+    // TODO: prevenire chiamate di show e hide quando la barra della vita è già visibile o invisibile
+    if (bossEntity.get.nonEmpty) {
+      hud.showBossHealthBar()
+      val boss: LivingEntity = bossEntity.get.head.asInstanceOf[LivingEntity]
+      this.hud.changeBossHealth(boss.getStatistics(Statistic.CurrentHealth), boss.getStatistics(Statistic.Health))
+    } else {
+      hud.hideBossHealthBar()
     }
 
     val entities: Option[List[Entity]] = entitiesGetter.getEntities(_ => true)
@@ -85,7 +96,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     this.camera.update()
 
     // render the map
-    orthogonalTiledMapRenderer.render()
+//    orthogonalTiledMapRenderer.render()
 
     //what will be shown by the camera
 
@@ -97,7 +108,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     // render objects inside
     this.spriteViewer.drawSprites()
     this.hud.drawHealthBar(batch)
-
+    this.hud.drawBossHealthBar(batch)
     batch.end()
 
     //for debug purpose
@@ -112,7 +123,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   }
 
   override def dispose(): Unit = {
-    orthogonalTiledMapRenderer.dispose()
+//    orthogonalTiledMapRenderer.dispose()
     this.entitiesGetter.getWorld.dispose()
     box2DDebugRenderer.dispose()
     hud.dispose()

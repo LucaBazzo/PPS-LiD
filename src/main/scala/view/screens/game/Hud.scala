@@ -50,8 +50,14 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
   itemsTable.bottom().left()
   itemsTable.setFillParent(true)
 
+  val bossHealthImage: Image = new Image(new Texture(HEALTH_BAR_PATH))
+  val bossHealthImageWidth: Float = 200
+  val bossHealthImageHeight: Float = 10
+  bossHealthImage.setColor(Color.PURPLE)
+
   var table = new Table()
   //it will display at the top
+//  table.debug()
   table.top()
   table.padTop(40)
   //the table has the size of the stage
@@ -62,7 +68,8 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
   table.add(itemsTextLabel)
   table.row()
   table.add(itemsTable)
-
+  table.row()
+  table.add(bossHealthImage)
 
   //adds the table to the stage
   stage.addActor(tableTop)
@@ -76,6 +83,24 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
   def getStage: Stage = this.stage
 
   override def dispose(): Unit = stage.dispose()
+
+  def changeBossHealth(currentHealth: Float, maxHealth: Float): Unit = {
+    val bossHealthPercentage = currentHealth / maxHealth
+    bossHealthImage.setWidth(bossHealthImageWidth * bossHealthPercentage)
+    bossHealthImage.setHeight(bossHealthImageHeight)
+  }
+  def drawBossHealthBar(batch: SpriteBatch): Unit = {
+    bossHealthImage.draw(batch, 0)
+  }
+
+  def showBossHealthBar(): Unit = {
+    this.bossHealthImage.setVisible(true)
+  }
+
+  def hideBossHealthBar(): Unit = {
+    //    bossHealthTable.getColor.a = 0
+    this.bossHealthImage.setVisible(false)
+  }
 
   def changeHealth(currentHealth: Float, maxHealth: Float): Unit = {
     this.healthPercentage = currentHealth / maxHealth

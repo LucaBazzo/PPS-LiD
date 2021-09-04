@@ -21,8 +21,6 @@ trait SpriteFactory {
                                        rowNumber: Int, startIndex: Int, endIndex: Int,
                                        rowNumber2: Int, startIndex2: Int, endIndex2: Int,
                                        frameDuration: Float = 0.10f): Animation[TextureRegion]
-
-  def defineEnemyWormAnimation(sprite: EntitySprite): Unit
 }
 
 class SpriteFactoryImpl extends SpriteFactory {
@@ -68,6 +66,7 @@ class SpriteFactoryImpl extends SpriteFactory {
         case EntityType.EnemySkeleton => this.defineEnemySkeletonAnimation(sprite)
         case EntityType.EnemySlime => this.defineEnemySlimeAnimation(sprite)
         case EntityType.EnemyWorm => this.defineEnemyWormAnimation(sprite)
+        case EntityType.EnemyBossWizard => this.defineEnemyWizardAnimation(sprite)
         case EntityType.AttackFireBall => this.defineAttackFireballAnimation(sprite)
         case _ => null
       }
@@ -149,7 +148,7 @@ class SpriteFactoryImpl extends SpriteFactory {
   private def defineAttackArrowAnimation(sprite: EntitySpriteImpl): Unit =
     sprite.addAnimation(State.Standing, this.createSpriteAnimation(sprite, 0, 0, 0))
 
-  override def defineEnemyWormAnimation(sprite:EntitySprite): Unit = {
+  private def defineEnemyWormAnimation(sprite:EntitySprite): Unit = {
     sprite.addAnimation(State.Attack01,
       this.createSpriteAnimationFromThreeRows(sprite,
         0, 0, 6,
@@ -171,6 +170,21 @@ class SpriteFactoryImpl extends SpriteFactory {
       this.createSpriteAnimationFromTwoRows(sprite,
         5, 1, 6,
         6, 0, 2, 0.18f), loop = true)
+  }
+
+  private def defineEnemyWizardAnimation(sprite:EntitySprite): Unit = {
+    sprite.addAnimation(State.Attack01,
+      this.createSpriteAnimationFromTwoRows(sprite, 0, 0, 6, 1, 0, 0, 0.15f))
+    sprite.addAnimation(State.Attack02,
+      this.createSpriteAnimationFromTwoRows(sprite, 1, 1, 6, 2, 0, 1, 0.15f))
+    sprite.addAnimation(State.Dying,
+      this.createSpriteAnimationFromTwoRows(sprite, 2, 2, 6, 3, 0, 1, 0.15f))
+    sprite.addAnimation(State.Standing,
+      this.createSpriteAnimationFromTwoRows(sprite, 3, 2, 6, 4, 0, 2, 0.15f), loop = true)
+    sprite.addAnimation(State.Running,
+      this.createSpriteAnimationFromTwoRows(sprite, 4, 3, 6, 5, 0, 3, 0.15f), loop = true)
+    sprite.addAnimation(State.Hurt,
+      this.createSpriteAnimation(sprite, 6, 4, 6, 0.15f))
   }
 
   // TODO: provare ad inserire anche l'animazione di esplosione
