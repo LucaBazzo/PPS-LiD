@@ -22,4 +22,8 @@ object ApplicationConstants {
   val HERO_SIZE: (Float, Float) = (8.5f, 14.9f)
 
   val HERO_SIZE_SMALL: (Float, Float) = (8.5f, 9f)
+
+  val CROUCH_OFFSET: (Float, Float) = (0f, -20f)
+
+  val SLIDE_OFFSET: (Float, Float) = (0f, -20f)
 }

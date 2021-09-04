@@ -2,6 +2,7 @@ package model.attack
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
+import model.{HeroInteraction, LadderInteraction}
 import model.entities.State.State
 import model.entities.{EntityType, Hero, MobileEntity, State}
 import model.helpers.EntitiesFactoryImpl
@@ -56,7 +57,7 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
 
   private def setSwordAttack(): Unit = {
     this.entity.stopMovement()
-    //this.entity.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(this.entity))))
+    this.entity.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(this.entity))))
 
     this.entity.getState match {
       case State.Attack01 if this.attackTimer < 75 => this.secondSwordAttack()

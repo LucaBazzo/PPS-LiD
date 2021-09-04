@@ -43,10 +43,10 @@ class HeroImpl(private val entityType: EntityType,
   extends LivingEntityImpl(entityType, entityBody, size, stats) with Hero{
 
   private var feet: Option[ImmobileEntity] = Option.empty
+  private var interaction: Option[HeroInteraction] = Option.empty
+  private var itemsPicked: List[Items] = List.empty
 
-  private var previousState: State = State.Standing
   private var little: Boolean = false
-
   private var waitTimer: Float = 0
 
   override def notifyCommand(command: GameEvent): Unit = {
@@ -111,7 +111,6 @@ class HeroImpl(private val entityType: EntityType,
 
   override def setState(state: State): Unit = {
     super.setState(state)
-    this.previousState = state
   }
 
   override def setLittle(little: Boolean): Unit = {
@@ -122,7 +121,6 @@ class HeroImpl(private val entityType: EntityType,
   override def isLittle: Boolean = this.little
 
   override def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit = {
-
     this.entityBody
       .setShape(createPolygonalShape(newSize.PPM))
       .createFixture()
@@ -132,10 +130,7 @@ class HeroImpl(private val entityType: EntityType,
     EntitiesFactoryImpl.createHeroFeet(this)
 
     this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
-
   }
-
-  private var itemsPicked: List[Items] = List.empty
 
   override def itemPicked(itemType: Items): Unit = {
     this.stopHero(300)
@@ -145,8 +140,6 @@ class HeroImpl(private val entityType: EntityType,
   }
 
   override def getItemsPicked: List[Items] = this.itemsPicked
-
-  private var interaction: Option[HeroInteraction] = Option.empty
 
   override def setEnvironmentInteraction(interaction: Option[HeroInteraction]): Unit =
     this.interaction = interaction

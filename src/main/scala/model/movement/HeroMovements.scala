@@ -4,7 +4,7 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions.{RichFloat, _}
 import model.entities.{Hero, State}
-import utils.ApplicationConstants.HERO_SIZE_SMALL
+import utils.ApplicationConstants.{CROUCH_OFFSET, HERO_SIZE_SMALL}
 
 class HeroMovementStrategy(private val entity: Hero, private var speed: Float) extends MovementStrategy {
 
@@ -14,7 +14,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   private val maxRunningVelocity: Float = 35f.PPM
 
   override def apply(command: GameEvent): Unit = {
-    if(checkCommand(command)) {
+    if(this.checkState && checkCommand(command)) {
       command match {
         case GameEvent.Up => this.jump()
         case GameEvent.MoveRight => this.moveRight()
@@ -32,24 +32,16 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
       this.entity.getFeet.get.getBody.setLinearVelocity(0,0)
   }
 
-  private def checkCommand(command: GameEvent): Boolean = {
-    if(entity.getState != State.Sliding && entity.getState != State.Attack01 &&
-      entity.getState != State.Attack02 && entity.getState != State.Attack03 &&
-      entity.getState != State.BowAttack && entity.getState != State.Hurt &&
-      entity.getState != State.ItemPicked) {
-      command match {
-        case GameEvent.Up => return entity.getState != State.Falling &&
-          entity.getState != State.Somersault && entity.getState != State.Crouch
-        case GameEvent.MoveRight | GameEvent.MoveLeft => return true
-        case GameEvent.Down => return entity.getState == State.Running ||
-          entity.getState == State.Standing
-        case GameEvent.DownReleased => return entity.getState == State.Crouch
-        case GameEvent.Slide => return entity.getState != State.Jumping && entity.getState != State.Falling && entity.getState != State.Somersault
-        case GameEvent.UpReleased => return false
-        case _ => throw new UnsupportedOperationException
-      }
-    }
-    false
+  private def checkCommand(command: GameEvent): Boolean = command match {
+    case GameEvent.Up => entity.getState != State.Falling &&
+      entity.getState != State.Somersault && entity.getState != State.Crouch
+    case GameEvent.MoveRight | GameEvent.MoveLeft => true
+    case GameEvent.Down => entity.getState == State.Running ||
+      entity.getState == State.Standing
+    case GameEvent.DownReleased => entity.getState == State.Crouch
+    case GameEvent.Slide => entity.getState != State.Jumping && entity.getState != State.Falling && entity.getState != State.Somersault
+    case GameEvent.UpReleased => false
+    case _ => throw new UnsupportedOperationException
   }
 
   private def jump(): Unit = {
@@ -61,36 +53,31 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   }
 
   private def moveRight(): Unit = {
-    if(entity.getState != State.Crouch) {
-      if(this.entity.isTouchingGround || (!this.entity.isTouchingGround && !this.entity.isColliding)) {
-        if (entity.getBody.getLinearVelocity.x <= maxRunningVelocity) {
-          this.applyLinearImpulse(this.setSpeed(runningForce, 0))
-        }
-
-        if(this.entity.getState == State.Standing)
-          this.entity.setState(State.Running)
-      }
-    }
-    entity.setFacing(right = true)
+    this.move(maxRunningVelocity, runningForce, right = true)
   }
 
   private def moveLeft(): Unit = {
+    this.move(-maxRunningVelocity, -runningForce, right = false)
+  }
+
+  private def move(maxVelocity: Float, runForce: Float, right: Boolean) {
     if(entity.getState != State.Crouch) {
       if(this.entity.isTouchingGround || (!this.entity.isTouchingGround && !this.entity.isColliding)) {
-        if (entity.getBody.getLinearVelocity.x >= -maxRunningVelocity) {
-          this.applyLinearImpulse(this.setSpeed(-runningForce, 0))
+        if ((right && entity.getBody.getLinearVelocity.x <= maxVelocity) ||
+          (!right && entity.getBody.getLinearVelocity.x >= maxVelocity)) {
+          this.applyLinearImpulse(this.setSpeed(runForce, 0))
         }
 
         if(this.entity.getState == State.Standing)
           this.entity.setState(State.Running)
       }
     }
-    entity.setFacing(right = false)
+    entity.setFacing(right = right)
   }
 
   private def crouch(): Unit = {
     this.stopMovement()
-    entity.changeHeroFixture(HERO_SIZE_SMALL, (0f, -20f))
+    entity.changeHeroFixture(HERO_SIZE_SMALL, CROUCH_OFFSET)
     entity.setState(State.Crouch)
     entity.setLittle(true)
   }
@@ -99,7 +86,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
     this.entity.stopMovement()
 
     if(entity.getState != State.Crouch) {
-      this.entity.changeHeroFixture(HERO_SIZE_SMALL, (0, -20f))
+      this.entity.changeHeroFixture(HERO_SIZE_SMALL, CROUCH_OFFSET)
       this.entity.setLittle(true)
     }
 
@@ -121,4 +108,10 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   private def setSpeed(force: (Float, Float)): (Float, Float) = force * speed
 
   override def apply(): Unit = ???
+
+  private def checkState: Boolean = entity.getState match {
+    case State.Sliding | State.Attack01 | State.Attack02
+      | State.Attack03 | State.BowAttack | State.Hurt | State.ItemPicked => false
+    case _ => true
+  }
 }
