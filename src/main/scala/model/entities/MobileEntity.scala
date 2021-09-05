@@ -12,7 +12,7 @@ object Statistic extends Enumeration {
 
   val CurrentHealth, Health, Strength, Defence, MovementSpeed, MaxMovementSpeed, Acceleration, AttackSpeed = Value
 
-  val HorizontalVisionDistance, HorizontalVisionAngle, AttackFrequency, AttackDuration    = Value
+  val VisionDistance, VisionAngle, AttackFrequency, AttackDuration    = Value
 }
 
 trait MobileEntity extends Entity {
