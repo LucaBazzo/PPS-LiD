@@ -4,6 +4,12 @@ import controller.GameEvent.GameEvent
 import model.entities.{Hero, State, Statistic}
 import model.movement.{HeroMovementStrategy, LadderClimbMovementStrategy}
 
+/** Represent the hero interaction with a certain environment interaction. The hero will start
+ *  the interaction when the command given is notified to him
+ *
+ *  @param command the command that start the interaction
+ *  @param environmentInteraction the interaction that specified the new behavior for the hero
+ */
 case class HeroInteraction(command: GameEvent, environmentInteraction: EnvironmentInteraction)
 
 /** An environment interaction between the hero and another entity in the world. Changes
