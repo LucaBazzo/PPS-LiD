@@ -8,7 +8,7 @@ import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionManager, EntityCollisionBit}
 import model.entities.ItemPools.ItemPools
 import model.entities._
-import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl, WorldUtilities}
+import model.helpers._
 
 trait Level {
 
@@ -45,8 +45,9 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private var isWorldSetted: Boolean = false
 
-//  EntitiesFactoryImpl.createSkeletonEnemy((+200, 300))
-  EntitiesFactoryImpl.createWormEnemy((280f, 550f))
+//  EntitiesFactoryImpl.createSkeletonEnemy((+280f, 550f))
+  EntitiesFactoryImpl.createWizardBossEnemy((+280f, 550f))
+//  EntitiesFactoryImpl.createWormEnemy((280f, 550f))
 //  EntitiesFactoryImpl.createSlimeEnemy((270,300))
 
   this.entitiesSetter.setEntities(entitiesList)
@@ -93,6 +94,12 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     if (entity.isInstanceOf[Enemy]) {
       this.score += entity.asInstanceOf[Score].getScore
       this.entitiesSetter.setScore(this.score)
+
+      // TODO: nomralizzare la creazione e rimozione di tutte le entity prima del word.step in update
+      // TODO: rifattorizzare .MPP (enemy position e in PPM mentre la createItem vuole valori non scalati)
+      EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
+        position=(entity.getPosition._1, entity.getPosition._2).MPP,
+        collisions = EntityCollisionBit.Hero)
     }
   }
 

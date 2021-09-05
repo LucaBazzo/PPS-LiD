@@ -49,4 +49,19 @@ object EnemiesConstants {
     Statistic.AttackDuration -> 1000,
   )
 
+  val WIZARD_BOSS_STATS:Map[Statistic, Float] = Map(
+    Statistic.Strength -> 10f,
+    Statistic.Health -> 100f,
+    Statistic.CurrentHealth -> 100f,
+    Statistic.Defence -> 0f,
+
+    Statistic.MaxMovementSpeed -> 40f.PPM,
+    Statistic.Acceleration -> 5f.PPM,
+
+    Statistic.VisionDistance -> 20.PPM,
+    Statistic.VisionAngle -> 20,
+    Statistic.AttackFrequency -> 2000,
+    Statistic.AttackDuration -> 1000,
+  )
+
 }
