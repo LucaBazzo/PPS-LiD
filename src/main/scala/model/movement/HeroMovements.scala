@@ -1,17 +1,18 @@
 package model.movement
 
+import com.badlogic.gdx.physics.box2d.Body
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.collisions.ImplicitConversions.{RichFloat, _}
+import model.collisions.ImplicitConversions.RichFloat
 import model.entities.{Hero, State}
-import utils.ApplicationConstants.{CROUCH_OFFSET, HERO_SIZE_SMALL}
+import utils.HeroConstants._
 
 class HeroMovementStrategy(private val entity: Hero, private var speed: Float) extends MovementStrategy {
 
-  private val jumpForce: Float = 7500f.PPM
-  private val runningForce: Float = 1000f.PPM
-  private val slidingForce: Float = 6000f.PPM
-  private val maxRunningVelocity: Float = 35f.PPM
+  private val jumpForce: Float = 7500f.PPM * 5
+  private val runningForce: Float = 1000f.PPM * 5
+  private val slidingForce: Float = 6000f.PPM * 10
+  private val maxRunningVelocity: Float = 35f.PPM * 10
 
   override def apply(command: GameEvent): Unit = {
     if(this.checkState && checkCommand(command)) {
@@ -45,7 +46,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   }
 
   private def jump(): Unit = {
-    this.applyLinearImpulse((0, jumpForce))
+    this.setFixedVelocityY(this.entity.getBody, JUMP_VELOCITY)
     if(this.entity.getState == State.Jumping)
       this.entity.setState(State.Somersault)
     else
@@ -53,26 +54,24 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   }
 
   private def moveRight(): Unit = {
-    this.move(maxRunningVelocity, runningForce, right = true)
+    this.move(RUN_VELOCITY)
+    entity.setFacing(right = true)
   }
 
   private def moveLeft(): Unit = {
-    this.move(-maxRunningVelocity, -runningForce, right = false)
+    this.move(-RUN_VELOCITY)
+    entity.setFacing(right = false)
   }
 
-  private def move(maxVelocity: Float, runForce: Float, right: Boolean) {
+  private def move(runVelocity: Float) {
     if(entity.getState != State.Crouch) {
       if(this.entity.isTouchingGround || (!this.entity.isTouchingGround && !this.entity.isColliding)) {
-        if ((right && entity.getBody.getLinearVelocity.x <= maxVelocity) ||
-          (!right && entity.getBody.getLinearVelocity.x >= maxVelocity)) {
-          this.applyLinearImpulse(this.setSpeed(runForce, 0))
-        }
+        this.setVelocityX(this.entity.getBody, runVelocity)
 
         if(this.entity.getState == State.Standing)
           this.entity.setState(State.Running)
       }
     }
-    entity.setFacing(right = right)
   }
 
   private def crouch(): Unit = {
@@ -91,21 +90,18 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
     }
 
     if (entity.isFacingRight) {
-      this.applyLinearImpulse(this.setSpeed(slidingForce, 0))
+      this.setVelocityX(this.entity.getBody, SLIDE_VELOCITY)
+      this.setVelocityX(this.entity.getFeet.get.getBody, SLIDE_VELOCITY)
     }
     else {
-      this.applyLinearImpulse(this.setSpeed(-slidingForce, 0))
+      this.setVelocityX(this.entity.getBody, -SLIDE_VELOCITY)
+      this.setVelocityX(this.entity.getFeet.get.getBody, -SLIDE_VELOCITY)
     }
 
     this.entity.setState(State.Sliding)
   }
 
-  private def applyLinearImpulse(vector: (Float, Float)): Unit =
-    entity.getBody.applyLinearImpulse(entity.vectorScalar(vector), entity.getBody.getWorldCenter, true)
-
   override def alterSpeed(alteration: Float): Unit = this.speed += alteration
-
-  private def setSpeed(force: (Float, Float)): (Float, Float) = force * speed
 
   override def apply(): Unit = ???
 
@@ -114,4 +110,13 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
       | State.Attack03 | State.BowAttack | State.Hurt | State.ItemPicked => false
     case _ => true
   }
+
+  private def setVelocityX(body: Body, velocity: Float): Unit =
+    body.setLinearVelocity(velocity * speed, body.getLinearVelocity.y)
+
+  private def setVelocityY(body: Body, velocity: Float): Unit =
+    body.setLinearVelocity(body.getLinearVelocity.x, velocity * speed)
+
+  private def setFixedVelocityY(body: Body, velocity: Float): Unit =
+    body.setLinearVelocity(body.getLinearVelocity.x, velocity)
 }

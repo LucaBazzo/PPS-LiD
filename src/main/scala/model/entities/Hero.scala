@@ -12,7 +12,7 @@ import model.helpers.EntitiesFactoryImpl
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
 import model.movement.DoNothingMovementStrategy
 import model.{EntityBody, HeroInteraction}
-import utils.ApplicationConstants.HERO_SIZE
+import utils.HeroConstants._
 
 trait Hero extends LivingEntity {
 
@@ -89,7 +89,7 @@ class HeroImpl(private val entityType: EntityType,
         this.setState(State.Standing)
 
       if(checkNotLittle) {
-        this.changeHeroFixture(HERO_SIZE, (0, 6f))
+        this.changeHeroFixture(HERO_SIZE, CROUCH_END_OFFSET)
         this.setLittle(false)
       }
 

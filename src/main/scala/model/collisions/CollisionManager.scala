@@ -59,6 +59,8 @@ object ImplicitConversions {
 
     def *(mul: Float): (Float, Float) = (base._1 * mul, base._2 * mul)
 
+    def *(tuple: (Float, Float)): (Float, Float) = (base._1 * tuple._1, base._2 * tuple._2)
+
     def +(tuple: (Float, Float)): (Float, Float) = (base._1 + tuple._1, base._2 + tuple._2)
 
     def -(tuple: (Float, Float)): (Float, Float) = (base._1 - tuple._1, base._2 - tuple._2)

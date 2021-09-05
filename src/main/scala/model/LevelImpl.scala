@@ -59,16 +59,24 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
       for(command <- actions){
         if(command.equals(GameEvent.SetMap)) {
           this.isWorldSetted = true
-
-        } else this.hero.notifyCommand(command)
+        } //else this.hero.notifyCommand(command)
       }
     }
 
     if(this.isWorldSetted){
-      this.entitiesList.foreach((entity: Entity) => entity.update())
+
+      if(actions.nonEmpty) {
+        for(command <- actions){
+          if(!command.equals(GameEvent.SetMap)) {
+            this.hero.notifyCommand(command)
+          }
+        }
+      }
 
       //this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
       this.worldStep()
+
+      this.entitiesList.foreach((entity: Entity) => entity.update())
 
       this.entitiesFactory.destroyBodies()
 

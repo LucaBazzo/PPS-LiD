@@ -13,6 +13,7 @@ import model.entities.ItemPools.ItemPools
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, Statistic, _}
 import model.movement._
+import _root_.utils.HeroConstants._
 
 import scala.collection.immutable.HashMap
 
@@ -51,6 +52,8 @@ trait EntitiesFactory {
   def createPolygonalShape(size: (Float, Float)): Shape
 
   def createCircleShape(radius: Float): Shape
+
+  def createEdgeShape(size: (Float, Float)): Shape
 
   def createImmobileEntity(entityType: EntityType = EntityType.Immobile,
                            size: (Float, Float) = (10, 10),
@@ -166,10 +169,10 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       EntitiesFactoryImpl.removeEntity(hero.getFeet.get)
     }
 
-    val feetSize: (Float, Float) = (8.0f, 0.1f)
+    val feetSize: (Float, Float) = (8.0f, 0.2f)
     val bodyPosition = hero.getPosition - (0, hero.getSize._2)
     val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Enemy | EntityCollisionBit.Immobile, createPolygonalShape(feetSize.PPM),
+      EntityCollisionBit.Enemy | EntityCollisionBit.Immobile, createEdgeShape(feetSize),
       bodyPosition, gravityScale = 0, friction = 0.8f)
     EntitiesFactoryImpl.createJoint(hero.getBody, feetBody.getBody)
 
@@ -307,6 +310,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createCircleShape(radius: Float): Shape = {
     val shape: CircleShape = new CircleShape()
     shape.setRadius(radius)
+    shape
+  }
+
+  override def createEdgeShape(size: (Float, Float)): Shape = {
+    val shape: EdgeShape = new EdgeShape()
+    shape.set(size.PPM * -1, size.PPM * (1, -1))
     shape
   }
 
