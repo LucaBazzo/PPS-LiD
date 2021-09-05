@@ -3,6 +3,7 @@ package view.screens.game
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
@@ -12,6 +13,7 @@ import model.entities.{Entity, EntityType, Hero, LivingEntity, Statistic}
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
+import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
@@ -24,11 +26,11 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-//  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map2.tmx")
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map2.tmx")
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
-  //this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
+  this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
   private val spriteViewer: SpriteViewer = new SpriteViewerImpl(this.batch)
 
@@ -43,7 +45,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     this.hud.setCurrentScore(this.entitiesGetter.getScore)
 
     //it will render only what the camera can see
-//    this.orthogonalTiledMapRenderer.setView(camera)
+    this.orthogonalTiledMapRenderer.setView(camera)
   }
 
   private def handleHoldingInput(): Unit = {
@@ -96,7 +98,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     this.camera.update()
 
     // render the map
-//    orthogonalTiledMapRenderer.render()
+    orthogonalTiledMapRenderer.render()
 
     //what will be shown by the camera
 
@@ -123,7 +125,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   }
 
   override def dispose(): Unit = {
-//    orthogonalTiledMapRenderer.dispose()
+    orthogonalTiledMapRenderer.dispose()
     this.entitiesGetter.getWorld.dispose()
     box2DDebugRenderer.dispose()
     hud.dispose()
