@@ -1,11 +1,9 @@
 package controller
 
-import com.badlogic.gdx.physics.box2d._
+import _root_.utils.ApplicationConstants.GAME_LOOP_STEP
 import controller.GameEvent.GameEvent
 import model._
 import model.helpers.EntitiesContainerMonitor
-import _root_.utils.ApplicationConstants.{GAME_LOOP_STEP, GRAVITY_FORCE}
-import com.badlogic.gdx.math.Vector2
 import view._
 
 import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
@@ -30,10 +28,8 @@ class ControllerImpl extends Controller with Observer {
   private val observerManager: ObserverManager = new ObserverManagerImpl()
   this.observerManager.addObserver(this)
 
-  private var level: Level = new LevelImpl(entitiesContainer)
-
-  private val view: View = new ViewImpl(entitiesContainer, observerManager, level)
-  private val model: Model = new ModelImpl(entitiesContainer, level)
+  private val view: View = new ViewImpl(entitiesContainer, observerManager)
+  private val model: Model = new ModelImpl(entitiesContainer)
 
   private val executorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
   private val gameLoop: GameLoop = new GameLoopImpl(model, this)

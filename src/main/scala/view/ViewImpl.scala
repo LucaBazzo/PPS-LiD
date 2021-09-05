@@ -2,10 +2,8 @@ package view
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.{Lwjgl3Application, Lwjgl3ApplicationConfiguration}
-import com.badlogic.gdx.physics.box2d.World
 import controller.ObserverManager
 import main.LostInDungeons
-import model.Level
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants.TITLE
 import view.screens.game.GameScreen
@@ -20,10 +18,9 @@ trait View {
 }
 
 class ViewImpl(private val entitiesGetter: EntitiesGetter,
-               private val observerManager: ObserverManager,
-               private val level: Level) extends View {
+               private val observerManager: ObserverManager) extends View {
 
-  private val screenSetter: LostInDungeons = new LostInDungeons(this.entitiesGetter, this.observerManager, this.level)
+  private val screenSetter: LostInDungeons = new LostInDungeons(this.entitiesGetter, this.observerManager)
 
   val config = new Lwjgl3ApplicationConfiguration
   config.setTitle(TITLE)

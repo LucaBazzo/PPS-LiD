@@ -2,13 +2,16 @@ package model.movement
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.collisions.ImplicitConversions.{RichFloat, _}
 import model.entities.{Hero, State}
+import utils.HeroConstants.LADDER_CLIMB_VELOCITY
 
+/** Implementation of the Hero Movement Strategy when the hero is climbing a ladder
+ *
+ *  @constructor the hero ladder climb movement strategy
+ *  @param entity the entity that will be moved in the world
+ *  @param speed a multiplier to the climbing velocity of the hero
+ */
 class LadderClimbMovementStrategy(private val entity: Hero, private var speed: Float) extends MovementStrategy {
-
-  private val climbForce: Float = 2500f.PPM
-  private val maxClimbVelocity: Float = 70f.PPM
 
   override def apply(command: GameEvent): Unit = {
     if(checkState && checkCommand(command)) {
@@ -21,9 +24,9 @@ class LadderClimbMovementStrategy(private val entity: Hero, private var speed: F
   }
 
   override def stopMovement(): Unit = {
-    this.entity.getBody.setLinearVelocity(0,0)
+    this.entity.setVelocity((0,0))
     if(this.entity.getFeet.nonEmpty)
-      this.entity.getFeet.get.getBody.setLinearVelocity(0,0)
+      this.entity.getFeet.get.setVelocity((0,0))
   }
 
   override def alterSpeed(alteration: Float): Unit = this.speed += alteration
@@ -45,30 +48,18 @@ class LadderClimbMovementStrategy(private val entity: Hero, private var speed: F
   }
 
   private def climb(): Unit = {
-    this.move(maxClimbVelocity, climbForce, up = true)
+    this.entity.setVelocityY(LADDER_CLIMB_VELOCITY, this.speed)
     this.entity.setState(State.LadderClimb)
   }
 
   private def descend(): Unit = {
-    this.move(-maxClimbVelocity, -climbForce, up = false)
+    this.entity.setVelocityY(-LADDER_CLIMB_VELOCITY, this.speed)
     this.entity.setState(State.LadderDescend)
-  }
-
-  private def move(maxVelocity: Float, force: Float, up: Boolean): Unit = {
-    if (up && entity.getBody.getLinearVelocity.y <= maxVelocity ||
-          entity.getBody.getLinearVelocity.y >= maxVelocity) {
-      this.applyLinearImpulse(this.setSpeed(0, force))
-    }
   }
 
   private def idle(): Unit = {
     this.stopMovement()
     this.entity.setState(State.LadderIdle)
   }
-
-  private def applyLinearImpulse(vector: (Float, Float)): Unit =
-    entity.getBody.applyLinearImpulse(entity.vectorScalar(vector), entity.getBody.getWorldCenter, true)
-
-  private def setSpeed(force: (Float, Float)): (Float, Float) = force * speed
 }
 

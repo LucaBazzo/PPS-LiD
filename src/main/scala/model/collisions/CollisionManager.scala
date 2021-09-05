@@ -55,6 +55,8 @@ object ImplicitConversions {
   implicit class RichTuple2(base: (Float, Float)) {
     def PPM: (Float, Float) = base / PIXELS_PER_METER
 
+    def INV: (Float, Float) = (-base._1, -base._2)
+
     def /(div: Float): (Float, Float) = (base._1 / div, base._2 / div)
 
     def *(mul: Float): (Float, Float) = (base._1 * mul, base._2 * mul)
@@ -64,6 +66,7 @@ object ImplicitConversions {
     def +(tuple: (Float, Float)): (Float, Float) = (base._1 + tuple._1, base._2 + tuple._2)
 
     def -(tuple: (Float, Float)): (Float, Float) = (base._1 - tuple._1, base._2 - tuple._2)
+
   }
 }
 

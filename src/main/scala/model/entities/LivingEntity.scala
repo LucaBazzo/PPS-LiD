@@ -10,9 +10,6 @@ trait LivingEntity extends MobileEntity {
   def sufferDamage(damage: Float)
   def getLife: Float
   def setAttackStrategy(strategy: AttackStrategy)
-  def getStatistics: Map[Statistic, Float]
-  def getStatistic(statistic: Statistic): Float
-  def alterStatistics(statistic: Statistic, alteration: Float)
 }
 
 class LivingEntityImpl(private val entityType: EntityType,
@@ -37,15 +34,20 @@ class LivingEntityImpl(private val entityType: EntityType,
   }
 
   override def sufferDamage(damage: Float): Unit = {
-    var trueDamage = damage - this.stats(Statistic.Defence)
-    if(trueDamage > 0) {
-      if(this.getStatistic(Statistic.CurrentHealth) < trueDamage) {
-        trueDamage = this.getStatistic(Statistic.CurrentHealth)
+    if(this.getStatistic(Statistic.Defence).nonEmpty && this.getStatistic(Statistic.CurrentHealth).nonEmpty){
+      val currentHealth = this.getStatistic(Statistic.CurrentHealth).get
+      val defence = this.getStatistic(Statistic.Defence).get
+
+      var trueDamage = damage - defence
+      if(trueDamage > 0) {
+        if(currentHealth < trueDamage) {
+          trueDamage = currentHealth
+        }
+        this.alterStatistics(Statistic.CurrentHealth, -trueDamage)
       }
-      this.alterStatistics(Statistic.CurrentHealth, -trueDamage)
-    }
-    if (this.getStatistic(Statistic.CurrentHealth) <= 0) {
-      this.state = State.Dying
+      if (currentHealth <= 0) {
+        this.state = State.Dying
+      }
     }
   }
 

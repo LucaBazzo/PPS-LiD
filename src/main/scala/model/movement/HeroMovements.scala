@@ -1,18 +1,17 @@
 package model.movement
 
-import com.badlogic.gdx.physics.box2d.Body
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.collisions.ImplicitConversions.RichFloat
 import model.entities.{Hero, State}
 import utils.HeroConstants._
 
+/** Implementation of the normal Hero Movement Strategy
+ *
+ *  @constructor the main hero movemnt strategy
+ *  @param entity the entity that will be moved in the world
+ *  @param speed a multiplier to the running velocity of the hero
+ */
 class HeroMovementStrategy(private val entity: Hero, private var speed: Float) extends MovementStrategy {
-
-  private val jumpForce: Float = 7500f.PPM * 5
-  private val runningForce: Float = 1000f.PPM * 5
-  private val slidingForce: Float = 6000f.PPM * 10
-  private val maxRunningVelocity: Float = 35f.PPM * 10
 
   override def apply(command: GameEvent): Unit = {
     if(this.checkState && checkCommand(command)) {
@@ -28,10 +27,14 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   }
 
   override def stopMovement(): Unit = {
-    this.entity.getBody.setLinearVelocity(0,0)
+    this.entity.setVelocity((0,0))
     if(this.entity.getFeet.nonEmpty)
-      this.entity.getFeet.get.getBody.setLinearVelocity(0,0)
+      this.entity.getFeet.get.setVelocity((0,0))
   }
+
+  override def alterSpeed(alteration: Float): Unit = this.speed += alteration
+
+  override def apply(): Unit = ???
 
   private def checkCommand(command: GameEvent): Boolean = command match {
     case GameEvent.Up => entity.getState != State.Falling &&
@@ -46,7 +49,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   }
 
   private def jump(): Unit = {
-    this.setFixedVelocityY(this.entity.getBody, JUMP_VELOCITY)
+    this.entity.setVelocityY(JUMP_VELOCITY)
     if(this.entity.getState == State.Jumping)
       this.entity.setState(State.Somersault)
     else
@@ -66,7 +69,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   private def move(runVelocity: Float) {
     if(entity.getState != State.Crouch) {
       if(this.entity.isTouchingGround || (!this.entity.isTouchingGround && !this.entity.isColliding)) {
-        this.setVelocityX(this.entity.getBody, runVelocity)
+        this.entity.setVelocityX(runVelocity, this.speed)
 
         if(this.entity.getState == State.Standing)
           this.entity.setState(State.Running)
@@ -90,33 +93,20 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
     }
 
     if (entity.isFacingRight) {
-      this.setVelocityX(this.entity.getBody, SLIDE_VELOCITY)
-      this.setVelocityX(this.entity.getFeet.get.getBody, SLIDE_VELOCITY)
+      this.entity.setVelocityX(SLIDE_VELOCITY)
+      this.entity.getFeet.get.setVelocityX(SLIDE_VELOCITY)
     }
     else {
-      this.setVelocityX(this.entity.getBody, -SLIDE_VELOCITY)
-      this.setVelocityX(this.entity.getFeet.get.getBody, -SLIDE_VELOCITY)
+      this.entity.setVelocityX(-SLIDE_VELOCITY)
+      this.entity.getFeet.get.setVelocityX(-SLIDE_VELOCITY)
     }
 
     this.entity.setState(State.Sliding)
   }
-
-  override def alterSpeed(alteration: Float): Unit = this.speed += alteration
-
-  override def apply(): Unit = ???
 
   private def checkState: Boolean = entity.getState match {
     case State.Sliding | State.Attack01 | State.Attack02
       | State.Attack03 | State.BowAttack | State.Hurt | State.ItemPicked => false
     case _ => true
   }
-
-  private def setVelocityX(body: Body, velocity: Float): Unit =
-    body.setLinearVelocity(velocity * speed, body.getLinearVelocity.y)
-
-  private def setVelocityY(body: Body, velocity: Float): Unit =
-    body.setLinearVelocity(body.getLinearVelocity.x, velocity * speed)
-
-  private def setFixedVelocityY(body: Body, velocity: Float): Unit =
-    body.setLinearVelocity(body.getLinearVelocity.x, velocity)
 }

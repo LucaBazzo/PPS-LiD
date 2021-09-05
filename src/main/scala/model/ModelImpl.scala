@@ -16,7 +16,9 @@ trait Model {
   def isGameOver: Boolean
 }
 
-class ModelImpl(private val entitiesSetter: EntitiesSetter, private val level: Level) extends Model {
+class ModelImpl(private val entitiesSetter: EntitiesSetter) extends Model {
+
+  private val level: Level = new LevelImpl(entitiesSetter)
 
   private var levelNumber: Int = 1
 

@@ -176,7 +176,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       bodyPosition, gravityScale = 0, friction = 0.8f)
     EntitiesFactoryImpl.createJoint(hero.getBody, feetBody.getBody)
 
-    val heroFeet: ImmobileEntity = ImmobileEntity(EntityType.Immobile, feetBody, feetSize.PPM)
+    val heroFeet: MobileEntity = new MobileEntityImpl(EntityType.Mobile, feetBody, feetSize.PPM)
     heroFeet.setCollisionStrategy(new FeetCollisionStrategy())
 
     hero.setFeet(heroFeet)
