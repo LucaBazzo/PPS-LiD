@@ -14,12 +14,10 @@ import scala.util.Random
  * and load it, handling inputs and closing the application.
  */
 trait Controller {
-
   def stopExecutorService()
   def gameOver()
   def newLevel()
 }
-
 
 /** This class represent the Controller of the all game.
  */
@@ -29,10 +27,8 @@ class ControllerImpl extends Controller with Observer {
   private val observerManager: ObserverManager = new ObserverManagerImpl()
   this.observerManager.addObserver(this)
 
-//  private var rooms: Array[String] = Array("hero-room", "room2")
-  private var rooms: Array[String] = Array()
-  rooms = rooms :+ "hero-room"
-  for(n <- 1 to 3) rooms = rooms :+ ROOM_MAP_NAMES(Random.between(0,ROOM_MAP_NAMES.size))
+  private var rooms: Array[String] = Array("hero-room")
+  for(n <- 1 to 2) rooms = rooms :+ ROOM_MAP_NAMES(Random.between(0,ROOM_MAP_NAMES.size))
 //  rooms = rooms :+ "boss-room"
 
   private val view: View = new ViewImpl(entitiesContainer, observerManager, rooms)
