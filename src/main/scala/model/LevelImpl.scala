@@ -48,7 +48,6 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 //  EntitiesFactoryImpl.createSkeletonEnemy((+280f, 550f))
 //  EntitiesFactoryImpl.createWizardBossEnemy((+280f, 550f))
 //  EntitiesFactoryImpl.createWormEnemy((280f, 550f))
-//  EntitiesFactoryImpl.createSlimeEnemy((270,300))
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)

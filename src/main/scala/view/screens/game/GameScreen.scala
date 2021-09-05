@@ -3,6 +3,7 @@ package view.screens.game
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
+import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
@@ -16,17 +17,26 @@ import view.inputs.GameInputProcessor
 import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
+import java.util.concurrent.{ExecutorService, Executors}
+
 class GameScreen(private val entitiesGetter: EntitiesGetter,
-                 private val observerManager: ObserverManager) extends ScreenAdapter{
+                 private val observerManager: ObserverManager,
+                 private val rooms: Array[String]) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
+  camera.translate(300f, 300f)
   private val batch: SpriteBatch = new SpriteBatch()
 
   private val box2DDebugRenderer: Box2DDebugRenderer = new Box2DDebugRenderer()
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map2.tmx")
+  private var tiledMaps: Array[TiledMap] = Array()
+  rooms.foreach(room => {
+    tiledMaps = tiledMaps :+ TileMapHelper.getTiledMap(room)
+  })
+
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMapRenderer(null)
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
@@ -36,7 +46,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
-  this.observerManager.notifyEvent(GameEvent.SetMap)
+  val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+  val task: Runnable = () => {
+    Thread.sleep(3000)
+    this.observerManager.notifyEvent(GameEvent.SetMap)
+  }
+  executorService.submit(task)
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
@@ -97,14 +112,13 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
     this.camera.update()
 
-    // render the map
-    orthogonalTiledMapRenderer.render()
+    this.tiledMaps.foreach(tiledMap => {
+      this.orthogonalTiledMapRenderer.setMap(tiledMap)
+      orthogonalTiledMapRenderer.render()
+    })
 
     //what will be shown by the camera
-
     batch.setProjectionMatrix(camera.combined)
-
-
 
     batch.begin()
     // render objects inside

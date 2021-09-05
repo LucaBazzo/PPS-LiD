@@ -23,5 +23,12 @@ object ApplicationConstants {
 
   val HERO_SIZE: (Float, Float) = (8.5f, 15f)
 
-  val HERO_SIZE_SMALL: (Float, Float) = (8.5f, 8f)
+  val HERO_OFFSET: (Float, Float) = (230f, 210f)
+
+  val HERO_SIZE_SMALL: (Float, Float) = (8.5f, 6f)
+
+  val HERO_ROOM_MAP_NAME: String = "hero-room"
+  val BOSS_ROOM_MAP_NAME: String = "boss-room"
+  val ROOM_MAP_NAMES: Array[String] = Array("room1-final", "room2-final", "room3-final")
+
 }

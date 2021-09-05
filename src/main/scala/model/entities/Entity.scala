@@ -20,7 +20,7 @@ object State extends Enumeration {
 object EntityType extends Enumeration {
   type EntityType = Value
   val Hero,
-      Mobile, Immobile, Enemy, //this values will not show any sprite
+      Mobile, Immobile, Enemy, SpawnZone, //this values will not show any sprite
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
       EnemySkeleton, EnemySlime, EnemyWorm, EnemyBossWizard,

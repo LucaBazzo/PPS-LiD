@@ -16,16 +16,20 @@ trait Model {
   def isGameOver: Boolean
 }
 
-class ModelImpl(private val entitiesSetter: EntitiesSetter, private val level: Level) extends Model {
+class ModelImpl(private val entitiesSetter: EntitiesSetter,
+                private  val rooms: Array[String]) extends Model {
 
-  private var levelNumber: Int = 1
+  private val levelNumber: Int = 1
+
+  private val level: Level = new LevelImpl(entitiesSetter)
 
   override def update(actions: List[GameEvent]): Unit = {
     for (action <- actions) {
       if(action.equals(GameEvent.SetMap)) {
 
         Gdx.app.postRunnable(
-          () => TileMapHelper.setWorld(this.level, "assets/maps/map2.tmx"))
+          () => TileMapHelper.setWorld(this.level, this.rooms)
+        )
       }
 
     }

@@ -61,21 +61,21 @@ trait EntitiesFactory {
                            collisions: Short = 0): Entity
 
   def createDoor(size: (Float, Float) = (10, 10),
-                          position: (Float, Float) = (0, 0),
-                          collisions: Short = 0): Entity
+                 position: (Float, Float) = (0, 0),
+                 collisions: Short = 0): Entity
 
   def createAttackPattern(entityType: EntityType = EntityType.Mobile,
-                          rotatingBodySize: (Float, Float) = (1,1),
-                          pivotPoint: (Float, Float) = (0,0),
-                          rotatingBodyDistance: (Float, Float) = (0,0),
+                          rotatingBodySize: (Float, Float) = (1, 1),
+                          pivotPoint: (Float, Float) = (0, 0),
+                          rotatingBodyDistance: (Float, Float) = (0, 0),
                           angularVelocity: Float = 0,
                           startingAngle: Float = 0,
                           sourceEntity: LivingEntity): MobileEntity
 
   def createFireballAttack(sourceEntity: LivingEntity, targetEntity: Entity): MobileEntity
 
-  def createMeleeAttack(sourceEntity:LivingEntity,
-                        targetEntity:Entity): MobileEntity
+  def createMeleeAttack(sourceEntity: LivingEntity,
+                        targetEntity: Entity): MobileEntity
 
   def createArrowProjectile(entity: LivingEntity): MobileEntity
 
@@ -92,6 +92,10 @@ trait EntitiesFactory {
   def changeCollisions(entity: Entity, entityType: Short): Unit
 
   def applyEntityCollisionChanges(): Unit
+
+  // TODO: convertire createEnemies in createSpawnZone e lasicare a levelImpl la generazione dei nemici nelle zone di spawn
+  def createEnemies(size: (Float, Float) = (10, 10),
+                    position: (Float, Float) = (0, 0)): Unit
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -121,7 +125,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createHeroEntity(): Hero = {
-    val position: (Float, Float) = (+100f, 50f)
+    val position: (Float, Float) = HERO_OFFSET
     val size: (Float, Float) = HERO_SIZE
 
     val statistic: Map[Statistic, Float] = Map(
@@ -202,8 +206,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     enemy.setBehaviour(behaviours)
 
     enemy.setCollisionStrategy(new DoNothingOnCollision())
-//    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
-//    enemy.setAttackStrategy(new RangedAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    //    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    //    enemy.setAttackStrategy(new RangedAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
     enemy
   }
 
@@ -259,6 +263,17 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
     immobileEntity
   }
+
+  // TODO: convertire createEnemies in createSpawnZone e lasciare a levelImpl la generazione dei nemici nelle zone di spawn
+  override def createEnemies(size: (Float, Float) = (10, 10),
+                             position: (Float, Float) = (0, 0)):Unit =  {
+    // pick the number of enemies to create
+
+    // pick the type of the enemies
+//    this.createWizardBossEnemy((position.x + 10, position.y+10))
+
+  }
+
 
   override def createDoor(size: (Float, Float) = (10, 10),
                           position: (Float, Float) = (0, 0),
