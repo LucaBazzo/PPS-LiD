@@ -1,15 +1,10 @@
 package view.screens.helpers
 
-import com.badlogic.gdx.{Gdx, utils}
-import com.badlogic.gdx.files.FileHandle
-import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.maps.MapProperties
 import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
-import com.badlogic.gdx.maps.tiled.{TiledMap, TiledMapRenderer, TmxMapLoader}
+import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
 import com.badlogic.gdx.math.Rectangle
-import com.badlogic.gdx.utils.XmlReader
-import com.badlogic.gdx.utils.XmlReader.Element
 import model.Level
 import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
@@ -69,9 +64,18 @@ object TileMapHelper {
 
         layer.getName() match {
           case "ground" | "bridge" => {
+              entity = EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack)
+          }
+          case "door" => {
+            entity = EntitiesFactoryImpl.createDoor(size, position)
+          }
+          case "chest" => {
             entity = EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack)
           }
           case "water" | "lava" | "ladder" => {
+            entity = EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile)
+          }
+          case "enemy" => {
             entity = EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile)
           }
           case _ => {
@@ -80,15 +84,14 @@ object TileMapHelper {
         }
 
         if (entity != null) level.addEntity(entity)
-
       })
+
     })
 
     //update x offset
     val mapProperties: MapProperties = tiledMap.getProperties
     val width: Integer = mapProperties.get("width", classOf[Integer])
     this.xOffset = this.xOffset + width
-
   }
 
 }
