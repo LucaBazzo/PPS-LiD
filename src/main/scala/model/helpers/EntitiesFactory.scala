@@ -43,6 +43,8 @@ trait EntitiesFactory {
 
   def createWormEnemy(position: (Float, Float)): Enemy
 
+  def createWizardBossEnemy(position: (Float, Float)): Enemy
+
   def createItem(PoolName: ItemPools,
                  size: (Float, Float) = (5f, 5f),
                  position: (Float, Float) = (0, 0),
@@ -125,7 +127,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val statistic: Map[Statistic, Float] = Map(
       Statistic.Health -> 1000,
       Statistic.CurrentHealth -> 1000,
-      Statistic.Strength -> 100,
+      Statistic.Strength -> 2000,
       Statistic.MovementSpeed -> 1,
       Statistic.Defence -> 0)
 
@@ -173,11 +175,38 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val enemy:Enemy = createEnemyEntity(position, size, WORM_STATS, score, EntityType.EnemyWorm)
 
-    enemy.setCollisionStrategy(new DoNothingOnCollision())
-    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
-    enemy.setAttackStrategy(new RangedAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy, "",
+      new DoNothingOnCollision, new DoNotMove(), new RangedAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+
+    enemy.setBehaviour(behaviours)
     enemy
   }
+
+  override def createWizardBossEnemy(position: (Float, Float)): Enemy = {
+    val size:(Float, Float) = (15f, 30f)
+    val score: Int = 1000
+
+    val enemy:Enemy = createEnemyEntity(position, size, WIZARD_BOSS_STATS, score, EntityType.EnemyBossWizard)
+
+    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy, "PHASE 1", new DoNothingOnCollision, new DoNotMove(), new DoNotAttack() )
+    val p2AttackStrategy = new RangedAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero]))
+    behaviours.addBehaviour("PHASE 2", new DoNothingOnCollision, new DoNotMove(), p2AttackStrategy)
+    behaviours.addBehaviour("PHASE 3",
+      new DoNothingOnCollision,
+      new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
+      new MeleeAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    behaviours.addTransition("PHASE 1", "PHASE 2", new TimePredicate(5000))
+    behaviours.addTransition("PHASE 2", "PHASE 3", new CompletedAttackPredicate(p2AttackStrategy, 3))
+    behaviours.addTransition("PHASE 3", "PHASE 1", new HealthThresholdPredicate(enemy, 50))
+
+    enemy.setBehaviour(behaviours)
+
+    enemy.setCollisionStrategy(new DoNothingOnCollision())
+//    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+//    enemy.setAttackStrategy(new RangedAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    enemy
+  }
+
 
   override def createEnemyEntity(position: (Float, Float),
                                  size: (Float, Float),
@@ -374,7 +403,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createBody(bodyDef: BodyDef): Body = this.level.getWorld.createBody(bodyDef)
 
   // TODO: rimettere private
-  def defineEntityBody(bodyType: BodyType,
+  private def defineEntityBody(bodyType: BodyType,
                                entityType: Short,
                                collisions: Short,
                                shape: Shape,
