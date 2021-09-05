@@ -2,14 +2,14 @@ package model.movement
 
 import controller.GameEvent.GameEvent
 
-/** The strategy that a Mobile Entity use to move inside the world
+/** The strategy that a Mobile Entity use to move inside the world.
  *
  */
 trait MovementStrategy {
 
   def apply()
 
-  /** Apply the movement strategy given a specific command
+  /** Apply the movement strategy given a specific command.
    *
    *  @param command the movement command
    */
@@ -20,7 +20,7 @@ trait MovementStrategy {
    */
   def stopMovement():Unit = ???
 
-  /** Changes the speed that will be applied to the movement
+  /** Changes the speed that will be applied to the movement.
    *
    * @param alteration the value to be added
    *
@@ -28,7 +28,7 @@ trait MovementStrategy {
   def alterSpeed(alteration: Float): Unit = ???
 }
 
-/** Movement strategy that does nothing
+/** Movement strategy that does nothing.
  *
  */
 case class DoNothingMovementStrategy() extends MovementStrategy {

@@ -7,88 +7,88 @@ import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State.State
-import model.entities.Statistic.Statistic
+import model.entities.Statistic._
 import model.helpers.EntitiesFactoryImpl
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
-import model.movement.DoNothingMovementStrategy
+import model.movement.{DoNothingMovementStrategy, HeroMovementStrategy}
 import model.{EntityBody, HeroInteraction}
 import utils.HeroConstants._
 
 /** Represents the entity that will be moved by the player, it can move or attack
- *  based on the command received, change its size and interact with the environment
+ *  based on the command received, change its size and interact with the environment.
  */
 trait Hero extends LivingEntity {
 
-  /** Implementation of the Entity Hero that will be command by the player
+  /** Implementation of the Entity Hero that will be command by the player.
    *
    *  @param command the command from the player to the hero
    */
   def notifyCommand(command: GameEvent)
 
-  /** Check if the hero is crouch or sliding
+  /** Check if the hero is crouch or sliding.
    *
    *  @return true if the hero is little
    */
   def isLittle: Boolean
 
-  /** Called when the hero changes its size
+  /** Called when the hero changes its size.
    *
    *  @param little true if the hero has become little
    */
   def setLittle(little: Boolean)
 
-  /** Changes the hero box that will collide with another entities
+  /** Changes the hero box that will collide with another entities.
    *
    *  @param newSize the new size of the box
    *  @param addCoordinates the offset from the previous position
    */
   def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0))
 
-  /** Called when the hero pick an important item
+  /** Called when the hero pick an important item.
    *
    *  @param itemType the type of the item picked
    */
   def itemPicked(itemType: Items)
 
-  /** Check if the items specified was already picked by the hero
+  /** Check if the items specified was already picked by the hero.
    *
    *  @return true if the item type is present
    */
   def isItemPicked(item: Items): Boolean
 
   /** Sets an environment interaction for the hero, when the command choose is notified
-   *  to the hero, itself will call the EnvironmentInteraction
+   *  to the hero, itself will call the EnvironmentInteraction.
    *
    *  @param interaction A pair of Command - EnvironmentInteraction
    */
   def setEnvironmentInteraction(interaction: Option[HeroInteraction])
 
-  /** Stops the update method of the hero for a chosen time
+  /** Stops the update method of the hero for a chosen time.
    *
    *  @param time how much time the hero will not perform the update method
    */
   def stopHero(time: Float)
 
-  /** Sets the feet of the hero, used to check if the hero is touching the ground
+  /** Sets the feet of the hero, used to check if the hero is touching the ground.
    *
    *  @param feet a mobile entity that will be attached at the bottom of the hero body
    */
   def setFeet(feet: MobileEntity)
 
-  /** Returns the hero's feet
+  /** Returns the hero's feet.
    *
    *  @return the feet if presents
    */
   def getFeet: Option[MobileEntity]
 
-  /** Check if the hero is touching the ground with the feet
+  /** Check if the hero is touching the ground with the feet.
    *
    *  @return true if it touching the ground
    */
   def isTouchingGround: Boolean
 }
 
-/** Implementation of the Entity Hero that will be command by the player
+/** Implementation of the Entity Hero that will be command by the player.
  *
  *  @constructor create a new hero
  *  @param entityType the type of entity that will be rendered by the view
@@ -202,8 +202,11 @@ class HeroImpl(private val entityType: EntityType,
 
   override def isItemPicked(item: Items): Boolean = this.itemsPicked.contains(item)
 
-  override def setEnvironmentInteraction(interaction: Option[HeroInteraction]): Unit =
+  override def setEnvironmentInteraction(interaction: Option[HeroInteraction]): Unit = {
     this.interaction = interaction
+    if(interaction.isEmpty)
+      this.restoreNormalMovementStrategy()
+  }
 
   override def stopHero(time: Float): Unit = this.waitTimer = time
 
@@ -228,6 +231,13 @@ class HeroImpl(private val entityType: EntityType,
   override def setFeet(feet: MobileEntity): Unit = this.feet = Option.apply(feet)
 
   override def getFeet: Option[MobileEntity] = this.feet
+
+  private def restoreNormalMovementStrategy(): Unit = {
+    this.setMovementStrategy(new HeroMovementStrategy(this, this.getStatistic(MovementSpeed).get))
+    this.getEntityBody.setGravityScale()
+    this.setState(State.Falling)
+    this.getBody.setAwake(true)
+  }
 
   private def isNotWaiting: Boolean = this.waitTimer <= 0
   private def decrementWaiting(value: Float): Unit = this.waitTimer -= value

@@ -16,7 +16,7 @@ class TestHero extends AnyFlatSpec{
   }
 
 
-  "An hero" should "change his behaviour based on the commands received" in {
+  "A hero" should "change his behaviour based on the commands received" in {
     initialize()
     assertResult(State.Standing)(hero.getState)
 
@@ -33,7 +33,7 @@ class TestHero extends AnyFlatSpec{
     assertResult(State.Somersault)(hero.getState)
   }
 
-  "An hero" should "update himself based on the physics and state he is" in {
+  "A hero" should "update himself based on the physics and state he is" in {
     initialize()
     assertResult(State.Standing)(hero.getState)
 
@@ -52,7 +52,7 @@ class TestHero extends AnyFlatSpec{
     assertResult(State.Standing)(hero.getState)
   }
 
-  "An hero" should "jumps two times until he touches the ground" in {
+  "A hero" should "jumps two times until he touches the ground" in {
     initialize()
     hero.notifyCommand(Up)
     hero.update()
@@ -105,7 +105,7 @@ class TestHero extends AnyFlatSpec{
     assert(hero.isTouchingGround)
   }
 
-  "An hero" should "have statistics that can be altered" in {
+  "A hero" should "have statistics that can be altered" in {
     initialize()
     var statistics: Map[Statistic, Float] = hero.getStatistics
 

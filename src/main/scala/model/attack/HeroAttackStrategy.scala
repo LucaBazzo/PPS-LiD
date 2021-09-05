@@ -8,7 +8,7 @@ import model.entities._
 import model.helpers.EntitiesFactoryImpl
 import utils.HeroConstants._
 
-/** Implementation of the Hero Attack Strategy with sword and bow
+/** Implementation of the Hero Attack Strategy with sword and bow.
  *
  *  @constructor the main hero attack strategy
  *  @param entity the entity that generates the attacks

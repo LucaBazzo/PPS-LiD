@@ -5,7 +5,7 @@ import controller.GameEvent.GameEvent
 import model.entities.{Hero, State}
 import utils.HeroConstants.LADDER_CLIMB_VELOCITY
 
-/** Implementation of the Hero Movement Strategy when the hero is climbing a ladder
+/** Implementation of the Hero Movement Strategy when the hero is climbing a ladder.
  *
  *  @constructor the hero ladder climb movement strategy
  *  @param entity the entity that will be moved in the world
