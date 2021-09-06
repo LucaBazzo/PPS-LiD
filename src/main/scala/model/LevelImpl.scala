@@ -1,6 +1,7 @@
 package model
 
-import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
+import _root_.utils.ApplicationConstants._
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent
 import controller.GameEvent.GameEvent
@@ -8,7 +9,9 @@ import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionManager, EntityCollisionBit}
 import model.entities.ItemPools.ItemPools
 import model.entities._
-import model.helpers._
+import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter, ItemPoolImpl, WorldUtilities}
+import _root_.utils.ApplicationConstants
+import _root_.utils.HeroConstants
 
 trait Level {
 
@@ -47,8 +50,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
 //  EntitiesFactoryImpl.createWizardBossEnemy(
 //    ApplicationConstants.HERO_OFFSET._1+150, ApplicationConstants.HERO_OFFSET._2)
-//  EntitiesFactoryImpl.createSkeletonEnemy(
-//    ApplicationConstants.HERO_OFFSET._1+90, ApplicationConstants.HERO_OFFSET._2)
+  EntitiesFactoryImpl.createSkeletonEnemy((HeroConstants.HERO_OFFSET._1+70, HeroConstants.HERO_OFFSET._2))
 //  EntitiesFactoryImpl.createSkeletonEnemy(
 //    ApplicationConstants.HERO_OFFSET._1+150, ApplicationConstants.HERO_OFFSET._2)
 
@@ -56,22 +58,39 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   this.entitiesSetter.setWorld(this.world)
   this.entitiesSetter.setScore(0)
 
-  this.world.setContactListener(new CollisionManager(this))
+  this.world.setContactListener(new CollisionManager(this.entitiesSetter.asInstanceOf[EntitiesGetter]))
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
     if(actions.nonEmpty) {
       for(command <- actions){
         if(command.equals(GameEvent.SetMap)) {
           this.isWorldSetted = true
-
-        } else this.hero.notifyCommand(command)
+        } //else this.hero.notifyCommand(command)
       }
     }
 
     if(this.isWorldSetted){
-      this.entitiesList.foreach((entity: Entity) => entity.update())
+      if(actions.nonEmpty) {
+        for(command <- actions){
+          if(!command.equals(GameEvent.SetMap)) {
+            this.hero.notifyCommand(command)
+          }
+        }
+      }
 
-      this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+      //this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+      this.worldStep()
+
+//      for ( r <- EntitiesFactoryImpl.temp){
+//        r.run()
+//        EntitiesFactoryImpl.temp = EntitiesFactoryImpl.temp.filterNot(e => e.equals(r))
+//        println(EntitiesFactoryImpl.temp.size)
+//      }
+
+
+      this.entitiesFactory.createEnemies()
+
+      this.entitiesList.foreach((entity: Entity) => entity.update())
 
       this.entitiesFactory.destroyBodies()
 
@@ -108,5 +127,19 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   override def spawnItem(pool: ItemPools): Unit = {
     entitiesFactory.createItem(pool)
+  }
+
+  private var accumulator: Float = 0f
+
+  private def worldStep() {
+    val delta: Float = Gdx.graphics.getDeltaTime
+
+    accumulator += Math.min(delta, 0.25f)
+
+    while (accumulator >= TIME_STEP) {
+      accumulator -= TIME_STEP
+
+      world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+    }
   }
 }

@@ -36,7 +36,7 @@ class Enemy(private val entityType: EntityType,
 
   override def sufferDamage(damage: Float): Unit = {
     super.sufferDamage(damage)
-    if (this.getStatistic(Statistic.CurrentHealth) <= 0) {
+    if (this.getStatistic(Statistic.CurrentHealth).get <= 0) {
       this.state = State.Dying
     }
 
@@ -132,7 +132,7 @@ class TimePredicate(time:Long) extends Predicate {
 }
 
 class HealthThresholdPredicate(entity:LivingEntity, percentage:Float) extends Predicate {
-  val healthThreshold = entity.getStatistic(Statistic.Health) * this.percentage / 100
+  val healthThreshold = entity.getStatistic(Statistic.Health).get * this.percentage / 100
 
   override def apply(): Boolean = this.entity.getLife <= this.healthThreshold
 

@@ -1,8 +1,8 @@
 import controller.GameEvent
 import model.entities.Items.Items
-import model.{Level, LevelImpl}
 import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesSetter}
+import model.helpers.EntitiesContainerMonitor
+import model.{Level, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class TestItem extends AnyFlatSpec {
@@ -55,7 +55,7 @@ class TestItem extends AnyFlatSpec {
     val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
     val effect = item.collect()
     val preStat: Float = hero.getStatistics(Statistic.Defence)
-    item.collisionDetected(hero)
+    item.collisionDetected(Option.apply(hero))
     assert(hero.getStatistics(effect._1) == preStat + effect._2)
   }
 }

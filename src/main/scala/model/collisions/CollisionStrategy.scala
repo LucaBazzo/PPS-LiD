@@ -6,16 +6,33 @@ import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item,
 
 trait CollisionStrategy {
   def apply(entity: Entity)
+  def release(entity: Entity)
 }
 
-class CollisionStrategyImpl extends CollisionStrategy {
+class DoNothingOnCollision() extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = {}
+
+  override def release(entity: Entity): Unit = {}
+}
+
+class FeetCollisionStrategy extends DoNothingOnCollision {
+  override def apply(entity: Entity): Unit = entity match {
+    case _ => println("Foot Collision Detected with" + entity.toString)
+  }
+
+  override def release(entity: Entity): Unit = entity match {
+    case _ => println("Foot Release Detected with" + entity.toString)
+  }
+}
+
+class CollisionStrategyImpl extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
     case i:Item =>  println("Collect item: " + i.getEnumVal)
     case _ => println("Collision Detected with" + entity.toString)
   }
 }
 
-class ItemCollisionStrategy(private val item: Item) extends CollisionStrategy {
+class ItemCollisionStrategy(private val item: Item) extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
     case h:Hero => println("Hero picked up item")
                    val effect = item.collect()
@@ -25,7 +42,7 @@ class ItemCollisionStrategy(private val item: Item) extends CollisionStrategy {
   }
 }
 
-class DoorCollisionStrategy(private val door: ImmobileEntity) extends CollisionStrategy {
+class DoorCollisionStrategy(private val door: ImmobileEntity) extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => print("Hero opened door")
                     this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
@@ -34,13 +51,11 @@ class DoorCollisionStrategy(private val door: ImmobileEntity) extends CollisionS
   }
 }
 
-class DoNothingOnCollision() extends CollisionStrategy {
-  override def apply(entity: Entity): Unit = {}
-}
+
 
 class ApplyDamage(private val target: Entity => Boolean,
                   private val stats: Map[Statistic, Float])
-  extends CollisionStrategy {
+  extends DoNothingOnCollision {
 
   override def apply(entity: Entity): Unit = {
     if (target(entity)) {

@@ -13,8 +13,9 @@ object State extends Enumeration {
   type State = Value
   val Standing, Crouch, Sliding,
       Running, Jumping, Falling, Somersault,
+      LadderClimb, LadderDescend, LadderIdle,
       Attack01, Attack02, Attack03, BowAttack,
-      Dying, Hurt = Value
+      Dying, Hurt, ItemPicked = Value
 }
 
 object EntityType extends Enumeration {
@@ -41,11 +42,15 @@ trait Entity {
 
   def getPosition: (Float, Float)
 
+  def setSize(size: (Float, Float))
+
   def getSize: (Float, Float)
 
   def setCollisionStrategy(collisionStrategy: CollisionStrategy)
 
-  def collisionDetected(entity: Entity)
+  def collisionDetected(entity: Option[Entity])
+
+  def collisionReleased(entity: Option[Entity])
 
   //TODO ricontrollare in futuro
   def getBody: Body
@@ -57,33 +62,48 @@ trait Entity {
   def destroyEntity(): Unit
 
   def changeCollisions(entityType: Short): Unit
+
+  def isColliding: Boolean
 }
 
 abstract class EntityImpl(private val entityType: EntityType,
                           private var entityBody: EntityBody,
-                          private val size: (Float, Float)) extends Entity {
+                          private var size: (Float, Float)) extends Entity {
 
   protected var state: State = State.Standing
   protected var collisionStrategy: CollisionStrategy = new DoNothingOnCollision()
+  private var collidingEntities: Int = 0
 
   override def getState: State = this.state
 
   override def setState(state:State):Unit = this.state = state
 
   override def setPosition(position: (Float, Float)): Unit = {
-    this.entityBody.getBody.setTransform(new Vector2(position._1, position._2), 0)
+    this.entityBody.setPosition(position)
   }
 
   override def getPosition: (Float, Float) = (this.entityBody.getBody.getPosition.x, this.entityBody.getBody.getPosition.y)
+
+  override def setSize(size: (Float, Float)): Unit = this.size = size
 
   override def getSize: (Float, Float) = this.size
 
   override def setCollisionStrategy(collisionStrategy: CollisionStrategy): Unit =
     this.collisionStrategy = collisionStrategy
 
-  override def collisionDetected(entity: Entity): Unit = {
-    this.collisionStrategy.apply(entity)
+  override def collisionDetected(entity: Option[Entity]): Unit = {
+    if(entity.nonEmpty)
+      this.collisionStrategy.apply(entity.get)
+    this.collidingEntities += 1
   }
+
+  override def collisionReleased(entity: Option[Entity]): Unit = {
+    if(entity.nonEmpty)
+      this.collisionStrategy.release(entity.get)
+    this.collidingEntities -= 1
+  }
+
+  override def isColliding: Boolean = this.collidingEntities > 0
 
   override def destroyEntity(): Unit = {
     EntitiesFactoryImpl.destroyBody(this.getBody)

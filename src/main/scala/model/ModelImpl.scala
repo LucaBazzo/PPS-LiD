@@ -19,9 +19,9 @@ trait Model {
 class ModelImpl(private val entitiesSetter: EntitiesSetter,
                 private  val rooms: Array[String]) extends Model {
 
-  private val levelNumber: Int = 1
-
   private val level: Level = new LevelImpl(entitiesSetter)
+
+  private var levelNumber: Int = 1
 
   override def update(actions: List[GameEvent]): Unit = {
     for (action <- actions) {

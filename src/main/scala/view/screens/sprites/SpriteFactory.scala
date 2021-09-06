@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.{Animation, TextureAtlas, TextureRegion}
 import com.badlogic.gdx.utils.Array
 import model.entities.EntityType.EntityType
 import model.entities.{EntityType, State}
+import model.entities.State
 
 trait SpriteFactory {
   def createHeroSprite(spriteSheetName: String, regionName: String, spriteWidth: Float, spriteHeight: Float): EntitySprite
@@ -15,12 +16,13 @@ trait SpriteFactory {
 
   def createSpriteAnimation(sprite: EntitySprite, rowNumber: Int,
                             startIndex: Int, endIndex: Int,
-                            frameDuration: Float = 0.10f): Animation[TextureRegion]
+                            frameDuration: Float = 0.10f, reverse: Boolean = false): Animation[TextureRegion]
 
   def createSpriteAnimationFromTwoRows(sprite: EntitySprite,
                                        rowNumber: Int, startIndex: Int, endIndex: Int,
                                        rowNumber2: Int, startIndex2: Int, endIndex2: Int,
-                                       frameDuration: Float = 0.10f): Animation[TextureRegion]
+                                       frameDuration: Float = 0.10f, reverse: Boolean = false): Animation[TextureRegion]
+
 }
 
 class SpriteFactoryImpl extends SpriteFactory {
@@ -80,7 +82,7 @@ class SpriteFactoryImpl extends SpriteFactory {
   // generalizzare i metodi createSpriteAnimation, ...FromTwoRows, ...FromThreeRows
   override def createSpriteAnimation(sprite: EntitySprite, rowNumber: Int,
                                      startIndex: Int, endIndex: Int,
-                                     frameDuration: Float = 0.10f): Animation[TextureRegion] = {
+                                     frameDuration: Float = 0.10f, reverse: Boolean = false): Animation[TextureRegion] = {
     val offsetX = sprite.getRegionX - 1
     val offsetY = sprite.getRegionY - 1
 
@@ -92,13 +94,14 @@ class SpriteFactoryImpl extends SpriteFactory {
         sprite.getIntHeight * rowNumber + offsetY , sprite.getIntWidth, sprite.getIntHeight))
     }
 
+    if(reverse) frames.reverse()
     new Animation(frameDuration, frames)
   }
 
-  def createSpriteAnimationFromTwoRows(sprite: EntitySprite,
-                                       rowNumber: Int, startIndex: Int, endIndex: Int,
-                                       rowNumber2: Int, startIndex2: Int, endIndex2: Int,
-                                       frameDuration: Float = 0.10f): Animation[TextureRegion] = {
+  override def createSpriteAnimationFromTwoRows(sprite: EntitySprite,
+                            rowNumber: Int, startIndex: Int, endIndex: Int,
+                            rowNumber2: Int, startIndex2: Int, endIndex2: Int,
+                            frameDuration: Float = 0.10f, reverse: Boolean = false): Animation[TextureRegion] = {
     val offsetX = sprite.getRegionX - 1
     val offsetY = sprite.getRegionY - 1
 
@@ -115,14 +118,15 @@ class SpriteFactoryImpl extends SpriteFactory {
         sprite.getIntHeight * rowNumber2 + offsetY , sprite.getIntWidth, sprite.getIntHeight))
     }
 
+    if(reverse) frames.reverse()
     new Animation(frameDuration, frames)
   }
 
   def createSpriteAnimationFromThreeRows(sprite: EntitySprite,
-                                         rowNumber: Int, startIndex: Int, endIndex: Int,
-                                         rowNumber2: Int, startIndex2: Int, endIndex2: Int,
-                                         rowNumber3: Int, startIndex3: Int, endIndex3: Int,
-                                         frameDuration: Float = 0.10f): Animation[TextureRegion] = {
+                                       rowNumber: Int, startIndex: Int, endIndex: Int,
+                                       rowNumber2: Int, startIndex2: Int, endIndex2: Int,
+                                       rowNumber3: Int, startIndex3: Int, endIndex3: Int,
+                                       frameDuration: Float = 0.10f, reverse: Boolean = false): Animation[TextureRegion] = {
     val offsetX = sprite.getRegionX - 1
     val offsetY = sprite.getRegionY - 1
 
@@ -144,6 +148,7 @@ class SpriteFactoryImpl extends SpriteFactory {
         sprite.getIntHeight * rowNumber3 + offsetY , sprite.getIntWidth, sprite.getIntHeight))
     }
 
+    if(reverse) frames.reverse()
     new Animation(frameDuration, frames)
   }
 
@@ -220,6 +225,21 @@ class SpriteFactoryImpl extends SpriteFactory {
     heroSprite.addAnimation(State.BowAttack,
       this.createSpriteAnimationFromTwoRows(heroSprite, 16, 0, 6,
         17, 0, 1))
+    heroSprite.addAnimation(State.LadderClimb,
+      this.createSpriteAnimationFromTwoRows(heroSprite, 11, 4, 6,
+        12, 0, 0), loop = true)
+    heroSprite.addAnimation(State.LadderDescend,
+      this.createSpriteAnimationFromTwoRows(heroSprite, 11, 4, 6,
+        12, 0, 0, reverse = true), loop = true)
+    heroSprite.addAnimation(State.LadderIdle,
+      this.createSpriteAnimation(heroSprite, 11, 6, 6))
+    heroSprite.addAnimation(State.ItemPicked,
+      this.createSpriteAnimation(heroSprite, 13, 2, 4,0.15f))
+    heroSprite.addAnimation(State.Hurt,
+      this.createSpriteAnimation(heroSprite, 8, 3, 5))
+    heroSprite.addAnimation(State.Dying,
+      this.createSpriteAnimationFromTwoRows(heroSprite, 8, 6, 6,
+        9, 0, 5,0.18f))
   }
 
   private  def defineEnemySkeletonAnimation(sprite:EntitySprite): Unit = {

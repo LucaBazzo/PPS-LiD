@@ -27,7 +27,7 @@ class ControllerImpl extends Controller with Observer {
   private val observerManager: ObserverManager = new ObserverManagerImpl()
   this.observerManager.addObserver(this)
 
-  private var rooms: Array[String] = Array("hero-room", "room1-final")
+  private var rooms: Array[String] = Array("hero-room")
   for(n <- 1 to 2) rooms = rooms :+ ROOM_MAP_NAMES(Random.between(0,ROOM_MAP_NAMES.size))
 //  rooms = rooms :+ "boss-room"
 

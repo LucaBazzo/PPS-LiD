@@ -76,7 +76,7 @@ object TileMapHelper {
             entity = EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile)
           }
           case "enemy" => {
-            EntitiesFactoryImpl.createEnemies(size, position)
+//            EntitiesFactoryImpl.createEnemies(size, position)
           }
           case _ => {
             println("not supported layer: " + layer.getName())

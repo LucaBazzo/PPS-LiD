@@ -11,8 +11,8 @@ class DoNotMove() extends MovementStrategy {
 class PatrolPlatform(val sourceEntity: MobileEntity,
                      val targetEntity: Entity) extends MovementStrategy {
 
-  protected val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed)
-  protected val acceleration: Float = sourceEntity.getStatistics(Statistic.Acceleration)
+  protected val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
+  protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
 
   protected var isMovingLeft: Boolean = false
 
@@ -66,8 +66,8 @@ class PatrolAndStop(override val sourceEntity:MobileEntity,
                     override val targetEntity:Entity)
   extends PatrolPlatform(sourceEntity, targetEntity) {
 
-  protected val maxDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance)
-  protected val visibilityMaxHorizontalAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle)
+  protected val maxDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance).get
+  protected val visibilityMaxHorizontalAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle).get
 
   protected var lastIsTargetNear: Boolean = this.isTargetNearby
 

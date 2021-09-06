@@ -12,7 +12,7 @@ class TestDoor extends AnyFlatSpec {
     val door: ImmobileEntity = level.getEntity(x => x.isInstanceOf[ImmobileEntity] && x.getEntityBody.getEntityCollisionBit() == EntityCollisionBit.Door).asInstanceOf[ImmobileEntity]
     val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
     level.updateEntities(List(GameEvent.SetMap))
-    door.collisionDetected(hero)
+    door.collisionDetected(Option.apply(hero))
     level.updateEntities(List.empty)
     assert(monitor.getEntities(x => x.isInstanceOf[ImmobileEntity] && x.getEntityBody.getEntityCollisions() == EntityCollisionBit.OpenedDoor).get.nonEmpty)
   }
