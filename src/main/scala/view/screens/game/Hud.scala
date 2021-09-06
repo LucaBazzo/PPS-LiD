@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.{Image, Label, Table}
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
-import model.entities.Items
+import model.entities.{Item, Items}
 import model.entities.Items.Items
 
 import java.util.concurrent.{ExecutorService, Executors}
@@ -22,6 +22,8 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
   private var score: Int = 0
 
   private var healthPercentage: Float = 1
+
+  private var itemsPicked: List[Items] = List.empty
 
   private val healthImage: Image = new Image(new Texture(HEALTH_BAR_PATH))
   healthImage.setWidth(80)
@@ -69,9 +71,6 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
   stage.addActor(table)
   stage.addActor(itemsTable)
 
-  //TODO da rifattorizzare e chiamare dall'esterno
-  this.addNewItem(Items.BFSword)
-  this.addNewItem(Items.Key)
 
   def getStage: Stage = this.stage
 
@@ -109,10 +108,39 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
     executorService.submit(task)
   }
 
-  def addNewItem(item: Items): Unit = item match {
-    case Items.BFSword => addItemToTable("assets/textures/sword.png")
-    case Items.Key => addItemToTable("assets/textures/key.png")
-    case _ => throw new UnsupportedOperationException
+  def addNewItem(item: Item): Unit = {
+    val itemName: Items = item.getEnumVal
+    if(! this.itemsPicked.contains(itemName)) {
+      this.setItemText(item.getDesc)
+
+      itemName match {
+        case Items.BFSword =>
+          addItemToTable("assets/textures/sword.png")
+          this.itemsPicked = itemName :: this.itemsPicked
+        case Items.Key =>
+          addItemToTable("assets/textures/key.png")
+          this.itemsPicked = itemName :: this.itemsPicked
+        case Items.Boots =>
+          addItemToTable("assets/textures/boots.png")
+          this.itemsPicked = itemName :: this.itemsPicked
+        case Items.Cake =>
+          addItemToTable("assets/textures/Cake.png")
+          this.itemsPicked = itemName :: this.itemsPicked
+        case Items.Map =>
+          addItemToTable("assets/textures/map.png")
+          this.itemsPicked = itemName :: this.itemsPicked
+        case Items.Shield =>
+          addItemToTable("assets/textures/shield.png")
+          this.itemsPicked = itemName :: this.itemsPicked
+        case Items.SkeletonKey =>
+          addItemToTable("assets/textures/SkeletonKey.png")
+          this.itemsPicked = itemName :: this.itemsPicked
+        case Items.Wrench =>
+          addItemToTable("assets/textures/wrench.png")
+          this.itemsPicked = itemName :: this.itemsPicked
+        case _ => throw new UnsupportedOperationException
+      }
+    }
   }
 
   private def addItemToTable(path: String): Unit = {

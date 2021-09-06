@@ -17,6 +17,7 @@ class ItemCollisionStrategy(private val item: Item) extends CollisionStrategy {
     case h:Hero => println("Hero picked up item")
                    val effect = item.collect()
                    println(effect._3 + "\n +" + item.getScore + " points")
+                   h.itemPicked(item)
                    h.alterStatistics(effect._1, effect._2)
     case _ => println("____")
   }

@@ -37,7 +37,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,50), EntityCollisionBit.Hero)
+  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero)
 
   private val door: Entity = entitiesFactory.createDoor((10, 30), (290, 300))
 
@@ -91,8 +91,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     this.entitiesList = this.entitiesList.filterNot((e: Entity) => e.equals(entity))
     this.entitiesSetter.setEntities(this.entitiesList)
 
-    // update score if the removed entity's type is Enemy
-    if (entity.isInstanceOf[Enemy]) {
+    // update score if the removed entity's type is Enemy or Item
+    if (entity.isInstanceOf[Enemy] || entity.isInstanceOf[Item]) {
       this.score += entity.asInstanceOf[Score].getScore
       this.entitiesSetter.setScore(this.score)
     }

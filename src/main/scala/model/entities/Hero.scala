@@ -5,7 +5,6 @@ import controller.GameEvent.GameEvent
 import model.attack.DoNothingAttackStrategy
 import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
-import model.entities.Items.Items
 import model.entities.State.State
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
@@ -15,22 +14,22 @@ import utils.ApplicationConstants.HERO_SIZE
 
 trait Hero extends LivingEntity {
 
-  def notifyCommand(command: GameEvent)
+  def notifyCommand(command: GameEvent): Unit
 
   def getPreviousState: State
   def getLinearVelocityX: Float
 
   def isLittle: Boolean
-  def setLittle(little: Boolean)
+  def setLittle(little: Boolean): Unit
 
-  def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0))
+  def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit
 
-  def itemPicked(itemType: Items)
-  def getItemsPicked: List[Items]
+  def itemPicked(itemType: Item): Unit
+  def getItemsPicked: List[Item]
 
-  def setEnvironmentInteraction(interaction: Option[HeroInteraction])
+  def setEnvironmentInteraction(interaction: Option[HeroInteraction]): Unit
 
-  def stopHero(time: Float)
+  def stopHero(time: Float): Unit
 }
 
 class HeroImpl(private val entityType: EntityType,
@@ -146,16 +145,16 @@ class HeroImpl(private val entityType: EntityType,
     this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
   }
 
-  private var itemsPicked: List[Items] = List.empty
+  private var itemsPicked: List[Item] = List.empty
 
-  override def itemPicked(itemType: Items): Unit = {
+  override def itemPicked(itemType: Item): Unit = {
     this.stopHero(300)
     this.stopMovement()
     this.setState(State.ItemPicked)
     this.itemsPicked = itemType :: this.itemsPicked
   }
 
-  override def getItemsPicked: List[Items] = this.itemsPicked
+  override def getItemsPicked: List[Item] = this.itemsPicked
 
   private var interaction: Option[HeroInteraction] = Option.empty
 
