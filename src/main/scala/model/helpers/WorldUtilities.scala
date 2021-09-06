@@ -32,7 +32,6 @@ trait WorldUtilities {
 
   def isPathObstructedOnTheRight(body: Body, size:(Float, Float), offset: Float = 5f.PPM): Boolean
 
-
   def checkCollision(x: Float, y: Float, sourceBody: Body): Boolean = checkCollision(x, y, x, y, sourceBody)
 
   def checkCollisionWithBody(x: Float, y: Float, targetBody: Body): Boolean = checkCollisionWithBody(x, y, x, y, targetBody)
@@ -44,8 +43,6 @@ trait WorldUtilities {
 }
 
 object WorldUtilities extends WorldUtilities {
-
-  // TODO: fattorizzare world.QueryAABB
 
   private var world:World = _
 
@@ -106,8 +103,10 @@ object WorldUtilities extends WorldUtilities {
       // Check horizontal axis angle of source-target bodies
       if (isTargetVisible) {
         val angle = new Vector2(sourceBody.getPosition.sub(targetBody.getPosition)).angleDeg()
-        isTargetVisible = ((angle <= maxHorizontalAngle || angle >= 360-maxHorizontalAngle)
-          || (180-maxHorizontalAngle <= angle && 180+maxHorizontalAngle >= angle))
+//        isTargetVisible = ((angle <= maxHorizontalAngle || angle >= 360-maxHorizontalAngle)
+//          || (180-maxHorizontalAngle <= angle && 180+maxHorizontalAngle >= angle))
+        isTargetVisible = ((angle >= 360-maxHorizontalAngle)
+          || (180+maxHorizontalAngle >= angle))
         preemptiveStop = true
       }
 

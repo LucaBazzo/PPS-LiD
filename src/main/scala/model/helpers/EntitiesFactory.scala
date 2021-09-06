@@ -75,7 +75,9 @@ trait EntitiesFactory {
   def createFireballAttack(sourceEntity: LivingEntity, targetEntity: Entity): MobileEntity
 
   def createMeleeAttack(sourceEntity: LivingEntity,
-                        targetEntity: Entity): MobileEntity
+                        targetEntity: Entity,
+                        size: (Float, Float) = (23, 23),
+                        offset: (Float, Float) = (20, 5)): MobileEntity
 
   def createArrowProjectile(entity: LivingEntity): MobileEntity
 
@@ -155,9 +157,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val enemy:Enemy = createEnemyEntity(position, size, SKELETON_STATS, score, EntityType.EnemySkeleton)
 
-    enemy.setCollisionStrategy(new DoNothingOnCollision())
-    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
-    enemy.setAttackStrategy(new MeleeAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy, "",
+      new DoNothingOnCollision(),
+      new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
+      new SkeletonAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    enemy.setBehaviour(behaviours)
     enemy
   }
 
@@ -167,9 +171,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val enemy:Enemy = createEnemyEntity(position, size, SLIME_STATS, score, EntityType.EnemySlime)
 
-    enemy.setCollisionStrategy(new DoNothingOnCollision())
-    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
-    enemy.setAttackStrategy(new MeleeAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy, "",
+      new DoNothingOnCollision(),
+      new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
+      new SlimeAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    enemy.setBehaviour(behaviours)
     enemy
   }
 
@@ -180,7 +186,9 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val enemy:Enemy = createEnemyEntity(position, size, WORM_STATS, score, EntityType.EnemyWorm)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy, "",
-      new DoNothingOnCollision, new DoNotMove(), new RangedAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+      new DoNothingOnCollision(),
+      new PatrolPlatform(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
+      new WormAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
 
     enemy.setBehaviour(behaviours)
     enemy
@@ -192,22 +200,18 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val enemy:Enemy = createEnemyEntity(position, size, WIZARD_BOSS_STATS, score, EntityType.EnemyBossWizard)
 
-    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy, "PHASE 1", new DoNothingOnCollision, new DoNotMove(), new DoNotAttack() )
-    val p2AttackStrategy = new RangedAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero]))
-    behaviours.addBehaviour("PHASE 2", new DoNothingOnCollision, new DoNotMove(), p2AttackStrategy)
-    behaviours.addBehaviour("PHASE 3",
+    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy, "1", new DoNothingOnCollision, new DoNotMove(), new DoNotAttack() )
+    val p2AttackStrategy = new WormAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero]))
+    behaviours.addBehaviour("2", new DoNothingOnCollision, new DoNotMove(), p2AttackStrategy)
+    behaviours.addBehaviour("3",
       new DoNothingOnCollision,
       new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
-      new MeleeAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
-    behaviours.addTransition("PHASE 1", "PHASE 2", new TimePredicate(5000))
-    behaviours.addTransition("PHASE 2", "PHASE 3", new CompletedAttackPredicate(p2AttackStrategy, 3))
-    behaviours.addTransition("PHASE 3", "PHASE 1", new HealthThresholdPredicate(enemy, 50))
+      new SkeletonAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+    behaviours.addTransition("1", "2", new TimePredicate(5000))
+    behaviours.addTransition("2", "3", new CompletedAttackPredicate(p2AttackStrategy, 3))
+    behaviours.addTransition("3", "1", new HealthThresholdPredicate(enemy, 50))
 
     enemy.setBehaviour(behaviours)
-
-    enemy.setCollisionStrategy(new DoNothingOnCollision())
-    //    enemy.setMovementStrategy(new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
-    //    enemy.setAttackStrategy(new RangedAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
     enemy
   }
 
@@ -270,10 +274,9 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     // pick the number of enemies to create
 
     // pick the type of the enemies
-//    this.createWizardBossEnemy((position.x + 10, position.y+10))
+    this.createSkeletonEnemy((position.x, position.y))
 
   }
-
 
   override def createDoor(size: (Float, Float) = (10, 10),
                           position: (Float, Float) = (0, 0),
@@ -348,21 +351,26 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createMeleeAttack(sourceEntity:LivingEntity,
-                                 targetEntity:Entity): MobileEntity = {
+                                 targetEntity:Entity,
+                                 size: (Float, Float) = (23, 23),
+                                 offset: (Float, Float) = (20, 5)): MobileEntity = {
 
-    val size: (Float, Float) = (17, 23)
     val pivotSize: (Float, Float) = (2f, 2f)
 
     // compute attack spawn point
-    val offset:Float = if (isEntityOnTheLeft(sourceEntity, targetEntity)) 20.PPM else -20.PPM
-    val position = (sourceEntity.getBody.getWorldCenter.x+offset,
-      sourceEntity.getBody.getWorldCenter.y)
+    val attackXOffset:Float = if (isEntityOnTheLeft(sourceEntity, targetEntity)) -offset._1.PPM else +offset._1.PPM
+    val attackYOffset:Float = offset._2.PPM
+    val position = (sourceEntity.getBody.getWorldCenter.x+attackXOffset,
+      sourceEntity.getBody.getWorldCenter.y+attackYOffset)
 
     // create a body inside the game world
     val pivotBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Immobile,
       0, createPolygonalShape(pivotSize.PPM), sourceEntity.getPosition, isSensor = true)
+
+    // TODO rendere la entityBody shape configurabile
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.EnemyAttack,
-      EntityCollisionBit.Hero, this.createPolygonalShape(size.PPM), (position.x-5.PPM, position.y+5.PPM), isSensor = true)
+      EntityCollisionBit.Hero, this.createPolygonalShape(size.PPM), position, isSensor = true)
+
     val jointDef:WeldJointDef = new WeldJointDef()
     jointDef.initialize(pivotBody.getBody, entityBody.getBody, pivotBody.getBody.getPosition)
     this.level.getWorld.createJoint(jointDef)

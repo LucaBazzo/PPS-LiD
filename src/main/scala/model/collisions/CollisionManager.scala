@@ -54,6 +54,7 @@ object ImplicitConversions {
   implicit class RichTuple2(base: (Float, Float)) {
     def PPM: (Float, Float) = base / PIXELS_PER_METER
 
+    // TODO: da rimuovere
     def MPP: (Float, Float) = base * PIXELS_PER_METER
 
     def /(div: Float): (Float, Float) = (base._1 / div, base._2 / div)
