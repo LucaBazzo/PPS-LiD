@@ -1,6 +1,5 @@
 package model.attack
 
-import model.Level
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, _}
 import model.helpers.EntitiesFactoryImpl.{createFireballAttack, createMeleeAttack}
@@ -48,16 +47,34 @@ abstract class AttackStrategyImpl(protected val sourceEntity: LivingEntity,
   protected def spawnAttack(): Unit
 }
 
-class MeleeAttack(override protected val sourceEntity: LivingEntity,
-                  override protected val targetEntity: Entity)
+// TODO: muovere la strategia di creazione di attacco fuori da MeleeAttack
+
+class SkeletonAttack(override protected val sourceEntity: LivingEntity,
+                     override protected val targetEntity: Entity)
   extends AttackStrategyImpl(sourceEntity, targetEntity) {
 
   protected var attackInstance: Option[MobileEntity] = Option.empty
+  protected var attackTimer: Long = 0
 
   override def apply():Unit = {
+    // remove attack box
     if (this.isAttackFinished && this.attackInstance.isDefined) {
       this.stopAttack()
       this.sourceEntity.setState(State.Standing)
+    }
+
+    // activate the attack box to match the displayed animation
+    if (!this.isAttackFinished) {
+      val attackProgress: Long = System.currentTimeMillis() - this.attackTimer
+      val isAttackActive: Boolean = this.attackInstance.get.getBody.isActive()
+      // TODO: calibrare meglio i tempi
+
+      if (attackProgress > 600 && attackProgress < 1000 && !isAttackActive) {
+        this.attackInstance.get.getBody.setActive(true)
+      }
+      if (attackProgress <= 600 && attackProgress > 1000 && isAttackActive) {
+        this.attackInstance.get.getBody.setActive(false)
+      }
     }
 
     super.apply()
@@ -67,31 +84,68 @@ class MeleeAttack(override protected val sourceEntity: LivingEntity,
     if (this.attackInstance.isDefined) {
       this.attackInstance.get.destroyEntity()
       this.attackInstance = Option.empty
+      this.attackTimer = 0
     }
   }
 
   override protected def spawnAttack(): Unit = {
-    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity))
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity, size = (23, 23), offset = (20, 5)))
+    this.attackInstance.get.getBody.setActive(false)
+    this.attackTimer = System.currentTimeMillis()
   }
 }
 
-class RangedAttack(override protected val sourceEntity: LivingEntity,
-                   override protected val targetEntity: Entity)
+class SlimeAttack(override protected val sourceEntity: LivingEntity,
+                  override protected val targetEntity: Entity)
   extends AttackStrategyImpl(sourceEntity, targetEntity) {
 
-  override protected def spawnAttack(): Unit = createFireballAttack(this.sourceEntity, this.targetEntity)
-}
+  protected var attackInstance: Option[MobileEntity] = Option.empty
+  protected var attackTimer: Long = 0
 
-class ContactAttack(protected val sourceEntity: LivingEntity,
-                    protected val level: Level,
-                    protected val stats: Map[Statistic, Float],
-                    protected val target: Entity => Boolean) extends AttackStrategy {
+  override def apply():Unit = {
+    // remove attack box
+    if (this.isAttackFinished && this.attackInstance.isDefined) {
+      this.stopAttack()
+      this.sourceEntity.setState(State.Standing)
+    }
 
+    // activate the attack box to match the displayed animation
+    if (!this.isAttackFinished) {
+      val attackProgress: Long = System.currentTimeMillis() - this.attackTimer
+      val isAttackActive: Boolean = this.attackInstance.get.getBody.isActive()
+      // TODO: calibrare meglio i tempi
+      if (attackProgress > 600 && attackProgress < 1000 && !isAttackActive) {
+        this.attackInstance.get.getBody.setActive(true)
+      }
+      if (attackProgress <= 600 && attackProgress > 1000 && isAttackActive) {
+        this.attackInstance.get.getBody.setActive(false)
+      }
+    }
 
-
-  override def apply(): Unit = {
-
+    super.apply()
   }
 
-  override def isAttackFinished: Boolean = ???
+  override def stopAttack(): Unit = {
+    if (this.attackInstance.isDefined) {
+      this.attackInstance.get.destroyEntity()
+      this.attackInstance = Option.empty
+      this.attackTimer = 0
+    }
+  }
+
+  override protected def spawnAttack(): Unit = {
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity,
+      size = (7, 15), offset = (10, 5)))
+    this.attackInstance.get.getBody.setActive(false)
+    this.attackTimer = System.currentTimeMillis()
+  }
+}
+
+class WormAttack(override protected val sourceEntity: LivingEntity,
+                 override protected val targetEntity: Entity)
+  extends AttackStrategyImpl(sourceEntity, targetEntity) {
+
+  override protected def spawnAttack(): Unit = {
+    createFireballAttack(this.sourceEntity, this.targetEntity)
+  }
 }
