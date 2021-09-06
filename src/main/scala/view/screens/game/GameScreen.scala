@@ -86,9 +86,14 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       val hero: Hero = heroEntity.get.head.asInstanceOf[Hero]
       this.camera.position.x = hero.getPosition._1
       this.camera.position.y = hero.getPosition._2
-
+      for (item <- hero.getItemsPicked)
+        this.hud.addNewItem(item)
       this.hud.changeHealth(hero.getStatistics(Statistic.CurrentHealth), hero.getStatistics(Statistic.Health))
     }
+
+    val message: Option[String] = entitiesGetter.getMessage
+    if(message.nonEmpty)
+      this.hud.setItemText(message.get)
 
     val entities: Option[List[Entity]] = entitiesGetter.getEntities(_ => true)
     if(entities.nonEmpty) {

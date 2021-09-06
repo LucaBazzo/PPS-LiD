@@ -15,7 +15,7 @@ object State extends Enumeration {
       Running, Jumping, Falling, Somersault,
       LadderClimb, LadderDescend, LadderIdle,
       Attack01, Attack02, Attack03, BowAttack,
-      Dying, Hurt, ItemPicked = Value
+      Dying, Hurt, ItemPicked, Opening = Value
 }
 
 object EntityType extends Enumeration {
@@ -24,13 +24,13 @@ object EntityType extends Enumeration {
       Mobile, Immobile, Enemy, //this values will not show any sprite
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
-      EnemySkeleton, EnemySlime, EnemyWorm,
+      EnemySkeleton, EnemySlime, EnemyWorm, Platform, Door, Ladder, Water, Lava,
       AttackFireBall, AttackArrow = Value
 }
 
 trait Entity {
 
-  def update()
+  def update(): Unit
 
   def getType: EntityType
 
@@ -38,7 +38,7 @@ trait Entity {
 
   def setState(state:State): Unit
 
-  def setPosition(position: (Float, Float))
+  def setPosition(position: (Float, Float)): Unit
 
   def getPosition: (Float, Float)
 
@@ -46,11 +46,11 @@ trait Entity {
 
   def getSize: (Float, Float)
 
-  def setCollisionStrategy(collisionStrategy: CollisionStrategy)
+  def setCollisionStrategy(collisionStrategy: CollisionStrategy): Unit
 
-  def collisionDetected(entity: Option[Entity])
+  def collisionDetected(entity: Option[Entity]): Unit
 
-  def collisionReleased(entity: Option[Entity])
+  def collisionReleased(entity: Option[Entity]): Unit
 
   //TODO ricontrollare in futuro
   def getBody: Body

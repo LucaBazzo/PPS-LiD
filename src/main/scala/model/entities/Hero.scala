@@ -23,7 +23,7 @@ trait Hero extends LivingEntity {
    *
    *  @param command the command from the player to the hero
    */
-  def notifyCommand(command: GameEvent)
+  def notifyCommand(command: GameEvent): Unit
 
   /** Check if the hero is crouch or sliding.
    *
@@ -35,20 +35,21 @@ trait Hero extends LivingEntity {
    *
    *  @param little true if the hero has become little
    */
-  def setLittle(little: Boolean)
+  def setLittle(little: Boolean): Unit
 
   /** Changes the hero box that will collide with another entities.
    *
    *  @param newSize the new size of the box
    *  @param addCoordinates the offset from the previous position
    */
-  def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0))
+  def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit
 
+  def getItemsPicked: List[Items]
   /** Called when the hero pick an important item.
    *
    *  @param itemType the type of the item picked
    */
-  def itemPicked(itemType: Items)
+  def itemPicked(itemType: Items): Unit
 
   /** Check if the items specified was already picked by the hero.
    *
@@ -61,13 +62,13 @@ trait Hero extends LivingEntity {
    *
    *  @param interaction A pair of Command - EnvironmentInteraction
    */
-  def setEnvironmentInteraction(interaction: Option[HeroInteraction])
+  def setEnvironmentInteraction(interaction: Option[HeroInteraction]): Unit
 
   /** Stops the update method of the hero for a chosen time.
    *
    *  @param time how much time the hero will not perform the update method
    */
-  def stopHero(time: Float)
+  def stopHero(time: Float): Unit
 
   /** Sets the feet of the hero, used to check if the hero is touching the ground.
    *
@@ -199,6 +200,8 @@ class HeroImpl(private val entityType: EntityType,
     this.setState(State.ItemPicked)
     this.itemsPicked = itemType :: this.itemsPicked
   }
+
+  override def getItemsPicked: List[Items] = this.itemsPicked
 
   override def isItemPicked(item: Items): Boolean = this.itemsPicked.contains(item)
 

@@ -26,6 +26,7 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
   private val heroHealthImage: Image = new Image(new Texture(HEALTH_BAR_PATH))
   heroHealthImage.setWidth(80)
   val heroHealthImageWidth: Float = heroHealthImage.getWidth
+  private var itemsPicked: List[Items] = List.empty
 
   val heroHealthTable: Table = new Table()
   heroHealthTable.add(heroHealthImage) //.expandX().fill(true, false)
@@ -81,9 +82,6 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
   stage.addActor(itemsTable)
   //stage.addActor(bossHealthTable)
 
-  //TODO da rifattorizzare e chiamare dall'esterno
-  this.addNewItem(Items.BFSword)
-  this.addNewItem(Items.Key)
 
   def getStage: Stage = this.stage
 
@@ -121,10 +119,36 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
     executorService.submit(task)
   }
 
-  def addNewItem(item: Items): Unit = item match {
-    case Items.BFSword => addItemToTable("assets/textures/sword.png")
-    case Items.Key => addItemToTable("assets/textures/key.png")
-    case _ => throw new UnsupportedOperationException
+  def addNewItem(item: Items): Unit = {
+    if(! this.itemsPicked.contains(item)) {
+      item match {
+        case Items.BFSword =>
+          addItemToTable("assets/textures/sword.png")
+          this.itemsPicked = item :: this.itemsPicked
+        case Items.Key =>
+          addItemToTable("assets/textures/key.png")
+          this.itemsPicked = item :: this.itemsPicked
+        case Items.Boots =>
+          addItemToTable("assets/textures/boots.png")
+          this.itemsPicked = item :: this.itemsPicked
+        case Items.Cake =>
+          addItemToTable("assets/textures/Cake.png")
+          this.itemsPicked = item :: this.itemsPicked
+        case Items.Map =>
+          addItemToTable("assets/textures/map.png")
+          this.itemsPicked = item :: this.itemsPicked
+        case Items.Shield =>
+          addItemToTable("assets/textures/shield.png")
+          this.itemsPicked = item :: this.itemsPicked
+        case Items.SkeletonKey =>
+          addItemToTable("assets/textures/SkeletonKey.png")
+          this.itemsPicked = item :: this.itemsPicked
+        case Items.Wrench =>
+          addItemToTable("assets/textures/wrench.png")
+          this.itemsPicked = item :: this.itemsPicked
+        case _ => throw new UnsupportedOperationException
+      }
+    }
   }
 
   private def addItemToTable(path: String): Unit = {

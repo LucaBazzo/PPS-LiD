@@ -38,15 +38,21 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,50), EntityCollisionBit.Hero)
+  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero, entitiesSetter)
 
-  private val door: Entity = entitiesFactory.createDoor((5, 30), (-20f, 10f))
+  private val door: Entity = entitiesFactory.createDoor((10, 30), (290, 300))
 
   private var isWorldSetted: Boolean = false
+  private var platform: Entity = entitiesFactory.createPlatform((280, 100), (60,2))
+  private var ladder: Entity = entitiesFactory.createLadder((280,120),(10,100))
 
   EntitiesFactoryImpl.createSkeletonEnemy((+350, 400))
   EntitiesFactoryImpl.createWormEnemy((+370,400))
-//  EntitiesFactoryImpl.createSlimeEnemy((270,300))
+  //  EntitiesFactoryImpl.createSlimeEnemy((270,300))
+
+  private var water: Entity = entitiesFactory.createWaterPool((200,30), (100,15))
+
+  private var lava: Entity = entitiesFactory.createLavaPool((400,30), (100,15))
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)
@@ -96,8 +102,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     this.entitiesList = this.entitiesList.filterNot((e: Entity) => e.equals(entity))
     this.entitiesSetter.setEntities(this.entitiesList)
 
-    // update score if the removed entity's type is Enemy
-    if (entity.isInstanceOf[Enemy]) {
+    // update score if the removed entity's type is Enemy or Item
+    if (entity.isInstanceOf[Enemy] || entity.isInstanceOf[Item]) {
       this.score += entity.asInstanceOf[Score].getScore
       this.entitiesSetter.setScore(this.score)
     }
@@ -106,7 +112,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   override def getWorld: World = this.world
 
   override def spawnItem(pool: ItemPools): Unit = {
-    entitiesFactory.createItem(pool)
+    entitiesFactory.createItem(pool, entitiesSetter = this.entitiesSetter)
   }
 
   private var accumulator: Float = 0f

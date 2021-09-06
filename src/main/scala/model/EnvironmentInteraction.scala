@@ -1,8 +1,12 @@
 package model
 
+import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.entities.{Hero, State, Statistic}
+import model.collisions.{CollisionMonitor, EntityCollisionBit}
+import model.entities.{Entity, Hero, State, Statistic}
 import model.movement.{HeroMovementStrategy, LadderClimbMovementStrategy}
+
+import java.util.concurrent.{ExecutorService, Executors}
 
 /** Represent the hero interaction with a certain environment interaction. The hero will start
  *  the interaction when the command given is notified to him
@@ -21,7 +25,7 @@ trait EnvironmentInteraction {
   /** Change the behaviour of the entity attached.
    *
    */
-  def apply()
+  def apply(): Unit
 
 }
 
@@ -57,5 +61,40 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
     this.entity.getEntityBody.setGravityScale()
     this.entity.setState(State.Falling)
     this.entity.getBody.setAwake(true)
+  }
+}
+
+class DoorInteraction(hero: Hero, door: Entity) extends EnvironmentInteraction {
+
+  override def apply(): Unit = {
+    this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
+    this.door.setState(State.Opening)
+    this.hero.setEnvironmentInteraction(Option.empty)
+    print("Hero opened door")
+  }
+}
+
+class PlatformInteraction(private val hero: Hero,
+                          private val upperPlatform: Entity,
+                          private val platform: Entity,
+                          private val lowerPlatform: Entity,
+                          private val monitor: CollisionMonitor) extends EnvironmentInteraction {
+
+  override def apply(): Unit = {
+    if(monitor.isPlayerOnLadder)
+      hero.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(hero))))
+    else
+      hero.setEnvironmentInteraction(Option.empty)
+    platform.changeCollisions(EntityCollisionBit.Enemy)
+    upperPlatform.changeCollisions(EntityCollisionBit.Enemy)
+    lowerPlatform.changeCollisions(EntityCollisionBit.Enemy)
+    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+    executorService.execute(() => {
+      Thread.sleep(1000)
+      platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      println("Enabled platform collisions")
+    })
   }
 }
