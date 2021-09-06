@@ -71,8 +71,10 @@ class SpriteFactoryImpl extends SpriteFactory {
         case _ => null
       }
       this.loadedSprites += entityType -> sprite
+      sprite
+    } else {
+      this.loadedSprites(entityType).cloneEntitySprite()
     }
-    this.loadedSprites(entityType)
   }
 
   // generalizzare i metodi createSpriteAnimation, ...FromTwoRows, ...FromThreeRows

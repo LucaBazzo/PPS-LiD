@@ -16,6 +16,8 @@ trait EntitySprite extends Sprite {
   def getIntWidth: Int = super.getWidth.asInstanceOf[Int]
 
   def getIntHeight: Int = super.getHeight.asInstanceOf[Int]
+
+  def cloneEntitySprite(): EntitySprite
 }
 
 class EntitySpriteImpl(regionName: String, width: Float, height: Float) extends EntitySprite {
@@ -25,10 +27,6 @@ class EntitySpriteImpl(regionName: String, width: Float, height: Float) extends 
 
   private var stateTimer: Float = 0
   private var previousState: State = State.Standing
-
-  /*private val atlas: TextureAtlas = new TextureAtlas(SPRITES_PACK_LOCATION)
-  this.setRegion(this.atlas.findRegion(regionName))
-  this.setBounds(0, 0, width, height)*/
 
   override def addAnimation(state: State, animation: Animation[TextureRegion], loop: Boolean = false): Unit = {
     this.animations += (state -> animation)
@@ -72,6 +70,14 @@ class EntitySpriteImpl(regionName: String, width: Float, height: Float) extends 
   override def draw(batch: Batch): Unit = {
     this.setSize(this.width.PPM, this.height.PPM)
     super.draw(batch)
+  }
+
+  override def cloneEntitySprite(): EntitySprite = {
+    val sprite = new EntitySpriteImpl(regionName, width, height)
+    for ((state, animation) <- this.animations) {
+      sprite.addAnimation(state, animation, this.loops(state))
+    }
+    sprite
   }
 
 }
