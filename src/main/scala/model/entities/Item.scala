@@ -1,10 +1,9 @@
 package model.entities
 
-import model.EntityBody
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.Statistic.Statistic
-import model.helpers.EntitiesFactoryImpl
+import model.{EntityBody, Score}
 
 object Items extends Enumeration {
   type Items = Value

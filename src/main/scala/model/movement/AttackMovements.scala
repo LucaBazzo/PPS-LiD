@@ -50,9 +50,11 @@ class WeightlessProjectileTrajectory(val owner: Entity,
                                      val originPoint:(Float, Float),
                                      val targetPoint:(Float, Float),
                                      val stats: Map[Statistic, Float]) extends MovementStrategy {
+  owner.getBody.applyLinearImpulse(
+    new Vector2(targetPoint._1, targetPoint._2).sub(new Vector2(originPoint._1, originPoint._2)).nor()
+    .scl(stats(Statistic.Strength)),
+  owner.getBody.getWorldCenter, true)
 
-  owner.getBody.applyLinearImpulse(new Vector2(targetPoint._1, targetPoint._2).nor().scl(stats(Statistic.Strength)),
-    owner.getBody.getWorldCenter, true)
   owner.getBody.setGravityScale(0)
 
   override def apply(): Unit = { }

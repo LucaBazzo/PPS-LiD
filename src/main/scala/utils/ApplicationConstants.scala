@@ -2,6 +2,8 @@ package utils
 
 object ApplicationConstants {
 
+  val DEBUG = true
+
   val TITLE = "Lost in Dungeons"
 
   val WIDTH_SCREEN: Int = 400

@@ -1,9 +1,9 @@
 package controller
 
+import _root_.utils.ApplicationConstants.{GAME_LOOP_STEP, ROOM_MAP_NAMES}
 import controller.GameEvent.GameEvent
 import model._
 import model.helpers.EntitiesContainerMonitor
-import _root_.utils.ApplicationConstants.{GAME_LOOP_STEP, ROOM_MAP_NAMES}
 import view._
 
 import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}

@@ -14,5 +14,3 @@ class DoNothingOnCollision() extends CollisionStrategy {
 
   override def release(entity: Entity): Unit = {}
 }
-
-

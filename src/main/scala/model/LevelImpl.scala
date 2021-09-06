@@ -1,6 +1,7 @@
 package model
 
-import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
+import _root_.utils.ApplicationConstants._
+import _root_.utils.HeroConstants
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent
@@ -9,7 +10,7 @@ import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionManager, EntityCollisionBit}
 import model.entities.ItemPools.ItemPools
 import model.entities._
-import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter, ItemPoolImpl}
+import model.helpers._
 
 trait Level {
 
@@ -20,6 +21,7 @@ trait Level {
   def removeEntity(entity: Entity): Unit
 
   def getEntity(predicate: Entity => Boolean): Entity
+  def getEntities(predicate: Entity => Boolean): List[Entity]
 
   def spawnItem(pool: ItemPools.ItemPools): Unit
 
@@ -31,6 +33,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var score: Int = 0
 
   private val world: World = new World(GRAVITY_FORCE, true)
+  WorldUtilities.setWorld(world)
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
   entitiesFactory.setLevel(this, new ItemPoolImpl())
@@ -46,9 +49,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var platform: Entity = entitiesFactory.createPlatform((380, 200), (60,2))
   private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
 
-  EntitiesFactoryImpl.createSkeletonEnemy((+350, 400))
-  EntitiesFactoryImpl.createWormEnemy((+370,400))
-  //  EntitiesFactoryImpl.createSlimeEnemy((270,300))
+  EntitiesFactoryImpl.createSkeletonEnemy((HeroConstants.HERO_OFFSET._1+70, HeroConstants.HERO_OFFSET._2))
 
   private var water: Entity = entitiesFactory.createWaterPool((200,290), (100,15))
 
@@ -70,7 +71,6 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     }
 
     if(this.isWorldSetted){
-
       if(actions.nonEmpty) {
         for(command <- actions){
           if(!command.equals(GameEvent.SetMap)) {
@@ -82,13 +82,21 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
       //this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
       this.worldStep()
 
+//      for ( r <- EntitiesFactoryImpl.temp){
+//        r.run()
+//        EntitiesFactoryImpl.temp = EntitiesFactoryImpl.temp.filterNot(e => e.equals(r))
+//        println(EntitiesFactoryImpl.temp.size)
+//      }
+
+
+      this.entitiesFactory.createEnemies()
+
       this.entitiesList.foreach((entity: Entity) => entity.update())
 
       this.entitiesFactory.destroyBodies()
 
       this.entitiesFactory.applyEntityCollisionChanges()
     }
-
   }
 
   override def addEntity(entity: Entity): Unit = {
@@ -97,6 +105,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   }
 
   override def getEntity(predicate: Entity => Boolean): Entity = entitiesList.filter(predicate).head
+  override def getEntities(predicate: Entity => Boolean): List[Entity] = entitiesList.filter(predicate)
 
   override def removeEntity(entity: Entity): Unit = {
     this.entitiesList = this.entitiesList.filterNot((e: Entity) => e.equals(entity))
@@ -106,6 +115,14 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     if (entity.isInstanceOf[Enemy] || entity.isInstanceOf[Item]) {
       this.score += entity.asInstanceOf[Score].getScore
       this.entitiesSetter.setScore(this.score)
+    }
+
+    if (entity.isInstanceOf[Enemy]) {
+      // TODO: nomralizzare la creazione e rimozione di tutte le entity prima del word.step in update
+      // TODO: rifattorizzare .MPP (enemy position e in PPM mentre la createItem vuole valori non scalati)
+      EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
+        position=(entity.getPosition._1, entity.getPosition._2).MPP,
+        collisions = EntityCollisionBit.Hero, entitesSetter=this.entitiesSetter)
     }
   }
 

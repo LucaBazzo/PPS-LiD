@@ -1,7 +1,6 @@
 package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.Batch
-import model.collisions.ImplicitConversions.RichInt
 import model.entities.{Entity, EntityType, State}
 import utils.ApplicationConstants
 
@@ -34,33 +33,24 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
     sprites += (entity -> getSprite(entity))
   }
 
+  // TODO: rimuovere magic numbers
+
   private def getSprite(entity: Entity): EntitySprite = entity.getType match {
-    case EntityType.Hero => spriteFactory.createHeroSprite(ApplicationConstants.SPRITES_PACK_LOCATION, "hero", 50, 37)
-    case EntityType.Arrow =>
-      val sprite = spriteFactory.createEntitySprite(ApplicationConstants.SPRITES_PACK_LOCATION, "arrow", 40, 5, 10, 1, 2)
-      sprite.addAnimation(State.Standing, spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
-      sprite
     case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile => null
-    case EntityType.EnemySkeleton =>
-      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/skeleton.pack",
-        "skeleton", 150, 150, 19.PPM, 23.PPM, 300)
-      spriteFactory.defineEnemySkeletonAnimation(e)
-      e
-    case EntityType.EnemySlime =>
-      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/slime.pack",
-        "slime", 32, 25, 13.PPM, 13.PPM, 100)
-      spriteFactory.defineEnemySlimeAnimation(e)
-      e
-    case EntityType.EnemyWorm =>
-      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/worm.pack",
-        "worm", 90, 90, 15.PPM, 15.PPM, 200)
-      spriteFactory.defineEnemyWormAnimation(e)
-      e
-    case EntityType.AttackFireBall =>
-      val e:EntitySprite = spriteFactory.createEntitySprite("assets/sprites/fireball.pack",
-        "fireball", 46, 46, 5.PPM, 5.PPM, 200)
-      spriteFactory.defineAttackFireballAnimation(e)
-      e
+    case EntityType.Hero => spriteFactory.createHeroSprite(ApplicationConstants.SPRITES_PACK_LOCATION,
+      "hero", 50, 37)
+    case EntityType.Arrow => spriteFactory.createEntitySprite(entity.getType, ApplicationConstants.SPRITES_PACK_LOCATION,
+      "arrow", 40, 5, 10, 1, 2)
+    case EntityType.EnemySkeleton => spriteFactory.createEntitySprite(entity.getType, "assets/sprites/skeleton.pack",
+      "skeleton", 150, 150, entity.getSize._1, entity.getSize._2, 350)
+    case EntityType.EnemySlime => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/slime.pack",
+      "slime", 32, 25, entity.getSize._1, entity.getSize._2, 100)
+    case EntityType.EnemyWorm => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/worm.pack",
+      "worm", 90, 90, entity.getSize._1, entity.getSize._2, 300)
+    case EntityType.EnemyBossWizard => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/evil_wizard.pack",
+      "evil_wizard", 250, 250, entity.getSize._1*500, entity.getSize._2*250, 1)
+    case EntityType.AttackFireBall => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/fireball.pack",
+      "fireball", 46, 46, entity.getSize._1, entity.getSize._2, 100)
     case EntityType.ArmorItem =>
       createItemSprite(entity, 0, 0)
     case EntityType.CakeItem =>
@@ -90,7 +80,7 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
     case EntityType.BFSwordItem =>
       createItemSprite(entity, 1, 6)
     case EntityType.Door =>
-      val sprite = spriteFactory.createEntitySprite("assets/sprites/ironDoor.pack", "ironDoor1", 80, 67,
+      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/ironDoor.pack", "ironDoor1", 80, 67,
         entity.getSize._1 + 0.5f, entity.getSize._2, 120)
       sprite.addAnimation(State.Standing,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
@@ -98,13 +88,13 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 2))
       sprite
     case EntityType.Ladder =>
-      val sprite = spriteFactory.createEntitySprite("assets/sprites/bigLadder.pack", "bigLadder", 32, 212,
+      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/bigLadder.pack", "bigLadder", 32, 212,
         entity.getSize._1, entity.getSize._2, 100)
       sprite.addAnimation(State.Standing,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
       sprite
     case EntityType.Platform =>
-      val sprite = spriteFactory.createEntitySprite("assets/sprites/platform.pack", "platform", 79, 4,
+      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/platform.pack", "platform", 79, 4,
         entity.getSize._1, entity.getSize._2, 100)
       sprite.addAnimation(State.Standing,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
@@ -114,7 +104,8 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
   }
 
   private def createItemSprite(entity: Entity, row: Int, column: Int): EntitySprite = {
-    val sprite = spriteFactory.createEntitySprite(ApplicationConstants.SPRITES_PACK_LOCATION, "items", 32,
+    val sprite = spriteFactory.createEntitySprite(entity.getType,
+      ApplicationConstants.SPRITES_PACK_LOCATION, "items", 32,
       32, entity.getSize._1, entity.getSize._2, 2)
     sprite.addAnimation(State.Standing,
       spriteFactory.createSpriteAnimation(sprite, row, column, column))

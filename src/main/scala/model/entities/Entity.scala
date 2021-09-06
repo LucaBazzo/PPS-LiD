@@ -21,10 +21,11 @@ object State extends Enumeration {
 object EntityType extends Enumeration {
   type EntityType = Value
   val Hero,
-      Mobile, Immobile, Enemy, //this values will not show any sprite
+      Mobile, Immobile, Enemy, SpawnZone, //this values will not show any sprite
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
-      EnemySkeleton, EnemySlime, EnemyWorm, Platform, Door, Ladder, Water, Lava,
+      EnemySkeleton, EnemySlime, EnemyWorm, EnemyBossWizard,
+      Platform, Door, Ladder, Water, Lava,
       AttackFireBall, AttackArrow = Value
 }
 
@@ -108,8 +109,6 @@ abstract class EntityImpl(private val entityType: EntityType,
   override def destroyEntity(): Unit = {
     EntitiesFactoryImpl.destroyBody(this.getBody)
     this.getBody.getJointList.toArray().foreach(j => {
-      // TODO: to be removed
-//      EntitiesFactoryImpl.destroyJoint(j.joint)
       EntitiesFactoryImpl.destroyBody(j.other)
     })
     EntitiesFactoryImpl.removeEntity(this)

@@ -2,14 +2,15 @@ package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.{Animation, TextureAtlas, TextureRegion}
 import com.badlogic.gdx.utils.Array
-import model.entities.State
+import model.entities.EntityType.EntityType
+import model.entities.{EntityType, State}
 
 trait SpriteFactory {
   def createHeroSprite(spriteSheetName: String, regionName: String, spriteWidth: Float, spriteHeight: Float): EntitySprite
 
 
-  def createEntitySprite(spritePackName: String, regionName: String, spriteWidth: Float, spriteHeight: Float,
-                         entitySpriteWidth: Float, entitySpriteHeight: Float,
+  def createEntitySprite(entityType: EntityType, spritePackName: String, regionName: String, spriteWidth: Float,
+                         spriteHeight: Float, entitySpriteWidth: Float, entitySpriteHeight: Float,
                          sizeMultiplicative: Float = 0): EntitySprite
 
   def createSpriteAnimation(sprite: EntitySprite, rowNumber: Int,
@@ -21,39 +22,57 @@ trait SpriteFactory {
                                        rowNumber2: Int, startIndex2: Int, endIndex2: Int,
                                        frameDuration: Float = 0.10f, reverse: Boolean = false): Animation[TextureRegion]
 
-  def defineEnemySkeletonAnimation(sprite:EntitySprite): Unit
-  def defineEnemySlimeAnimation(sprite:EntitySprite): Unit
-  def defineEnemyWormAnimation(sprite: EntitySprite):Unit
-  def defineAttackFireballAnimation(sprite: EntitySprite):Unit
 }
 
 class SpriteFactoryImpl extends SpriteFactory {
 
   private var atlases: Map[String, TextureAtlas] = Map.empty
+  private var loadedSprites: Map[EntityType, EntitySprite] = Map.empty
+
+  // TODO: unire la createHeroSprite con createEntitySprite
+  // TODO: verificare se è possibile usare un pattern proxy
 
   override def createHeroSprite(spritePackName:String, regionName: String, spriteWidth: Float, spriteHeight: Float): EntitySprite = {
-    this.lookupSprite(spritePackName)
+    // load the atlas (spritesheet)
+    if (!this.atlases.contains(spritePackName))
+      this.atlases += spritePackName -> new TextureAtlas(spritePackName)
 
     val sprite = new HeroEntitySprite(regionName, spriteWidth, spriteHeight)
     sprite.setRegion(this.atlases(spritePackName).findRegion(regionName))
 
     sprite.setBounds(0, 0, spriteWidth, spriteHeight)
     this.defineHeroSpriteAnimations(sprite)
+
+    this.loadedSprites += EntityType.Hero -> sprite
     sprite
   }
 
-  override def createEntitySprite(spritePackName:String, regionName: String, spriteWidth: Float, spriteHeight: Float,
-                                  entitySpriteWidth: Float, entitySpriteHeight: Float,
+  override def createEntitySprite(entityType: EntityType, spritePackName:String, regionName: String, spriteWidth: Float,
+                                  spriteHeight: Float, entitySpriteWidth: Float, entitySpriteHeight: Float,
                                   sizeMultiplicative: Float = 1): EntitySprite = {
+    // load the atlas (spritesheet)
+    if (!this.atlases.contains(spritePackName))
+      this.atlases += spritePackName -> new TextureAtlas(spritePackName)
 
-    this.lookupSprite(spritePackName)
+    // load the sprites and define the animations to be displayed
     val sprite = new EntitySpriteImpl(regionName, entitySpriteWidth * sizeMultiplicative, entitySpriteHeight * sizeMultiplicative)
     sprite.setRegion(this.atlases(spritePackName).findRegion(regionName))
-
     sprite.setBounds(0, 0, spriteWidth, spriteHeight)
+
+    // define animations for the created sprite
+    entityType match {
+      case EntityType.Arrow => this.defineAttackArrowAnimation(sprite)
+      case EntityType.EnemySkeleton => this.defineEnemySkeletonAnimation(sprite)
+      case EntityType.EnemySlime => this.defineEnemySlimeAnimation(sprite)
+      case EntityType.EnemyWorm => this.defineEnemyWormAnimation(sprite)
+      case EntityType.EnemyBossWizard => this.defineEnemyWizardAnimation(sprite)
+      case EntityType.AttackFireBall => this.defineAttackFireballAnimation(sprite)
+      case _ => null
+    }
     sprite
   }
 
+  // generalizzare i metodi createSpriteAnimation, ...FromTwoRows, ...FromThreeRows
   override def createSpriteAnimation(sprite: EntitySprite, rowNumber: Int,
                                      startIndex: Int, endIndex: Int,
                                      frameDuration: Float = 0.10f, reverse: Boolean = false): Animation[TextureRegion] = {
@@ -126,7 +145,10 @@ class SpriteFactoryImpl extends SpriteFactory {
     new Animation(frameDuration, frames)
   }
 
-  override def defineEnemyWormAnimation(sprite:EntitySprite): Unit = {
+  private def defineAttackArrowAnimation(sprite: EntitySpriteImpl): Unit =
+    sprite.addAnimation(State.Standing, this.createSpriteAnimation(sprite, 0, 0, 0))
+
+  private def defineEnemyWormAnimation(sprite:EntitySprite): Unit = {
     sprite.addAnimation(State.Attack01,
       this.createSpriteAnimationFromThreeRows(sprite,
         0, 0, 6,
@@ -150,14 +172,24 @@ class SpriteFactoryImpl extends SpriteFactory {
         6, 0, 2, 0.18f), loop = true)
   }
 
-  def defineAttackFireballAnimation(sprite: EntitySprite):Unit = {
-    sprite.addAnimation(State.Running,
-      this.createSpriteAnimation(sprite,
-        1, 0, 5,0.15f), loop = true)
+  private def defineEnemyWizardAnimation(sprite:EntitySprite): Unit = {
+    sprite.addAnimation(State.Attack01,
+      this.createSpriteAnimationFromTwoRows(sprite, 0, 0, 6, 1, 0, 0, 0.15f))
+    sprite.addAnimation(State.Attack02,
+      this.createSpriteAnimationFromTwoRows(sprite, 1, 1, 6, 2, 0, 1, 0.15f))
     sprite.addAnimation(State.Dying,
-      this.createSpriteAnimation(sprite,
-        0, 0, 6, 0.18f))
+      this.createSpriteAnimationFromTwoRows(sprite, 2, 2, 6, 3, 0, 1, 0.15f))
+    sprite.addAnimation(State.Standing,
+      this.createSpriteAnimationFromTwoRows(sprite, 3, 2, 6, 4, 0, 2, 0.15f), loop = true)
+    sprite.addAnimation(State.Running,
+      this.createSpriteAnimationFromTwoRows(sprite, 4, 3, 6, 5, 0, 3, 0.15f), loop = true)
+    sprite.addAnimation(State.Hurt,
+      this.createSpriteAnimation(sprite, 6, 4, 6, 0.15f))
   }
+
+  // TODO: provare ad inserire anche l'animazione di esplosione
+  private def defineAttackFireballAnimation(sprite: EntitySprite):Unit =
+    sprite.addAnimation(State.Standing, this.createSpriteAnimation(sprite, 1, 0, 5,0.15f), loop = true)
 
   private def defineHeroSpriteAnimations(heroSprite: EntitySprite): Unit = {
     heroSprite.addAnimation(State.Standing,
@@ -203,7 +235,7 @@ class SpriteFactoryImpl extends SpriteFactory {
         9, 0, 5,0.18f))
   }
 
-  override def defineEnemySkeletonAnimation(sprite:EntitySprite): Unit = {
+  private  def defineEnemySkeletonAnimation(sprite:EntitySprite): Unit = {
     sprite.addAnimation(State.Attack01,
       this.createSpriteAnimationFromTwoRows(sprite,
         0, 0, 6,
@@ -224,7 +256,7 @@ class SpriteFactoryImpl extends SpriteFactory {
         3, 3, 6, 0.18f), loop = true)
   }
 
-  override def defineEnemySlimeAnimation(sprite:EntitySprite): Unit = {
+  private  def defineEnemySlimeAnimation(sprite:EntitySprite): Unit = {
     sprite.addAnimation(State.Attack01,
       this.createSpriteAnimation(sprite, 0, 0, 4, 0.18f))
     sprite.addAnimation(State.Dying,
@@ -237,10 +269,5 @@ class SpriteFactoryImpl extends SpriteFactory {
         2,0,2,0.15f), loop = true)
     sprite.addAnimation(State.Running,
       this.createSpriteAnimation(sprite, 2, 3, 6, 0.18f), loop = true)
-  }
-
-  def lookupSprite(spritePackName: String): Unit = {
-    if (!this.atlases.contains(spritePackName))
-      this.atlases += spritePackName -> new TextureAtlas(spritePackName)
   }
 }

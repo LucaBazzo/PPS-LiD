@@ -31,7 +31,6 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
           () => TileMapHelper.setWorld(this.level, this.rooms)
         )
       }
-
     }
 
     this.level.updateEntities(actions)
