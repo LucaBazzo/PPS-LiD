@@ -116,6 +116,9 @@ trait EntitiesFactory {
   // TODO: convertire createEnemies in createSpawnZone e lasicare a levelImpl la generazione dei nemici nelle zone di spawn
   def createEnemies(size: (Float, Float) = (10, 10),
                     position: (Float, Float) = (0, 0)): Unit
+
+  def addPendingEntityCreation(r:() => Unit): Unit
+  def createPendingEntities(): Unit
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -124,6 +127,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   private var itemPool: ItemPool = _
   private var bodiesToBeDestroyed: List[Body] = List.empty
   private val collisonMonitor: CollisionMonitor = new CollisionMonitorImpl
+  private var pendingEntitiesCreation: List[() => Unit] = List.empty
 
   override def setLevel(level: Level, pool: ItemPool): Unit = {
     this.level = level
@@ -242,7 +246,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createSkeletonEnemy(position: (Float, Float)): Enemy = {
     val size: (Float, Float) = (13f, 23f)
     val score: Int = 100
-    println(position)
     val spawnPosition = (position._1, position._2+size._2*2)
 
     val enemy:Enemy = createEnemyEntity(spawnPosition, size, SKELETON_STATS, score, EntityType.EnemySkeleton)
@@ -366,21 +369,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     immobileEntity
   }
 
-//  var temp: List[Runnable] = List.empty
 
   // TODO: convertire createEnemies in createSpawnZone e lasciare a levelImpl la generazione dei nemici nelle zone di spawn
   override def createEnemies(size: (Float, Float) = (10, 10),
                              position: (Float, Float) = (0, 0)):Unit =  {
-    // pick the number of enemies to create
-
-    // pick the type of the enemies
-
-
-//    val a:Runnable = () => {
-//      this.createSkeletonEnemy((position.x, position.y))
-//    }
-
-//    temp = a :: temp
+    this.createSkeletonEnemy((position.x, position.y))
   }
 
   override def createDoor(size: (Float, Float) = (10, 10),
@@ -587,6 +580,17 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       change._1.getEntityBody.createFixture()
     }
     this.entitiesToBeChanged = List.empty
+  }
+
+  override def addPendingEntityCreation(r:() => Unit):Unit = synchronized {
+    this.pendingEntitiesCreation = r :: this.pendingEntitiesCreation
+  }
+
+  override def createPendingEntities(): Unit = synchronized {
+    for(func <- this.pendingEntitiesCreation) {
+      func.apply()
+    }
+    this.pendingEntitiesCreation = List.empty
   }
 }
 

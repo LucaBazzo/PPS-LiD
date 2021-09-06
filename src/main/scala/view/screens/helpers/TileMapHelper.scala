@@ -1,5 +1,6 @@
 package view.screens.helpers
 
+import _root_.utils.ApplicationConstants.PIXELS_PER_METER
 import com.badlogic.gdx.maps.MapProperties
 import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
@@ -8,9 +9,8 @@ import com.badlogic.gdx.math.Rectangle
 import model.Level
 import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
-import model.entities.{Entity, EntityType}
+import model.entities.EntityType
 import model.helpers.EntitiesFactoryImpl
-import _root_.utils.ApplicationConstants.PIXELS_PER_METER
 
 object TileMapHelper {
 
@@ -54,36 +54,32 @@ object TileMapHelper {
 
     tiledMap.getLayers().forEach(layer => {
       layer.getObjects().forEach(obj => {
-
         rect = obj.asInstanceOf[RectangleMapObject].getRectangle
 
         val size: (Float, Float) = (rect.getWidth, rect.getHeight)
         val position: (Float, Float) = ((rect.getX*2 + rect.getWidth + (this.xOffset*16)) , (rect.getY*2 + rect.getHeight) )
 
-        var entity: Entity = null
 
         layer.getName() match {
           case "ground" | "bridge" => {
-              entity = EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack)
+            spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
           }
           case "door" => {
-            entity = EntitiesFactoryImpl.createDoor(size, position)
+            spawnEntity(() => EntitiesFactoryImpl.createDoor(size, position))
           }
           case "chest" => {
-            entity = EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack)
+            spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
           }
           case "water" | "lava" | "ladder" => {
-            entity = EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile)
+            spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile))
           }
           case "enemy" => {
-//            EntitiesFactoryImpl.createEnemies(size, position)
+            spawnEntity(() => EntitiesFactoryImpl.createEnemies(size, position))
           }
           case _ => {
             println("not supported layer: " + layer.getName())
           }
         }
-
-        if (entity != null) level.addEntity(entity)
       })
 
     })
@@ -93,5 +89,8 @@ object TileMapHelper {
     val width: Integer = mapProperties.get("width", classOf[Integer])
     this.xOffset = this.xOffset + width
   }
+
+  private def spawnEntity(f:() => Unit): Unit =
+    EntitiesFactoryImpl.addPendingEntityCreation(f)
 
 }

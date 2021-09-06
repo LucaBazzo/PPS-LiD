@@ -21,11 +21,13 @@ trait Level {
   def removeEntity(entity: Entity): Unit
 
   def getEntity(predicate: Entity => Boolean): Entity
+
   def getEntities(predicate: Entity => Boolean): List[Entity]
 
   def spawnItem(pool: ItemPools.ItemPools): Unit
 
   def getWorld: World
+
 }
 
 class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
@@ -82,14 +84,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
       //this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
       this.worldStep()
 
-//      for ( r <- EntitiesFactoryImpl.temp){
-//        r.run()
-//        EntitiesFactoryImpl.temp = EntitiesFactoryImpl.temp.filterNot(e => e.equals(r))
-//        println(EntitiesFactoryImpl.temp.size)
-//      }
-
-
-      this.entitiesFactory.createEnemies()
+      EntitiesFactoryImpl.createPendingEntities()
 
       this.entitiesList.foreach((entity: Entity) => entity.update())
 
@@ -145,4 +140,5 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
       world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
     }
   }
+
 }
