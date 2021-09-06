@@ -45,9 +45,12 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private var isWorldSetted: Boolean = false
 
-//  EntitiesFactoryImpl.createSkeletonEnemy((+280f, 550f))
-//  EntitiesFactoryImpl.createWizardBossEnemy((+280f, 550f))
-//  EntitiesFactoryImpl.createWormEnemy((280f, 550f))
+//  EntitiesFactoryImpl.createWizardBossEnemy(
+//    ApplicationConstants.HERO_OFFSET._1+150, ApplicationConstants.HERO_OFFSET._2)
+//  EntitiesFactoryImpl.createSkeletonEnemy(
+//    ApplicationConstants.HERO_OFFSET._1+90, ApplicationConstants.HERO_OFFSET._2)
+//  EntitiesFactoryImpl.createSkeletonEnemy(
+//    ApplicationConstants.HERO_OFFSET._1+150, ApplicationConstants.HERO_OFFSET._2)
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)
@@ -74,7 +77,6 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
       this.entitiesFactory.applyEntityCollisionChanges()
     }
-
   }
 
   override def addEntity(entity: Entity): Unit = {
