@@ -30,6 +30,7 @@ class GameInputProcessor(private val observerManager: ObserverManager) extends I
   override def touchDown(x: Int, y: Int, pointer: Int, button: Int): Boolean = {
     button match {
       case Buttons.LEFT => this.observerManager.notifyEvent(GameEvent.Attack)
+      case Buttons.RIGHT => this.observerManager.notifyEvent(GameEvent.BowAttack)
       case _ => return false
     }
     true

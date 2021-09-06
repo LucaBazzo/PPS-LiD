@@ -7,6 +7,7 @@ import model.entities.Entity
 import scala.collection.immutable.ListMap
 
 object WorldUtilities {
+
   def computePointsDistance(sourcePoint: Vector2, targetPoint: Vector2): Float =
     Math.sqrt(Math.pow(sourcePoint.x - targetPoint.x, 2) +
       Math.pow(sourcePoint.y - targetPoint.y, 2)).toFloat
@@ -35,7 +36,7 @@ object WorldUtilities {
 
   def checkAABBCollision(world:World, x1:Float, y1:Float, x2:Float, y2:Float): Boolean = {
     var output: Boolean = false
-    world.QueryAABB((_) => {
+    world.QueryAABB(_ => {
       output = true
       false // automatically stop consecutive queries
     },x1, y1, x2, y2)
@@ -78,7 +79,9 @@ object WorldUtilities {
       }
 
       // an entity who can collides with the source is obstructing the visual
-      if ((sourceBody.getFixtureList.toArray().head.getFilterData.maskBits & fixture.getFilterData.categoryBits) != 0)
+
+      if ((sourceBody.getFixtureList.toArray().head.getFilterData.maskBits & fixture.getFilterData.categoryBits) != 0 &&
+        !fixture.isSensor )
         preemptiveStop = true
     }
     isTargetVisible

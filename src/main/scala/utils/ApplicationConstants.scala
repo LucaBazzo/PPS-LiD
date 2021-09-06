@@ -22,5 +22,4 @@ object ApplicationConstants {
   val HERO_SIZE: (Float, Float) = (8.5f, 15f)
 
   val HERO_SIZE_SMALL: (Float, Float) = (8.5f, 8f)
-
 }

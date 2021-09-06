@@ -4,7 +4,10 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.EntityBody
 import model.collisions.ImplicitConversions._
+import model.entities.EntityType.EntityType
+import model.entities.Items.Items
 import model.entities.State.State
+import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
 import utils.ApplicationConstants.{HERO_SIZE, HERO_SIZE_SMALL}
 
@@ -15,14 +18,20 @@ trait Hero extends LivingEntity {
   def getPreviousState: State
   def getLinearVelocityX: Float
 
-  def setState(state: State)
   def isLittle: Boolean
   def setLittle(little: Boolean)
 
   def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0))
+
+  def itemPicked(itemType: Items)
+  def getItemsPicked: List[Items]
 }
 
-class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Float)) extends LivingEntityImpl(entityBody, size) with Hero{
+class HeroImpl(private val entityType: EntityType,
+               private var entityBody: EntityBody,
+               private val size: (Float, Float),
+               private val stats: Map[Statistic, Float])
+  extends LivingEntityImpl(entityType, entityBody, size, stats) with Hero{
 
   private var previousState: State = State.Standing
   private var little: Boolean = false
@@ -33,7 +42,7 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
     case GameEvent.Jump | GameEvent.MoveRight | GameEvent.MoveLeft | GameEvent.Slide => move(command)
     case GameEvent.Crouch => this.crouch()
     case GameEvent.StopCrouch => if(this.state == State.Crouch) this.state = State.Standing
-    case GameEvent.Attack => attack(command)
+    case GameEvent.Attack | GameEvent.BowAttack => attack(command)
     case _ => throw new UnsupportedOperationException
   }
 
@@ -51,7 +60,7 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
     this.state match {
       case State.Standing | State.Running =>
         this.stopMovement()
-        this.changeHeroFixture(HERO_SIZE_SMALL, (0, -6f))
+        this.changeHeroFixture(HERO_SIZE_SMALL, (0f, -6f))
         this.state = State.Crouch
         this.setLittle(true)
       case _ =>
@@ -99,8 +108,9 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
         && (this.state == State.Jumping || this.state == State.Falling))
         this.state = State.Running
       else if((this.entityBody.getBody.getLinearVelocity.y == 0 && this.entityBody.getBody.getLinearVelocity.x == 0)
-        && this.state != State.Crouch &&
-        this.state != State.Attack01 && this.state != State.Attack02 && this.state != State.Attack03)
+        && this.state != State.Crouch
+        && this.state != State.Attack01 && this.state != State.Attack02 && this.state != State.Attack03
+        && this.state != State.BowAttack)
         this.state = State.Standing
 
       if(this.state != State.Sliding && this.state != State.Crouch && isLittle) {
@@ -116,6 +126,10 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
       if((this.state == State.Attack01 || this.state == State.Attack02 || this.state == State.Attack03)
             && this.attackStrategy.isAttackFinished){
         this.attackStrategy.stopAttack()
+        this.state = State.Standing
+      }
+
+      if(this.state == State.BowAttack && this.attackStrategy.isAttackFinished){
         this.state = State.Standing
       }
     }
@@ -155,8 +169,8 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
   override def getPreviousState: State = this.previousState
 
   override def setState(state: State): Unit = {
+    super.setState(state)
     this.previousState = state
-    this.state = state
   }
 
   override def setLittle(little: Boolean): Unit = {
@@ -173,4 +187,10 @@ class HeroImpl(private var entityBody: EntityBody, private val size: (Float, Flo
 
     this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
   }
+
+  private var itemsPicked: List[Items] = List.empty
+
+  override def itemPicked(itemType: Items): Unit = this.itemsPicked = itemType :: this.itemsPicked
+
+  override def getItemsPicked: List[Items] = this.itemsPicked
 }

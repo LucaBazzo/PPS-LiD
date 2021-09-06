@@ -1,13 +1,13 @@
 package model.collisions
 
+import _root_.utils.ApplicationConstants.PIXELS_PER_METER
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.Level
+import model.collisions.ImplicitConversions._
 import model.entities.Entity
-import ImplicitConversions._
-import com.badlogic.gdx.math.Vector2
-import _root_.utils.ApplicationConstants.PIXELS_PER_METER
 
-object EntityType extends Enumeration {
+object EntityCollisionBit {
 
   private var currentBitValue: Short = 1
   private val bitMulti: Int = 2
@@ -15,17 +15,22 @@ object EntityType extends Enumeration {
   /** Collision bit used in fixture filters for recognizing the player.
    */
   val Hero: Short = currentBitValue
+  val Wall: Short = getNextBitValue
   val Enemy: Short = getNextBitValue
   val Mobile: Short = getNextBitValue
   val Immobile: Short = getNextBitValue
   val Item: Short = getNextBitValue
   val Sword: Short = getNextBitValue
+  val Door: Short = getNextBitValue
+  val OpenedDoor: Short = getNextBitValue
+  val DestroyedDoor: Short = getNextBitValue
+  val Arrow: Short = getNextBitValue
+  val EnemyAttack: Short = getNextBitValue
 
   private def getNextBitValue: Short = {
     this.currentBitValue = this.currentBitValue * bitMulti
     this.currentBitValue
   }
-
 }
 
 object ImplicitConversions {
@@ -50,12 +55,20 @@ object ImplicitConversions {
     def PPM: (Float, Float) = base / PIXELS_PER_METER
 
     def /(div: Float): (Float, Float) = (base._1 / div, base._2 / div)
+
+    def *(mul: Float): (Float, Float) = (base._1 * mul, base._2 * mul)
+
+    def +(tuple: (Float, Float)): (Float, Float) = (base._1 + tuple._1, base._2 + tuple._2)
+
+    def -(tuple: (Float, Float)): (Float, Float) = (base._1 - tuple._1, base._2 - tuple._2)
   }
 }
 
 // TODO: come gestire collissioni continue?
 
 class CollisionManager(private val level: Level) extends ContactListener {
+
+
 
   override def beginContact(contact: Contact): Unit = {
     val bodyA: Body = contact.getFixtureA.getBody
