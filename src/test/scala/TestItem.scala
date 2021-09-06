@@ -1,7 +1,7 @@
 import controller.GameEvent
 import model.entities.Items.Items
 import model.entities._
-import model.helpers.EntitiesContainerMonitor
+import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl}
 import model.{Level, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -39,11 +39,12 @@ class TestItem extends AnyFlatSpec {
   "An Item" should "disappear when picked up" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
     val level: Level = new LevelImpl(monitor)
-    level.updateEntities(List(GameEvent.SetMap))
     level.spawnItem(ItemPools.Level_1)
     for(item <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
       item.asInstanceOf[Item].collect()
-    level.updateEntities(List.empty)
+
+    EntitiesFactoryImpl.destroyBodies()
+    EntitiesFactoryImpl.applyEntityCollisionChanges()
     assert(monitor.getEntities(x => x.isInstanceOf[Item]).get.isEmpty)
   }
 

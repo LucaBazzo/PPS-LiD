@@ -30,7 +30,7 @@ trait EntitiesFactory {
 
   def createHeroEntity(): Hero
 
-  def createHeroFeet(hero: Hero)
+  def createHeroFeet(hero: Hero): Unit
 
   def createEnemyEntity(position: (Float, Float),
                         size: (Float, Float),
@@ -127,6 +127,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   private var itemPool: ItemPool = _
   private var bodiesToBeDestroyed: List[Body] = List.empty
   private var jointsToBeDestroyed: List[Joint] = List.empty
+  private val collisonMonitor: CollisionMonitor = new CollisionMonitorImpl
 
   override def setLevel(level: Level, pool: ItemPool): Unit = {
     this.level = level
@@ -185,7 +186,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val feetSize: (Float, Float) = (8.0f, 0.2f)
     val bodyPosition = hero.getPosition - (0, hero.getSize._2)
     val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Enemy | EntityCollisionBit.Immobile, createEdgeShape(feetSize),
+      EntityCollisionBit.Enemy | EntityCollisionBit.Immobile | EntityCollisionBit.Platform, createEdgeShape(feetSize),
       bodyPosition, gravityScale = 0, friction = 0.8f)
     EntitiesFactoryImpl.createJoint(hero.getBody, feetBody.getBody)
 
@@ -216,21 +217,15 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new DoNothingOnCollision)
-    immobileEntity.setEndCollisionStrategy(new DoNothingOnCollision)
     this.level.addEntity(immobileEntity)
 
     val immobileEntityUpper: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBodyUpper, upperSize.PPM)
     val immobileEntityLower: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBodyLower, lowerSize.PPM)
 
-    val platformEndCollision: CollisionStrategy = new PlatformEndCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower)
-
     immobileEntityUpper.setCollisionStrategy(new UpperPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower, this.collisonMonitor))
-    immobileEntityUpper.setEndCollisionStrategy(platformEndCollision)
     this.level.addEntity(immobileEntityUpper)
 
-
     immobileEntityLower.setCollisionStrategy(new LowerPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower))
-    immobileEntityLower.setEndCollisionStrategy(platformEndCollision)
     this.level.addEntity(immobileEntityLower)
 
     immobileEntity
@@ -243,7 +238,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Ladder, entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new LadderCollisionStrategy(this.collisonMonitor))
-    immobileEntity.setEndCollisionStrategy(new EndLadderCollisionStrategy(this.collisonMonitor))
     this.level.addEntity(immobileEntity)
 
     immobileEntity
@@ -410,7 +404,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val immobileEntity: Entity = ImmobileEntity(EntityType.Door, entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new DoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
-    immobileEntity.setEndCollisionStrategy(new EndDoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
     this.level.addEntity(immobileEntity)
     immobileEntity
   }
@@ -422,7 +415,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val immobileEntity: Entity = ImmobileEntity(EntityType.Water, entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new WaterCollisionStrategy)
-    immobileEntity.setEndCollisionStrategy(new EndWaterCollisionStrategy)
     this.level.addEntity(immobileEntity)
     immobileEntity
   }
@@ -435,7 +427,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val immobileEntity: Entity = ImmobileEntity(EntityType.Lava, entityBody, size.PPM)
 
     immobileEntity.setCollisionStrategy(new LavaCollisionStrategy(this.collisonMonitor))
-    immobileEntity.setEndCollisionStrategy(new EndLavaCollisionStrategy(this.collisonMonitor))
     this.level.addEntity(immobileEntity)
     immobileEntity
   }

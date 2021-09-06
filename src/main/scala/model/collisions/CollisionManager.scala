@@ -118,17 +118,4 @@ class CollisionManager(private val entitiesGetter: EntitiesGetter) extends Conta
     }
   }
 
-  /*override def endContact(contact: Contact): Unit = {
-    val firstBody: Body = contact.getFixtureA.getBody
-    val secondBody: Body = contact.getFixtureB.getBody
-
-    val firstEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals firstBody).get
-    val secondEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals secondBody).get
-
-    if(firstEntities.nonEmpty && secondEntities.nonEmpty) {
-      firstEntities.head.collisionEnded(secondEntities.head)
-      secondEntities.head.collisionEnded(firstEntities.head)
-    }
-  }*/
-
 }
