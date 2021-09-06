@@ -69,11 +69,29 @@ class PatrolAndStop(override val sourceEntity:MobileEntity,
   protected val maxDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance)
   protected val visibilityMaxHorizontalAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle)
 
-  override def apply(): Unit = {
-    if (this.isTargetNearby) {
-      this.stopMoving()
-    } else super.apply()
+  protected var lastIsTargetNear: Boolean = this.isTargetNearby
 
+  override def apply(): Unit = {
+    // prevents enemy movement if he is already attacking
+    if (!Array(State.Attack01, State.Attack02, State.Attack03).contains(this.sourceEntity.getState)) {
+      val isTargetNearbyCheck = this.isTargetNearby
+
+      // face the target entity if near
+      if (isTargetNearbyCheck &&
+        (this.isMovingLeft && isEntityOnTheRight(this.sourceEntity, this.targetEntity) ||
+          !this.isMovingLeft && isEntityOnTheLeft(this.sourceEntity, this.targetEntity))) {
+        this.changeDirection()
+      }
+
+      // stop moving when the target entity is near
+      if (isTargetNearbyCheck && !this.lastIsTargetNear) {
+        this.stopMoving()
+        this.sourceEntity.setState(State.Standing)
+      } else if (!isTargetNearbyCheck) {
+        super.apply()
+      }
+      this.lastIsTargetNear = isTargetNearbyCheck
+    }
   }
 
   protected def isTargetNearby: Boolean = {
