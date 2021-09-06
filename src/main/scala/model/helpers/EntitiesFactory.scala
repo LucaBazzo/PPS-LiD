@@ -44,7 +44,8 @@ trait EntitiesFactory {
   def createItem(PoolName: ItemPools,
                  size: (Float, Float) = (5f, 5f),
                  position: (Float, Float) = (0, 0),
-                 collisions: Short = EntityCollisionBit.Hero): Item
+                 collisions: Short = EntityCollisionBit.Hero,
+                 entitiesSetter: EntitiesSetter): Item
 
   def createPolygonalShape(size: (Float, Float)): Shape
 
@@ -330,11 +331,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createItem(PoolName: ItemPools,
                           size: (Float, Float) = (5f, 5f),
                           position: (Float, Float) = (0, 0),
-                          collisions: Short = EntityCollisionBit.Hero): Item = {
+                          collisions: Short = EntityCollisionBit.Hero,
+                          entitesSetter: EntitiesSetter): Item = {
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Item,
       collisions, createPolygonalShape(size.PPM), position.PPM)
     val item: Item = itemPool.getItem(entityBody, size, PoolName)
-    item.setCollisionStrategy(new ItemCollisionStrategy(item))
+    item.setCollisionStrategy(new ItemCollisionStrategy(item, entitesSetter))
     this.level.addEntity(item)
     item
   }

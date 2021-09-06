@@ -4,6 +4,7 @@ import controller.GameEvent
 import model.{DoorInteraction, HeroInteraction, LadderInteraction, PlatformInteraction}
 import model.entities.Statistic.Statistic
 import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
+import model.helpers.{EntitiesContainerMonitor, EntitiesSetter}
 
 import java.util.concurrent.{ExecutorService, Executors}
 
@@ -12,12 +13,13 @@ trait CollisionStrategy {
   def apply(entity: Entity): Unit
 }
 
-class ItemCollisionStrategy(private val item: Item) extends CollisionStrategy {
+class ItemCollisionStrategy(private val item: Item, private val entitiesMonitor: EntitiesSetter) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
     case h:Hero => println("Hero picked up item")
                    val effect = item.collect()
                    println(effect._3 + "\n +" + item.getScore + " points")
-                   h.itemPicked(item)
+                   h.itemPicked(item.getEnumVal)
+                   entitiesMonitor.addMessage(effect._3)
                    h.alterStatistics(effect._1, effect._2)
     case _ => println("____")
   }

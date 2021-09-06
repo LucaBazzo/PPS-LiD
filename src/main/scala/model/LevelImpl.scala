@@ -37,7 +37,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero)
+  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero, entitiesSetter)
 
   private val door: Entity = entitiesFactory.createDoor((10, 30), (290, 300))
 
@@ -101,6 +101,6 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   override def getWorld: World = this.world
 
   override def spawnItem(pool: ItemPools): Unit = {
-    entitiesFactory.createItem(pool)
+    entitiesFactory.createItem(pool, entitiesSetter = this.entitiesSetter)
   }
 }

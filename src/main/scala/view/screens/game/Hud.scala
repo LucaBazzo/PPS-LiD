@@ -108,36 +108,33 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
     executorService.submit(task)
   }
 
-  def addNewItem(item: Item): Unit = {
-    val itemName: Items = item.getEnumVal
-    if(! this.itemsPicked.contains(itemName)) {
-      this.setItemText(item.getDesc)
-
-      itemName match {
+  def addNewItem(item: Items): Unit = {
+    if(! this.itemsPicked.contains(item)) {
+      item match {
         case Items.BFSword =>
           addItemToTable("assets/textures/sword.png")
-          this.itemsPicked = itemName :: this.itemsPicked
+          this.itemsPicked = item :: this.itemsPicked
         case Items.Key =>
           addItemToTable("assets/textures/key.png")
-          this.itemsPicked = itemName :: this.itemsPicked
+          this.itemsPicked = item :: this.itemsPicked
         case Items.Boots =>
           addItemToTable("assets/textures/boots.png")
-          this.itemsPicked = itemName :: this.itemsPicked
+          this.itemsPicked = item :: this.itemsPicked
         case Items.Cake =>
           addItemToTable("assets/textures/Cake.png")
-          this.itemsPicked = itemName :: this.itemsPicked
+          this.itemsPicked = item :: this.itemsPicked
         case Items.Map =>
           addItemToTable("assets/textures/map.png")
-          this.itemsPicked = itemName :: this.itemsPicked
+          this.itemsPicked = item :: this.itemsPicked
         case Items.Shield =>
           addItemToTable("assets/textures/shield.png")
-          this.itemsPicked = itemName :: this.itemsPicked
+          this.itemsPicked = item :: this.itemsPicked
         case Items.SkeletonKey =>
           addItemToTable("assets/textures/SkeletonKey.png")
-          this.itemsPicked = itemName :: this.itemsPicked
+          this.itemsPicked = item :: this.itemsPicked
         case Items.Wrench =>
           addItemToTable("assets/textures/wrench.png")
-          this.itemsPicked = itemName :: this.itemsPicked
+          this.itemsPicked = item :: this.itemsPicked
         case _ => throw new UnsupportedOperationException
       }
     }

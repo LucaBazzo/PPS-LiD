@@ -57,6 +57,6 @@ class TestItem extends AnyFlatSpec {
     val preStat: Float = hero.getStatistics(Statistic.Defence)
     item.collisionDetected(hero)
     assert(hero.getStatistics(effect._1) == preStat + effect._2)
-    assert(hero.getItemsPicked.head.getEnumVal == item.getEnumVal)
+    assert(hero.getItemsPicked.head == item.getEnumVal)
   }
 }

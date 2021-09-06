@@ -77,6 +77,10 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.hud.changeHealth(hero.getStatistics(Statistic.CurrentHealth), hero.getStatistics(Statistic.Health))
     }
 
+    val message: Option[String] = entitiesGetter.getMessage
+    if(message.nonEmpty)
+      this.hud.setItemText(message.get)
+
     val entities: Option[List[Entity]] = entitiesGetter.getEntities(_ => true)
     if(entities.nonEmpty) {
       this.spriteViewer.loadSprites(entities.get)

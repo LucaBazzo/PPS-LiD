@@ -5,6 +5,7 @@ import controller.GameEvent.GameEvent
 import model.attack.DoNothingAttackStrategy
 import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
+import model.entities.Items.Items
 import model.entities.State.State
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
@@ -24,8 +25,8 @@ trait Hero extends LivingEntity {
 
   def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit
 
-  def itemPicked(itemType: Item): Unit
-  def getItemsPicked: List[Item]
+  def itemPicked(itemType: Items): Unit
+  def getItemsPicked: List[Items]
 
   def setEnvironmentInteraction(interaction: Option[HeroInteraction]): Unit
 
@@ -145,16 +146,16 @@ class HeroImpl(private val entityType: EntityType,
     this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
   }
 
-  private var itemsPicked: List[Item] = List.empty
+  private var itemsPicked: List[Items] = List.empty
 
-  override def itemPicked(itemType: Item): Unit = {
+  override def itemPicked(itemType: Items): Unit = {
     this.stopHero(300)
     this.stopMovement()
     this.setState(State.ItemPicked)
     this.itemsPicked = itemType :: this.itemsPicked
   }
 
-  override def getItemsPicked: List[Item] = this.itemsPicked
+  override def getItemsPicked: List[Items] = this.itemsPicked
 
   private var interaction: Option[HeroInteraction] = Option.empty
 
