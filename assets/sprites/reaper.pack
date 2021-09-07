@@ -1,12 +1,12 @@
 
-evil_wizard.png
+reaper.png
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-evil_wizard
+reaper
   rotate: false
   xy: 0, 0
-  size: 1750, 1500
-  orig: 1750, 1500
+  size: 1477, 1300
+  orig: 1477, 1300
   offset: 0, 0
   index: -1

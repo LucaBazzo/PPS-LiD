@@ -49,8 +49,12 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
       "worm", 90, 90, entity.getSize._1, entity.getSize._2, 300)
     case EntityType.EnemyBossWizard => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/evil_wizard.pack",
       "evil_wizard", 250, 250, entity.getSize._1*500, entity.getSize._2*250, 1)
+    case EntityType.EnemyBossReaper => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/reaper.pack",
+      "reaper", 211, 130, entity.getSize._1*500, entity.getSize._2*250, 1)
     case EntityType.AttackFireBall => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/fireball.pack",
       "fireball", 46, 46, entity.getSize._1, entity.getSize._2, 100)
+    case EntityType.AttackSmite => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/reaper.pack",
+      "reaper", 211, 130, entity.getSize._1, entity.getSize._2, 100)
     case EntityType.ArmorItem =>
       createItemSprite(entity, 0, 0)
     case EntityType.CakeItem =>

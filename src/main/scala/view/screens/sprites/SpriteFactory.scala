@@ -66,7 +66,9 @@ class SpriteFactoryImpl extends SpriteFactory {
       case EntityType.EnemySlime => this.defineEnemySlimeAnimation(sprite)
       case EntityType.EnemyWorm => this.defineEnemyWormAnimation(sprite)
       case EntityType.EnemyBossWizard => this.defineEnemyWizardAnimation(sprite)
+      case EntityType.EnemyBossReaper => this.defineEnemyReaperAnimation(sprite)
       case EntityType.AttackFireBall => this.defineAttackFireballAnimation(sprite)
+      case EntityType.AttackSmite => this.defineAttackFireballAnimation(sprite)
       case _ => null
     }
     sprite
@@ -187,9 +189,28 @@ class SpriteFactoryImpl extends SpriteFactory {
       this.createSpriteAnimation(sprite, 6, 4, 6, 0.15f))
   }
 
+  private def defineEnemyReaperAnimation(sprite:EntitySprite): Unit = {
+    sprite.addAnimation(State.Attack01,
+      this.createSpriteAnimationFromTwoRows(sprite, 0, 0, 6, 1, 0, 2, 0.15f))
+    sprite.addAnimation(State.Attack02,
+      this.createSpriteAnimationFromTwoRows(sprite, 1, 3, 6, 2, 0, 4, 0.15f))
+    sprite.addAnimation(State.Dying,
+      this.createSpriteAnimationFromThreeRows(sprite, 2, 5, 6, 3, 0, 6, 4, 0, 0, 0.15f))
+    sprite.addAnimation(State.Standing,
+      this.createSpriteAnimationFromTwoRows(sprite, 4, 4, 6, 5, 0, 4, 0.15f), loop = true)
+    sprite.addAnimation(State.Running,
+      this.createSpriteAnimationFromTwoRows(sprite, 8, 0, 6, 9, 0, 0, 0.15f), loop = true)
+    sprite.addAnimation(State.Hurt,
+      this.createSpriteAnimation(sprite, 4, 1, 3, 0.15f))
+  }
+
   // TODO: provare ad inserire anche l'animazione di esplosione
   private def defineAttackFireballAnimation(sprite: EntitySprite):Unit =
     sprite.addAnimation(State.Standing, this.createSpriteAnimation(sprite, 1, 0, 5,0.15f), loop = true)
+
+  private def defineAttackSmiteAnimation(sprite: EntitySprite):Unit =
+    sprite.addAnimation(State.Standing,
+      this.createSpriteAnimationFromThreeRows(sprite, 5, 5, 6, 6, 0, 6, 7, 0, 6, 0.15f), loop = true)
 
   private def defineHeroSpriteAnimations(heroSprite: EntitySprite): Unit = {
     heroSprite.addAnimation(State.Standing,
