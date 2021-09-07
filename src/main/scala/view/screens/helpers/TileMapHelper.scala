@@ -61,17 +61,26 @@ object TileMapHelper {
 
 
         layer.getName() match {
-          case "ground" | "bridge" => {
+          case "ground" => {
             spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
+          }
+          case "bridge" => {
+            spawnEntity(() => EntitiesFactoryImpl.createPlatform(position, size))
           }
           case "door" => {
             spawnEntity(() => EntitiesFactoryImpl.createDoor(size, position))
           }
           case "chest" => {
-            spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
+            spawnEntity(() => EntitiesFactoryImpl.createChest(size, position))
           }
-          case "water" | "lava" | "ladder" => {
-            spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile))
+          case "water" => {
+            spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position, size))
+          }
+          case "lava" => {
+            spawnEntity(() => EntitiesFactoryImpl.createLavaPool(position, size))
+          }
+          case "ladder" => {
+            spawnEntity(() => EntitiesFactoryImpl.createLadder(position, size))
           }
           case "enemy" => {
             spawnEntity(() => EntitiesFactoryImpl.createEnemies(size, position))
