@@ -1,18 +1,18 @@
 package model.entities
 
-import com.badlogic.gdx.physics.box2d.Joint
 import model.EntityBody
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl
 import model.movement.{DoNotMove, MovementStrategy}
+import model.collisions.ImplicitConversions._
 
 object Statistic extends Enumeration {
   type Statistic = Value
 
   val CurrentHealth, Health, Strength, Defence, MovementSpeed, MaxMovementSpeed, Acceleration, AttackSpeed = Value
 
-  val HorizontalVisionDistance, HorizontalVisionAngle, AttackFrequency, AttackDuration    = Value
+  val VisionDistance, VisionAngle, AttackFrequency, AttackDuration    = Value
 }
 
 trait MobileEntity extends Entity {
@@ -30,13 +30,19 @@ trait MobileEntity extends Entity {
 
   def alterStatistics(statistic: Statistic, alteration: Float)
 
-  def getStatistic(statistic: Statistic): Float
+  def getStatistic(statistic: Statistic): Option[Float]
+
+  def setVelocity(velocity: (Float, Float), speed: Float = 1)
+  def setVelocityX(velocity: Float, speed: Float = 1)
+  def setVelocityY(velocity: Float, speed: Float = 1)
+
+  def getVelocity: (Float, Float)
 }
 
 class MobileEntityImpl(private val entityType: EntityType,
                        private var entityBody: EntityBody,
                        private val size: (Float, Float),
-                       private var stats: Map[Statistic, Float]) extends EntityImpl(entityType, entityBody, size) with MobileEntity {
+                       private var stats: Map[Statistic, Float] = Map()) extends EntityImpl(entityType, entityBody, size) with MobileEntity {
 
   private var facingRight: Boolean = true
 
@@ -61,22 +67,34 @@ class MobileEntityImpl(private val entityType: EntityType,
   override def getStatistics: Map[Statistic, Float] = stats
 
   override def alterStatistics(statistic: Statistic, alteration: Float): Unit = {
+    if(stats.contains(statistic)) {
+      val newValue = stats(statistic) + alteration
+      this.stats += (statistic -> newValue)
 
-    val newValue = stats(statistic) + alteration
-    this.stats += (statistic -> newValue)
-
-    statistic match {
-      case Statistic.MovementSpeed => this.movementStrategy.alterSpeed(alteration)
-      case _ =>
+      statistic match {
+        case Statistic.MovementSpeed => this.movementStrategy.alterSpeed(alteration)
+        case _ =>
+      }
     }
   }
 
-  override def getStatistic(statistic:Statistic): Float = {
+  override def getStatistic(statistic:Statistic): Option[Float] = {
     if (this.stats.contains(statistic))
-      this.stats(statistic)
+      Option.apply(this.stats(statistic))
     else
-      throw new IllegalArgumentException
+      Option.empty
   }
+
+  override def setVelocity(velocity: (Float, Float), speed: Float = 1): Unit =
+    this.getBody.setLinearVelocity(velocity * speed)
+
+  override def setVelocityX(velocity: Float, speed: Float = 1): Unit =
+    this.getBody.setLinearVelocity(velocity * speed, this.getBody.getLinearVelocity.y)
+
+  override def setVelocityY(velocity: Float, speed: Float = 1): Unit =
+    this.getBody.setLinearVelocity(this.getBody.getLinearVelocity.x, velocity * speed)
+
+  override def getVelocity: (Float, Float) = (this.getBody.getLinearVelocity.x, this.getBody.getLinearVelocity.y)
 }
 
 
@@ -86,12 +104,5 @@ class CircularMobileEntity(private val entityType: EntityType,
                            private val statistics:Map[Statistic, Float],
                            private val pivotBody: EntityBody) extends MobileEntityImpl(entityType, entityBody, size, statistics) {
 
-  private val joint: Joint = EntitiesFactoryImpl.createJoint(this.pivotBody.getBody, this.entityBody.getBody)
-
-//  override def destroyEntity(): Unit = {
-//    EntitiesFactoryImpl.destroyJoint(this.joint)
-//    EntitiesFactoryImpl.destroyBody(this.pivotBody.getBody)
-//    EntitiesFactoryImpl.destroyBody(this.entityBody.getBody)
-//    EntitiesFactoryImpl.removeEntity(this)
-//  }
+  EntitiesFactoryImpl.createJoint(this.pivotBody.getBody, this.entityBody.getBody)
 }

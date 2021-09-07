@@ -3,41 +3,55 @@ package view.screens.game
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
+import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model.Level
 import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Entity, Hero, Statistic}
+import model.entities.{Entity, EntityType, Hero, LivingEntity, Statistic}
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
 import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
+import java.util.concurrent.{ExecutorService, Executors}
+
 class GameScreen(private val entitiesGetter: EntitiesGetter,
-                 private val observerManager: ObserverManager) extends ScreenAdapter{
+                 private val observerManager: ObserverManager,
+                 private val rooms: Array[String]) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
+  camera.translate(300f, 300f)
   private val batch: SpriteBatch = new SpriteBatch()
 
   private val box2DDebugRenderer: Box2DDebugRenderer = new Box2DDebugRenderer()
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map2.tmx")
+  private var tiledMaps: Array[TiledMap] = Array()
+  rooms.foreach(room => {
+    tiledMaps = tiledMaps :+ TileMapHelper.getTiledMap(room)
+  })
+
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMapRenderer(null)
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
-  //this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
+  this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
   private val spriteViewer: SpriteViewer = new SpriteViewerImpl(this.batch)
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
-  this.observerManager.notifyEvent(GameEvent.SetMap)
+  val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+  val task: Runnable = () => {
+    Thread.sleep(5000)
+    this.observerManager.notifyEvent(GameEvent.SetMap)
+  }
+  executorService.submit(task)
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
@@ -67,13 +81,32 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     super.render(delta)
 
+    // TODO: Convertire Option[List[Entity]] in List[Entity] o Option[Entity]
     val heroEntity: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Hero])
     if(heroEntity.nonEmpty) {
       val hero: Hero = heroEntity.get.head.asInstanceOf[Hero]
       this.camera.position.x = hero.getPosition._1
       this.camera.position.y = hero.getPosition._2
-
+//      for (item <- hero.getItemsPicked)
+//        this.hud.addNewItem(item)
       this.hud.changeHealth(hero.getStatistics(Statistic.CurrentHealth), hero.getStatistics(Statistic.Health))
+    }
+
+    val message: Option[String] = entitiesGetter.getMessage
+    if(message.nonEmpty)
+      this.hud.setItemText(message.get)
+
+    val bossEntity: Option[List[Entity]] = entitiesGetter.getEntities(e => e.getType match {
+      case EntityType.EnemyBossWizard => true
+      case _ => false
+    })
+    // TODO: prevenire chiamate di show e hide quando la barra della vita è già visibile o invisibile
+    if (bossEntity.get.nonEmpty) {
+      hud.showBossHealthBar()
+      val boss: LivingEntity = bossEntity.get.head.asInstanceOf[LivingEntity]
+      this.hud.changeBossHealth(boss.getStatistics(Statistic.CurrentHealth), boss.getStatistics(Statistic.Health))
+    } else {
+      hud.hideBossHealthBar()
     }
 
     val entities: Option[List[Entity]] = entitiesGetter.getEntities(_ => true)
@@ -84,20 +117,19 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
     this.camera.update()
 
-    // render the map
-    orthogonalTiledMapRenderer.render()
+    this.tiledMaps.foreach(tiledMap => {
+      this.orthogonalTiledMapRenderer.setMap(tiledMap)
+      orthogonalTiledMapRenderer.render()
+    })
 
     //what will be shown by the camera
-
     batch.setProjectionMatrix(camera.combined)
-
-
 
     batch.begin()
     // render objects inside
     this.spriteViewer.drawSprites()
     this.hud.drawHealthBar(batch)
-
+    this.hud.drawBossHealthBar(batch)
     batch.end()
 
     //for debug purpose

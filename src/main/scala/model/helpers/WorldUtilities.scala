@@ -2,69 +2,99 @@ package model.helpers
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
-import model.entities.Entity
+import model.collisions.ImplicitConversions.RichFloat
 
 import scala.collection.immutable.ListMap
 
-object WorldUtilities {
+trait WorldUtilities {
 
-  def computePointsDistance(sourcePoint: Vector2, targetPoint: Vector2): Float =
-    Math.sqrt(Math.pow(sourcePoint.x - targetPoint.x, 2) +
-      Math.pow(sourcePoint.y - targetPoint.y, 2)).toFloat
+  def setWorld(world: World): Unit
 
-  def checkAABBCollision(world:World, x1:Float, y1:Float, x2:Float, y2:Float, entity:Entity): Boolean = {
+  def isBodyVisible(sourceBody: Body, targetBody: Body, angle: Float = 90): Boolean
+
+  def checkCollisionWithBody(x1: Float, y1: Float, x2: Float, y2: Float, body: Body): Boolean
+
+  def checkCollision(x1: Float, y1: Float, x2: Float, y2: Float, entityBit: Short): Boolean
+
+  def checkCollision(x1: Float, y1: Float, x2: Float, y2: Float, body: Body): Boolean
+
+  def checkCollision(x1: Float, y1: Float, x2: Float, y2: Float): Boolean
+
+  def canBodiesCollide(body1: Body, body2: Body): Boolean
+
+  def canFixturesCollide(fixture1: Fixture, fixture2: Fixture): Boolean
+
+  def isFloorPresentOnTheLeft(body: Body, size:(Float, Float), offset: Float = 5f.PPM): Boolean
+
+  def isFloorPresentOnTheRight(body: Body, size:(Float, Float), offset: Float = 5f.PPM): Boolean
+
+  def isPathObstructedOnTheLeft(body: Body, size:(Float, Float), offset: Float = 5f.PPM): Boolean
+
+  def isPathObstructedOnTheRight(body: Body, size:(Float, Float), offset: Float = 5f.PPM): Boolean
+
+  def checkCollision(x: Float, y: Float, sourceBody: Body): Boolean = checkCollision(x, y, x, y, sourceBody)
+
+  def checkCollisionWithBody(x: Float, y: Float, targetBody: Body): Boolean = checkCollisionWithBody(x, y, x, y, targetBody)
+
+  def checkCollision(x: Float, y: Float, entityBit: Short): Boolean = checkCollision(x, y, x, y, entityBit)
+
+  def checkCollision(x: Float, y: Float): Boolean = checkCollision(x, y, x, y)
+
+}
+
+object WorldUtilities extends WorldUtilities {
+
+  private var world:World = _
+
+  override def setWorld(world:World): Unit = this.world = world
+
+  override def checkCollisionWithBody(x1: Float, y1: Float, x2: Float, y2: Float, targetBody: Body): Boolean = {
     var output: Boolean = false
     world.QueryAABB((fixture: Fixture) => {
-      if (entity.getBody equals fixture.getBody)
-        output = true
+      output = targetBody equals fixture.getBody
       !output // automatically stop consecutive queries if a match has been found
     }, x1, y1, x2, y2)
     output
   }
 
-  def checkAABBCollision(world:World, x1:Float, y1:Float, x2:Float, y2:Float, entityBit:Short): Boolean = {
+  override def checkCollision(x1: Float, y1: Float, x2: Float, y2: Float, sourceBody: Body): Boolean = {
+    var output: Boolean = false
+    val sourceFixture = sourceBody.getFixtureList.toArray().head
+    world.QueryAABB((fixture: Fixture) => {
+      output = canFixturesCollide(sourceFixture, fixture)
+      !output // automatically stop consecutive queries if a match has been found
+    }, x1, y1, x2, y2)
+    output
+  }
+
+  override def checkCollision(x1: Float, y1: Float, x2: Float, y2: Float, entityBit: Short): Boolean = {
     var output: Boolean = false
     world.QueryAABB((fixture: Fixture) => {
-      // a collision with a specific entity type has occurred
       output = fixture.getFilterData.categoryBits == entityBit
-
-      // automatically stop consecutive queries if a match has been found
-      !output
+      !output // automatically stop consecutive queries if a match has been found
     },x1, y1, x2, y2)
     output
   }
 
-  def checkAABBCollision(world:World, x1:Float, y1:Float, x2:Float, y2:Float): Boolean = {
+  override def checkCollision(x1: Float, y1: Float, x2: Float, y2: Float): Boolean = {
     var output: Boolean = false
     world.QueryAABB(_ => {
       output = true
-      false // automatically stop consecutive queries
-    },x1, y1, x2, y2)
+      !output // automatically stop consecutive queries if a match has been found
+    }, x1, y1, x2, y2)
     output
   }
 
-  def checkPointCollision(world:World, x:Float, y:Float): Boolean = {
-    checkAABBCollision(world:World, x, y, x, y)
-  }
-
-  def checkPointCollision(world:World, x:Float, y:Float, entity:Entity): Boolean = {
-    checkAABBCollision(world:World, x, y, x, y, entity)
-  }
-
-  def checkPointCollision(world:World, x:Float, y:Float, entityBit:Short): Boolean = {
-    checkAABBCollision(world:World, x, y, x, y, entityBit)
-  }
-
-  def checkBodyIsVisible(world: World, sourceBody:Body, targetBody:Body, maxHorizontalAngle:Float=90): Boolean = {
+  override def isBodyVisible(sourceBody: Body, targetBody: Body, maxHorizontalAngle: Float = 90): Boolean = {
     // Get the list of ordered fixtures (bodies) between source and target bodies
     var fixList:Map[Fixture, Float] = Map.empty
     world.rayCast((fixture:Fixture, point:Vector2, _, _) => {
-      fixList = fixList + (fixture -> WorldUtilities.computePointsDistance(sourceBody.getPosition, point))
+      fixList = fixList + (fixture -> GeometricUtilities.getPointsDistance(sourceBody.getPosition, point))
       1
     }, sourceBody.getPosition, targetBody.getPosition)
 
     // Check if source and target bodies are obstructed by other colliding entities
-    // No fixtures between target and source means that they are overlapping
+    // No fixtures between target and source (fixList is empty) means that they are overlapping
     var isTargetVisible = if (fixList.nonEmpty) false else true
     var preemptiveStop = false
     for (fixture <- ListMap(fixList.toSeq.sortBy(_._2):_*).keys if !preemptiveStop && !isTargetVisible) {
@@ -73,73 +103,57 @@ object WorldUtilities {
       // Check horizontal axis angle of source-target bodies
       if (isTargetVisible) {
         val angle = new Vector2(sourceBody.getPosition.sub(targetBody.getPosition)).angleDeg()
-        isTargetVisible = ((angle <= maxHorizontalAngle || angle >= 360-maxHorizontalAngle)
-          || (180-maxHorizontalAngle <= angle && 180+maxHorizontalAngle >= angle))
+//        isTargetVisible = ((angle <= maxHorizontalAngle || angle >= 360-maxHorizontalAngle)
+//          || (180-maxHorizontalAngle <= angle && 180+maxHorizontalAngle >= angle))
+        isTargetVisible = ((angle >= 360-maxHorizontalAngle)
+          || (180+maxHorizontalAngle >= angle))
         preemptiveStop = true
       }
 
       // an entity who can collides with the source is obstructing the visual
-
-      if ((sourceBody.getFixtureList.toArray().head.getFilterData.maskBits & fixture.getFilterData.categoryBits) != 0 &&
-        !fixture.isSensor )
+      if ((sourceBody.getFixtureList.toArray().head.getFilterData.maskBits & fixture.getFilterData.categoryBits) != 0
+        && !fixture.isSensor)
         preemptiveStop = true
     }
     isTargetVisible
   }
 
-  def getBodiesDistance(body1:Body, body2:Body): Float = {
-    // TODO : convertire distanza tra centri (attuale) in minima distanza tra le superfici dei body
-    body1.getWorldCenter.dst(body2.getWorldCenter)
+  override def canBodiesCollide(body1:Body, body2:Body):Boolean =
+    canFixturesCollide(body1.getFixtureList.toArray().head, body2.getFixtureList.toArray().head)
+
+  override def canFixturesCollide(fixture1:Fixture, fixture2:Fixture): Boolean =
+    (fixture1.getFilterData.maskBits & fixture2.getFilterData.categoryBits) != 0
+
+  override def isFloorPresentOnTheLeft(body: Body, size:(Float, Float), offset:Float = 5f.PPM): Boolean = {
+    val position = body.getPosition
+
+    checkCollision(
+      position.x - size._1 - offset, position.y - size._2 - offset,
+      position.x - size._1, position.y - size._2,
+      body)
   }
 
-  def isTargetOnTheRight(sourceBody: Body, targetBody: Body): Boolean = {
-    sourceBody.getPosition.x - targetBody.getPosition.x < 0
+  override def isFloorPresentOnTheRight(body: Body, size:(Float, Float), offset:Float = 5f.PPM): Boolean = {
+    val position = body.getWorldCenter
+    checkCollision(
+      position.x + size._1, position.y - size._2 - offset,
+      position.x + size._1 + offset, position.y - size._2,
+      body)
   }
 
-//  def getBodyWidth(body: Body): Float = {
-//    // TODO: instead of looking only the first Fixture, consider every non-sensor fixture
-//    val fixture:Fixture = body.getFixtureList.toArray().head
-//    fixture.getType match {
-//      case Shape.Type.Circle => fixture.getShape.asInstanceOf[CircleShape].getRadius*2
-//    }
-//  }
-//
-//  def getBodyHeight(body: Body): Float = {
-//    // TODO: instead of looking only the first Fixture, consider every non-sensor fixture
-//    val fixture:Fixture = body.getFixtureList.toArray().head
-//    fixture.getType match {
-//      case Shape.Type.Circle => fixture.getShape.asInstanceOf[CircleShape].getRadius*2
-//    }
-//  }
+  override def isPathObstructedOnTheLeft(body: Body, size:(Float, Float), offset:Float = 5f.PPM): Boolean = {
+    val position = body.getWorldCenter
+    checkCollision(
+      position.x - size._1 / 2 - offset, position.y - size._2 / 2,
+      position.x - size._1 / 2 - offset, position.y + size._2 / 2,
+      body)
+  }
+
+  override def isPathObstructedOnTheRight(body: Body, size:(Float, Float), offset:Float = 5f.PPM): Boolean = {
+    val position = body.getWorldCenter
+    checkCollision(
+      position.x + size._1 / 2 + offset, position.y - size._2 / 2,
+      position.x + size._1 / 2 + offset, position.y + size._2 / 2,
+      body)
+  }
 }
-
-//object SensorsUtility {
-//  val fixtureDef:FixtureDef = new FixtureDef()
-//  val shape:PolygonShape = new PolygonShape
-//
-//  fixtureDef.isSensor = true
-//
-//  def createLowerLeftSensor(body:Body): Fixture = {
-//    shape.setAsBox(0.1f, 0.1f, new Vector2(
-//      -getBodyWidth(body)/2 - 0.1f,
-//      -getBodyHeight(body)/2 - 0.1f), 0)
-//    fixtureDef.shape = shape
-//    body.createFixture(fixtureDef)
-//  }
-//
-//  def createLowerRightSensor(body:Body): Fixture = {
-//    shape.setAsBox(0.1f, 0.1f, new Vector2(
-//      +getBodyWidth(body)/2 + 0.1f,
-//      -getBodyHeight(body)/2 - 0.1f), 0)
-//    fixtureDef.shape = shape
-//    body.createFixture(fixtureDef)
-//  }
-//
-//  def sensorIsIntersectingWith(sensor:Fixture, categoryBit: Short, world:World): Boolean = {
-//    var output: Boolean = true
-//    for (contact <- world.getContactList.toArray()) {
-//      output = contact.getFixtureA.equals(sensor) && contact.getFixtureB.getFilterData.categoryBits.equals(categoryBit)
-//    }
-//    output
-//  }
-//}

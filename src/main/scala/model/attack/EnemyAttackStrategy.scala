@@ -1,13 +1,9 @@
 package model.attack
 
-import model.entities.{Entity, MobileEntity}
-import com.badlogic.gdx.math.Vector2
-import model.Level
 import model.entities.Statistic.Statistic
-import model.entities._
-import model.helpers.EntitiesFactoryImpl
-import model.helpers.EntitiesFactoryImpl.{createEnemyProjectileAttack, createMeleeSwordAttack}
-import model.helpers.WorldUtilities.{checkBodyIsVisible, getBodiesDistance, isTargetOnTheRight}
+import model.entities.{Entity, _}
+import model.helpers.EntitiesFactoryImpl.{createFireballAttack, createMeleeAttack}
+import model.helpers.EntitiesUtilities._
 
 
 
@@ -20,116 +16,136 @@ class DoNotAttack() extends AttackStrategy {
 
 }
 
-class ContactAttack(val owner: LivingEntity,
-                    val stats: Map[Statistic, Float],
-                    val target:Entity => Boolean)
+abstract class AttackStrategyImpl(protected val sourceEntity: LivingEntity,
+                                  protected val targetEntity: Entity)
   extends AttackStrategy {
 
-  // the attack itself is created once and "attached" to the owner body
-  val entity:MobileEntity = EntitiesFactoryImpl.createEnemyContactAttack(owner.getSize._1, owner)
-
-  override def apply(): Unit = { }
-
-  override def isAttackFinished: Boolean = true
-
-  override def stopAttack(): Unit = {
-
-  }
-}
-
-class MeleeAttack(val owner: LivingEntity,
-                  val level: Level,
-                  val stats: Map[Statistic, Float],
-                  val target: Entity => Boolean)
-  extends AttackStrategy {
-
-  protected val targetEntity:LivingEntity = level.getEntity(target).asInstanceOf[LivingEntity]
-  protected val maxDistance:Float = stats(Statistic.HorizontalVisionDistance)
-  protected val visibilityMaxHorizontalAngle:Float = stats(Statistic.HorizontalVisionAngle)
-  protected val attackFrequency:Float = stats(Statistic.AttackFrequency)
-  protected val attackDuration:Float = stats(Statistic.AttackDuration)
+  protected val stats: Map[Statistic, Float] = this.sourceEntity.getStatistics
+  protected val attackFrequency: Float = this.stats(Statistic.AttackFrequency)
+  protected val attackDuration: Float = this.stats(Statistic.AttackDuration)
+  protected val visionAngle: Float = this.stats(Statistic.VisionAngle)
+  protected val visionDistance: Float = this.stats(Statistic.VisionDistance)
 
   protected var lastAttackTime:Long = 0
 
   override def apply(): Unit = {
-    if (canAttack && isAttackFinished) {
+    if (this.canAttack) {
       this.lastAttackTime = System.currentTimeMillis()
-      spawnAttack()
-    }
-  }
-
-  override def isAttackFinished: Boolean = System.currentTimeMillis() - this.lastAttackTime > this.attackDuration
-
-  private def canAttack: Boolean =  {
-    System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
-      checkBodyIsVisible(level.getWorld, owner.getBody, targetEntity.getBody, this.visibilityMaxHorizontalAngle) &&
-      getBodiesDistance(owner.getBody, targetEntity.getBody) <= this.maxDistance
-  }
-
-  private def spawnAttack(): MobileEntity = {
-    val spawnCoordinates: Vector2 = owner.getBody.getWorldCenter.add(
-      if (isTargetOnTheRight(owner.getBody, targetEntity.getBody))
-        owner.getSize._1 else -owner.getSize._1, 0)
-
-    val entity:MobileEntity = createMeleeSwordAttack(EntityType.Mobile, (15, 15), (spawnCoordinates.x, spawnCoordinates.y), owner)
-    entity.getBody.setBullet(true)
-    entity
-  }
-}
-
-class RangedAttack(val owner: LivingEntity,
-                   val level:Level,
-                   val stats: Map[Statistic, Float],
-                   val target:Entity => Boolean)
-  extends AttackStrategy {
-
-  protected val targetEntity:Entity = this.level.getEntity(target)
-  protected val maxDistance:Float = stats(Statistic.HorizontalVisionDistance)
-  protected val visibilityMaxHorizontalAngle:Float = stats(Statistic.HorizontalVisionAngle)
-  protected val attackFrequency:Float = stats(Statistic.AttackFrequency)
-  protected val attackDuration:Float = stats(Statistic.AttackDuration)
-
-  protected var lastAttackTime:Long = 0
-
-  override def apply(): Unit = {
-    if (canAttack && isAttackFinished) {
-      this.lastAttackTime = System.currentTimeMillis()
+      this.sourceEntity.setState(State.Attack01)
       spawnAttack()
     }
   }
 
   override def isAttackFinished: Boolean =
-    System.currentTimeMillis() - this.lastAttackTime >= this.attackDuration
+    System.currentTimeMillis() - this.lastAttackTime > this.attackDuration
 
-  private def canAttack: Boolean =  {
+  protected def canAttack: Boolean = this.isAttackFinished &&
     System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
-      checkBodyIsVisible(this.level.getWorld, owner.getBody, targetEntity.getBody,
-        this.visibilityMaxHorizontalAngle) &&
-      getBodiesDistance(this.owner.getBody, targetEntity.getBody) <= this.maxDistance
+    isEntityVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
+    getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
+
+  protected def spawnAttack(): Unit
+}
+
+// TODO: muovere la strategia di creazione di attacco fuori da MeleeAttack
+
+class SkeletonAttack(override protected val sourceEntity: LivingEntity,
+                     override protected val targetEntity: Entity)
+  extends AttackStrategyImpl(sourceEntity, targetEntity) {
+
+  protected var attackInstance: Option[MobileEntity] = Option.empty
+  protected var attackTimer: Long = 0
+
+  override def apply():Unit = {
+    // remove attack box
+    if (this.isAttackFinished && this.attackInstance.isDefined) {
+      this.stopAttack()
+      this.sourceEntity.setState(State.Standing)
+    }
+
+    // activate the attack box to match the displayed animation
+    if (!this.isAttackFinished) {
+      val attackProgress: Long = System.currentTimeMillis() - this.attackTimer
+      val isAttackActive: Boolean = this.attackInstance.get.getBody.isActive()
+      // TODO: calibrare meglio i tempi
+
+      if (attackProgress > 600 && attackProgress < 1000 && !isAttackActive) {
+        this.attackInstance.get.getBody.setActive(true)
+      }
+      if (attackProgress <= 600 && attackProgress > 1000 && isAttackActive) {
+        this.attackInstance.get.getBody.setActive(false)
+      }
+    }
+
+    super.apply()
   }
 
-  private def spawnAttack(): Attack = {
-    val spawnCoordinates = owner.getBody.getWorldCenter.add(
-      if (isTargetOnTheRight(owner.getBody, targetEntity.getBody))
-        owner.getSize._1 else -owner.getSize._1, 0)
-    val entity:Attack = createEnemyProjectileAttack(EntityType.AttackFireBall, (5, 5),
-      (spawnCoordinates.x, spawnCoordinates.y), targetEntity.getPosition, owner)
-    entity
+  override def stopAttack(): Unit = {
+    if (this.attackInstance.isDefined) {
+      this.attackInstance.get.destroyEntity()
+      this.attackInstance = Option.empty
+      this.attackTimer = 0
+    }
+  }
+
+  override protected def spawnAttack(): Unit = {
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity, size = (23, 23), offset = (20, 5)))
+    this.attackInstance.get.getBody.setActive(false)
+    this.attackTimer = System.currentTimeMillis()
   }
 }
 
-//class MagicMissleAttack(enemyEntity: Entity, heroEntity:Entity, world:World, level:Level) extends AttackStrategy {
-//  private val maxDistance = 10
-//
-//  val attackFrequency = 1000
-//  var lastAttackTime = 0l
-//
-//  override def attack(): Unit = {
-//    lastAttackTime = System.currentTimeMillis()
-//    val attackEntity:Attack = entitiesFactory.createProjectile(
-//      enemyEntity.getBody.getWorldCenter,
-//      heroEntity.getBody.getWorldCenter, enemyEntity)
-//    level.addEntity(attackEntity)
-//  }
-//
-//}
+class SlimeAttack(override protected val sourceEntity: LivingEntity,
+                  override protected val targetEntity: Entity)
+  extends AttackStrategyImpl(sourceEntity, targetEntity) {
+
+  protected var attackInstance: Option[MobileEntity] = Option.empty
+  protected var attackTimer: Long = 0
+
+  override def apply():Unit = {
+    // remove attack box
+    if (this.isAttackFinished && this.attackInstance.isDefined) {
+      this.stopAttack()
+      this.sourceEntity.setState(State.Standing)
+    }
+
+    // activate the attack box to match the displayed animation
+    if (!this.isAttackFinished) {
+      val attackProgress: Long = System.currentTimeMillis() - this.attackTimer
+      val isAttackActive: Boolean = this.attackInstance.get.getBody.isActive()
+      // TODO: calibrare meglio i tempi
+      if (attackProgress > 600 && attackProgress < 1000 && !isAttackActive) {
+        this.attackInstance.get.getBody.setActive(true)
+      }
+      if (attackProgress <= 600 && attackProgress > 1000 && isAttackActive) {
+        this.attackInstance.get.getBody.setActive(false)
+      }
+    }
+
+    super.apply()
+  }
+
+  override def stopAttack(): Unit = {
+    if (this.attackInstance.isDefined) {
+      this.attackInstance.get.destroyEntity()
+      this.attackInstance = Option.empty
+      this.attackTimer = 0
+    }
+  }
+
+  override protected def spawnAttack(): Unit = {
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity,
+      size = (7, 15), offset = (10, 5)))
+    this.attackInstance.get.getBody.setActive(false)
+    this.attackTimer = System.currentTimeMillis()
+  }
+}
+
+class WormAttack(override protected val sourceEntity: LivingEntity,
+                 override protected val targetEntity: Entity)
+  extends AttackStrategyImpl(sourceEntity, targetEntity) {
+
+  override protected def spawnAttack(): Unit = {
+    createFireballAttack(this.sourceEntity, this.targetEntity)
+  }
+}
