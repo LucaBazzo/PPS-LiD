@@ -157,7 +157,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val statistic: Map[Statistic, Float] = Map(
       Statistic.Health -> 1000,
       Statistic.CurrentHealth -> 1000,
-      Statistic.Strength -> 2000,
+      Statistic.Strength -> 40,
       Statistic.MovementSpeed -> 1,
       Statistic.Defence -> 0)
 
@@ -250,10 +250,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val enemy:Enemy = createEnemyEntity(spawnPosition, size, SKELETON_STATS, score, EntityType.EnemySkeleton)
 
-    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy, "",
+    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
+    behaviours.addBehaviour("",
       new DoNothingOnCollision(),
       new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
       new SkeletonAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+
     enemy.setBehaviour(behaviours)
     enemy
   }
@@ -264,7 +266,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val enemy:Enemy = createEnemyEntity(position, size, SLIME_STATS, score, EntityType.EnemySlime)
 
-    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy, "",
+    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
+    behaviours.addBehaviour("",
       new DoNothingOnCollision(),
       new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
       new SlimeAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
@@ -278,7 +281,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val enemy:Enemy = createEnemyEntity(position, size, WORM_STATS, score, EntityType.EnemyWorm)
 
-    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy, "",
+    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
+    behaviours.addBehaviour("",
       new DoNothingOnCollision(),
       new PatrolPlatform(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
       new WormAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
@@ -292,17 +296,27 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val score: Int = 1000
 
     val enemy:Enemy = createEnemyEntity(position, size, WIZARD_BOSS_STATS, score, EntityType.EnemyBossWizard)
+    val targetEntity:Entity = this.level.getEntity(e => e.isInstanceOf[Hero])
 
-    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy, "1", new DoNothingOnCollision, new DoNotMove(), new DoNotAttack() )
-    val p2AttackStrategy = new WormAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero]))
-    behaviours.addBehaviour("2", new DoNothingOnCollision, new DoNotMove(), p2AttackStrategy)
-    behaviours.addBehaviour("3",
-      new DoNothingOnCollision,
-      new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
-      new SkeletonAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
-    behaviours.addTransition("1", "2", new TimePredicate(5000))
-    behaviours.addTransition("2", "3", new CompletedAttackPredicate(p2AttackStrategy, 3))
-    behaviours.addTransition("3", "1", new HealthThresholdPredicate(enemy, 50))
+    val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
+
+    // first behaviour - do nothing for some time
+    behaviours.addBehaviour("1", new DoNothingOnCollision(), new FaceTarget(enemy, targetEntity), new DoNotAttack())
+
+    // second behaviour - attack hero if near
+    val p2AttackStrategy = new WizardFirstAttack(enemy, targetEntity)
+    behaviours.addBehaviour("2", new DoNothingOnCollision(), new ChaseTarget(enemy, targetEntity), p2AttackStrategy)
+
+    // third behaviour - attack hero if near (with another attack)
+    val p3AttackStrategy = new WizardSecondAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero]))
+    behaviours.addBehaviour("3", new DoNothingOnCollision(), new ChaseTarget(enemy, targetEntity), p3AttackStrategy)
+
+    // add conditional transitions between behaviours
+    behaviours.addTransition("1", "2", new TimePredicate(10000))
+
+    behaviours.addTransition("2", "3", new RandomTruePredicate(0.5f))
+
+    behaviours.addTransition("3", "2", new RandomTruePredicate(0.5f))
 
     enemy.setBehaviour(behaviours)
     enemy

@@ -4,8 +4,24 @@ import com.badlogic.gdx.math.Vector2
 import model.entities.{Entity, MobileEntity, State, Statistic}
 import model.helpers.EntitiesUtilities._
 
+// TODO: replace with MovementStratey.DoNothingMovementStrategy
 class DoNotMove() extends MovementStrategy {
   override def apply(): Unit = { }
+}
+
+class FaceTarget(val sourceEntity: MobileEntity, val targetEntity: Entity) extends MovementStrategy {
+
+  private var isFacingRight: Boolean = isEntityOnTheRight(sourceEntity, targetEntity)
+
+  override def apply(): Unit = {
+    val facingRightCheck = isEntityOnTheRight(sourceEntity, targetEntity)
+
+    // prevents continuous calls to sourceEntity.setFacing
+    if (facingRightCheck != isFacingRight) {
+      this.isFacingRight = facingRightCheck
+      this.sourceEntity.setFacing(facingRightCheck)
+    }
+  }
 }
 
 class PatrolPlatform(val sourceEntity: MobileEntity,
@@ -15,7 +31,6 @@ class PatrolPlatform(val sourceEntity: MobileEntity,
   protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
 
   protected var isMovingLeft: Boolean = false
-
   sourceEntity.setFacing(right = !isMovingLeft)
 
   override def apply(): Unit = {
@@ -66,8 +81,8 @@ class PatrolAndStop(override val sourceEntity:MobileEntity,
                     override val targetEntity:Entity)
   extends PatrolPlatform(sourceEntity, targetEntity) {
 
-  protected val maxDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance).get
-  protected val visibilityMaxHorizontalAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle).get
+  protected val visionDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance).get
+  protected val visionAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle).get
 
   protected var lastIsTargetNear: Boolean = this.isTargetNearby
 
@@ -95,8 +110,62 @@ class PatrolAndStop(override val sourceEntity:MobileEntity,
   }
 
   protected def isTargetNearby: Boolean = {
-    isEntityVisible(this.sourceEntity, this.targetEntity, this.visibilityMaxHorizontalAngle) &&
-      getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.maxDistance
+    isEntityVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
+      getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
   }
 }
 
+class ChaseTarget(val sourceEntity:MobileEntity,
+                  val targetEntity:Entity) extends MovementStrategy {
+
+  protected val visionDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance).get
+  protected val visionAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle).get
+  protected val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
+  protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
+
+  protected var isTargetLeft: Boolean = false
+  private var lastMovementCheck: Boolean = false
+
+  override def apply(): Unit = {
+
+    val canMoveToTheLeft: Boolean = !isPathObstructedOnTheLeft(this.sourceEntity) && isFloorPresentOnTheLeft(this.sourceEntity)
+    val canMoveToTheRight: Boolean = !isPathObstructedOnTheRight(this.sourceEntity) && isFloorPresentOnTheRight(this.sourceEntity)
+
+    this.isTargetLeft = isEntityOnTheLeft(this.sourceEntity, this.targetEntity)
+
+    val isTargetVisible: Boolean = isEntityVisible(this.sourceEntity, this.targetEntity)
+
+    if (!Array(State.Attack01, State.Attack02, State.Attack03).contains(this.sourceEntity.getState)) {
+      if (!canMoveToTheLeft && isTargetLeft ||
+        !canMoveToTheRight && !isTargetLeft ||
+        !isTargetVisible ||
+        getEntitiesDistance(this.sourceEntity, this.targetEntity) < this.visionDistance) {
+        if (this.lastMovementCheck)
+          this.sourceEntity.setState(State.Standing)
+        this.lastMovementCheck = false
+      } else {
+        this.move()
+        if (!this.lastMovementCheck)
+          this.sourceEntity.setState(State.Running)
+        this.lastMovementCheck = true
+      }
+      this.sourceEntity.setFacing(right = !isTargetLeft)
+    }
+  }
+
+  protected def move(): Unit = {
+    // apply movement force
+    val movementForce = if (this.isTargetLeft) -this.acceleration else this.acceleration
+    this.sourceEntity.setVelocityX(this.sourceEntity.getVelocity._1 + movementForce)
+
+    // limit horizontal speed
+    if (Math.abs(this.sourceEntity.getVelocity._1) > this.maxMovementSpeed) {
+      var maxMovementForce: Float = 0
+      if (this.sourceEntity.getBody.getLinearVelocity.x > this.maxMovementSpeed)
+        maxMovementForce = this.maxMovementSpeed
+      if (this.sourceEntity.getBody.getLinearVelocity.x < -this.maxMovementSpeed)
+        maxMovementForce = -this.maxMovementSpeed
+      this.sourceEntity.setVelocityX(maxMovementForce)
+    }
+  }
+}

@@ -58,8 +58,8 @@ object EnemiesConstants {
     Statistic.MaxMovementSpeed -> 40f.PPM,
     Statistic.Acceleration -> 5f.PPM,
 
-    Statistic.VisionDistance -> 20.PPM,
-    Statistic.VisionAngle -> 20,
+    Statistic.VisionDistance -> 70.PPM,
+    Statistic.VisionAngle -> 90,
     Statistic.AttackFrequency -> 2000,
     Statistic.AttackDuration -> 1000,
   )

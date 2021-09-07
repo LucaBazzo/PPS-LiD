@@ -35,10 +35,11 @@ class Enemy(private val entityType: EntityType,
   override def setBehaviour(enemyBehaviour: EnemyBehaviour): Unit = this.enemyBehaviour = Option(enemyBehaviour)
 
   override def sufferDamage(damage: Float): Unit = {
-    super.sufferDamage(damage)
     if (this.getStatistic(Statistic.CurrentHealth).get <= 0) {
       this.state = State.Dying
+      this.enemyBehaviour.get.getAttackStrategy.stopAttack()
     }
+    super.sufferDamage(damage)
 
     // TODO: spostare qui la creazione di items
   }
@@ -54,6 +55,8 @@ trait EnemyBehaviour {
 
   def apply(): Unit
 
+  def getAttackStrategy: AttackStrategy
+  def getMovementStrategy: MovementStrategy
 }
 
 class EnemyBehaviourImpl(protected val sourceEntity:LivingEntity)
@@ -114,6 +117,9 @@ class EnemyBehaviourImpl(protected val sourceEntity:LivingEntity)
     this.currentBehaviour.get._4.stopAttack()
   }
 
+  override def getAttackStrategy: AttackStrategy = this.currentBehaviour.get._4
+
+  override def getMovementStrategy: MovementStrategy = this.currentBehaviour.get._3
 }
 
 // TODO: convertire in funzioni higher order
@@ -148,7 +154,6 @@ class CompletedAttackPredicate(attackStrategy: AttackStrategy,
   override def apply(): Boolean = {
     if (this.attackStrategy.isAttackFinished && !lastAttackFinishedCheck) {
       finishedAttacksCount += 1
-      println("detected a completed attack")
     }
 
     lastAttackFinishedCheck = this.attackStrategy.isAttackFinished
@@ -158,6 +163,29 @@ class CompletedAttackPredicate(attackStrategy: AttackStrategy,
   override def reset(): Unit = {
     this.finishedAttacksCount = 0
     this.lastAttackFinishedCheck = true
+  }
+}
+
+class RandomTruePredicate(val percentage: Float) extends Predicate {
+  private var lastCheckTime:Long = 0
+  private val checkPeriod: Long = 3000
+  private val randomGenerator: Random = new Random()
+  private var response: Boolean = false
+
+  override def apply(): Boolean = {
+    if (System.currentTimeMillis() - this.lastCheckTime > this.checkPeriod) {
+      this.lastCheckTime = System.currentTimeMillis()
+      randomGenerator.nextFloat() match {
+        case x if x < this.percentage => this.response = true
+        case _ => this.response = false
+      }
+    }
+    response
+  }
+
+  override def reset(): Unit = {
+    this.lastCheckTime = 0
+    this.response = false
   }
 }
 
@@ -186,4 +214,3 @@ class AllPredicate(override val predicates: Seq[Predicate]) extends AggregatedPr
     count == predicates.size
   }
 }
-
