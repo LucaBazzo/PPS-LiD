@@ -1,6 +1,6 @@
 package view.screens.helpers
 
-import _root_.utils.ApplicationConstants.PIXELS_PER_METER
+import _root_.utils.ApplicationConstants.{PIXELS_PER_METER}
 import com.badlogic.gdx.maps.MapProperties
 import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
@@ -15,40 +15,29 @@ import model.helpers.EntitiesFactoryImpl
 object TileMapHelper {
 
   private val scale: Float = 1/(PIXELS_PER_METER/2)
-
-  private var xOffset: Float = 0f
-  private var xOffsetRenderer: Float = 0f
+//  private val scale: Float = 1/(PIXELS_PER_METER*4)
 
   def getMapRenderer(tiledMap: TiledMap): OrthogonalTiledMapRenderer = {
     new OrthogonalTiledMapRenderer(tiledMap, scale)
   }
 
-  //restituisce la tiledMap settando l'offset di renderizzazione relativo all'asse x
-  def getTiledMap(mapName: String): TiledMap = {
+  //restituisce la tiledMap settando l'offset di renderizzazione
+  def getTiledMap(mapName: String, offset: (Integer, Integer)): TiledMap = {
     val tiledMap: TiledMap = new TmxMapLoader().load("assets/maps/" + mapName + ".tmx")
 
     tiledMap.getLayers().forEach(layer => {
-      layer.setOffsetX(xOffsetRenderer*8)
+      layer.setOffsetX(offset._1*8)
+      layer.setOffsetY(offset._2*8)
     })
-
-    //update x offset
-    val mapProperties: MapProperties = tiledMap.getProperties
-    val width: Integer = mapProperties.get("width", classOf[Integer])
-    this.xOffsetRenderer = this.xOffsetRenderer + width
 
     tiledMap
   }
 
-  def setWorld(level: Level, rooms: Array[String]): Unit = {
-
-    this.xOffset = 0f
-
-    rooms.foreach(room => {
-      loadRoomObjects(level, "assets/maps/" + room + ".tmx")
-    })
+  def setWorld(rooms: Array[(String, (Integer, Integer))]): Unit = {
+    rooms.foreach(room => loadRoomObjects("assets/maps/" + room._1 + ".tmx", room._2))
   }
 
-  def loadRoomObjects(level: Level, path: String): Unit = {
+  def loadRoomObjects(path: String, offset: (Integer, Integer)): Unit = {
     var rect: Rectangle = new Rectangle()
     val tiledMap: TiledMap = new TmxMapLoader().load(path)
 
@@ -57,8 +46,9 @@ object TileMapHelper {
         rect = obj.asInstanceOf[RectangleMapObject].getRectangle
 
         val size: (Float, Float) = (rect.getWidth, rect.getHeight)
-        val position: (Float, Float) = ((rect.getX*2 + rect.getWidth + (this.xOffset*16)) , (rect.getY*2 + rect.getHeight) )
-
+        val position: (Float, Float) = (
+          (rect.getX*2 + rect.getWidth + offset._1*16),
+          (rect.getY*2 + rect.getHeight - offset._2*16))
 
         layer.getName() match {
           case "ground" | "bridge" => {
@@ -70,8 +60,14 @@ object TileMapHelper {
           case "chest" => {
             spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
           }
-          case "water" | "lava" | "ladder" => {
-            spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile))
+          case "ladder" => {
+            spawnEntity(() => EntitiesFactoryImpl.createLadder(position, size))
+          }
+          case "water" => {
+            spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position,size))
+          }
+          case "lava" => {
+            spawnEntity(() => EntitiesFactoryImpl.createLavaPool(position, size))
           }
           case "enemy" => {
             spawnEntity(() => EntitiesFactoryImpl.createEnemies(size, position))
@@ -84,10 +80,6 @@ object TileMapHelper {
 
     })
 
-    //update x offset
-    val mapProperties: MapProperties = tiledMap.getProperties
-    val width: Integer = mapProperties.get("width", classOf[Integer])
-    this.xOffset = this.xOffset + width
   }
 
   private def spawnEntity(f:() => Unit): Unit =

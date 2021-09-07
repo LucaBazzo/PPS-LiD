@@ -19,7 +19,7 @@ trait View {
 
 class ViewImpl(private val entitiesGetter: EntitiesGetter,
                private val observerManager: ObserverManager,
-               private val rooms: Array[String]) extends View {
+               private val rooms: Array[(String, (Integer, Integer))]) extends View {
 
   private val screenSetter: LostInDungeons = new LostInDungeons(this.entitiesGetter, this.observerManager, this.rooms)
 

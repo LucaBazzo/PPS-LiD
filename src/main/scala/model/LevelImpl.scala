@@ -45,17 +45,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private val hero: Hero = entitiesFactory.createHeroEntity()
   private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero, entitiesSetter)
 
-  private val door: Entity = entitiesFactory.createDoor((10, 30), (390, 200))
-
   private var isWorldSetted: Boolean = false
-  private var platform: Entity = entitiesFactory.createPlatform((380, 200), (60,2))
-  private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
-
-  EntitiesFactoryImpl.createSkeletonEnemy((HeroConstants.HERO_OFFSET._1+70, HeroConstants.HERO_OFFSET._2))
-
-  private var water: Entity = entitiesFactory.createWaterPool((200,290), (100,15))
-
-  private var lava: Entity = entitiesFactory.createLavaPool((400,290), (100,15))
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)

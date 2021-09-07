@@ -21,7 +21,7 @@ import java.util.concurrent.{ExecutorService, Executors}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager,
-                 private val rooms: Array[String]) extends ScreenAdapter{
+                 private val rooms: Array[(String, (Integer, Integer))]) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   camera.translate(300f, 300f)
@@ -32,9 +32,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
   private var tiledMaps: Array[TiledMap] = Array()
-  rooms.foreach(room => {
-    tiledMaps = tiledMaps :+ TileMapHelper.getTiledMap(room)
-  })
+  rooms.foreach(room => tiledMaps = tiledMaps :+ TileMapHelper.getTiledMap(room._1, room._2))
 
   private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMapRenderer(null)
 
