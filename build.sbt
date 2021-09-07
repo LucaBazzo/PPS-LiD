@@ -11,3 +11,5 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 // junit dependencies
 libraryDependencies += "junit" % "junit" % "4.12" % "test"
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
+
+parallelExecution in Test := false

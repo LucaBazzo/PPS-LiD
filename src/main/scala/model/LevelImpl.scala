@@ -39,11 +39,12 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
   entitiesFactory.setLevel(this, new ItemPoolImpl())
+  entitiesFactory.setEntitiesSetter(entitiesSetter)
 
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero, entitiesSetter)
+  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero)
 
   private var isWorldSetted: Boolean = false
 
@@ -107,14 +108,14 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
       // TODO: rifattorizzare .MPP (enemy position e in PPM mentre la createItem vuole valori non scalati)
       EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
         position=(entity.getPosition._1, entity.getPosition._2).MPP,
-        collisions = EntityCollisionBit.Hero, entitesSetter=this.entitiesSetter)
+        collisions = EntityCollisionBit.Hero)
     }
   }
 
   override def getWorld: World = this.world
 
   override def spawnItem(pool: ItemPools): Unit = {
-    entitiesFactory.createItem(pool, entitiesSetter = this.entitiesSetter)
+    entitiesFactory.createItem(pool)
   }
 
   private var accumulator: Float = 0f

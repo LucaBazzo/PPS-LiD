@@ -3,7 +3,7 @@ package model.collisions
 import controller.GameEvent
 import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
 import model.helpers.EntitiesSetter
-import model.{DoorInteraction, HeroInteraction, LadderInteraction, PlatformInteraction}
+import model.{ChestInteraction, DoorInteraction, HeroInteraction, LadderInteraction, PlatformInteraction}
 
 import java.util.concurrent.{ExecutorService, Executors}
 
@@ -119,6 +119,20 @@ class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
   }
 }
 
+class ChestCollisionStrategy(chest: ImmobileEntity) extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => print("Hero touches chest" + "\n")
+      h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new ChestInteraction(h,chest))))
+    case _ =>
+  }
+
+  override def release(entity: Entity): Unit = entity match {
+    case h:Hero => print("Hero not touching chest anymore" + "\n")
+      h.setEnvironmentInteraction(Option.empty)
+    case _ =>
+  }
+}
+
 class LadderCollisionStrategy(private val monitor: CollisionMonitor) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => print("Hero touches ladder" + "\n")
@@ -130,6 +144,7 @@ class LadderCollisionStrategy(private val monitor: CollisionMonitor) extends Col
   override def release(entity: Entity): Unit = entity match {
     case h:Hero => print("Hero leaving ladder" + "\n")
       monitor.playerQuitLadder()
+      h.setState(State.Jumping)
       h.setEnvironmentInteraction(Option.empty)
     case _ =>
   }
