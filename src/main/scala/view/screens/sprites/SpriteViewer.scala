@@ -6,9 +6,9 @@ import utils.ApplicationConstants
 
 trait SpriteViewer {
 
-  def loadSprites(entities: List[Entity])
-  def updateSprites(deltaTime: Float)
-  def drawSprites()
+  def loadSprites(entities: List[Entity]): Unit
+  def updateSprites(deltaTime: Float): Unit
+  def drawSprites(): Unit
 }
 
 class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
@@ -95,18 +95,14 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
       sprite.addAnimation(State.Opening,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 1))
       sprite
-    /*case EntityType.Ladder =>
-      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/bigLadder.pack", "bigLadder", 32, 212,
-        entity.getSize._1, entity.getSize._2, 100)
+    case EntityType.Portal =>
+      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/portal.pack", "portal", 64, 62,
+        entity.getSize._1, entity.getSize._2, 150)
       sprite.addAnimation(State.Standing,
-        spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
+        spriteFactory.createSpriteAnimation(sprite, 0, 0, 7), loop = true)
+      sprite.addAnimation(State.Opening,
+        spriteFactory.createSpriteAnimation(sprite, 1, 0, 7))
       sprite
-    case EntityType.Platform =>
-      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/platform.pack", "platform", 79, 4,
-        entity.getSize._1, entity.getSize._2, 100)
-      sprite.addAnimation(State.Standing,
-        spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
-      sprite*/
     case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile | EntityType.Ladder | EntityType.Platform => null
     case _ => null
   }

@@ -52,6 +52,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var platform: Entity = entitiesFactory.createPlatform((380, 200), (60,2))
   private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
   private var chest: Entity = entitiesFactory.createChest((10,10), (480,150))
+  private var portal: Entity = entitiesFactory.createPortal((10,30), (200, 220))
   //EntitiesFactoryImpl.createSkeletonEnemy((HeroConstants.HERO_OFFSET._1+70, HeroConstants.HERO_OFFSET._2))
 
   //private var water: Entity = entitiesFactory.createWaterPool((200,290), (100,15))
@@ -130,7 +131,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private var accumulator: Float = 0f
 
-  private def worldStep() {
+  private def worldStep(): Unit = {
     val delta: Float = Gdx.graphics.getDeltaTime
 
     accumulator += Math.min(delta, 0.25f)

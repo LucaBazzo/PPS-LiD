@@ -133,6 +133,20 @@ class ChestCollisionStrategy(chest: ImmobileEntity) extends CollisionStrategy {
   }
 }
 
+class PortalCollisionStrategy() extends CollisionStrategy {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => print("Hero touches portal" + "\n")
+      //h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new PortalInteraction(h))))
+    case _ =>
+  }
+
+  override def release(entity: Entity): Unit = entity match {
+    case h:Hero => print("Hero not touching portal anymore" + "\n")
+      h.setEnvironmentInteraction(Option.empty)
+    case _ =>
+  }
+}
+
 class LadderCollisionStrategy(private val monitor: CollisionMonitor) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => print("Hero touches ladder" + "\n")

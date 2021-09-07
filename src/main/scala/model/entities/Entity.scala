@@ -25,7 +25,7 @@ object EntityType extends Enumeration {
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
       EnemySkeleton, EnemySlime, EnemyWorm, EnemyBossWizard,
-      Platform, Door, Ladder, Water, Lava, Chest,
+      Platform, Door, Ladder, Water, Lava, Chest, Portal,
       AttackFireBall, AttackArrow = Value
 }
 
@@ -43,7 +43,7 @@ trait Entity {
 
   def getPosition: (Float, Float)
 
-  def setSize(size: (Float, Float))
+  def setSize(size: (Float, Float)): Unit
 
   def getSize: (Float, Float)
 

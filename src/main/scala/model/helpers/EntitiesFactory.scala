@@ -17,6 +17,7 @@ import _root_.utils.EnemiesConstants._
 import _root_.utils.ApplicationConstants._
 import _root_.utils.HeroConstants._
 
+import java.util.concurrent.{ExecutorService, Executors}
 import scala.collection.immutable.HashMap
 
 trait EntitiesFactory {
@@ -72,6 +73,9 @@ trait EntitiesFactory {
   def createChest(size: (Float, Float) = (70, 70),
                   position: (Float, Float) = (0,0)): Entity
 
+  def createPortal(size: (Float, Float) = (10,30),
+                   position: (Float, Float) = (0,0)): Entity
+
   def createPlatform(position: (Float, Float),
                      size: (Float, Float)): Entity
 
@@ -122,7 +126,7 @@ trait EntitiesFactory {
   def addPendingEntityCreation(r:() => Unit): Unit
   def createPendingEntities(): Unit
 
-  def setEntitiesSetter(entitySetter: EntitiesSetter)
+  def setEntitiesSetter(entitySetter: EntitiesSetter): Unit
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -168,7 +172,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
       EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Enemy | EntityCollisionBit.Platform | EntityCollisionBit.Pool |
-        EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
+        EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.Portal | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, statistic)
 
@@ -399,6 +403,25 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Chest, entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new ChestCollisionStrategy(immobileEntity))
+    this.level.addEntity(immobileEntity)
+    immobileEntity
+  }
+
+  override def createPortal(size: (Float, Float) = (10, 10),
+                          position: (Float, Float) = (0, 0)): Entity = {
+
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Portal,
+      EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(size.PPM), position.PPM)
+
+    val immobileEntity: Entity = ImmobileEntity(EntityType.Portal, entityBody, size.PPM)
+    immobileEntity.setCollisionStrategy(new PortalCollisionStrategy())
+    immobileEntity.setState(State.Opening)
+    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+    executorService.execute(() => {
+      Thread.sleep(1900)
+      immobileEntity.setState(State.Standing)
+      println("Portal opened")
+    })
     this.level.addEntity(immobileEntity)
     immobileEntity
   }
