@@ -1,6 +1,7 @@
 package view.screens.helpers
 
 import _root_.utils.ApplicationConstants.PIXELS_PER_METER
+import _root_.utils.MapConstants.{BOTTOM_KEY_ITEM_ROOM_NAME, TOP_KEY_ITEM_ROOM_NAME}
 import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
@@ -51,7 +52,12 @@ object TileMapHelper {
         layer.getName match {
           case "ground" | "bridge" => spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
           case "door" => spawnEntity(() => EntitiesFactoryImpl.createDoor(size, position))
-          case "chest" => spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
+          case "chest" => {
+            if(path.contains(BOTTOM_KEY_ITEM_ROOM_NAME) || path.contains(TOP_KEY_ITEM_ROOM_NAME)){
+              //TODO spawnare la chiave per il boss o un oggetto speciale
+              println("spawn della chiave")
+            } else spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
+          }
           case "ladder" => spawnEntity(() => EntitiesFactoryImpl.createLadder(position, size))
           case "water" => spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position,size))
           case "lava" => spawnEntity(() => EntitiesFactoryImpl.createLavaPool(position, size))
