@@ -13,7 +13,7 @@ object HeroConstants {
   val SLIDE_OFFSET: (Float, Float) = (0f, -20f)
 
   val RUN_VELOCITY: Float = 60f.PPM
-  val JUMP_VELOCITY: Float = 150f.PPM
+  val JUMP_VELOCITY: Float = 170f.PPM
   val SLIDE_VELOCITY: Float = 150f.PPM
 
   val LADDER_CLIMB_VELOCITY: Float = 60f.PPM
