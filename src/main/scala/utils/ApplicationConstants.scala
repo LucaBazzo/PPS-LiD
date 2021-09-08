@@ -35,6 +35,6 @@ object ApplicationConstants {
   val HUD_FIRST_ROW_PADDING_TOP: Float = 10
   val HUD_FIRST_ROW_PADDING_SIDE: Float = 20
   val HUD_BOSS_HEALTH_BAR_PADDING: Float = 35
-  val HUD_PADDING_TOP: Float = 40
+  val HUD_PADDING_TOP: Float = 45
 
 }
