@@ -133,7 +133,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     batch.end()
 
     //for debug purpose
-    //box2DDebugRenderer.render(this.entitiesGetter.getWorld, camera.combined)
+    box2DDebugRenderer.render(this.entitiesGetter.getWorld, camera.combined)
 
     batch.setProjectionMatrix(hud.getStage.getCamera.combined)
     hud.getStage.draw()
