@@ -88,9 +88,9 @@ class HeroEntitySprite(regionName: String, width: Float, height: Float) extends 
   override def setPosition(entity: Entity): Unit = {
     if(entity.asInstanceOf[Hero].isLittle)
       super.setPosition(entity.getPosition._1 - this.getWidth / 2,
-        entity.getPosition._2 - this.getHeight / 2 + 9.3f.PPM)
+        entity.getPosition._2 - this.getHeight / 2 + 11.5f.PPM)
     else
       super.setPosition(entity.getPosition._1 - this.getWidth / 2,
-        entity.getPosition._2 - this.getHeight / 2 + 4f.PPM)
+        entity.getPosition._2 - this.getHeight / 2 + 2.5f.PPM)
   }
 }

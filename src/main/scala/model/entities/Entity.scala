@@ -11,11 +11,11 @@ import model.helpers.EntitiesFactoryImpl
 
 object State extends Enumeration {
   type State = Value
-  val Standing, Crouch, Sliding,
+  val Standing, Crouching, Sliding,
       Running, Jumping, Falling, Somersault,
-      LadderClimb, LadderDescend, LadderIdle,
-      Attack01, Attack02, Attack03, BowAttack,
-      Dying, Hurt, ItemPicked, Opening = Value
+      LadderClimbing, LadderDescending, LadderIdle,
+      Attack01, Attack02, Attack03, BowAttacking,
+      Dying, Hurt, pickingItem, Opening = Value
 }
 
 object EntityType extends Enumeration {
@@ -38,6 +38,10 @@ trait Entity {
   def getState: State
 
   def setState(state:State): Unit
+
+  def is(state: State): Boolean
+
+  def isNot(state: State): Boolean
 
   def setPosition(position: (Float, Float)): Unit
 
@@ -77,11 +81,13 @@ abstract class EntityImpl(private val entityType: EntityType,
 
   override def getState: State = this.state
 
-  override def setState(state:State):Unit = this.state = state
+  override def setState(state: State): Unit = this.state = state
 
-  override def setPosition(position: (Float, Float)): Unit = {
-    this.entityBody.setPosition(position)
-  }
+  override def is(state: State): Boolean = this.state equals state
+
+  override def isNot(state: State): Boolean = !(this is state)
+
+  override def setPosition(position: (Float, Float)): Unit = this.entityBody.setPosition(position)
 
   override def getPosition: (Float, Float) = (this.entityBody.getBody.getPosition.x, this.entityBody.getBody.getPosition.y)
 

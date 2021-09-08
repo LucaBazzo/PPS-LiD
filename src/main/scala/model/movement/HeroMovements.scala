@@ -3,6 +3,7 @@ package model.movement
 import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.entities.{Hero, State}
+import model.entities.State._
 import utils.HeroConstants._
 
 /** Implementation of the normal Hero Movement Strategy
@@ -37,58 +38,58 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   override def apply(): Unit = ???
 
   private def checkCommand(command: GameEvent): Boolean = command match {
-    case GameEvent.Up => entity.getState != State.Falling &&
-      entity.getState != State.Somersault && entity.getState != State.Crouch
+    case GameEvent.Up => (entity isNot Falling) &&
+      (entity isNot Somersault) && (entity isNot Crouching)
     case GameEvent.MoveRight | GameEvent.MoveLeft => true
-    case GameEvent.Down => entity.getState == State.Running ||
-      entity.getState == State.Standing
-    case GameEvent.DownReleased => entity.getState == State.Crouch
-    case GameEvent.Slide => entity.getState != State.Jumping && entity.getState != State.Falling && entity.getState != State.Somersault
+    case GameEvent.Down => (entity is Running) || (entity is Standing)
+    case GameEvent.DownReleased => entity is Crouching
+    case GameEvent.Slide => (entity isNot Jumping) && (entity isNot Falling) && (entity isNot Somersault)
     case GameEvent.UpReleased => false
     case _ => throw new UnsupportedOperationException
   }
 
   private def jump(): Unit = {
     this.entity.setVelocityY(JUMP_VELOCITY)
-    if(this.entity.getState == State.Jumping)
+    if(this.entity is Jumping)
       this.entity.setState(State.Somersault)
     else
       this.entity.setState(State.Jumping)
   }
 
   private def moveRight(): Unit = {
-    this.move(RUN_VELOCITY)
-    entity.setFacing(right = true)
+    this.move(RUN_VELOCITY, right = true)
   }
 
   private def moveLeft(): Unit = {
-    this.move(-RUN_VELOCITY)
-    entity.setFacing(right = false)
+    this.move(-RUN_VELOCITY, right = false)
   }
 
-  private def move(runVelocity: Float) {
-    if(entity.getState != State.Crouch) {
-      if(this.entity.isTouchingGround || (!this.entity.isTouchingGround && !this.entity.isColliding)) {
+  private def move(runVelocity: Float, right: Boolean) {
+    if(entity isNot Crouching) {
+      if(this.entity.isTouchingGround || (right && !this.entity.isTouchingWallOnSide(right)) ||
+        (!right && !this.entity.isTouchingWallOnSide(right))) {
         this.entity.setVelocityX(runVelocity, this.speed)
 
-        if(this.entity.getState == State.Standing)
+        if(this.entity is Standing)
           this.entity.setState(State.Running)
       }
     }
+
+    this.entity.setFacing(right = right)
   }
 
   private def crouch(): Unit = {
     this.stopMovement()
     entity.changeHeroFixture(HERO_SIZE_SMALL, CROUCH_OFFSET)
-    entity.setState(State.Crouch)
+    entity.setState(State.Crouching)
     entity.setLittle(true)
   }
 
   private def slide(): Unit = {
     this.entity.stopMovement()
 
-    if(entity.getState != State.Crouch) {
-      this.entity.changeHeroFixture(HERO_SIZE_SMALL, CROUCH_OFFSET)
+    if(entity isNot Crouching) {
+      this.entity.changeHeroFixture(HERO_SIZE_SMALL, SLIDE_OFFSET)
       this.entity.setLittle(true)
     }
 
@@ -106,7 +107,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
 
   private def checkState: Boolean = entity.getState match {
     case State.Sliding | State.Attack01 | State.Attack02
-      | State.Attack03 | State.BowAttack | State.Hurt | State.ItemPicked => false
+         | State.Attack03 | State.BowAttacking | State.Hurt | State.`pickingItem` => false
     case _ => true
   }
 }

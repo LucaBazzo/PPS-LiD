@@ -8,107 +8,96 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import model.entities.Items
 import model.entities.Items.Items
+import utils.ApplicationConstants._
 
 import java.util.concurrent.{ExecutorService, Executors}
 
 class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable {
 
   private val viewPort: Viewport = new FitViewport(width, height, new OrthographicCamera())
-  val stage: Stage = new Stage(viewPort, spriteBatch)
+  private val stage: Stage = new Stage(viewPort, spriteBatch)
 
-  private val FONT_PATH_LABEL = "assets/fonts/arial.fnt"
-  private val HEALTH_BAR_PATH: String = "assets/textures/health_bar.png"
-
-  private var score: Int = 0
+  private var itemsPicked: List[Items] = List.empty
 
   private var healthPercentage: Float = 1
 
-  private val heroHealthImage: Image = new Image(new Texture(HEALTH_BAR_PATH))
-  heroHealthImage.setWidth(80)
+  val heroHealthImage: Image = GUIFactory.createImage(HEALTH_BAR_PATH)
   val heroHealthImageWidth: Float = heroHealthImage.getWidth
-  private var itemsPicked: List[Items] = List.empty
+  val heroHealthBorder: Image = GUIFactory.createImage(HEALTH_BORDER_PATH)
+  val heroHealthTable: Table = GUIFactory.createHealthTable(heroHealthImage, heroHealthBorder)
 
-  val heroHealthTable: Table = new Table()
-  heroHealthTable.add(heroHealthImage) //.expandX().fill(true, false)
+  val bossHealthImage: Image = GUIFactory.createImage(HEALTH_BAR_BOSS_PATH)
+  val bossHealthImageWidth: Float = bossHealthImage.getWidth
+  val bossHealthBorder: Image = GUIFactory.createImage(HEALTH_BORDER_BOSS_PATH)
+  val bossHealthTable: Table = GUIFactory.createHealthTable(bossHealthImage, bossHealthBorder)
+  bossHealthImage.setColor(Color.RED)
 
-//  private val bossHealthImage: Image = new Image(new Texture(HEALTH_BAR_PATH))
-//  bossHealthImage.setWidth(160)
-//  val bossHealthImageWidth: Float = bossHealthImage.getWidth
+  val levelLabel: Label = GUIFactory.createLabel("LEVEL 01",
+    GUIFactory.createBitmapFont(FONT_PATH_LABEL), Color.WHITE)
 
-  val levelLabel: Label = GUIFactoryImpl.createLabel("", GUIFactoryImpl.createBitmapFont(FONT_PATH_LABEL), Color.WHITE)
-  val scoreLabel: Label = GUIFactoryImpl.createLabel("", GUIFactoryImpl.createBitmapFont(FONT_PATH_LABEL), Color.WHITE)
-  val itemsTextLabel: Label = GUIFactoryImpl.createLabel("", GUIFactoryImpl.createBitmapFont(FONT_PATH_LABEL), Color.WHITE)
-  levelLabel.setText("LEVEL 01")
-  scoreLabel.setText("SCORE " + String.format("%06d", score))
-  scoreLabel.setFontScale(0.2f)
-  levelLabel.setFontScale(0.2f)
-  itemsTextLabel.setFontScale(0.2f)
+  val scoreLabel: Label = GUIFactory.createLabel("SCORE " + String.format("%06d", 0),
+    GUIFactory.createBitmapFont(FONT_PATH_LABEL), Color.WHITE)
+
+  val itemsTextLabel: Label = GUIFactory.createLabel("",
+    GUIFactory.createBitmapFont(FONT_PATH_LABEL), Color.WHITE)
 
   var tableTop: Table = new Table()
+  //it will display at the top
   tableTop.top()
+  //the table has the size of the stage
   tableTop.setFillParent(true)
-  tableTop.add(heroHealthTable).expandX().fill(0.8f, 0).padTop(10).padLeft(20)
-  tableTop.add(levelLabel).expandX().center().padTop(10)
-  tableTop.add(scoreLabel).expandX().padTop(10)
+  tableTop.add(heroHealthTable).expandX().padTop(HUD_FIRST_ROW_PADDING_TOP).padLeft(HUD_FIRST_ROW_PADDING_SIDE)
+  tableTop.add(levelLabel).expandX().center().padTop(HUD_FIRST_ROW_PADDING_TOP)
+  tableTop.add(scoreLabel).expandX().padTop(HUD_FIRST_ROW_PADDING_TOP).padRight(HUD_FIRST_ROW_PADDING_SIDE)
 
-  val bossHealthTable: Table = new Table()
-  bossHealthTable.top()
-  bossHealthTable.setFillParent(true)
-  bossHealthTable.add(bossHealthImage).expandX().fill(0.6f,0).padTop(40)
+  val bossTable: Table = new Table()
+  bossTable.top()
+  bossTable.setFillParent(true)
+  bossTable.add(bossHealthTable).expandX().center().padTop(HUD_BOSS_HEALTH_BAR_PADDING)
 
   var itemsTable: Table = new Table()
   itemsTable.bottom().left()
   itemsTable.setFillParent(true)
 
-  val bossHealthImage: Image = new Image(new Texture(HEALTH_BAR_PATH))
-  val bossHealthImageWidth: Float = 200
-  val bossHealthImageHeight: Float = 10
-  bossHealthImage.setColor(Color.PURPLE)
-
   var table = new Table()
-  //it will display at the top
-//  table.debug()
   table.top()
-  table.padTop(40)
-  //the table has the size of the stage
+  table.padTop(HUD_PADDING_TOP)
   table.setFillParent(true)
 
   table.add(tableTop)
-  table.row()
-  table.add(bossHealthTable)
   table.row()
   table.add(itemsTextLabel)
   table.row()
   table.add(itemsTable)
   table.row()
-  table.add(bossHealthImage)
+  table.add(bossTable)
 
   //adds the table to the stage
   stage.addActor(tableTop)
   stage.addActor(table)
   stage.addActor(itemsTable)
-  //stage.addActor(bossHealthTable)
-
-
-  def getStage: Stage = this.stage
+  stage.addActor(bossTable)
 
   override def dispose(): Unit = stage.dispose()
+
+  def getStage: Stage = this.stage
 
   def changeBossHealth(currentHealth: Float, maxHealth: Float): Unit = {
     val bossHealthPercentage = currentHealth / maxHealth
     bossHealthImage.setWidth(bossHealthImageWidth * bossHealthPercentage)
-    bossHealthImage.setHeight(bossHealthImageHeight)
   }
+
   def drawBossHealthBar(batch: SpriteBatch): Unit = {
     bossHealthImage.draw(batch, 0)
   }
 
   def showBossHealthBar(): Unit = {
+    this.bossHealthBorder.setVisible(true)
     this.bossHealthImage.setVisible(true)
   }
 
   def hideBossHealthBar(): Unit = {
-    //    bossHealthTable.getColor.a = 0
+    this.bossHealthBorder.setVisible(false)
     this.bossHealthImage.setVisible(false)
   }
 
@@ -118,12 +107,16 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
   }
 
   def drawHealthBar(batch: SpriteBatch): Unit = {
-    if (healthPercentage > 0.6f)
+    if (healthPercentage > 0.6f) {
       heroHealthImage.setColor(Color.GREEN)
-    else if (healthPercentage > 0.2f)
+      heroHealthBorder.setColor(Color.GREEN)
+    } else if (healthPercentage > 0.2f) {
       heroHealthImage.setColor(Color.ORANGE)
-    else
+      heroHealthBorder.setColor(Color.ORANGE)
+    } else {
       heroHealthImage.setColor(Color.RED)
+      heroHealthBorder.setColor(Color.RED)
+    }
 
     heroHealthImage.draw(batch, 0)
   }
