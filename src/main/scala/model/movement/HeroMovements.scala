@@ -66,9 +66,8 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
 
   private def move(runVelocity: Float, right: Boolean) {
     if(entity.getState != State.Crouch) {
-      if(this.entity.isTouchingGround ||
-        (right && !this.entity.isTouchingWallOnRightSide) ||
-        (!right && !this.entity.isTouchingWallOnLeftSide)) {
+      if(this.entity.isTouchingGround || (right && !this.entity.isTouchingWallOnSide(right)) ||
+        (!right && !this.entity.isTouchingWallOnSide(right))) {
         this.entity.setVelocityX(runVelocity, this.speed)
 
         if(this.entity.getState == State.Standing)
@@ -90,7 +89,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
     this.entity.stopMovement()
 
     if(entity.getState != State.Crouch) {
-      this.entity.changeHeroFixture(HERO_SIZE_SMALL, CROUCH_OFFSET)
+      this.entity.changeHeroFixture(HERO_SIZE_SMALL, SLIDE_OFFSET)
       this.entity.setLittle(true)
     }
 

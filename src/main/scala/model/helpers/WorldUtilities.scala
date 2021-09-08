@@ -41,7 +41,7 @@ trait WorldUtilities {
 
   def checkCollision(x: Float, y: Float): Boolean = checkCollision(x, y, x, y)
 
-  def checkSideCollision(entity: Entity, entityBit: Short, rightSide: Boolean = true): Boolean
+  def checkSideCollision(rightSide: Boolean, entity: Entity, entitiesBit: Short*): Boolean
 }
 
 object WorldUtilities extends WorldUtilities {
@@ -159,13 +159,13 @@ object WorldUtilities extends WorldUtilities {
       body)
   }
 
-  override def checkSideCollision(entity: Entity, entityBit: Short, rightSide: Boolean = true): Boolean = {
+  override def checkSideCollision(rightSide: Boolean, entity: Entity, entitiesBit: Short*): Boolean = {
     val sideX = getEntitySideX(entity.getPosition, entity.getSize, rightSide)
     val sideY = getEntitySideY(entity.getPosition, entity.getSize)
-    checkCollision(sideX._1, sideY._1, sideX._2, sideY._2, entityBit)
+
+    entitiesBit.exists(entityBit => checkCollision(sideX._1, sideY._1, sideX._2, sideY._2, entityBit))
   }
 
-  //TODO riguardare le size
   private def getEntitySideX(position: (Float, Float), size: (Float, Float), rightSide: Boolean = true): (Float, Float) = {
     var x1: Float = size._1
     if(!rightSide) x1 = -x1

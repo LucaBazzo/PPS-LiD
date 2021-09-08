@@ -89,17 +89,12 @@ trait Hero extends LivingEntity {
    */
   def isTouchingGround: Boolean
 
-  /** Check if the hero is touching the wall on right side.
+  /** Check if the hero is touching the wall on a specific side.
    *
-   *  @return true if it touching the wall
+   *  @param rightSide witch side the touching will be checked
+   *  @return true if it touching a wall
    */
-  def isTouchingWallOnRightSide: Boolean
-
-  /** Check if the hero is touching the wall on left side.
-   *
-   *  @return true if it touching the wall
-   */
-  def isTouchingWallOnLeftSide: Boolean
+  def isTouchingWallOnSide(rightSide: Boolean = true): Boolean
 }
 
 /** Implementation of the Entity Hero that will be command by the player.
@@ -149,8 +144,6 @@ class HeroImpl(private val entityType: EntityType,
   }
 
   override def update(): Unit = {
-
-    println(isTouchingWallOnLeftSide, isTouchingWallOnRightSide)
 
     if(isNotWaiting) {
       if(this.isSlidingFinished)
@@ -281,11 +274,8 @@ class HeroImpl(private val entityType: EntityType,
       (this.entityBody.getBody.getLinearVelocity.x >= -1 && this.getState == State.Sliding && !isFacingRight)
   }
 
-  override def isTouchingWallOnRightSide: Boolean = {
-    WorldUtilities.checkSideCollision(this, EntityCollisionBit.Immobile)
-  }
-
-  override def isTouchingWallOnLeftSide: Boolean = {
-    WorldUtilities.checkSideCollision(this, EntityCollisionBit.Immobile, rightSide = false)
+  override def isTouchingWallOnSide(rightSide: Boolean = true): Boolean = {
+    WorldUtilities.checkSideCollision(rightSide, this,
+      EntityCollisionBit.Immobile, EntityCollisionBit.Platform, EntityCollisionBit.Door)
   }
 }
