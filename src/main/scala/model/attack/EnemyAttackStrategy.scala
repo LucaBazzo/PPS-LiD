@@ -174,4 +174,8 @@ class WormAttack(override protected val sourceEntity: LivingEntity,
     this.sourceEntity.setState(State.Attack01)
     createFireballAttack(this.sourceEntity, this.targetEntity)
   }
+
+  override def stopAttack(): Unit = {
+
+  }
 }

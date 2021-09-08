@@ -30,15 +30,12 @@ class PatrolPlatform(val sourceEntity: MobileEntity,
   protected val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
   protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
 
-  protected var isMovingLeft: Boolean = false
-  sourceEntity.setFacing(right = !isMovingLeft)
-
   override def apply(): Unit = {
 
     val canMoveToTheLeft: Boolean = !isPathObstructedOnTheLeft(this.sourceEntity) && isFloorPresentOnTheLeft(this.sourceEntity)
     val canMoveToTheRight: Boolean = !isPathObstructedOnTheRight(this.sourceEntity) && isFloorPresentOnTheRight(this.sourceEntity)
 
-    if (!canMoveToTheLeft && isMovingLeft || !canMoveToTheRight && !isMovingLeft) {
+    if (!canMoveToTheLeft && !this.sourceEntity.isFacingRight || !canMoveToTheRight && this.sourceEntity.isFacingRight) {
       this.stopMoving()
       this.changeDirection()
     }
@@ -55,13 +52,12 @@ class PatrolPlatform(val sourceEntity: MobileEntity,
   }
 
   protected def changeDirection(): Unit = {
-    this.isMovingLeft = !this.isMovingLeft
-    this.sourceEntity.setFacing(right = !this.isMovingLeft)
+    this.sourceEntity.setFacing(right = !this.sourceEntity.isFacingRight)
   }
 
   protected def move(): Unit = {
     // apply movement force
-    val movementForce = if (this.isMovingLeft) -this.acceleration else this.acceleration
+    val movementForce = if (!this.sourceEntity.isFacingRight) -this.acceleration else this.acceleration
     this.sourceEntity.getBody.applyLinearImpulse(
       new Vector2(movementForce, 0), this.sourceEntity.getBody.getWorldCenter, true)
 
@@ -93,8 +89,8 @@ class PatrolAndStop(override val sourceEntity:MobileEntity,
 
       // face the target entity if near
       if (isTargetNearbyCheck &&
-        (this.isMovingLeft && isEntityOnTheRight(this.sourceEntity, this.targetEntity) ||
-          !this.isMovingLeft && isEntityOnTheLeft(this.sourceEntity, this.targetEntity))) {
+        (!this.sourceEntity.isFacingRight && isEntityOnTheRight(this.sourceEntity, this.targetEntity) ||
+          this.sourceEntity.isFacingRight && isEntityOnTheLeft(this.sourceEntity, this.targetEntity))) {
         this.changeDirection()
       }
 
