@@ -1,5 +1,7 @@
 package utils
 
+import scala.util.Random
+
 object ApplicationConstants {
 
   val DEBUG = true
@@ -24,4 +26,7 @@ object ApplicationConstants {
   val HERO_ROOM_MAP_NAME: String = "hero-room"
   val BOSS_ROOM_MAP_NAME: String = "boss-room"
   val ROOM_MAP_NAMES: Array[String] = Array("room1-final", "room2-final", "room3-final")
+
+  val RANDOM_SEED: Int = 42
+  val RANDOM: Random = new Random()
 }
