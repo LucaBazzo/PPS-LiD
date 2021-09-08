@@ -3,12 +3,13 @@ package model.entities
 import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.attack.DoNothingAttackStrategy
+import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State.State
 import model.entities.Statistic._
-import model.helpers.EntitiesFactoryImpl
+import model.helpers.{EntitiesFactoryImpl, WorldUtilities}
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
 import model.movement.{DoNothingMovementStrategy, HeroMovementStrategy}
 import model.{EntityBody, HeroInteraction}
@@ -87,6 +88,18 @@ trait Hero extends LivingEntity {
    *  @return true if it touching the ground
    */
   def isTouchingGround: Boolean
+
+  /** Check if the hero is touching the wall on right side.
+   *
+   *  @return true if it touching the wall
+   */
+  def isTouchingWallOnRightSide: Boolean
+
+  /** Check if the hero is touching the wall on left side.
+   *
+   *  @return true if it touching the wall
+   */
+  def isTouchingWallOnLeftSide: Boolean
 }
 
 /** Implementation of the Entity Hero that will be command by the player.
@@ -136,6 +149,8 @@ class HeroImpl(private val entityType: EntityType,
   }
 
   override def update(): Unit = {
+
+    println(isTouchingWallOnLeftSide, isTouchingWallOnRightSide)
 
     if(isNotWaiting) {
       if(this.isSlidingFinished)
@@ -264,5 +279,13 @@ class HeroImpl(private val entityType: EntityType,
   private def isSlidingFinished: Boolean = {
     (this.entityBody.getBody.getLinearVelocity.x <= 1 && this.getState == State.Sliding && isFacingRight) ||
       (this.entityBody.getBody.getLinearVelocity.x >= -1 && this.getState == State.Sliding && !isFacingRight)
+  }
+
+  override def isTouchingWallOnRightSide: Boolean = {
+    WorldUtilities.checkSideCollision(this, EntityCollisionBit.Immobile)
+  }
+
+  override def isTouchingWallOnLeftSide: Boolean = {
+    WorldUtilities.checkSideCollision(this, EntityCollisionBit.Immobile, rightSide = false)
   }
 }
