@@ -202,7 +202,7 @@ class SpriteFactoryImpl extends SpriteFactory {
       this.createSpriteAnimation(heroSprite, 3, 1, 2), loop = true)
     heroSprite.addAnimation(State.Sliding,
       this.createSpriteAnimation(heroSprite, 3, 3, 6))
-    heroSprite.addAnimation(State.Crouch,
+    heroSprite.addAnimation(State.Crouching,
       this.createSpriteAnimationFromTwoRows(heroSprite, 0, 4, 6,
         1,0,0,0.18f), loop = true)
     heroSprite.addAnimation(State.Attack01,
@@ -215,18 +215,18 @@ class SpriteFactoryImpl extends SpriteFactory {
     heroSprite.addAnimation(State.Somersault,
       this.createSpriteAnimationFromTwoRows(heroSprite, 2, 4, 6,
         3, 0, 0), loop = true)
-    heroSprite.addAnimation(State.BowAttack,
+    heroSprite.addAnimation(State.BowAttacking,
       this.createSpriteAnimationFromTwoRows(heroSprite, 16, 0, 6,
         17, 0, 1))
-    heroSprite.addAnimation(State.LadderClimb,
+    heroSprite.addAnimation(State.LadderClimbing,
       this.createSpriteAnimationFromTwoRows(heroSprite, 11, 4, 6,
         12, 0, 0), loop = true)
-    heroSprite.addAnimation(State.LadderDescend,
+    heroSprite.addAnimation(State.LadderDescending,
       this.createSpriteAnimationFromTwoRows(heroSprite, 11, 4, 6,
         12, 0, 0, reverse = true), loop = true)
     heroSprite.addAnimation(State.LadderIdle,
       this.createSpriteAnimation(heroSprite, 11, 6, 6))
-    heroSprite.addAnimation(State.ItemPicked,
+    heroSprite.addAnimation(State.pickingItem,
       this.createSpriteAnimation(heroSprite, 13, 2, 4,0.15f))
     heroSprite.addAnimation(State.Hurt,
       this.createSpriteAnimation(heroSprite, 8, 3, 5))

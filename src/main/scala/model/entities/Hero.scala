@@ -7,7 +7,7 @@ import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
-import model.entities.State.State
+import model.entities.State._
 import model.entities.Statistic._
 import model.helpers.{EntitiesFactoryImpl, WorldUtilities}
 import model.helpers.EntitiesFactoryImpl.createPolygonalShape
@@ -195,6 +195,11 @@ class HeroImpl(private val entityType: EntityType,
       .setShape(createPolygonalShape(newSize.PPM))
       .createFixture()
 
+    /*if(!isLittle)
+      this.entityBody.addCoordinates(0, -size._2 * 2 + newSize._2.PPM)
+    else
+      this.entityBody.addCoordinates(0, -size._2 + newSize._2.PPM * 2)*/
+
     this.setSize(newSize.PPM)
 
     EntitiesFactoryImpl.createHeroFeet(this)
@@ -205,7 +210,7 @@ class HeroImpl(private val entityType: EntityType,
   override def itemPicked(itemType: Items): Unit = {
     this.stopHero(LONG_WAIT_TIME)
     this.stopMovement()
-    this.setState(State.ItemPicked)
+    this.setState(State.pickingItem)
     this.itemsPicked = itemType :: this.itemsPicked
   }
 
@@ -222,16 +227,19 @@ class HeroImpl(private val entityType: EntityType,
   override def stopHero(time: Float): Unit = this.waitTimer = time
 
   override def sufferDamage(damage: Float): Unit = {
-    super.sufferDamage(damage)
-    //when the hero is dead, it changes the attack and movement strategy
-    if (isDead) {
-      this.attackStrategy.stopAttack()
-      this.setAttackStrategy(DoNothingAttackStrategy())
-      this.setMovementStrategy(DoNothingMovementStrategy())
-    }
-    else {
-      this.stopHero(SHORT_WAIT_TIME)
-      this.setState(State.Hurt)
+    //the hero is invincible when he is sliding
+    if(!(this is Sliding)) {
+      super.sufferDamage(damage)
+      //when the hero is dead, it changes the attack and movement strategy
+      if (isDead) {
+        this.attackStrategy.stopAttack()
+        this.setAttackStrategy(DoNothingAttackStrategy())
+        this.setMovementStrategy(DoNothingMovementStrategy())
+      }
+      else {
+        this.stopHero(SHORT_WAIT_TIME)
+        this.setState(State.Hurt)
+      }
     }
   }
 
@@ -258,20 +266,19 @@ class HeroImpl(private val entityType: EntityType,
   private def isMovingHorizontally: Boolean = this.entityBody.getBody.getLinearVelocity.x != 0 && this.entityBody.getBody.getLinearVelocity.y == 0
   private def isIdle = this.entityBody.getBody.getLinearVelocity.x == 0 && this.entityBody.getBody.getLinearVelocity.y == 0
 
-  private def checkFalling: Boolean = isFalling && this.state != State.Jumping && this.state != State.LadderDescend
-  private def checkRunning: Boolean = isMovingHorizontally && (this.getState == State.Jumping || this.getState == State.Falling)
+  private def checkFalling: Boolean = isFalling && (this isNot Jumping) && (this isNot LadderDescending)
+  private def checkRunning: Boolean = isMovingHorizontally && ((this is Jumping) || (this is Falling))
   private def checkIdle: Boolean = {
-    isIdle && !isSwordAttacking && this.getState != State.Crouch &&
-      this.getState != State.BowAttack && this.getState != State.LadderIdle
+    isIdle && !isSwordAttacking && (this isNot Crouching) && (this isNot BowAttacking) && (this isNot LadderIdle)
   }
 
-  private def checkNotLittle: Boolean = this.getState != State.Sliding && this.getState != State.Crouch && isLittle
-  private def isSwordAttacking: Boolean = this.getState == State.Attack01 || this.getState == State.Attack02 || this.getState == State.Attack03
+  private def checkNotLittle: Boolean = (this isNot Sliding) && (this isNot Crouching) && isLittle
+  private def isSwordAttacking: Boolean = (this is Attack01) || (this is Attack02) || (this is Attack03)
   private def isSwordAttackFinished: Boolean = this.isSwordAttacking && this.attackStrategy.isAttackFinished
-  private def isBowAttackFinished: Boolean = this.getState == State.BowAttack && this.attackStrategy.isAttackFinished
+  private def isBowAttackFinished: Boolean = (this is BowAttacking) && this.attackStrategy.isAttackFinished
   private def isSlidingFinished: Boolean = {
-    (this.entityBody.getBody.getLinearVelocity.x <= 1 && this.getState == State.Sliding && isFacingRight) ||
-      (this.entityBody.getBody.getLinearVelocity.x >= -1 && this.getState == State.Sliding && !isFacingRight)
+    (this.entityBody.getBody.getLinearVelocity.x <= 1 && (this is Sliding) && isFacingRight) ||
+      (this.entityBody.getBody.getLinearVelocity.x >= -1 && (this is Sliding) && !isFacingRight)
   }
 
   override def isTouchingWallOnSide(rightSide: Boolean = true): Boolean = {
