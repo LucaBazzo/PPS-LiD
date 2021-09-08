@@ -1,10 +1,20 @@
 package utils
 
 import model.collisions.ImplicitConversions.RichFloat
-import model.entities.Statistic
+import model.entities.EntityType.EntityType
+import model.entities.{EntityType, Statistic}
 import model.entities.Statistic.Statistic
 
 object EnemiesConstants {
+
+  val ENEMIES_SPAWN_RATIO = 25 // spawn zone width / ENEMIES_SPAWN_RATIO
+
+  val ENEMY_TYPES: List[EntityType] =
+    List(EntityType.EnemySkeleton, EntityType.EnemyWorm, EntityType.EnemySlime)
+
+  val BOSSES_TYPES: List[EntityType] =
+    List(EntityType.EnemyBossWizard) // EntityType.EnemyBossReaper
+
   val SKELETON_STATS:Map[Statistic, Float] = Map(
     Statistic.Strength -> 100f,
     Statistic.Health -> 11f,

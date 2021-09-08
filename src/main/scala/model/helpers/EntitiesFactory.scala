@@ -16,6 +16,7 @@ import model.movement._
 import _root_.utils.EnemiesConstants._
 import _root_.utils.ApplicationConstants._
 import _root_.utils.HeroConstants._
+import com.badlogic.gdx.math.Vector2
 
 import scala.collection.immutable.HashMap
 
@@ -54,7 +55,7 @@ trait EntitiesFactory {
                  collisions: Short = EntityCollisionBit.Hero,
                  entitiesSetter: EntitiesSetter): Item
 
-  def createPolygonalShape(size: (Float, Float)): Shape
+  def createPolygonalShape(size: (Float, Float), rounder:Boolean = false): Shape
 
   def createCircleShape(radius: Float): Shape
 
@@ -246,7 +247,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createSkeletonEnemy(position: (Float, Float)): Enemy = {
     val size: (Float, Float) = (13f, 23f)
     val score: Int = 100
-    val spawnPosition = (position._1, position._2+size._2*2)
+
+    val spawnPosition = (position._1, position._2+size._2)
 
     val enemy:Enemy = createEnemyEntity(spawnPosition, size, SKELETON_STATS, score, EntityType.EnemySkeleton)
 
@@ -264,7 +266,9 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val size:(Float, Float) = (13f, 13f)
     val score: Int = 100
 
-    val enemy:Enemy = createEnemyEntity(position, size, SLIME_STATS, score, EntityType.EnemySlime)
+    val spawnPosition = (position._1, position._2+size._2)
+
+    val enemy:Enemy = createEnemyEntity(spawnPosition, size, SLIME_STATS, score, EntityType.EnemySlime)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -279,7 +283,9 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val size:(Float, Float) = (15f, 11f)
     val score: Int = 100
 
-    val enemy:Enemy = createEnemyEntity(position, size, WORM_STATS, score, EntityType.EnemyWorm)
+    val spawnPosition = (position._1, position._2+size._2)
+
+    val enemy:Enemy = createEnemyEntity(spawnPosition, size, WORM_STATS, score, EntityType.EnemyWorm)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -330,12 +336,13 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
       EntityCollisionBit.Immobile | EntityCollisionBit.Sword | EntityCollisionBit.Arrow,
-      createPolygonalShape(size.PPM), position.PPM)
+      createPolygonalShape(size.PPM, true), position.PPM)
+
+
     val enemy:Enemy = new Enemy(entityId, entityBody, size.PPM, stats, score)
     this.level.addEntity(enemy)
     enemy
   }
-
 
   override def createItem(PoolName: ItemPools,
                           size: (Float, Float) = (5f, 5f),
@@ -350,9 +357,17 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     item
   }
 
-  override def createPolygonalShape(size: (Float, Float)): Shape = {
+  override def createPolygonalShape(size: (Float, Float), rounder:Boolean = false): Shape = {
     val shape: PolygonShape = new PolygonShape()
-    shape.setAsBox(size._1, size._2)
+    if (!rounder) shape.setAsBox(size._1, size._2)
+    else {
+      shape.set(Array[Vector2](new Vector2(size._1, size._2),
+        new Vector2(size._1, -size._2+1f.PPM),
+        new Vector2(size._1-1f.PPM, -size._2),
+        new Vector2(-size._1+1f.PPM, -size._2),
+        new Vector2(-size._1, -size._2+1f.PPM),
+        new Vector2(-size._1, size._2)))
+    }
     shape
   }
 
@@ -383,11 +398,29 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     immobileEntity
   }
 
-
-  // TODO: convertire createEnemies in createSpawnZone e lasciare a levelImpl la generazione dei nemici nelle zone di spawn
   override def createEnemies(size: (Float, Float) = (10, 10),
                              position: (Float, Float) = (0, 0)):Unit =  {
-    this.createSkeletonEnemy((position.x, position.y))
+
+    def spawnEnemy(position: (Float, Float)): Enemy = {
+      RANDOM.shuffle(ENEMY_TYPES).head match {
+        case EntityType.EnemySkeleton => this.createSkeletonEnemy((position.x, position.y))
+        case EntityType.EnemyWorm => this.createSkeletonEnemy((position.x, position.y))
+        case EntityType.EnemySlime => this.createSkeletonEnemy((position.x, position.y))
+      }
+    }
+
+    // compute number of enemies to spawn in the spawnZone
+    val spawnCount: Int = Math.floor(size._1 / ENEMIES_SPAWN_RATIO).toInt
+    for (_ <- 0 until spawnCount) {
+      // randomy pick spawn position inside the spawn zone. Only the horizontal axis coordinate is generated randomly
+      val spawnPosition: (Float, Float) = (RANDOM.between(position._1 - size._1 / 2, position._1 + size._1 / 2), position._2)
+
+      // randomly generate an enemy
+      val enemy:Enemy = spawnEnemy(spawnPosition)
+      // TODO: set movement direction inside a movement strategy
+      enemy.setFacing(RANDOM.nextBoolean()) // set initial movement direction
+    }
+
   }
 
   override def createDoor(size: (Float, Float) = (10, 10),
