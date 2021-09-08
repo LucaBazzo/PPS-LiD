@@ -404,8 +404,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     def spawnEnemy(position: (Float, Float)): Enemy = {
       RANDOM.shuffle(ENEMY_TYPES).head match {
         case EntityType.EnemySkeleton => this.createSkeletonEnemy((position.x, position.y))
-        case EntityType.EnemyWorm => this.createSkeletonEnemy((position.x, position.y))
-        case EntityType.EnemySlime => this.createSkeletonEnemy((position.x, position.y))
+        case EntityType.EnemyWorm => this.createWormEnemy((position.x, position.y))
+        case EntityType.EnemySlime => this.createSlimeEnemy((position.x, position.y))
       }
     }
 
