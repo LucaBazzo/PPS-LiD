@@ -22,7 +22,12 @@ object ApplicationConstants {
   val SPRITES_PACK_LOCATION = "assets/sprites/sprites.pack"
 
   val LEVEL_MUSIC_LOCATION = "assets/audio/music.mp3"
-  val JUMP_SOUND_LOCATION = "assets/audio/stomp.wav"
+  val JUMP_SOUND_LOCATION = "assets/audio/jump.wav"
+  val POWERUP_SOUND_LOCATION = "assets/audio/powerup.wav"
+  val KEY_ITEM_SOUND_LOCATION = "assets/audio/key-item.wav"
+  val HERO_ATTACK_1_SOUND_LOCATION = "assets/audio/hero-attack1.ogg"
+  val HERO_ATTACK_2_SOUND_LOCATION = "assets/audio/hero-attack2.ogg"
+  val HERO_ATTACK_3_SOUND_LOCATION = "assets/audio/hero-attack3.ogg"
 
   val HERO_ROOM_MAP_NAME: String = "hero-room"
   val BOSS_ROOM_MAP_NAME: String = "boss-room"

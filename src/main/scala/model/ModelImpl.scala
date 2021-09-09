@@ -1,7 +1,7 @@
 package model
 
 import com.badlogic.gdx.Gdx
-import controller.GameEvent
+import controller.{GameEvent, SoundManager}
 import controller.GameEvent.GameEvent
 import model.entities.{Hero, LivingEntity}
 import model.helpers.EntitiesSetter
@@ -21,6 +21,8 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
 
   private val level: Level = new LevelImpl(entitiesSetter)
 
+  private val soundManager: SoundManager = new SoundManager
+
   private var levelNumber: Int = 1
 
   override def update(actions: List[GameEvent]): Unit = {
@@ -28,7 +30,12 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
       if(action.equals(GameEvent.SetMap)) {
 
         Gdx.app.postRunnable(
-          () => TileMapHelper.setWorld(this.level, this.rooms)
+          () => {
+
+            TileMapHelper.setWorld(this.level, this.rooms)
+
+            soundManager.startMusic()
+          }
         )
       }
     }
