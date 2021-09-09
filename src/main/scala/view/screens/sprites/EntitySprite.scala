@@ -20,7 +20,10 @@ trait EntitySprite extends Sprite {
 //  def cloneEntitySprite(): EntitySprite
 }
 
-class EntitySpriteImpl(regionName: String, width: Float, height: Float) extends EntitySprite {
+class EntitySpriteImpl(regionName: String,
+                       width: Float,
+                       height: Float)
+  extends EntitySprite {
 
   private var animations: Map[State, Animation[TextureRegion]] = Map()
   private var loops: Map[State, Boolean] = Map()
@@ -51,7 +54,8 @@ class EntitySpriteImpl(regionName: String, width: Float, height: Float) extends 
   }
 
   override def setPosition(entity: Entity): Unit = {
-    super.setPosition(entity.getPosition._1 - this.getWidth / 2, entity.getPosition._2 - this.getHeight / 2)
+    super.setPosition(entity.getPosition._1 - this.getWidth / 2,
+      entity.getPosition._2 - this.getHeight / 2)
   }
 
   private def getFrame(state: State): TextureRegion = animations(state).getKeyFrame(stateTimer, loops(state))
@@ -71,19 +75,10 @@ class EntitySpriteImpl(regionName: String, width: Float, height: Float) extends 
     this.setSize(this.width.PPM, this.height.PPM)
     super.draw(batch)
   }
-
-  // TODO: to be removed
-//  override def cloneEntitySprite(): EntitySprite = {
-//    val sprite = new EntitySpriteImpl(regionName, width, height)
-//    for ((state, animation) <- this.animations) {
-//      sprite.addAnimation(state, animation, this.loops(state))
-//    }
-//    sprite
-//  }
-
 }
 
-class HeroEntitySprite(regionName: String, width: Float, height: Float) extends EntitySpriteImpl(regionName, width, height) {
+class HeroEntitySprite(regionName: String, width: Float, height: Float)
+  extends EntitySpriteImpl(regionName, width, height) {
 
   override def setPosition(entity: Entity): Unit = {
     if(entity.asInstanceOf[Hero].isLittle)

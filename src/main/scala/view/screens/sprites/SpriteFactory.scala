@@ -55,7 +55,9 @@ class SpriteFactoryImpl extends SpriteFactory {
       this.atlases += spritePackName -> new TextureAtlas(spritePackName)
 
     // load the sprites and define the animations to be displayed
-    val sprite = new EntitySpriteImpl(regionName, entitySpriteWidth * sizeMultiplicative, entitySpriteHeight * sizeMultiplicative)
+    val sprite = new EntitySpriteImpl(regionName,
+      entitySpriteWidth * sizeMultiplicative,
+      entitySpriteHeight * sizeMultiplicative)
     sprite.setRegion(this.atlases(spritePackName).findRegion(regionName))
     sprite.setBounds(0, 0, spriteWidth, spriteHeight)
 
@@ -260,7 +262,7 @@ class SpriteFactoryImpl extends SpriteFactory {
     sprite.addAnimation(State.Attack01,
       this.createSpriteAnimationFromTwoRows(sprite,
         0, 0, 6,
-        1,0,0,0.15f))
+        1,0,0,0.13f))
     sprite.addAnimation(State.Dying,
       this.createSpriteAnimation(sprite,
         1, 1, 4, 0.18f))

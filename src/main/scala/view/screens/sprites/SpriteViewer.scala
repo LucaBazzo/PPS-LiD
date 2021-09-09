@@ -3,7 +3,6 @@ package view.screens.sprites
 import com.badlogic.gdx.graphics.g2d.Batch
 import model.entities.{Entity, EntityType, State}
 import utils.ApplicationConstants
-
 trait SpriteViewer {
 
   def loadSprites(entities: List[Entity])
@@ -42,17 +41,17 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
     case EntityType.Arrow => spriteFactory.createEntitySprite(entity.getType, ApplicationConstants.SPRITES_PACK_LOCATION,
       "arrow", 40, 5, 10, 1, 2)
     case EntityType.EnemySkeleton => spriteFactory.createEntitySprite(entity.getType, "assets/sprites/skeleton.pack",
-      "skeleton", 150, 150, entity.getSize._1, entity.getSize._2, 350)
+      "skeleton", 150, 150, 150, 150, 0.9f)
     case EntityType.EnemySlime => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/slime.pack",
-      "slime", 32, 25, entity.getSize._1, entity.getSize._2, 100)
+      "slime", 125, 125, 125, 125, 1.3f)
     case EntityType.EnemyWorm => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/worm.pack",
-      "worm", 90, 90, entity.getSize._1, entity.getSize._2, 300)
+      "worm", 90, 90, 90, 90, 0.8f)
     case EntityType.EnemyBossWizard => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/evil_wizard.pack",
-      "evil_wizard", 250, 250, entity.getSize._1*500, entity.getSize._2*250, 1)
+      "evil_wizard", 250, 250, 250, 250, 0.9f)
     case EntityType.EnemyBossReaper => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/reaper.pack",
       "reaper", 211, 130, entity.getSize._1*500, entity.getSize._2*250, 1)
     case EntityType.AttackFireBall => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/fireball.pack",
-      "fireball", 46, 46, entity.getSize._1, entity.getSize._2, 100)
+      "fireball", 46, 46, 46, 46, 1.5f)
     case EntityType.AttackSmite => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/reaper.pack",
       "reaper", 211, 130, entity.getSize._1, entity.getSize._2, 100)
     case EntityType.ArmorItem =>
