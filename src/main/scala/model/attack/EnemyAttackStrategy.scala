@@ -167,8 +167,8 @@ class WizardSecondAttack(override protected val sourceEntity: LivingEntity,
 }
 
 
-class WormAttack(override protected val sourceEntity: LivingEntity,
-                 override protected val targetEntity: Entity)
+class FireballAttack(override protected val sourceEntity: LivingEntity,
+                     override protected val targetEntity: Entity)
   extends EnemyAttackStrategy(sourceEntity, targetEntity) {
 
   override protected def spawnAttack(): Unit = {

@@ -12,7 +12,7 @@ object EnemiesConstants {
   val ENEMY_TYPES: List[EntityType] =
     List(EntityType.EnemySkeleton, EntityType.EnemyWorm, EntityType.EnemySlime)
 
-  val BOSSES_TYPES: List[EntityType] =
+  val ENEMY_BOSS_TYPES: List[EntityType] =
     List(EntityType.EnemyBossWizard) // EntityType.EnemyBossReaper
 
   val SKELETON_STATS:Map[Statistic, Float] = Map(

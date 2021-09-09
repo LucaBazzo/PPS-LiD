@@ -1,27 +1,29 @@
 package model.entities
 
 import model.attack.AttackStrategy
-import model.collisions.CollisionStrategy
+import model.collisions.{CollisionStrategy, EntityCollisionBit}
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
-import model.helpers.EntitiesUtilities
+import model.helpers.{EntitiesFactoryImpl, EntitiesUtilities}
 import model.movement.MovementStrategy
 import model.{EntityBody, Score}
 import utils.ApplicationConstants.RANDOM
+import utils.EnemiesConstants.{ENEMY_BOSS_TYPES, ENEMY_TYPES}
+import model.collisions.ImplicitConversions._
+import model.entities.Items.Items
 
-import scala.util.Random
-
-trait EnemyInterface {
+trait Enemy {
   // TODO: rifattorizzare a livello di living entity?
   def setBehaviour(enemyBehaviour: EnemyBehaviour): Unit
 }
 
-class Enemy(private val entityType: EntityType,
-            private var entityBody: EntityBody,
-            private val size: (Float, Float),
-            private val stats: Map[Statistic, Float],
-            private val score: Int = 100) extends LivingEntityImpl(entityType, entityBody, size, stats)
-          with LivingEntity with Score with EnemyInterface {
+class EnemyImpl(private val entityType: EntityType,
+                private var entityBody: EntityBody,
+                private val size: (Float, Float),
+                private val stats: Map[Statistic, Float],
+                private val score: Int = 100,
+                private val heroEntity: Hero) extends LivingEntityImpl(entityType, entityBody, size, stats)
+          with LivingEntity with Score with Enemy {
 
   var enemyBehaviour:Option[EnemyBehaviour] = None
 
@@ -42,8 +44,28 @@ class Enemy(private val entityType: EntityType,
       this.enemyBehaviour.get.getAttackStrategy.stopAttack()
     }
     super.sufferDamage(damage)
+  }
 
-    // TODO: spostare qui la creazione di items
+  override def destroyEntity(): Unit = {
+    super.destroyEntity()
+
+    if (ENEMY_TYPES.contains(this.entityType)) {
+      EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
+        position=(this.getPosition._1, this.getPosition._2).MPP,
+        collisions = EntityCollisionBit.Hero)
+    }
+
+    if (ENEMY_BOSS_TYPES.contains(this.getType)) {
+      if (this.heroEntity.getItemsPicked.contains((i:Items) => i == Items.Bow)) {
+        // TODO: cambiare ItemPools.Enemy_Drops con la giusta item pool
+        EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
+          position=(this.getPosition._1, this.getPosition._2).MPP,
+          collisions = EntityCollisionBit.Hero)
+      } else
+        EntitiesFactoryImpl.createItem(ItemPools.Boss,
+          position=(this.getPosition._1, this.getPosition._2).MPP,
+          collisions = EntityCollisionBit.Hero)
+    }
   }
 }
 
@@ -68,8 +90,6 @@ class EnemyBehaviourImpl(protected val sourceEntity:LivingEntity)
   protected var transitions:List[(String, String, Predicate)] = List.empty
 
   protected var currentBehaviour:Option[(String, CollisionStrategy, MovementStrategy, AttackStrategy)] = None
-
-  protected val randomGenerator = new Random()
 
   override def addBehaviour(name:String, collisionStrategy: CollisionStrategy, movementStrategy: MovementStrategy, attackStrategy: AttackStrategy): Unit = {
     if (this.behaviours.map(b => b._1).exists(n => n equals name))
@@ -97,20 +117,13 @@ class EnemyBehaviourImpl(protected val sourceEntity:LivingEntity)
 
       if (activeTransitions.nonEmpty) {
         println(currentBehaviour.get._1, activeTransitions.map(t => t._1), activeTransitions.map(t => t._2))
-        // TODO: implementare?
-        // reset current state allowing reuse of cyclic behaviours
-        //      this.currentBehaviour._1.reset()
-        //      this.currentBehaviour._2.reset()
-        //      this.currentBehaviour._3.reset()
-        //      this.currentBehaviour._4.reset()
 
-        val pickedTransition = activeTransitions(randomGenerator.nextInt(activeTransitions.length))
+        val pickedTransition = activeTransitions(RANDOM.nextInt(activeTransitions.length))
 
-        this.currentBehaviour.get._3.stopMovement()
-        this.currentBehaviour.get._4.stopAttack()
-
-        this.currentBehaviour = Option(this.behaviours.find(b => b._1.equals(pickedTransition._2)).get)
         this.resetBehaviour()
+        this.currentBehaviour = Option(this.behaviours.find(b => b._1.equals(pickedTransition._2)).get)
+        this.sourceEntity.setMovementStrategy(this.currentBehaviour.get._3)
+        this.sourceEntity.setAttackStrategy(this.currentBehaviour.get._4)
       }
       this.currentBehaviour.get._3.apply()
       this.currentBehaviour.get._4.apply()
@@ -119,6 +132,7 @@ class EnemyBehaviourImpl(protected val sourceEntity:LivingEntity)
 
   protected def resetBehaviour(): Unit = {
     this.transitions.filter(t => t._1 == this.currentBehaviour.get._1).foreach(t => t._3.reset())
+    this.currentBehaviour.get._3.stopMovement()
     this.currentBehaviour.get._4.stopAttack()
   }
 

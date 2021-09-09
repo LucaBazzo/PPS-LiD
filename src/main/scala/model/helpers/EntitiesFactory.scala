@@ -39,15 +39,15 @@ trait EntitiesFactory {
                         size: (Float, Float),
                         stats: Map[Statistic, Float],
                         score: Int,
-                        entityId: EntityType): Enemy
+                        entityId: EntityType): EnemyImpl
 
-  def createSlimeEnemy(position: (Float, Float)): Enemy
+  def createSlimeEnemy(position: (Float, Float)): EnemyImpl
 
-  def createSkeletonEnemy(position: (Float, Float)): Enemy
+  def createSkeletonEnemy(position: (Float, Float)): EnemyImpl
 
-  def createWormEnemy(position: (Float, Float)): Enemy
+  def createWormEnemy(position: (Float, Float)): EnemyImpl
 
-  def createWizardBossEnemy(position: (Float, Float)): Enemy
+  def createWizardBossEnemy(position: (Float, Float)): EnemyImpl
 
   def createItem(PoolName: ItemPools,
                  size: (Float, Float) = (10f, 10f),
@@ -249,13 +249,13 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     immobileEntity
   }
 
-  override def createSkeletonEnemy(position: (Float, Float)): Enemy = {
+  override def createSkeletonEnemy(position: (Float, Float)): EnemyImpl = {
     val size: (Float, Float) = (13f, 23f)
     val score: Int = 100
 
     val spawnPosition = (position._1, position._2+size._2)
 
-    val enemy:Enemy = createEnemyEntity(spawnPosition, size, SKELETON_STATS, score, EntityType.EnemySkeleton)
+    val enemy:EnemyImpl = createEnemyEntity(spawnPosition, size, SKELETON_STATS, score, EntityType.EnemySkeleton)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -267,13 +267,13 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     enemy
   }
 
-  override def createSlimeEnemy(position: (Float, Float)): Enemy = {
+  override def createSlimeEnemy(position: (Float, Float)): EnemyImpl = {
     val size:(Float, Float) = (13f, 13f)
     val score: Int = 100
 
     val spawnPosition = (position._1, position._2+size._2)
 
-    val enemy:Enemy = createEnemyEntity(spawnPosition, size, SLIME_STATS, score, EntityType.EnemySlime)
+    val enemy:EnemyImpl = createEnemyEntity(spawnPosition, size, SLIME_STATS, score, EntityType.EnemySlime)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -284,29 +284,29 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     enemy
   }
 
-  override def createWormEnemy(position: (Float, Float)): Enemy = {
+  override def createWormEnemy(position: (Float, Float)): EnemyImpl = {
     val size:(Float, Float) = (15f, 11f)
     val score: Int = 100
 
     val spawnPosition = (position._1, position._2+size._2)
 
-    val enemy:Enemy = createEnemyEntity(spawnPosition, size, WORM_STATS, score, EntityType.EnemyWorm)
+    val enemy:EnemyImpl = createEnemyEntity(spawnPosition, size, WORM_STATS, score, EntityType.EnemyWorm)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
       new DoNothingOnCollision(),
       new PatrolPlatform(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
-      new WormAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+      new FireballAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
 
     enemy.setBehaviour(behaviours)
     enemy
   }
 
-  override def createWizardBossEnemy(position: (Float, Float)): Enemy = {
+  override def createWizardBossEnemy(position: (Float, Float)): EnemyImpl = {
     val size:(Float, Float) = (15f, 30f)
     val score: Int = 1000
 
-    val enemy:Enemy = createEnemyEntity(position, size, WIZARD_BOSS_STATS, score, EntityType.EnemyBossWizard)
+    val enemy:EnemyImpl = createEnemyEntity(position, size, WIZARD_BOSS_STATS, score, EntityType.EnemyBossWizard)
     val targetEntity:Entity = this.level.getEntity(e => e.isInstanceOf[Hero])
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
@@ -319,17 +319,25 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     behaviours.addBehaviour("2", new DoNothingOnCollision(), new ChaseTarget(enemy, targetEntity), p2AttackStrategy)
 
     // third behaviour - attack hero if near (with another attack)
-    val p3AttackStrategy = new WizardSecondAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero]))
+    val p3AttackStrategy = new WizardSecondAttack(enemy, targetEntity)
     behaviours.addBehaviour("3", new DoNothingOnCollision(), new ChaseTarget(enemy, targetEntity), p3AttackStrategy)
+
+    // fourth behaviour - attack hero with ranged attacks
+//    val p4AttackStrategy = new FireballAttack(enemy, targetEntity)
+//    behaviours.addBehaviour("4", new DoNothingOnCollision(), new FaceTarget(enemy, targetEntity), p4AttackStrategy)
 
     // add conditional transitions between behaviours
     behaviours.addTransition("1", "2", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
+    behaviours.addTransition("1", "3", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
 
     behaviours.addTransition("2", "3", new RandomTruePredicate(0.5f))
-    behaviours.addTransition("2", "1", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
+//    behaviours.addTransition("2", "4", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
 
     behaviours.addTransition("3", "2", new RandomTruePredicate(0.5f))
-    behaviours.addTransition("3", "1", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
+//    behaviours.addTransition("3", "4", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
+
+//    behaviours.addTransition("4", "2", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
+//    behaviours.addTransition("4", "3", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
 
     enemy.setBehaviour(behaviours)
     enemy
@@ -339,14 +347,15 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                                  size: (Float, Float),
                                  stats: Map[Statistic, Float],
                                  score: Int,
-                                 entityId: EntityType): Enemy = {
+                                 entityId: EntityType): EnemyImpl = {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
       EntityCollisionBit.Immobile | EntityCollisionBit.Sword | EntityCollisionBit.Arrow,
       createPolygonalShape(size.PPM, true), position.PPM)
 
+    val heroEntity: Hero = this.level.getEntity(e => e.getType == EntityType.Hero).asInstanceOf[Hero]
 
-    val enemy:Enemy = new Enemy(entityId, entityBody, size.PPM, stats, score)
+    val enemy:EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, stats, score, heroEntity)
     this.level.addEntity(enemy)
     enemy
   }
@@ -407,7 +416,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createEnemies(size: (Float, Float) = (10, 10),
                              position: (Float, Float) = (0, 0)):Unit =  {
 
-    def spawnEnemy(position: (Float, Float)): Enemy = {
+    def spawnEnemy(position: (Float, Float)): EnemyImpl = {
       RANDOM.shuffle(ENEMY_TYPES).head match {
         case EntityType.EnemySkeleton => this.createSkeletonEnemy((position.x, position.y))
         case EntityType.EnemyWorm => this.createWormEnemy((position.x, position.y))
@@ -422,7 +431,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       val spawnPosition: (Float, Float) = (RANDOM.between(position._1 - size._1 / 2, position._1 + size._1 / 2), position._2)
 
       // randomly generate an enemy
-      val enemy:Enemy = spawnEnemy(spawnPosition)
+      val enemy:EnemyImpl = spawnEnemy(spawnPosition)
       // TODO: set movement direction inside a movement strategy
       enemy.setFacing(RANDOM.nextBoolean()) // set initial movement direction
     }
@@ -499,7 +508,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     circularMobileEntity.setMovementStrategy(
       new CircularMovementStrategy(circularMobileEntity, angularVelocity))
     circularMobileEntity.setCollisionStrategy(
-      new ApplyDamage((e:Entity) => e.isInstanceOf[Enemy], sourceEntity.getStatistics))
+      new ApplyDamage((e:Entity) => e.isInstanceOf[EnemyImpl], sourceEntity.getStatistics))
 
     this.level.addEntity(circularMobileEntity)
     circularMobileEntity
@@ -583,7 +592,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       EntityCollisionBit.Immobile | EntityCollisionBit.Enemy , gravityScale = 0)
     arrow.setFacing(entity.isFacingRight)
     arrow.setMovementStrategy(new ArrowMovementStrategy(arrow, entity.getStatistics(Statistic.MovementSpeed)))
-    arrow.setCollisionStrategy(new ApplyDamageAndDestroyEntity(arrow, (e:Entity) => e.isInstanceOf[Enemy] , entity.getStatistics))
+    arrow.setCollisionStrategy(new ApplyDamageAndDestroyEntity(arrow, (e:Entity) => e.isInstanceOf[EnemyImpl] , entity.getStatistics))
     arrow
   }
 
