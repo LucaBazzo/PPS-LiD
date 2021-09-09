@@ -36,7 +36,6 @@ class PatrolPlatform(val sourceEntity: MobileEntity,
   protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
 
   override def apply(): Unit = {
-
     val canMoveToTheLeft: Boolean = !isPathObstructedOnTheLeft(this.sourceEntity) && isFloorPresentOnTheLeft(this.sourceEntity)
     val canMoveToTheRight: Boolean = !isPathObstructedOnTheRight(this.sourceEntity) && isFloorPresentOnTheRight(this.sourceEntity)
 
@@ -66,6 +65,8 @@ class PatrolPlatform(val sourceEntity: MobileEntity,
     this.sourceEntity.getBody.applyLinearImpulse(
       new Vector2(movementForce, 0), this.sourceEntity.getBody.getWorldCenter, true)
 
+
+    // TODO: convertire come ha detto Luca
     // limit horizontal speed
     if (Math.abs(this.sourceEntity.getBody.getLinearVelocity.x) > this.maxMovementSpeed) {
       val maxMovementForce: Vector2 = new Vector2(0f, this.sourceEntity.getBody.getLinearVelocity.y)

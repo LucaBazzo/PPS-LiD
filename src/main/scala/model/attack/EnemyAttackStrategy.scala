@@ -4,6 +4,8 @@ import model.entities.Statistic.Statistic
 import model.entities.{Entity, _}
 import model.helpers.EntitiesFactoryImpl.{createFireballAttack, createMeleeAttack}
 import model.helpers.EntitiesUtilities._
+import utils.EnemiesConstants
+import utils.EnemiesConstants.{SKELETON_ATTACK_OFFSET, SKELETON_ATTACK_SIZE, SLIME_ATTACK_OFFSET, SLIME_ATTACK_SIZE, WIZARD_BOSS_ATTACK1_OFFSET, WIZARD_BOSS_ATTACK1_SIZE, WIZARD_BOSS_ATTACK2_OFFSET, WIZARD_BOSS_ATTACK2_SIZE}
 
 // TODO: rimpiazzare con AttackStrategy.DoNothingAttackStrategy
 class DoNotAttack() extends AttackStrategy {
@@ -98,7 +100,8 @@ class SkeletonAttack(override protected val sourceEntity: LivingEntity,
 
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack01)
-    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity, size = (23, 23), offset = (20, 5)))
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity,
+      size = SKELETON_ATTACK_SIZE, offset = SKELETON_ATTACK_OFFSET))
     this.attackInstance.get.getBody.setActive(false)
   }
 }
@@ -119,7 +122,7 @@ class SlimeAttack(override protected val sourceEntity: LivingEntity,
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack01)
     this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity,
-      size = (7, 15), offset = (10, 5)))
+      size = SLIME_ATTACK_SIZE, offset = SLIME_ATTACK_OFFSET))
     this.attackInstance.get.getBody.setActive(false)
   }
 }
@@ -140,7 +143,7 @@ class WizardFirstAttack(override protected val sourceEntity: LivingEntity,
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack01)
     this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity,
-      size = (40, 30), offset = (25, 10)))
+      size = WIZARD_BOSS_ATTACK1_SIZE, offset = WIZARD_BOSS_ATTACK1_OFFSET))
     this.attackInstance.get.getBody.setActive(false)
   }
 }
@@ -161,7 +164,7 @@ class WizardSecondAttack(override protected val sourceEntity: LivingEntity,
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack02)
     this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity,
-      size = (30, 40), offset = (35, 12)))
+      size = WIZARD_BOSS_ATTACK2_SIZE, offset = WIZARD_BOSS_ATTACK2_OFFSET))
     this.attackInstance.get.getBody.setActive(false)
   }
 }
@@ -173,7 +176,9 @@ class FireballAttack(override protected val sourceEntity: LivingEntity,
 
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack01)
-    createFireballAttack(this.sourceEntity, this.targetEntity)
+    createFireballAttack(this.sourceEntity, this.targetEntity,
+      EnemiesConstants.WORM_FIREBALL_ATTACK_SIZE,
+      EnemiesConstants.WORM_FIREBALL_ATTACK_OFFSET)
   }
 
   override def stopAttack(): Unit = { }
