@@ -67,10 +67,12 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
   }
 }
 
-class DoorInteraction(hero: Hero, door: Entity) extends EnvironmentInteraction {
+class DoorInteraction(hero: Hero, door: Entity, leftSensor: Entity, rightSensor: Entity) extends EnvironmentInteraction {
 
   override def apply(): Unit = {
     this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
+    this.leftSensor.changeCollisions(EntityCollisionBit.OpenedDoor)
+    this.rightSensor.changeCollisions(EntityCollisionBit.OpenedDoor)
     this.door.setState(State.Opening)
     this.hero.setEnvironmentInteraction(Option.empty)
     print("Hero opened door")

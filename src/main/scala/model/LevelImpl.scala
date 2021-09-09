@@ -44,12 +44,12 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero)
+  private val item: Item = entitiesFactory.createItem(ItemPools.Default, (10f, 10f), (300, 220), EntityCollisionBit.Hero)
 
-  //private val door: Entity = entitiesFactory.createDoor((10, 30), (390, 200))
+  private val door: Entity = entitiesFactory.createDoor((10, 30), (390, 200))
 
   private var isWorldSetted: Boolean = false
-  private var platform: Entity = entitiesFactory.createPlatform((380, 200), (60,2))
+  private var platform: Entity = entitiesFactory.createPlatform((280, 250), (60,2))
   private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
   private var chest: Entity = entitiesFactory.createChest((10,10), (480,150))
   private var portal: Entity = entitiesFactory.createPortal((10,30), (200, 220))
@@ -115,7 +115,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     }
 
     if (entity.isInstanceOf[Enemy]) {
-      // TODO: nomralizzare la creazione e rimozione di tutte le entity prima del word.step in update
+      // TODO: normalizzare la creazione e rimozione di tutte le entity prima del word.step in update
       // TODO: rifattorizzare .MPP (enemy position e in PPM mentre la createItem vuole valori non scalati)
       EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
         position=(entity.getPosition._1, entity.getPosition._2).MPP,

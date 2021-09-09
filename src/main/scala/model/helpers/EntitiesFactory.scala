@@ -388,13 +388,38 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                           position: (Float, Float) = (0, 0),
                           collisions: Short = 0): Entity = {
 
+    val sensorSize = (0f, size._2)
+    val leftSensorPosition = (position._1 - size._1 - 10, position._2)
+
+    val rightSensorPosition = (position._1 + size._1 + 10, position._2)
+
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Door,
       EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(size.PPM), position.PPM)
 
-    val immobileEntity: Entity = ImmobileEntity(EntityType.Door, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new DoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
-    this.level.addEntity(immobileEntity)
-    immobileEntity
+    val leftSensorBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Door,
+      EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(sensorSize.PPM), leftSensorPosition.PPM, isSensor = true)
+
+    val rightSensorBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Door,
+      EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(sensorSize.PPM), rightSensorPosition.PPM, isSensor = true)
+
+    val door: ImmobileEntity = ImmobileEntity(EntityType.Door, entityBody, size.PPM)
+
+    val leftSensor: ImmobileEntity = ImmobileEntity(EntityType.Immobile, leftSensorBody, size.PPM)
+
+    val rightSensor: ImmobileEntity = ImmobileEntity(EntityType.Immobile, rightSensorBody, size.PPM)
+
+    door.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, door, leftSensor, rightSensor))
+
+    leftSensor.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, door, leftSensor, rightSensor))
+
+    rightSensor.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, door, leftSensor, rightSensor))
+
+    this.level.addEntity(door)
+
+    this.level.addEntity(leftSensor)
+
+    this.level.addEntity(rightSensor)
+    door
   }
 
   override def createChest(size: (Float, Float), position: (Float, Float)): Entity = {
@@ -402,7 +427,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(size.PPM), position.PPM)
 
     val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Chest, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new ChestCollisionStrategy(immobileEntity))
+    immobileEntity.setCollisionStrategy(new ChestCollisionStrategy(this.entitiesSetter, immobileEntity))
     this.level.addEntity(immobileEntity)
     immobileEntity
   }
@@ -465,7 +490,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val rotatingBodyPosition = (pivotPoint._1 + rotatingBodyDistance._1.PPM, pivotPoint._2 + rotatingBodyDistance._2.PPM)
     val rotatingBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Sword,
-      EntityCollisionBit.Enemy, createPolygonalShape(rotatingBodySize.PPM), rotatingBodyPosition,
+      EntityCollisionBit.Enemy | EntityCollisionBit.Door, createPolygonalShape(rotatingBodySize.PPM), rotatingBodyPosition,
       startingAngle, gravityScale = 0, 1, 0.3f, 0.5f, isSensor = true)
 
     val circularMobileEntity =

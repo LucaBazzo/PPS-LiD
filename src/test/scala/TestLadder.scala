@@ -1,5 +1,4 @@
 import controller.GameEvent
-import controller.GameEvent.GameEvent
 import model.entities.{Entity, EntityType, Hero, State}
 import model.{Level, LevelImpl}
 import model.helpers.EntitiesContainerMonitor
@@ -16,7 +15,7 @@ class TestLadder extends AnyFlatSpec {
     hero.notifyCommand(GameEvent.Interaction)
     assert(hero.getState == State.LadderIdle)
     hero.notifyCommand(GameEvent.Interaction)
-    assert(hero.getState == State.Falling)
+    assert(hero.getState == State.Jumping)
   }
 
 }
