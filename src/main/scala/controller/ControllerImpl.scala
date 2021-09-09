@@ -50,13 +50,14 @@ class ControllerImpl extends Controller with Observer {
     (INNER_ROOM_MAP_NAMES(0), INNER_ROOM_MAP_OFFSET(3)),
     (INNER_ROOM_MAP_NAMES(0), INNER_ROOM_MAP_OFFSET(4)),
     (INNER_ROOM_MAP_NAMES(0), INNER_ROOM_MAP_OFFSET(5)),
+    //TODO decommentare quandi ci saranno abbastanza inner-rooms nell'array
 //    (innerRooms(0), INNER_ROOM_MAP_OFFSET(0)),
 //    (innerRooms(1), INNER_ROOM_MAP_OFFSET(1)),
 //    (innerRooms(2), INNER_ROOM_MAP_OFFSET(2)),
 //    (innerRooms(3), INNER_ROOM_MAP_OFFSET(3)),
 //    (innerRooms(4), INNER_ROOM_MAP_OFFSET(4)),
 //    (innerRooms(5), INNER_ROOM_MAP_OFFSET(5)),
-    (INNER_BORDER_NAMES, INNER_BORDER_OFFSET))
+    (INNER_BORDER_NAMES(Random.nextInt(INNER_BORDER_NAMES.length)), INNER_BORDER_OFFSET))
 
   private val view: View = new ViewImpl(entitiesContainer, observerManager, rooms)
   private val model: Model = new ModelImpl(entitiesContainer, rooms)

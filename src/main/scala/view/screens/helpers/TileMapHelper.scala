@@ -18,9 +18,9 @@ object TileMapHelper {
   private val scale: Float = 1/(PIXELS_PER_METER/2)
   private var keyLocation: String = null
 
-  def getMapRenderer(tiledMap: TiledMap): OrthogonalTiledMapRenderer = {
-    new OrthogonalTiledMapRenderer(tiledMap, scale)
-  }
+  def getMapRenderer(tiledMap: TiledMap): OrthogonalTiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap, scale)
+
+  def getTiledMap(mapName: String): TiledMap = new TmxMapLoader().load("assets/maps/" + mapName + ".tmx")
 
   //restituisce la tiledMap settando l'offset di renderizzazione
   def getTiledMap(mapName: String, offset: (Integer, Integer)): TiledMap = {
@@ -32,10 +32,6 @@ object TileMapHelper {
     })
 
     tiledMap
-  }
-
-  def getTiledMap(mapName: String): TiledMap = {
-    new TmxMapLoader().load("assets/maps/" + mapName + ".tmx")
   }
 
   def setWorld(rooms: Array[(String, (Integer, Integer))]): Unit = {
