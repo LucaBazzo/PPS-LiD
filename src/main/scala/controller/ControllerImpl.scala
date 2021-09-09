@@ -39,10 +39,8 @@ class ControllerImpl extends Controller with Observer {
 
   this.executorService.scheduleAtFixedRate(gameLoop, 0, GAME_LOOP_STEP, TimeUnit.NANOSECONDS)
 
-  //TODO only when the main menu is ready
-  //this.view.startGame()
-
   override def handleEvent(event: GameEvent): Unit = event match {
+    case GameEvent.StartGame => this.view.startGame()
     case GameEvent.CloseApplication => this.terminateApplication()
     case _ => this.gameLoop.addAction(event)
   }
@@ -53,11 +51,11 @@ class ControllerImpl extends Controller with Observer {
 
   override def newLevel(): Unit = ???
 
-  override def stopExecutorService(): Unit = this.executorService.shutdown()
+  override def stopExecutorService(): Unit = this.executorService.shutdownNow()
 
   private def terminateApplication(): Unit = {
     // terminate game loop executor
-    this.executorService.shutdown()
+    this.executorService.shutdownNow()
 
     // let view terminate itself
     this.view.terminate()

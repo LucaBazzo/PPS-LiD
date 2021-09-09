@@ -10,7 +10,7 @@ class LostInDungeons(private val entitiesGetter: EntitiesGetter,
                      private val rooms: Array[String]) extends Game {
 
   override def create(): Unit = {
-    this.setScreen(new MainMenuScreen())
+    this.setScreen(new MainMenuScreen(observerManager))
     //this.setScreen(new GameScreen(entitiesGetter, observerManager, rooms))
   }
 

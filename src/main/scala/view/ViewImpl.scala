@@ -41,7 +41,7 @@ class ViewImpl(private val entitiesGetter: EntitiesGetter,
   override def initialize(): Unit = ???
 
   override def terminate(): Unit = {
-    this.executorService.shutdown()
+    this.executorService.shutdownNow()
     Gdx.app.exit()
   }
 }

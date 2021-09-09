@@ -8,7 +8,9 @@ class GameInputProcessor(private val observerManager: ObserverManager) extends I
 
   override def keyDown(i: Int): Boolean = {
     i match {
-      case Keys.ESCAPE => Gdx.app.exit()
+      case Keys.ESCAPE => {
+        this.observerManager.notifyEvent(GameEvent.CloseApplication)
+      }
       case Keys.W | Keys.SPACE | Keys.UP => this.observerManager.notifyEvent(GameEvent.Up)
       case Keys.E => this.observerManager.notifyEvent(GameEvent.Slide)
       case Keys.S | Keys.DOWN => this.observerManager.notifyEvent(GameEvent.Down)

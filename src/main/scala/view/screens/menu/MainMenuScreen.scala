@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.{ClickListener, TextureRegionDrawab
 import com.badlogic.gdx.scenes.scene2d.{InputEvent, Stage}
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, Screen}
+import controller.{GameEvent, ObserverManager}
 import utils.ApplicationConstants._
 import view.screens.game.GUIFactory
 
@@ -15,7 +16,7 @@ import view.screens.game.GUIFactory
 /**
  * Class containing the components for the main menu creation.
  */
-class MainMenuScreen extends Screen {
+class MainMenuScreen(private val observerManager: ObserverManager) extends Screen {
 
   // Setting the view
   val camera: Camera = new OrthographicCamera()
@@ -96,13 +97,13 @@ class MainMenuScreen extends Screen {
 
   private def addPlayListener(button: TextButton): Unit = {
     button.addListener(new ClickListener() {
-      override def clicked(event: InputEvent, x: Float, y: Float): Unit = println("Play")
+      override def clicked(event: InputEvent, x: Float, y: Float): Unit = observerManager.notifyEvent(GameEvent.StartGame)
     })
   }
 
   private def addExitListener(button: TextButton): Unit = {
     button.addListener(new ClickListener() {
-      override def clicked(event: InputEvent, x: Float, y: Float): Unit = println("Exit")
+      override def clicked(event: InputEvent, x: Float, y: Float): Unit = observerManager.notifyEvent(GameEvent.CloseApplication)
     })
   }
 
@@ -114,6 +115,6 @@ class MainMenuScreen extends Screen {
 
   override def hide(): Unit = {}
 
-  override def dispose(): Unit = {}
+  override def dispose(): Unit = observerManager.notifyEvent(GameEvent.CloseApplication)
 }
 
