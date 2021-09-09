@@ -58,17 +58,20 @@ object TileMapHelper {
           rect.getY*2 + rect.getHeight - offset._2*16)
 
         layer.getName match {
-          case "ground" | "bridge" => spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
+          case "ground" => spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
+          case "bridge" => spawnEntity(() => EntitiesFactoryImpl.createPlatform(position, size))
           case "door" =>
             if(mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME)){
               //TODO spawn boss room door
             } else spawnEntity(() => EntitiesFactoryImpl.createDoor(size, position))
           case "chest" =>
-            if(mapName.equalsIgnoreCase(TOP_KEY_ITEM_ROOM_NAME) && keyLocation.equalsIgnoreCase("TOP")) {
-              //TODO spawnare la chiave per il boss o un oggetto speciale
-            } else if(mapName.equalsIgnoreCase(BOTTOM_KEY_ITEM_ROOM_NAME) && keyLocation.equalsIgnoreCase("BOTTOM")) {
-              //TODO spawnare la chiave per il boss o un oggetto speciale
-            } else spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
+            if(mapName.equalsIgnoreCase(TOP_KEY_ITEM_ROOM_NAME) || mapName.equalsIgnoreCase(BOTTOM_KEY_ITEM_ROOM_NAME))
+              if (mapName.contains(keyLocation)) {
+                //TODO spawnare la chiave per il boss
+              } else {
+                //TODO spawnare un oggetto speciale
+              }
+            else spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
           case "ladder" => spawnEntity(() => EntitiesFactoryImpl.createLadder(position, size))
           case "water" => spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position,size))
           case "lava" => spawnEntity(() => EntitiesFactoryImpl.createLavaPool(position, size))

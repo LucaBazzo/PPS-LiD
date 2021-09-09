@@ -14,7 +14,7 @@ object MapConstants {
   val HERO_ROOM_MAP_NAME: String = "hero-room"
   val HERO_ROOM_OFFSET: (Integer, Integer) = (0,0)
   val BOSS_ROOM_MAP_NAME: String = "boss-room"
-  val BOSS_ROOM_OFFSET: (Integer, Integer) = (135, 12)
+  val BOSS_ROOM_OFFSET: (Integer, Integer) = (135, 1)
   val TOP_KEY_ITEM_ROOM_NAME: String = "top-key-item-room"
   val TOP_KEY_ITEM_ROOM_OFFSET: (Integer, Integer) = (67, -48)
   val BOTTOM_KEY_ITEM_ROOM_NAME: String = "bottom-key-item-room"
