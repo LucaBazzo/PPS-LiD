@@ -3,7 +3,8 @@ package model
 import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.collisions.{CollisionMonitor, EntityCollisionBit}
-import model.entities.{Entity, Hero, State, Statistic}
+import model.entities.{Entity, Hero, ImmobileEntity, ItemPools, State, Statistic}
+import model.helpers.EntitiesFactoryImpl
 import model.movement.{HeroMovementStrategy, LadderClimbMovementStrategy}
 
 import java.util.concurrent.{ExecutorService, Executors}
@@ -44,8 +45,10 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
 
     if(!applied)
       this.startLadderInteraction()
-    else
+    else {
       this.restoreNormalMovementStrategy()
+      this.entity.setState(State.Jumping)
+    }
 
     this.applied = !applied
   }
@@ -74,6 +77,17 @@ class DoorInteraction(hero: Hero, door: Entity) extends EnvironmentInteraction {
   }
 }
 
+class ChestInteraction(private val hero: Hero, private val chest: ImmobileEntity) extends EnvironmentInteraction {
+
+  override def apply(): Unit = {
+    chest.setState(State.Opening)
+    chest.changeCollisions(EntityCollisionBit.DestroyedDoor)
+    val itemPos: (Float, Float) = chest.getPosition
+    //EntitiesFactoryImpl.createItem(ItemPools.Level_1, position = (itemPos._1 + 1f, itemPos._2 + 1f))
+    hero.setEnvironmentInteraction(Option.empty)
+  }
+}
+
 class PlatformInteraction(private val hero: Hero,
                           private val upperPlatform: Entity,
                           private val platform: Entity,
@@ -85,16 +99,18 @@ class PlatformInteraction(private val hero: Hero,
       hero.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(hero))))
     else
       hero.setEnvironmentInteraction(Option.empty)
-    platform.changeCollisions(EntityCollisionBit.Enemy)
-    upperPlatform.changeCollisions(EntityCollisionBit.Enemy)
-    lowerPlatform.changeCollisions(EntityCollisionBit.Enemy)
+    this.platformCollisions(EntityCollisionBit.Enemy)
     val executorService: ExecutorService = Executors.newSingleThreadExecutor()
     executorService.execute(() => {
       Thread.sleep(1000)
-      platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-      upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-      lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      this.platformCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
       println("Enabled platform collisions")
     })
+  }
+
+  private def platformCollisions(collisions: Short): Unit = {
+    platform.changeCollisions(collisions)
+    upperPlatform.changeCollisions(collisions)
+    lowerPlatform.changeCollisions(collisions)
   }
 }

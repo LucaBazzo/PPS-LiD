@@ -39,23 +39,14 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
   entitiesFactory.setLevel(this, new ItemPoolImpl())
+  entitiesFactory.setEntitiesSetter(entitiesSetter)
 
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero, entitiesSetter)
-
-  private val door: Entity = entitiesFactory.createDoor((10, 30), (390, 200))
+  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero)
 
   private var isWorldSetted: Boolean = false
-  private var platform: Entity = entitiesFactory.createPlatform((380, 200), (60,2))
-  private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
-
-  EntitiesFactoryImpl.createSkeletonEnemy((HeroConstants.HERO_OFFSET._1+70, HeroConstants.HERO_OFFSET._2))
-
-  private var water: Entity = entitiesFactory.createWaterPool((200,290), (100,15))
-
-  private var lava: Entity = entitiesFactory.createLavaPool((400,290), (100,15))
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)
@@ -116,14 +107,14 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
       // TODO: rifattorizzare .MPP (enemy position e in PPM mentre la createItem vuole valori non scalati)
       EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
         position=(entity.getPosition._1, entity.getPosition._2).MPP,
-        collisions = EntityCollisionBit.Hero, entitesSetter=this.entitiesSetter)
+        collisions = EntityCollisionBit.Hero)
     }
   }
 
   override def getWorld: World = this.world
 
   override def spawnItem(pool: ItemPools): Unit = {
-    entitiesFactory.createItem(pool, entitiesSetter = this.entitiesSetter)
+    entitiesFactory.createItem(pool)
   }
 
   private var accumulator: Float = 0f

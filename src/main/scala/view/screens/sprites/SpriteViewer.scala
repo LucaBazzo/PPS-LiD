@@ -91,7 +91,15 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
       sprite.addAnimation(State.Opening,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 2))
       sprite
-    case EntityType.Ladder =>
+    case EntityType.Chest =>
+      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/chest.pack", "ChestClosed", 64, 68,
+        entity.getSize._1, entity.getSize._2, 100)
+      sprite.addAnimation(State.Standing,
+        spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
+      sprite.addAnimation(State.Opening,
+        spriteFactory.createSpriteAnimation(sprite, 0, 0, 1))
+      sprite
+    /*case EntityType.Ladder =>
       val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/bigLadder.pack", "bigLadder", 32, 212,
         entity.getSize._1, entity.getSize._2, 100)
       sprite.addAnimation(State.Standing,
@@ -102,8 +110,8 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
         entity.getSize._1, entity.getSize._2, 100)
       sprite.addAnimation(State.Standing,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
-      sprite
-    case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile => null
+      sprite*/
+    case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile | EntityType.Ladder | EntityType.Platform => null
     case _ => null
   }
 

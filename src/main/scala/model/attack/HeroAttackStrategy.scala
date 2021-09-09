@@ -3,7 +3,7 @@ package model.attack
 import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions._
-import model.entities.State.State
+import model.entities.State._
 import model.entities._
 import model.helpers.EntitiesFactoryImpl
 import utils.HeroConstants._
@@ -45,7 +45,7 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
       && this.attackTimer > THIRD_SWORD_STOP_TIME => this.startThirdSwordAttack()
     case State.Attack03 if timeEventPresent && this.attackTimer <= THIRD_SWORD_STOP_TIME =>
       this.stopThirdSwordAttack()
-    case State.BowAttack if timeEventPresent && this.attackTimer <= BOW_ATTACK_STARTING_TIME =>
+    case State.BowAttacking if timeEventPresent && this.attackTimer <= BOW_ATTACK_STARTING_TIME =>
       this.startBowAttack()
     case _ =>
   }
@@ -56,10 +56,10 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
 
   private def checkCommand(command: GameEvent): Boolean = {
     command match {
-      case GameEvent.Attack => return entity.getState == State.Running || entity.getState == State.Standing ||
-        entity.getState == State.Attack01 || entity.getState == State.Attack02
+      case GameEvent.Attack => return (entity is Running) || (entity is Standing) ||
+        (entity is Attack01) || (entity is Attack02)
       case GameEvent.BowAttack => return isBowPicked &&
-        (entity.getState == State.Running || entity.getState == State.Standing)
+        ((entity is Running) || (entity is Standing))
       case _ => throw new UnsupportedOperationException
     }
     false
@@ -146,7 +146,7 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
 
   private def setBowAttack(): Unit = {
     this.entity.stopMovement()
-    this.entity.setState(State.BowAttack)
+    this.entity.setState(State.BowAttacking)
     this.restartTimer(BOW_ATTACK_DURATION)
     this.timeEventPresent = true
   }

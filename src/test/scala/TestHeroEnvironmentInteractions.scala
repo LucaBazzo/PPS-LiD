@@ -50,11 +50,11 @@ class TestHeroEnvironmentInteractions extends AnyFlatSpec{
 
     hero.notifyCommand(Up)
     hero.update()
-    assertResult(State.LadderClimb)(hero.getState)
+    assertResult(State.LadderClimbing)(hero.getState)
 
     hero.notifyCommand(Down)
     hero.update()
-    assertResult(State.LadderDescend)(hero.getState)
+    assertResult(State.LadderDescending)(hero.getState)
 
     //stop interaction
     hero.notifyCommand(interactionCommand)
@@ -76,7 +76,7 @@ class TestHeroEnvironmentInteractions extends AnyFlatSpec{
     hero.update()
     hero.notifyCommand(Up)
     hero.update()
-    assertResult(State.LadderClimb)(hero.getState)
+    assertResult(State.LadderClimbing)(hero.getState)
 
     hero.setEnvironmentInteraction(Option.empty)
     assertResult(State.Falling)(hero.getState)

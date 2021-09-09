@@ -7,7 +7,7 @@ import view.screens.game.GameScreen
 
 class LostInDungeons(private val entitiesGetter: EntitiesGetter,
                      private val observerManager: ObserverManager,
-                     private val rooms: Array[String]) extends Game {
+                     private val rooms: Array[(String, (Integer, Integer))]) extends Game {
 
   override def create(): Unit = {
     this.setScreen(new GameScreen(entitiesGetter, observerManager, rooms))

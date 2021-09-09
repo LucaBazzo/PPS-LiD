@@ -50,10 +50,9 @@ trait EntitiesFactory {
   def createWizardBossEnemy(position: (Float, Float)): Enemy
 
   def createItem(PoolName: ItemPools,
-                 size: (Float, Float) = (5f, 5f),
+                 size: (Float, Float) = (10f, 10f),
                  position: (Float, Float) = (0, 0),
-                 collisions: Short = EntityCollisionBit.Hero,
-                 entitiesSetter: EntitiesSetter): Item
+                 collisions: Short = EntityCollisionBit.Hero): Item
 
   def createPolygonalShape(size: (Float, Float), rounder:Boolean = false): Shape
 
@@ -70,6 +69,9 @@ trait EntitiesFactory {
   def createDoor(size: (Float, Float) = (10, 10),
                  position: (Float, Float) = (0, 0),
                  collisions: Short = 0): Entity
+
+  def createChest(size: (Float, Float) = (70, 70),
+                  position: (Float, Float) = (0,0)): Entity
 
   def createPlatform(position: (Float, Float),
                      size: (Float, Float)): Entity
@@ -120,6 +122,8 @@ trait EntitiesFactory {
 
   def addPendingEntityCreation(r:() => Unit): Unit
   def createPendingEntities(): Unit
+
+  def setEntitiesSetter(entitySetter: EntitiesSetter)
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -129,6 +133,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   private var bodiesToBeDestroyed: List[Body] = List.empty
   private val collisonMonitor: CollisionMonitor = new CollisionMonitorImpl
   private var pendingEntitiesCreation: List[() => Unit] = List.empty
+  private var entitiesSetter: EntitiesSetter = _
 
   override def setLevel(level: Level, pool: ItemPool): Unit = {
     this.level = level
@@ -349,12 +354,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createItem(PoolName: ItemPools,
                           size: (Float, Float) = (5f, 5f),
                           position: (Float, Float) = (0, 0),
-                          collisions: Short = EntityCollisionBit.Hero,
-                          entitesSetter: EntitiesSetter): Item = {
+                          collisions: Short = EntityCollisionBit.Hero): Item = {
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Item,
       collisions, createPolygonalShape(size.PPM), position.PPM)
     val item: Item = itemPool.getItem(entityBody, size, PoolName)
-    item.setCollisionStrategy(new ItemCollisionStrategy(item, entitesSetter))
+    item.setCollisionStrategy(new ItemCollisionStrategy(item, this.entitiesSetter))
     this.level.addEntity(item)
     item
   }
@@ -437,6 +441,17 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     this.level.addEntity(immobileEntity)
     immobileEntity
   }
+
+  override def createChest(size: (Float, Float), position: (Float, Float)): Entity = {
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Door,
+      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(size.PPM), position.PPM)
+
+    val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Chest, entityBody, size.PPM)
+    immobileEntity.setCollisionStrategy(new ChestCollisionStrategy(immobileEntity))
+    this.level.addEntity(immobileEntity)
+    immobileEntity
+  }
+
 
   override def createWaterPool(position: (Float, Float),
                                size: (Float, Float)): Entity = {
@@ -641,5 +656,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     }
     this.pendingEntitiesCreation = List.empty
   }
+
+  override def setEntitiesSetter(entitySetter: EntitiesSetter): Unit = this.entitiesSetter = entitySetter
+
 }
 

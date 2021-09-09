@@ -3,6 +3,7 @@ package model.helpers
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.collisions.ImplicitConversions.RichFloat
+import model.entities.Entity
 
 import scala.collection.immutable.ListMap
 
@@ -40,6 +41,7 @@ trait WorldUtilities {
 
   def checkCollision(x: Float, y: Float): Boolean = checkCollision(x, y, x, y)
 
+  def checkSideCollision(rightSide: Boolean, entity: Entity, entitiesBit: Short*): Boolean
 }
 
 object WorldUtilities extends WorldUtilities {
@@ -156,4 +158,20 @@ object WorldUtilities extends WorldUtilities {
       position.x + size._1 / 2 + offset, position.y + size._2 / 2,
       body)
   }
+
+  override def checkSideCollision(rightSide: Boolean, entity: Entity, entitiesBit: Short*): Boolean = {
+    val sideX = getEntitySideX(entity.getPosition, entity.getSize, rightSide)
+    val sideY = getEntitySideY(entity.getPosition, entity.getSize)
+
+    entitiesBit.exists(entityBit => checkCollision(sideX._1, sideY._1, sideX._2, sideY._2, entityBit))
+  }
+
+  private def getEntitySideX(position: (Float, Float), size: (Float, Float), rightSide: Boolean = true): (Float, Float) = {
+    var x1: Float = size._1
+    if(!rightSide) x1 = -x1
+    (position._1 + x1, position._1 + x1 + x1)
+  }
+
+  private def getEntitySideY(position: (Float, Float), size: (Float, Float)): (Float, Float) =
+    (position._2 - size._2, position._2 + size._2)
 }
