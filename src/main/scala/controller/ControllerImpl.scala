@@ -28,18 +28,20 @@ class ControllerImpl extends Controller with Observer {
   private val observerManager: ObserverManager = new ObserverManagerImpl()
   this.observerManager.addObserver(this)
 
-  //scelgo casualmente 6 stanze da mettere nel world
+  //scelgo casualmente 6 stanze da mettere nel world (le stanze non devono ripetersi)
   private var innerRooms: Array[String] = Array()
   while (innerRooms.length < 6){
-    val room: String = INNER_ROOM_MAP_NAMES(Random.between(0, INNER_ROOM_MAP_NAMES.size))
+    val room: String = INNER_ROOM_MAP_NAMES(Random.nextInt(INNER_ROOM_MAP_NAMES.size))
     if(!innerRooms.contains(room)) innerRooms = innerRooms :+ room
   }
 
   private val rooms: Array[(String,(Integer,Integer))] = Array(
     (WORLD_LEFT_BORDER_NAME, WORLD_LEFT_BORDER_OFFSET),
     (WORLD_TOP_BORDER_NAME, WORLD_TOP_BORDER_OFFSET),
+    (WORLD_RIGHT_BORDER_NAME, WORLD_RIGHT_BORDER_OFFSET),
     (WORLD_BOTTOM_BORDER_NAME, WORLD_BOTTOM_BORDER_OFFSET),
     (HERO_ROOM_MAP_NAME, HERO_ROOM_OFFSET),
+    (BOSS_ROOM_MAP_NAME, BOSS_ROOM_OFFSET),
     (TOP_KEY_ITEM_ROOM_NAME, TOP_KEY_ITEM_ROOM_OFFSET),
     (BOTTOM_KEY_ITEM_ROOM_NAME, BOTTOM_KEY_ITEM_ROOM_OFFSET),
     (INNER_ROOM_MAP_NAMES(2), INNER_ROOM_MAP_OFFSET(0)),

@@ -44,12 +44,14 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
-  val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-  val task: Runnable = () => {
-    Thread.sleep(5000)
-    this.observerManager.notifyEvent(GameEvent.SetMap)
-  }
-  executorService.submit(task)
+//  val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+//  val task: Runnable = () => {
+//    Thread.sleep(5000)
+//    this.observerManager.notifyEvent(GameEvent.SetMap)
+//  }
+//  executorService.submit(task)
+  this.observerManager.notifyEvent(GameEvent.SetMap)
+
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
