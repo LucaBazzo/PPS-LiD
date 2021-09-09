@@ -45,16 +45,16 @@ object GeometricUtilities extends GeometricUtilities {
     sourcePoint.dst(targetPoint)
 
   override def isTargetPointOnTheLeft(sourcePoint: Vector2, targetPoint: Vector2): Boolean =
-    sourcePoint.sub(targetPoint).x >= 0
+    sourcePoint.x - targetPoint.x >= 0
 
   override def isTargetPointOnTheRight(sourcePoint: Vector2, targetPoint: Vector2): Boolean =
-    sourcePoint.sub(targetPoint).x <= 0
+    sourcePoint.x - targetPoint.x <= 0
 
   override def isTargetPointAbove(sourcePoint: Vector2, targetPoint: Vector2): Boolean =
-    sourcePoint.sub(targetPoint).y < 0
+    sourcePoint.y - targetPoint.y < 0
 
   override def isTargetPointBelow(sourcePoint: Vector2, targetPoint: Vector2): Boolean =
-    sourcePoint.sub(targetPoint).y > 0
+    sourcePoint.y - targetPoint.y > 0
 
   override def getPointsAngle(sourcePoint: Vector2, targetPoint: Vector2): Float =
     sourcePoint.angleDeg(targetPoint)

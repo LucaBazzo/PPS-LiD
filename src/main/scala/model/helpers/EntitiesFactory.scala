@@ -1,5 +1,9 @@
 package model.helpers
 
+import _root_.utils.ApplicationConstants._
+import _root_.utils.EnemiesConstants._
+import _root_.utils.HeroConstants._
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.{RevoluteJointDef, WeldJointDef}
@@ -11,12 +15,8 @@ import model.entities.EntityType.EntityType
 import model.entities.ItemPools.ItemPools
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, Statistic, _}
-import model.helpers.EntitiesUtilities.isEntityOnTheLeft
+import model.helpers.EntitiesUtilities.{isEntityOnTheLeft, isEntityOnTheRight}
 import model.movement._
-import _root_.utils.EnemiesConstants._
-import _root_.utils.ApplicationConstants._
-import _root_.utils.HeroConstants._
-import com.badlogic.gdx.math.Vector2
 
 import scala.collection.immutable.HashMap
 
@@ -93,7 +93,10 @@ trait EntitiesFactory {
                           startingAngle: Float = 0,
                           sourceEntity: LivingEntity): MobileEntity
 
-  def createFireballAttack(sourceEntity: LivingEntity, targetEntity: Entity): MobileEntity
+  def createFireballAttack(sourceEntity: LivingEntity,
+                           targetEntity: Entity,
+                           size: (Float, Float) = (23, 23),
+                           offset: (Float, Float) = (20, 5)): MobileEntity
 
   def createMeleeAttack(sourceEntity: LivingEntity,
                         targetEntity: Entity,
@@ -250,12 +253,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createSkeletonEnemy(position: (Float, Float)): EnemyImpl = {
-    val size: (Float, Float) = (13f, 23f)
-    val score: Int = 100
-
-    val spawnPosition = (position._1, position._2+size._2)
-
-    val enemy:EnemyImpl = createEnemyEntity(spawnPosition, size, SKELETON_STATS, score, EntityType.EnemySkeleton)
+    val enemy:EnemyImpl = createEnemyEntity(position, SKELETON_SIZE,
+      SKELETON_STATS, SKELETON_SCORE, EntityType.EnemySkeleton)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -268,12 +267,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createSlimeEnemy(position: (Float, Float)): EnemyImpl = {
-    val size:(Float, Float) = (13f, 13f)
-    val score: Int = 100
-
-    val spawnPosition = (position._1, position._2+size._2)
-
-    val enemy:EnemyImpl = createEnemyEntity(spawnPosition, size, SLIME_STATS, score, EntityType.EnemySlime)
+    val enemy:EnemyImpl = createEnemyEntity(position,
+      SLIME_SIZE, SLIME_STATS, SLIME_SCORE, EntityType.EnemySlime)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -285,12 +280,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createWormEnemy(position: (Float, Float)): EnemyImpl = {
-    val size:(Float, Float) = (15f, 11f)
-    val score: Int = 100
-
-    val spawnPosition = (position._1, position._2+size._2)
-
-    val enemy:EnemyImpl = createEnemyEntity(spawnPosition, size, WORM_STATS, score, EntityType.EnemyWorm)
+    val enemy:EnemyImpl = createEnemyEntity(position, WORM_SIZE,
+      WORM_STATS, WORM_SCORE, EntityType.EnemyWorm)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -303,10 +294,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createWizardBossEnemy(position: (Float, Float)): EnemyImpl = {
-    val size:(Float, Float) = (15f, 30f)
-    val score: Int = 1000
-
-    val enemy:EnemyImpl = createEnemyEntity(position, size, WIZARD_BOSS_STATS, score, EntityType.EnemyBossWizard)
+    val enemy:EnemyImpl = createEnemyEntity(position, WIZARD_BOSS_SIZE, WIZARD_BOSS_STATS, WIZARD_BOSS_SCORE,
+      EntityType.EnemyBossWizard)
     val targetEntity:Entity = this.level.getEntity(e => e.isInstanceOf[Hero])
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
@@ -323,21 +312,21 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     behaviours.addBehaviour("3", new DoNothingOnCollision(), new ChaseTarget(enemy, targetEntity), p3AttackStrategy)
 
     // fourth behaviour - attack hero with ranged attacks
-//    val p4AttackStrategy = new FireballAttack(enemy, targetEntity)
-//    behaviours.addBehaviour("4", new DoNothingOnCollision(), new FaceTarget(enemy, targetEntity), p4AttackStrategy)
+    val p4AttackStrategy = new FireballAttack(enemy, targetEntity)
+    behaviours.addBehaviour("4", new DoNothingOnCollision(), new FaceTarget(enemy, targetEntity), p4AttackStrategy)
 
     // add conditional transitions between behaviours
     behaviours.addTransition("1", "2", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
     behaviours.addTransition("1", "3", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
 
     behaviours.addTransition("2", "3", new RandomTruePredicate(0.5f))
-//    behaviours.addTransition("2", "4", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
+    behaviours.addTransition("2", "4", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
 
     behaviours.addTransition("3", "2", new RandomTruePredicate(0.5f))
-//    behaviours.addTransition("3", "4", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
+    behaviours.addTransition("3", "4", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
 
-//    behaviours.addTransition("4", "2", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
-//    behaviours.addTransition("4", "3", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
+    behaviours.addTransition("4", "2", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
+    behaviours.addTransition("4", "3", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
 
     enemy.setBehaviour(behaviours)
     enemy
@@ -349,9 +338,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                                  score: Int,
                                  entityId: EntityType): EnemyImpl = {
 
+    val spawnPoint = (position._1, position._2+size._2)
+
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
       EntityCollisionBit.Immobile | EntityCollisionBit.Sword | EntityCollisionBit.Arrow,
-      createPolygonalShape(size.PPM, true), position.PPM)
+      createPolygonalShape(size.PPM, true), spawnPoint.PPM)
 
     val heroEntity: Hero = this.level.getEntity(e => e.getType == EntityType.Hero).asInstanceOf[Hero]
 
@@ -514,14 +505,16 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     circularMobileEntity
   }
 
-  override def createFireballAttack(sourceEntity: LivingEntity, targetEntity: Entity): MobileEntity = {
-
-    val size = (10f, 10f)
+  override def createFireballAttack(sourceEntity: LivingEntity,
+                                    targetEntity: Entity,
+                                    size: (Float, Float) = (1f, 1f),
+                                    offset: (Float, Float) = (0f, 0f)): MobileEntity = {
 
     // compute bullet spawn point
-    val offset:Float = if (isEntityOnTheLeft(sourceEntity, targetEntity))
-      sourceEntity.getSize._1.PPM else -sourceEntity.getSize._1.PPM
-    val position = sourceEntity.getBody.getWorldCenter.add(offset, 0)
+    val attackXOffset:Float = if (sourceEntity.isFacingRight) offset._1.PPM else -offset._1.PPM
+    val attackYOffset:Float = offset._2.PPM
+    val position = (sourceEntity.getBody.getWorldCenter.x+attackXOffset,
+      sourceEntity.getBody.getWorldCenter.y+attackYOffset)
 
     // create a body inside the game world
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.EnemyAttack,
@@ -532,7 +525,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     // create an entity representing the bullet
     val attack: MobileEntity = new MobileEntityImpl(EntityType.AttackFireBall, entityBody,
       size.PPM, sourceEntity.getStatistics)
-    attack.setFacing(attack.isFacingRight)
+    attack.setFacing(isEntityOnTheRight(sourceEntity, targetEntity))
 
     // set entity behaviours
     attack.setCollisionStrategy(new ApplyDamageAndDestroyEntity(attack, (e:Entity) => e.isInstanceOf[Hero],
