@@ -7,6 +7,9 @@ import model.helpers.EntitiesUtilities._
 // TODO: replace with MovementStratey.DoNothingMovementStrategy
 class DoNotMove() extends MovementStrategy {
   override def apply(): Unit = { }
+
+  override def stopMovement(): Unit = { }
+
 }
 
 class FaceTarget(val sourceEntity: MobileEntity, val targetEntity: Entity) extends MovementStrategy {
@@ -22,6 +25,8 @@ class FaceTarget(val sourceEntity: MobileEntity, val targetEntity: Entity) exten
       this.sourceEntity.setFacing(facingRightCheck)
     }
   }
+
+  override def stopMovement(): Unit = { }
 }
 
 class PatrolPlatform(val sourceEntity: MobileEntity,
@@ -36,7 +41,7 @@ class PatrolPlatform(val sourceEntity: MobileEntity,
     val canMoveToTheRight: Boolean = !isPathObstructedOnTheRight(this.sourceEntity) && isFloorPresentOnTheRight(this.sourceEntity)
 
     if (!canMoveToTheLeft && !this.sourceEntity.isFacingRight || !canMoveToTheRight && this.sourceEntity.isFacingRight) {
-      this.stopMoving()
+      this.stopMovement()
       this.changeDirection()
     }
 
@@ -47,7 +52,7 @@ class PatrolPlatform(val sourceEntity: MobileEntity,
        this.sourceEntity.setState(State.Standing)
   }
 
-  protected def stopMoving(): Unit = {
+  override def stopMovement(): Unit = {
     this.sourceEntity.getBody.setLinearVelocity(0, this.sourceEntity.getBody.getLinearVelocity.y)
   }
 
@@ -96,7 +101,7 @@ class PatrolAndStop(override val sourceEntity:MobileEntity,
 
       // stop moving when the target entity is near
       if (isTargetNearbyCheck && !this.lastIsTargetNear) {
-        this.stopMoving()
+        this.stopMovement()
         this.sourceEntity.setState(State.Standing)
       } else if (!isTargetNearbyCheck) {
         super.apply()
@@ -164,4 +169,6 @@ class ChaseTarget(val sourceEntity:MobileEntity,
       this.sourceEntity.setVelocityX(maxMovementForce)
     }
   }
+
+  override def stopMovement(): Unit = { }
 }
