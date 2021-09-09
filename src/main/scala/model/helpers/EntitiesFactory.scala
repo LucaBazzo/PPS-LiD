@@ -307,7 +307,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
 
     // first behaviour - do nothing for some time
-    behaviours.addBehaviour("1", new DoNothingOnCollision(), new FaceTarget(enemy, targetEntity), new DoNotAttack())
+    behaviours.addBehaviour("1", new DoNothingOnCollision(), new DoNotMove(), new DoNotAttack())
 
     // second behaviour - attack hero if near
     val p2AttackStrategy = new WizardFirstAttack(enemy, targetEntity)
@@ -318,11 +318,13 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     behaviours.addBehaviour("3", new DoNothingOnCollision(), new ChaseTarget(enemy, targetEntity), p3AttackStrategy)
 
     // add conditional transitions between behaviours
-    behaviours.addTransition("1", "2", new TimePredicate(10000))
+    behaviours.addTransition("1", "2", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
 
     behaviours.addTransition("2", "3", new RandomTruePredicate(0.5f))
+    behaviours.addTransition("2", "1", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
 
     behaviours.addTransition("3", "2", new RandomTruePredicate(0.5f))
+    behaviours.addTransition("3", "1", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
 
     enemy.setBehaviour(behaviours)
     enemy

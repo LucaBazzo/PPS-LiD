@@ -5,6 +5,7 @@ import model.entities.{Entity, _}
 import model.helpers.EntitiesFactoryImpl.{createFireballAttack, createMeleeAttack}
 import model.helpers.EntitiesUtilities._
 
+// TODO: rimpiazzare con AttackStrategy.DoNothingAttackStrategy
 class DoNotAttack() extends AttackStrategy {
   override def apply(): Unit = { }
 
@@ -175,7 +176,5 @@ class WormAttack(override protected val sourceEntity: LivingEntity,
     createFireballAttack(this.sourceEntity, this.targetEntity)
   }
 
-  override def stopAttack(): Unit = {
-
-  }
+  override def stopAttack(): Unit = { }
 }

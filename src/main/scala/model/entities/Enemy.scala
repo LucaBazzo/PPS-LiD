@@ -4,8 +4,10 @@ import model.attack.AttackStrategy
 import model.collisions.CollisionStrategy
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
+import model.helpers.EntitiesUtilities
 import model.movement.MovementStrategy
 import model.{EntityBody, Score}
+import utils.ApplicationConstants.RANDOM
 
 import scala.util.Random
 
@@ -104,8 +106,11 @@ class EnemyBehaviourImpl(protected val sourceEntity:LivingEntity)
 
         val pickedTransition = activeTransitions(randomGenerator.nextInt(activeTransitions.length))
 
-        this.resetBehaviour()
+        this.currentBehaviour.get._3.stopMovement()
+        this.currentBehaviour.get._4.stopAttack()
+
         this.currentBehaviour = Option(this.behaviours.find(b => b._1.equals(pickedTransition._2)).get)
+        this.resetBehaviour()
       }
       this.currentBehaviour.get._3.apply()
       this.currentBehaviour.get._4.apply()
@@ -122,7 +127,7 @@ class EnemyBehaviourImpl(protected val sourceEntity:LivingEntity)
   override def getMovementStrategy: MovementStrategy = this.currentBehaviour.get._3
 }
 
-// TODO: convertire in funzioni higher order
+// TODO: convertire in funzioni higher order?
 
 trait Predicate {
   def apply(): Boolean
@@ -166,16 +171,55 @@ class CompletedAttackPredicate(attackStrategy: AttackStrategy,
   }
 }
 
+abstract class DistancePredicate(sourceEntity: Entity,
+                                 targetEntity: Entity,
+                                 distance: Float) extends Predicate {
+
+  private var lastCheckResult: Boolean = false
+  private var lastCheckTime: Long = 0
+  private val TIMER:Long = 1000
+
+  override def apply(): Boolean = {
+    if (System.currentTimeMillis() - this.lastCheckTime > TIMER) {
+      this.lastCheckTime = System.currentTimeMillis()
+      this.lastCheckResult = this.distanceCheck()
+    }
+    this.lastCheckResult
+  }
+
+  override def reset(): Unit = {
+    this.lastCheckTime = 0
+  }
+
+  def distanceCheck(): Boolean
+}
+
+class TargetIsNearPredicate(sourceEntity: Entity,
+                   targetEntity:Entity,
+                   distance: Float) extends DistancePredicate(sourceEntity, targetEntity, distance) {
+
+  override def distanceCheck(): Boolean =
+    EntitiesUtilities.getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.distance
+}
+
+
+class TargetIsFarPredicate(sourceEntity: Entity,
+                  targetEntity:Entity,
+                  distance: Float) extends DistancePredicate(sourceEntity, targetEntity, distance) {
+
+  override def distanceCheck(): Boolean =
+    EntitiesUtilities.getEntitiesDistance(this.sourceEntity, this.targetEntity) > this.distance
+}
+
 class RandomTruePredicate(val percentage: Float) extends Predicate {
-  private var lastCheckTime:Long = 0
+  private var lastCheckTime:Long = System.currentTimeMillis()
   private val checkPeriod: Long = 3000
-  private val randomGenerator: Random = new Random()
   private var response: Boolean = false
 
   override def apply(): Boolean = {
     if (System.currentTimeMillis() - this.lastCheckTime > this.checkPeriod) {
       this.lastCheckTime = System.currentTimeMillis()
-      randomGenerator.nextFloat() match {
+      RANDOM.nextFloat() match {
         case x if x < this.percentage => this.response = true
         case _ => this.response = false
       }
@@ -184,8 +228,8 @@ class RandomTruePredicate(val percentage: Float) extends Predicate {
   }
 
   override def reset(): Unit = {
-    this.lastCheckTime = 0
     this.response = false
+    this.lastCheckTime = System.currentTimeMillis()
   }
 }
 
@@ -195,22 +239,12 @@ abstract class AggregatedPredicate(val predicates: Seq[Predicate]) extends Predi
 
 class AnyPredicate(override val predicates: Seq[Predicate]) extends AggregatedPredicate(predicates) {
   override def apply(): Boolean = {
-    var output:Boolean = false
-    for (predicate <- predicates) {
-      if (predicate.apply()) {
-        output = true
-      }
-    }
-    output
+    predicates.map(p => p.apply()).count(e => e) != 0
   }
 }
 
 class AllPredicate(override val predicates: Seq[Predicate]) extends AggregatedPredicate(predicates) {
   override def apply(): Boolean = {
-    var count:Int = 0
-    for (predicate <- predicates) {
-      if (predicate.apply()) count += 1
-    }
-    count == predicates.size
+    predicates.map(p => p.apply()).count(e => e) == predicates.size
   }
 }
