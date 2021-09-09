@@ -1,0 +1,12 @@
+
+bigLadder.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+bigLadder
+  rotate: false
+  xy: 1, 1
+  size: 33, 212
+  orig: 33, 212
+  offset: 0, 0
+  index: -1

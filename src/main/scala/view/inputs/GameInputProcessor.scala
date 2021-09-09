@@ -9,9 +9,10 @@ class GameInputProcessor(private val observerManager: ObserverManager) extends I
   override def keyDown(i: Int): Boolean = {
     i match {
       case Keys.ESCAPE => Gdx.app.exit()
-      case Keys.W | Keys.SPACE | Keys.UP => this.observerManager.notifyEvent(GameEvent.Jump)
+      case Keys.W | Keys.SPACE | Keys.UP => this.observerManager.notifyEvent(GameEvent.Up)
       case Keys.E => this.observerManager.notifyEvent(GameEvent.Slide)
-      case Keys.S | Keys.DOWN => this.observerManager.notifyEvent(GameEvent.Crouch)
+      case Keys.S | Keys.DOWN => this.observerManager.notifyEvent(GameEvent.Down)
+      case Keys.F | Keys.ENTER => this.observerManager.notifyEvent(GameEvent.Interaction)
       case _ => return false
     }
     true
@@ -19,7 +20,8 @@ class GameInputProcessor(private val observerManager: ObserverManager) extends I
 
   override def keyUp(i: Int): Boolean = {
     i match {
-      case Keys.S | Keys.DOWN => this.observerManager.notifyEvent(GameEvent.StopCrouch)
+      case Keys.S | Keys.DOWN => this.observerManager.notifyEvent(GameEvent.DownReleased)
+      case Keys.W | Keys.UP => this.observerManager.notifyEvent(GameEvent.UpReleased)
       case _ => return false
     }
     true
@@ -30,6 +32,7 @@ class GameInputProcessor(private val observerManager: ObserverManager) extends I
   override def touchDown(x: Int, y: Int, pointer: Int, button: Int): Boolean = {
     button match {
       case Buttons.LEFT => this.observerManager.notifyEvent(GameEvent.Attack)
+      case Buttons.RIGHT => this.observerManager.notifyEvent(GameEvent.BowAttack)
       case _ => return false
     }
     true
