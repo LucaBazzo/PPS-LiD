@@ -3,8 +3,9 @@ package model
 import com.badlogic.gdx.Gdx
 import controller.GameEvent
 import controller.GameEvent.GameEvent
+import model.collisions.EntityCollisionBit
 import model.entities.{Hero, LivingEntity}
-import model.helpers.EntitiesSetter
+import model.helpers.{EntitiesFactoryImpl, EntitiesSetter}
 import view.screens.helpers.TileMapHelper
 
 trait Model {
@@ -26,6 +27,13 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
   override def update(actions: List[GameEvent]): Unit = {
     for (action <- actions) {
       if(action.equals(GameEvent.SetMap)) {
+
+//        EntitiesFactoryImpl.createImmobileEntity(
+//          size=(200, 10),
+//          position=(0, 10000),
+//          collisions = (EntityCollisionBit.Hero | EntityCollisionBit.Enemy).toShort
+//        )
+
 
         Gdx.app.postRunnable(
           () => TileMapHelper.setWorld(this.rooms)

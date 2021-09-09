@@ -1,7 +1,6 @@
 package model
 
 import _root_.utils.ApplicationConstants._
-import _root_.utils.HeroConstants
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent
@@ -49,7 +48,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var isWorldSetted: Boolean = false
 
   // TODO: to be removed
-//  EntitiesFactoryImpl.createWizardBossEnemy((HeroConstants.HERO_OFFSET._1+110, HeroConstants.HERO_OFFSET._2))
+//  EntitiesFactoryImpl.createSlimeEnemy((HeroConstants.HERO_OFFSET._1+110, HeroConstants.HERO_OFFSET._2))
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)

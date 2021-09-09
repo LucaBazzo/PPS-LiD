@@ -73,7 +73,7 @@ object TileMapHelper {
           case "water" => spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position,size))
           case "lava" => spawnEntity(() => EntitiesFactoryImpl.createLavaPool(position, size))
           case "enemy" =>
-            if(mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME) && false) spawnEntity(() => EntitiesFactoryImpl.createWizardBossEnemy(position))
+            if(mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME)) spawnEntity(() => EntitiesFactoryImpl.createWizardBossEnemy(position))
             else spawnEntity(() => EntitiesFactoryImpl.createEnemies(size, position))
           case "portal" => //TODO spawn portal to new world (inactive)
           case _ => println("not supported layer: " + layer.getName)
