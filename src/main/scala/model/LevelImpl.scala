@@ -48,6 +48,9 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private var isWorldSetted: Boolean = false
 
+  // TODO: to be removed
+//  EntitiesFactoryImpl.createWizardBossEnemy((HeroConstants.HERO_OFFSET._1+110, HeroConstants.HERO_OFFSET._2))
+
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)
   this.entitiesSetter.setScore(0)
@@ -97,17 +100,9 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     this.entitiesSetter.setEntities(this.entitiesList)
 
     // update score if the removed entity's type is Enemy or Item
-    if (entity.isInstanceOf[Enemy] || entity.isInstanceOf[Item]) {
+    if (entity.isInstanceOf[EnemyImpl] || entity.isInstanceOf[Item]) {
       this.score += entity.asInstanceOf[Score].getScore
       this.entitiesSetter.setScore(this.score)
-    }
-
-    if (entity.isInstanceOf[Enemy]) {
-      // TODO: nomralizzare la creazione e rimozione di tutte le entity prima del word.step in update
-      // TODO: rifattorizzare .MPP (enemy position e in PPM mentre la createItem vuole valori non scalati)
-      EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
-        position=(entity.getPosition._1, entity.getPosition._2).MPP,
-        collisions = EntityCollisionBit.Hero)
     }
   }
 
