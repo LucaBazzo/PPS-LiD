@@ -52,6 +52,8 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
       "reaper", 211, 130, entity.getSize._1*500, entity.getSize._2*250, 1)
     case EntityType.AttackFireBall => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/fireball.pack",
       "fireball", 46, 46, 46, 46, 1.5f)
+    case EntityType.AttackEnergyBall => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/energy_ball.pack",
+      "energy_ball", 128, 128, 128, 128, 0.5f)
     case EntityType.AttackSmite => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/reaper.pack",
       "reaper", 211, 130, entity.getSize._1, entity.getSize._2, 100)
     case EntityType.ArmorItem =>

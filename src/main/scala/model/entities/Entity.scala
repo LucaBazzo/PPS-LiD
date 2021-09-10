@@ -27,7 +27,7 @@ object EntityType extends Enumeration {
 
       EnemySkeleton, EnemySlime, EnemyWorm, EnemyBossWizard, EnemyBossReaper, // EnemyGhost
       Platform, Door, Ladder, Water, Lava, Chest,
-      AttackFireBall, AttackSmite, AttackArrow = Value
+      AttackFireBall, AttackEnergyBall, AttackSmite, AttackArrow = Value
 }
 
 trait Entity {

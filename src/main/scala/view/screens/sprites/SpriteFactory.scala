@@ -70,6 +70,7 @@ class SpriteFactoryImpl extends SpriteFactory {
       case EntityType.EnemyBossWizard => this.defineEnemyWizardAnimation(sprite)
       case EntityType.EnemyBossReaper => this.defineEnemyReaperAnimation(sprite)
       case EntityType.AttackFireBall => this.defineAttackFireballAnimation(sprite)
+      case EntityType.AttackEnergyBall => this.defineAttackEnergyBallAnimation(sprite)
       case EntityType.AttackSmite => this.defineAttackFireballAnimation(sprite)
       case _ => null
     }
@@ -207,8 +208,15 @@ class SpriteFactoryImpl extends SpriteFactory {
   }
 
   // TODO: provare ad inserire anche l'animazione di esplosione
-  private def defineAttackFireballAnimation(sprite: EntitySprite):Unit =
-    sprite.addAnimation(State.Standing, this.createSpriteAnimation(sprite, 1, 0, 5,0.15f), loop = true)
+  private def defineAttackFireballAnimation(sprite: EntitySprite):Unit = {
+    sprite.addAnimation(State.Standing, this.createSpriteAnimation(sprite, 1, 0, 5, 0.15f), loop = true)
+//    sprite.addAnimation(State.Dying, this.createSpriteAnimation(sprite, 0, 0, 6, 0.15f))
+  }
+
+  private def defineAttackEnergyBallAnimation(sprite: EntitySprite):Unit = {
+    sprite.addAnimation(State.Standing, this.createSpriteAnimationFromTwoRows(sprite, 1, 0, 6, 2, 0, 1, 0.15f), loop = true)
+//    sprite.addAnimation(State.Dying, this.createSpriteAnimation(sprite, 0, 0, 6, 0.15f))
+  }
 
   private def defineAttackSmiteAnimation(sprite: EntitySprite):Unit =
     sprite.addAnimation(State.Standing,
