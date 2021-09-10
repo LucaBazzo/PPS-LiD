@@ -21,7 +21,7 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
 
   private val level: Level = new LevelImpl(entitiesSetter)
   EntitiesFactoryImpl.setModel(this)
-  private var levelNumber: Int = 100
+  private var levelNumber: Int = 1
 
   override def update(actions: List[GameEvent]): Unit = {
     for (action <- actions) {

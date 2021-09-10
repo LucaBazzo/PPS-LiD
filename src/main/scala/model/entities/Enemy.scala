@@ -35,6 +35,9 @@ class EnemyImpl(private val entityType: EntityType,
     super.update()
     if (state != State.Dying && enemyBehaviour.isDefined) {
       enemyBehaviour.get.apply()
+
+      this.movementStrategy.apply()
+      this.attackStrategy.apply()
     }
   }
 
@@ -139,13 +142,11 @@ class EnemyBehaviourImpl(protected val sourceEntity:LivingEntity)
         this.sourceEntity.setMovementStrategy(this.currentBehaviour.get._3)
         this.sourceEntity.setAttackStrategy(this.currentBehaviour.get._4)
       }
-      this.currentBehaviour.get._3.apply()
-      this.currentBehaviour.get._4.apply()
     }
   }
 
   protected def resetBehaviour(): Unit = {
-    this.transitions.filter(t => t._1 == this.currentBehaviour.get._1).foreach(t => t._3.reset())
+    this.transitions.filter(t => t._1.equals(this.currentBehaviour.get._1)).foreach(t => t._3.reset())
     this.currentBehaviour.get._3.stopMovement()
     this.currentBehaviour.get._4.stopAttack()
   }
@@ -199,9 +200,7 @@ class CompletedAttackPredicate(attackStrategy: AttackStrategy,
   }
 }
 
-abstract class DistancePredicate(sourceEntity: Entity,
-                                 targetEntity: Entity,
-                                 distance: Float) extends Predicate {
+abstract class DistancePredicate() extends Predicate {
 
   private var lastCheckResult: Boolean = false
   private var lastCheckTime: Long = 0
@@ -224,7 +223,7 @@ abstract class DistancePredicate(sourceEntity: Entity,
 
 class TargetIsNearPredicate(sourceEntity: Entity,
                    targetEntity:Entity,
-                   distance: Float) extends DistancePredicate(sourceEntity, targetEntity, distance) {
+                   distance: Float) extends DistancePredicate() {
 
   override def distanceCheck(): Boolean =
     EntitiesUtilities.getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.distance
@@ -233,31 +232,34 @@ class TargetIsNearPredicate(sourceEntity: Entity,
 
 class TargetIsFarPredicate(sourceEntity: Entity,
                   targetEntity:Entity,
-                  distance: Float) extends DistancePredicate(sourceEntity, targetEntity, distance) {
+                  distance: Float) extends DistancePredicate() {
 
   override def distanceCheck(): Boolean =
     EntitiesUtilities.getEntitiesDistance(this.sourceEntity, this.targetEntity) > this.distance
 }
 
 class RandomTruePredicate(val percentage: Float) extends Predicate {
-  private var lastCheckTime:Long = System.currentTimeMillis()
+  private var lastCheckTime:Long = 0
   private val checkPeriod: Long = 3000
   private var response: Boolean = false
 
   override def apply(): Boolean = {
-    if (System.currentTimeMillis() - this.lastCheckTime > this.checkPeriod) {
-      this.lastCheckTime = System.currentTimeMillis()
+    if (this.lastCheckTime == 0) this.lastCheckTime = System.currentTimeMillis()
+
+    val now:Long = System.currentTimeMillis()
+    if (now - this.lastCheckTime > this.checkPeriod) {
+      this.lastCheckTime = now
       RANDOM.nextFloat() match {
         case x if x < this.percentage => this.response = true
         case _ => this.response = false
       }
     }
-    response
+    this.response
   }
 
   override def reset(): Unit = {
     this.response = false
-    this.lastCheckTime = System.currentTimeMillis()
+    this.lastCheckTime = 0
   }
 }
 

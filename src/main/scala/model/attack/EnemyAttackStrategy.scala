@@ -181,6 +181,10 @@ class WizardEnergyBallAttack(override protected val sourceEntity: LivingEntity,
   }
 
   override def stopAttack(): Unit = { }
+
+  override protected def canAttack: Boolean = this.isAttackFinished &&
+    System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
+    getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
 }
 
 
@@ -196,4 +200,5 @@ class WormFireballAttack(override protected val sourceEntity: LivingEntity,
   }
 
   override def stopAttack(): Unit = { }
+
 }

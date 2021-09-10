@@ -126,7 +126,6 @@ class ChaseTarget(val sourceEntity:MobileEntity,
   protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
 
   protected var isTargetLeft: Boolean = false
-  private var lastMovementCheck: Boolean = false
 
   override def apply(): Unit = {
 
@@ -142,16 +141,15 @@ class ChaseTarget(val sourceEntity:MobileEntity,
         !canMoveToTheRight && !isTargetLeft ||
         !isTargetVisible ||
         getEntitiesDistance(this.sourceEntity, this.targetEntity) < this.visionDistance) {
-        if (this.lastMovementCheck)
-          this.sourceEntity.setState(State.Standing)
-        this.lastMovementCheck = false
+        this.sourceEntity.setState(State.Standing)
+        this.stopMovement()
       } else {
+        this.sourceEntity.setState(State.Running)
         this.move()
-        if (!this.lastMovementCheck)
-          this.sourceEntity.setState(State.Running)
-        this.lastMovementCheck = true
       }
       this.sourceEntity.setFacing(right = !isTargetLeft)
+    } else {
+      this.stopMovement()
     }
   }
 
@@ -171,5 +169,5 @@ class ChaseTarget(val sourceEntity:MobileEntity,
     }
   }
 
-  override def stopMovement(): Unit = { }
+  override def stopMovement(): Unit = this.sourceEntity.getBody.setLinearVelocity(0, this.sourceEntity.getBody.getLinearVelocity.y)
 }

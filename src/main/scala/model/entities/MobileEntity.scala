@@ -49,7 +49,7 @@ class MobileEntityImpl(private val entityType: EntityType,
   protected var movementStrategy: MovementStrategy = new DoNotMove()
 
   override def update(): Unit = {
-
+    // TODO: chiedere a luca perchè non si può fare la move qui
   }
 
   override def setMovementStrategy(strategy: MovementStrategy): Unit = this.movementStrategy = strategy
