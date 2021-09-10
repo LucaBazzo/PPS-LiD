@@ -11,6 +11,7 @@ class LostInDungeons(private val entitiesGetter: EntitiesGetter,
 
   override def create(): Unit = {
     this.setScreen(new MainMenuScreen(observerManager))
+    //this.setScreen(new GameOverScreen(observerManager))
     //this.setScreen(new GameScreen(entitiesGetter, observerManager, rooms))
   }
 

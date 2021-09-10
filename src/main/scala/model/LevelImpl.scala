@@ -4,7 +4,6 @@ import _root_.utils.ApplicationConstants._
 import _root_.utils.HeroConstants
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
-import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionManager, EntityCollisionBit}
@@ -28,9 +27,12 @@ trait Level {
 
   def getWorld: World
 
+  def newLevel(): Unit
+
+  def dispose(): Unit
 }
 
-class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
+class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSetter) extends Level {
 
   private var score: Int = 0
 
@@ -42,12 +44,12 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private var entitiesList: List[Entity] = List.empty
 
-  private val hero: Hero = entitiesFactory.createHeroEntity()
+  private val hero: Hero = entitiesFactory.createHeroEntity(this.entitiesSetter.asInstanceOf[EntitiesGetter].getHeroStatistics)
+
   private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero, entitiesSetter)
 
   private val door: Entity = entitiesFactory.createDoor((10, 30), (390, 200))
 
-  private var isWorldSetted: Boolean = false
   private var platform: Entity = entitiesFactory.createPlatform((380, 200), (60,2))
   private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
 
@@ -64,33 +66,18 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   this.world.setContactListener(new CollisionManager(this.entitiesSetter.asInstanceOf[EntitiesGetter]))
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
-    if(actions.nonEmpty) {
-      for(command <- actions){
-        if(command.equals(GameEvent.SetMap)) {
-          this.isWorldSetted = true
-        } //else this.hero.notifyCommand(command)
-      }
-    }
 
-    if(this.isWorldSetted){
-      if(actions.nonEmpty) {
-        for(command <- actions){
-          if(!command.equals(GameEvent.SetMap)) {
-            this.hero.notifyCommand(command)
-          }
-        }
-      }
+    for(command <- actions) this.hero.notifyCommand(command)
 
-      this.worldStep()
+    this.worldStep()
 
-      EntitiesFactoryImpl.createPendingEntities()
+    EntitiesFactoryImpl.createPendingEntities()
 
-      this.entitiesList.foreach((entity: Entity) => entity.update())
+    this.entitiesList.foreach((entity: Entity) => entity.update())
 
-      this.entitiesFactory.destroyBodies()
+    this.entitiesFactory.destroyBodies()
 
-      this.entitiesFactory.applyEntityCollisionChanges()
-    }
+    this.entitiesFactory.applyEntityCollisionChanges()
   }
 
   override def addEntity(entity: Entity): Unit = {
@@ -140,4 +127,11 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     }
   }
 
+  override def newLevel(): Unit = {
+    this.entitiesSetter.setHeroStatistics(this.hero.getStatistics)
+    println("New level", this.hero.getStatistics)
+    this.model.requestNewLevel()
+  }
+
+  override def dispose(): Unit = this.world.dispose()
 }

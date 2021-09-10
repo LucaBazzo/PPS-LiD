@@ -6,7 +6,7 @@ import model._
 import model.helpers.EntitiesContainerMonitor
 import view._
 
-import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
+import java.util.concurrent.{ExecutorService, Executors, ScheduledExecutorService, TimeUnit}
 import scala.util.Random
 
 /** Handles almost every aspect that allows the game to run such as starting and
@@ -16,7 +16,6 @@ import scala.util.Random
 trait Controller {
   def stopExecutorService()
   def gameOver()
-  def newLevel()
 }
 
 /** This class represent the Controller of the all game.
@@ -42,14 +41,19 @@ class ControllerImpl extends Controller with Observer {
   override def handleEvent(event: GameEvent): Unit = event match {
     case GameEvent.StartGame => this.view.startGame()
     case GameEvent.CloseApplication => this.terminateApplication()
+    case GameEvent.ReturnToMenu => this.view.returnToMenu()
     case _ => this.gameLoop.addAction(event)
   }
 
   override def gameOver(): Unit = {
-    this.terminateApplication()
+    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+    val task: Runnable = () => {
+      Thread.sleep(2000)
+      this.stopExecutorService()
+      this.view.endGame()
+    }
+    executorService.submit(task)
   }
-
-  override def newLevel(): Unit = ???
 
   override def stopExecutorService(): Unit = this.executorService.shutdownNow()
 

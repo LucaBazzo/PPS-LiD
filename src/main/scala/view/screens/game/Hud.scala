@@ -169,6 +169,14 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
     }
   }
 
+  def setLevelNumber(levelNumber: Int): Unit = {
+    var levelText = "LEVEL "
+    if(levelNumber < 10) levelText += "0"
+    levelText += levelNumber
+
+    this.levelLabel.setText(levelText)
+  }
+
   private def addItemToTable(path: String): Unit = {
     val itemImage = new Image(new Texture(path))
     itemImage.setScale(0.75f, 0.75f)

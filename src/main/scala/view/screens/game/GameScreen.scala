@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
 import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Entity, EntityType, Hero, LivingEntity, Statistic}
+import model.entities._
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
@@ -48,7 +48,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   val executorService: ExecutorService = Executors.newSingleThreadExecutor()
   val task: Runnable = () => {
-    Thread.sleep(5000)
+    Thread.sleep(2000)
     this.observerManager.notifyEvent(GameEvent.SetMap)
   }
   executorService.submit(task)
@@ -81,14 +81,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     super.render(delta)
 
-    // TODO: Convertire Option[List[Entity]] in List[Entity] o Option[Entity]
-    val heroEntity: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Hero])
-    if(heroEntity.nonEmpty) {
-      val hero: Hero = heroEntity.get.head.asInstanceOf[Hero]
+    this.hud.setLevelNumber(this.entitiesGetter.getLevelNumber)
+
+    if(entitiesGetter.getHero.nonEmpty) {
+      val hero: Hero = entitiesGetter.getHero.get
       this.camera.position.x = hero.getPosition._1
       this.camera.position.y = hero.getPosition._2
-//      for (item <- hero.getItemsPicked)
-//        this.hud.addNewItem(item)
       this.hud.changeHealth(hero.getStatistics(Statistic.CurrentHealth), hero.getStatistics(Statistic.Health))
     }
 

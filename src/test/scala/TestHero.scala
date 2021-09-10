@@ -11,8 +11,9 @@ class TestHero extends AnyFlatSpec{
   private var hero: Hero = _
 
   private def initialize(): Unit = {
-    new LevelImpl(new EntitiesContainerMonitor)
-    hero = EntitiesFactoryImpl.createHeroEntity()
+    //TODO null temporaneo
+    new LevelImpl(null, new EntitiesContainerMonitor)
+    hero = EntitiesFactoryImpl.createHeroEntity(Option.empty)
   }
 
 

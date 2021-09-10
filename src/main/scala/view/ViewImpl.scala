@@ -7,14 +7,20 @@ import main.LostInDungeons
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants.TITLE
 import view.screens.game.GameScreen
+import view.screens.menu.{GameOverScreen, MainMenuScreen}
 
 import java.util.concurrent.{ExecutorService, Executors}
 
 trait View {
   def startGame()
+
   def endGame()
+
   def initialize()
+
   def terminate()
+
+  def returnToMenu()
 }
 
 class ViewImpl(private val entitiesGetter: EntitiesGetter,
@@ -36,7 +42,7 @@ class ViewImpl(private val entitiesGetter: EntitiesGetter,
     Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager, this.rooms)))
   }
 
-  override def endGame(): Unit = ???
+  override def endGame(): Unit = Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameOverScreen(this.observerManager)))
 
   override def initialize(): Unit = ???
 
@@ -44,4 +50,6 @@ class ViewImpl(private val entitiesGetter: EntitiesGetter,
     this.executorService.shutdownNow()
     Gdx.app.exit()
   }
+
+  override def returnToMenu(): Unit = Gdx.app.postRunnable(() => this.screenSetter.setScreen(new MainMenuScreen(this.observerManager)))
 }

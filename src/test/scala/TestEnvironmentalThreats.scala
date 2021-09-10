@@ -7,7 +7,8 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
 
   "The Hero" should "be slowed while inside a water pool" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+    //TODO null temporaneo
+    val level: Level = new LevelImpl(null, monitor)
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Water).get.head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).get.head.asInstanceOf[Hero]
     val prevMoveSpeed: Float = hero.getStatistic(Statistic.MovementSpeed).get
@@ -18,7 +19,8 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
 
   "The Hero" should "regain its previous movement speed after exiting a water pool" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+    //TODO null temporaneo
+    val level: Level = new LevelImpl(null, monitor)
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Water).get.head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).get.head.asInstanceOf[Hero]
     val prevMoveSpeed: Float = hero.getStatistic(Statistic.MovementSpeed).get
@@ -30,7 +32,8 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
 
   "The Hero" should "periodically suffer damage while inside a lava pool" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+    //TODO null temporaneo
+    val level: Level = new LevelImpl(null, monitor)
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Lava).get.head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).get.head.asInstanceOf[Hero]
     val prevHP: Float = hero.getStatistic(Statistic.CurrentHealth).get
@@ -46,7 +49,8 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
 
   "The Hero" must "stop suffering damage after exiting a lava pool" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+    //TODO null temporaneo
+    val level: Level = new LevelImpl(null, monitor)
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Lava).get.head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).get.head.asInstanceOf[Hero]
     val prevHP: Float = hero.getStatistic(Statistic.CurrentHealth).get

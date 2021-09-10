@@ -1,14 +1,18 @@
 package model.helpers
 
 import com.badlogic.gdx.physics.box2d.World
-import model.entities.Entity
+import model.entities.Statistic.Statistic
+import model.entities.{Entity, Hero}
 
 trait EntitiesGetter {
 
   def getEntities(predicate: Entity => Boolean): Option[List[Entity]]
+  def getHero: Option[Hero]
   def getWorld: World
   def getScore: Int
   def getMessage: Option[String]
+  def getHeroStatistics: Option[Map[Statistic, Float]]
+  def getLevelNumber: Int
 }
 
 trait EntitiesSetter {
@@ -17,6 +21,8 @@ trait EntitiesSetter {
   def setWorld(world: World): Unit
   def setScore(score: Int): Unit
   def addMessage(mess: String): Unit
+  def setHeroStatistics(statistics: Map[Statistic, Float])
+  def setLevelNumber(number: Int): Unit
 }
 
 class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
@@ -24,7 +30,11 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
   private var world: World = _
   private var messages: List[String] = List.empty
   private var entities: List[Entity] = List.empty
+
+  private var levelNumber = 0
   private var score: Int = 0
+
+  private var heroStatistics: Option[Map[Statistic, Float]] = Option.empty
 
   override def getEntities(predicate: Entity => Boolean): Option[List[Entity]] = synchronized {
     Option.apply(this.entities.filter(predicate))
@@ -60,4 +70,18 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
   }
 
   override def addMessage(mess: String): Unit = this.messages = mess :: this.messages
+
+  override def getHero: Option[Hero] = {
+    if(this.entities.exists(e => e.isInstanceOf[Hero]))
+      return Option.apply(this.entities.filter(e => e.isInstanceOf[Hero]).head.asInstanceOf[Hero])
+    Option.empty
+  }
+
+  override def getHeroStatistics: Option[Map[Statistic, Float]] = this.heroStatistics
+
+  override def setHeroStatistics(statistics: Map[Statistic, Float]): Unit = this.heroStatistics = Option.apply(statistics)
+
+  override def setLevelNumber(levelNumber: Int): Unit = this.levelNumber = levelNumber
+
+  override def getLevelNumber: Int = this.levelNumber
 }

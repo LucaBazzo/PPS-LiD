@@ -3,8 +3,7 @@ package model
 import com.badlogic.gdx.Gdx
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.entities.{Hero, LivingEntity}
-import model.helpers.EntitiesSetter
+import model.helpers.{EntitiesGetter, EntitiesSetter}
 import view.screens.helpers.TileMapHelper
 
 trait Model {
@@ -14,29 +13,60 @@ trait Model {
   def getCurrentLevelNumber: Int
 
   def isGameOver: Boolean
+
+  def requestNewLevel(): Unit
 }
 
 class ModelImpl(private val entitiesSetter: EntitiesSetter,
                 private  val rooms: Array[String]) extends Model {
 
-  private val level: Level = new LevelImpl(entitiesSetter)
+  private var level: Level = new LevelImpl(this, entitiesSetter)
 
   private var levelNumber: Int = 1
+  private var isLevelActive: Boolean = false
+  private var requestedNewLevel: Boolean = false
+
+  this.entitiesSetter.setLevelNumber(this.levelNumber)
 
   override def update(actions: List[GameEvent]): Unit = {
-    for (action <- actions) {
-      if(action.equals(GameEvent.SetMap)) {
+    if(this.requestedNewLevel)
+      this.newLevel()
 
-        Gdx.app.postRunnable(
-          () => TileMapHelper.setWorld(this.level, this.rooms)
-        )
-      }
-    }
+    if(actions.exists(g => g equals GameEvent.SetMap))
+      this.setWorld()
 
-    this.level.updateEntities(actions)
+    //TODO scegliere un altro metodo invece della filter
+    if(this.isLevelActive)
+      this.level.updateEntities(actions.filterNot(g => g equals GameEvent.SetMap))
   }
 
-  override def isGameOver: Boolean = this.level.getEntity(e => e.isInstanceOf[Hero]).asInstanceOf[LivingEntity].getLife == 0
+  override def isGameOver: Boolean = {
+    if(this.entitiesSetter.asInstanceOf[EntitiesGetter].getHero.nonEmpty)
+      return this.entitiesSetter.asInstanceOf[EntitiesGetter].getHero.get.isDead
+    false
+  }
+
 
   override def getCurrentLevelNumber: Int = this.levelNumber
+
+  override def requestNewLevel(): Unit = this.requestedNewLevel = true
+
+  private def newLevel(): Unit = {
+    this.isLevelActive = false
+    this.requestedNewLevel = false
+
+    this.entitiesSetter.setEntities(List.empty)
+    this.level.dispose()
+
+    this.levelNumber += 1
+    this.entitiesSetter.setLevelNumber(this.levelNumber)
+    this.level = new LevelImpl(this, entitiesSetter)
+
+    this.setWorld()
+  }
+
+  private def setWorld(): Unit = {
+    Gdx.app.postRunnable(() => TileMapHelper.setWorld(this.level, this.rooms))
+    this.isLevelActive = true
+  }
 }

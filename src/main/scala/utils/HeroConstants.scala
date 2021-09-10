@@ -1,8 +1,17 @@
 package utils
 
 import model.collisions.ImplicitConversions._
+import model.entities.Statistic
+import model.entities.Statistic.Statistic
 
 object HeroConstants {
+
+  val HERO_STATISTICS_DEFAULT: Map[Statistic, Float] = Map(
+    Statistic.Health -> 150,
+    Statistic.CurrentHealth -> 150,
+    Statistic.Strength -> 2000,
+    Statistic.MovementSpeed -> 1,
+    Statistic.Defence -> 0)
 
   val HERO_SIZE: (Float, Float) = (8.5f, 14.9f)
   val HERO_SIZE_SMALL: (Float, Float) = (8.5f, 6f)

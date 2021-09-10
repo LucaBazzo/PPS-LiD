@@ -77,7 +77,10 @@ object GUIFactory extends GUIFactory {
     val buttonStyle: TextButtonStyle = Objects.requireNonNull(style)
     buttonStyle.fontColor = Color.BLACK
     val button: TextButton = new TextButton(Objects.requireNonNull(text), buttonStyle)
-    button.pad(DISTANCE_FROM_TD,DISTANCE_FROM_LR,DISTANCE_FROM_TD,DISTANCE_FROM_LR)
+    if(text == "No") {
+      button.pad(DISTANCE_FROM_TD,DISTANCE_FROM_LR + 5,DISTANCE_FROM_TD,DISTANCE_FROM_LR + 5)
+    } else
+      button.pad(DISTANCE_FROM_TD,DISTANCE_FROM_LR,DISTANCE_FROM_TD,DISTANCE_FROM_LR)
     button
   }
 }

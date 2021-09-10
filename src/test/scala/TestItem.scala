@@ -14,14 +14,16 @@ class TestItem extends AnyFlatSpec {
 
   "A Level" must "start with an Item from level 1 pool" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+    //TODO null temporaneo
+    val level: Level = new LevelImpl(null, monitor)
     val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
     assert(LEVEL_1_ITEMS.contains(item.getEnumVal))
   }
 
   "In a Level" should "be able to spawn items from every pool" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+    //TODO null temporaneo
+    val level: Level = new LevelImpl(null, monitor)
     level.spawnItem(ItemPools.Level_2)
     val item2: Item = monitor.getEntities(x => x.isInstanceOf[Item]
       && LEVEL_2_ITEMS.contains(x.asInstanceOf[Item].getEnumVal)).get.head.asInstanceOf[Item]
@@ -37,7 +39,8 @@ class TestItem extends AnyFlatSpec {
 
   "An Item" should "disappear when picked up" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+    //TODO null temporaneo
+    val level: Level = new LevelImpl(null, monitor)
     level.spawnItem(ItemPools.Level_1)
     for(item <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
       item.asInstanceOf[Item].collect()
@@ -49,7 +52,8 @@ class TestItem extends AnyFlatSpec {
 
   "An Item" should "grant stats when picked up" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+    //TODO null temporaneo
+    val level: Level = new LevelImpl(null, monitor)
     level.spawnItem(ItemPools.Level_1)
     val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
     val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
@@ -62,7 +66,8 @@ class TestItem extends AnyFlatSpec {
 
   "An item pool (excluding keys and enemy drops)" should "never give the same item twice unless it has exhausted all its items" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+    //TODO null temporaneo
+    val level: Level = new LevelImpl(null, monitor)
     var itemList1: List[Items] = List()
     var itemList2: List[Items] = List()
     var itemList3: List[Items] = List()
@@ -98,7 +103,8 @@ class TestItem extends AnyFlatSpec {
 
   "An exhausted item pool" should "spawn only cake" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+    //TODO null temporaneo
+    val level: Level = new LevelImpl(null, monitor)
     var itemList1: List[Items] = List()
     var itemList2: List[Items] = List()
     var itemList3: List[Items] = List()
