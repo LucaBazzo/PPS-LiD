@@ -9,7 +9,7 @@ object HeroConstants {
 
   // TODO: remove those after testing
   // test platform: (-90f, 10050f) //boss room: (2420.0f,-96.0f)
-  val HERO_OFFSET: (Float, Float) = (30f, 30f)
+  val HERO_OFFSET: (Float, Float) = (2420.0f,-96.0f) // (30f, 30f)
 
   val CROUCH_OFFSET: (Float, Float) = (0f, -30f)
   val CROUCH_END_OFFSET: (Float, Float) = (0f, 6f)

@@ -68,7 +68,7 @@ object EnemiesConstants {
     Statistic.MaxMovementSpeed -> 40f.PPM,
     Statistic.Acceleration -> 5f.PPM,
 
-    Statistic.VisionDistance -> 70.PPM,
+    Statistic.VisionDistance -> 200.PPM,
     Statistic.VisionAngle -> 90,
     Statistic.AttackFrequency -> 2000,
     Statistic.AttackDuration -> 1000,
@@ -89,6 +89,8 @@ object EnemiesConstants {
   val WIZARD_BOSS_ATTACK1_OFFSET: (Float, Float) = (25, 10)
   val WIZARD_BOSS_ATTACK2_SIZE: (Float, Float) = (30, 40)
   val WIZARD_BOSS_ATTACK2_OFFSET: (Float, Float) = (35, 12)
+  val WIZARD_BOSS_ATTACK3_SIZE: (Float, Float) = (10, 10)
+  val WIZARD_BOSS_ATTACK3_OFFSET: (Float, Float) = (13, 25)
 
   val SLIME_SIZE: (Float, Float) = (13f, 9f)
   val SLIME_SCORE: Int = 100

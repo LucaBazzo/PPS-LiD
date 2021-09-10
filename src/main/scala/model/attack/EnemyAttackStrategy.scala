@@ -2,7 +2,7 @@ package model.attack
 
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, _}
-import model.helpers.EntitiesFactoryImpl.{createFireballAttack, createMeleeAttack}
+import model.helpers.EntitiesFactoryImpl.{createEnergyBallAttack, createFireballAttack, createMeleeAttack}
 import model.helpers.EntitiesUtilities._
 import utils.EnemiesConstants
 import utils.EnemiesConstants.{SKELETON_ATTACK_OFFSET, SKELETON_ATTACK_SIZE, SLIME_ATTACK_OFFSET, SLIME_ATTACK_SIZE, WIZARD_BOSS_ATTACK1_OFFSET, WIZARD_BOSS_ATTACK1_SIZE, WIZARD_BOSS_ATTACK2_OFFSET, WIZARD_BOSS_ATTACK2_SIZE}
@@ -169,9 +169,23 @@ class WizardSecondAttack(override protected val sourceEntity: LivingEntity,
   }
 }
 
+class WizardEnergyBallAttack(override protected val sourceEntity: LivingEntity,
+                             override protected val targetEntity: Entity)
+  extends EnemyAttackStrategy(sourceEntity, targetEntity) {
 
-class FireballAttack(override protected val sourceEntity: LivingEntity,
-                     override protected val targetEntity: Entity)
+  override protected def spawnAttack(): Unit = {
+    this.sourceEntity.setState(State.Standing)
+    createEnergyBallAttack(this.sourceEntity, this.targetEntity,
+      EnemiesConstants.WIZARD_BOSS_ATTACK3_SIZE,
+      EnemiesConstants.WIZARD_BOSS_ATTACK3_OFFSET)
+  }
+
+  override def stopAttack(): Unit = { }
+}
+
+
+class WormFireballAttack(override protected val sourceEntity: LivingEntity,
+                         override protected val targetEntity: Entity)
   extends EnemyAttackStrategy(sourceEntity, targetEntity) {
 
   override protected def spawnAttack(): Unit = {

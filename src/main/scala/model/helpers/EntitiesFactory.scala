@@ -101,6 +101,11 @@ trait EntitiesFactory {
                            size: (Float, Float) = (23, 23),
                            offset: (Float, Float) = (20, 5)): MobileEntity
 
+  def createEnergyBallAttack(sourceEntity: LivingEntity,
+                             targetEntity: Entity,
+                             size: (Float, Float) = (1f, 1f),
+                             offset: (Float, Float) = (0f, 0f)): MobileEntity
+
   def createMeleeAttack(sourceEntity: LivingEntity,
                         targetEntity: Entity,
                         size: (Float, Float) = (23, 23),
@@ -298,7 +303,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     behaviours.addBehaviour("",
       new DoNothingOnCollision(),
       new PatrolPlatform(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
-      new FireballAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
+      new WormFireballAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
 
     enemy.setBehaviour(behaviours)
     enemy
@@ -323,7 +328,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     behaviours.addBehaviour("3", new DoNothingOnCollision(), new ChaseTarget(enemy, targetEntity), p3AttackStrategy)
 
     // fourth behaviour - attack hero with ranged attacks
-    val p4AttackStrategy = new FireballAttack(enemy, targetEntity)
+    val p4AttackStrategy = new WizardEnergyBallAttack(enemy, targetEntity)
     behaviours.addBehaviour("4", new DoNothingOnCollision(), new FaceTarget(enemy, targetEntity), p4AttackStrategy)
 
     // add conditional transitions between behaviours
@@ -443,7 +448,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def spawnBoss(spawnZoneSize: (Float, Float) = (10, 10),
                          spawnZonePosition: (Float, Float) = (0, 0)): Unit =  {
-
+    println(spawnZonePosition)
     this.createWizardBossEnemy(spawnZonePosition)
 
 //    def spawnEnemy(position: (Float, Float)): EnemyImpl = {
@@ -560,6 +565,37 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), sourceEntity.getStatistics))
 
     this.level.addEntity(attack)
+    attack
+  }
+
+  override def createEnergyBallAttack(sourceEntity: LivingEntity,
+                                      targetEntity: Entity,
+                                      size: (Float, Float) = (1f, 1f),
+                                      offset: (Float, Float) = (0f, 0f)): MobileEntity = {
+      // compute bullet spawn point
+    val attackXOffset:Float = if (sourceEntity.isFacingRight) offset._1.PPM else -offset._1.PPM
+    val attackYOffset:Float = offset._2.PPM
+    val position = (sourceEntity.getBody.getWorldCenter.x+attackXOffset,
+        sourceEntity.getBody.getWorldCenter.y+attackYOffset)
+
+      // create a body inside the game world
+    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.EnemyAttack,
+        EntityCollisionBit.Hero | EntityCollisionBit.Sword,
+        this.createCircleShape(size._1.PPM), (position.x, position.y), isSensor = true)
+    entityBody.getBody.setBullet(true)
+
+      // create an entity representing the bullet
+    val attack: MobileEntity = new MobileEntityImpl(EntityType.AttackEnergyBall, entityBody,
+        size.PPM, sourceEntity.getStatistics)
+    attack.setFacing(isEntityOnTheRight(sourceEntity, targetEntity))
+
+      // set entity behaviours
+    attack.setCollisionStrategy(new ApplyDamageAndDestroyEntity(attack, (e:Entity) => e.isInstanceOf[Hero],
+        sourceEntity.getStatistics))
+    attack.setMovementStrategy(new HomingProjectileTrajectory(attack, (position.x, position.y),
+        (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), sourceEntity.getStatistics))
+
+      this.level.addEntity(attack)
     attack
   }
 
