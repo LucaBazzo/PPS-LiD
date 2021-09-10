@@ -24,6 +24,8 @@ trait EntitiesFactory {
 
   def setLevel(level: Level, pool: ItemPool): Unit
 
+  def setModel(model: Model): Unit
+
   def createMobileEntity(entityType: EntityType = EntityType.Mobile,
                          size: (Float, Float) = (10, 10),
                          position: (Float, Float) = (0, 0),
@@ -38,6 +40,7 @@ trait EntitiesFactory {
   def createEnemyEntity(position: (Float, Float),
                         size: (Float, Float),
                         stats: Map[Statistic, Float],
+                        statsModifiers: Map[Statistic, Float],
                         score: Int,
                         entityId: EntityType): EnemyImpl
 
@@ -134,6 +137,7 @@ trait EntitiesFactory {
 
 object EntitiesFactoryImpl extends EntitiesFactory {
   private var level: Level = _
+  private var model: Model = null
   private var entitiesToBeChanged: List[(Entity, Short)] = List.empty
   private var itemPool: ItemPool = _
   private var bodiesToBeDestroyed: List[Body] = List.empty
@@ -144,6 +148,10 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def setLevel(level: Level, pool: ItemPool): Unit = {
     this.level = level
     this.itemPool = pool
+  }
+
+  override def setModel(model: Model): Unit = {
+    this.model = model
   }
 
   override def createMobileEntity(entityType: EntityType = EntityType.Mobile,
@@ -257,7 +265,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createSkeletonEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy:EnemyImpl = createEnemyEntity(position, SKELETON_SIZE,
-      SKELETON_STATS, SKELETON_SCORE, EntityType.EnemySkeleton)
+      SKELETON_STATS, STATS_MODIFIER, SKELETON_SCORE, EntityType.EnemySkeleton)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -271,7 +279,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createSlimeEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy:EnemyImpl = createEnemyEntity(position,
-      SLIME_SIZE, SLIME_STATS, SLIME_SCORE, EntityType.EnemySlime)
+      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, SLIME_SCORE, EntityType.EnemySlime)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -284,7 +292,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createWormEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy:EnemyImpl = createEnemyEntity(position, WORM_SIZE,
-      WORM_STATS, WORM_SCORE, EntityType.EnemyWorm)
+      WORM_STATS, STATS_MODIFIER, WORM_SCORE, EntityType.EnemyWorm)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -297,7 +305,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createWizardBossEnemy(position: (Float, Float)): EnemyImpl = {
-    val enemy:EnemyImpl = createEnemyEntity(position, WIZARD_BOSS_SIZE, WIZARD_BOSS_STATS, WIZARD_BOSS_SCORE,
+    val enemy:EnemyImpl = createEnemyEntity(position, WIZARD_BOSS_SIZE, WIZARD_BOSS_STATS, STATS_MODIFIER, WIZARD_BOSS_SCORE,
       EntityType.EnemyBossWizard)
     val targetEntity:Entity = this.level.getEntity(e => e.isInstanceOf[Hero])
 
@@ -338,6 +346,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createEnemyEntity(position: (Float, Float),
                                  size: (Float, Float),
                                  stats: Map[Statistic, Float],
+                                 statsModifiers: Map[Statistic, Float],
                                  score: Int,
                                  entityId: EntityType): EnemyImpl = {
 
@@ -349,7 +358,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val heroEntity: Hero = this.level.getEntity(e => e.getType == EntityType.Hero).asInstanceOf[Hero]
 
-    val enemy:EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, stats, score, heroEntity)
+    val enemy:EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, stats, statsModifiers,
+      model.getCurrentLevelNumber, score, heroEntity)
     this.level.addEntity(enemy)
     enemy
   }
@@ -425,11 +435,10 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       val spawnPosition: (Float, Float) = (RANDOM.between(spawnZonePosition._1 - spawnZoneSize._1 / 2, spawnZonePosition._1 + spawnZoneSize._1 / 2), spawnZonePosition._2)
 
       // randomly generate an enemy
-      val enemy:EnemyImpl = spawnEnemy(spawnPosition)
+      val enemy:LivingEntity = spawnEnemy(spawnPosition)
       // TODO: set movement direction inside a movement strategy
       enemy.setFacing(RANDOM.nextBoolean()) // set initial movement direction
     }
-
   }
 
   override def spawnBoss(spawnZoneSize: (Float, Float) = (10, 10),

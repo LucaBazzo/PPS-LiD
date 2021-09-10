@@ -21,6 +21,8 @@ class EnemyImpl(private val entityType: EntityType,
                 private var entityBody: EntityBody,
                 private val size: (Float, Float),
                 private val stats: Map[Statistic, Float],
+                private val statsModifiers: Map[Statistic, Float],
+                private val levelNumber: Int,
                 private val score: Int = 100,
                 private val heroEntity: Hero) extends LivingEntityImpl(entityType, entityBody, size, stats)
           with LivingEntity with Score with Enemy {
@@ -66,6 +68,18 @@ class EnemyImpl(private val entityType: EntityType,
           position=(this.getPosition._1, this.getPosition._2).MPP,
           collisions = EntityCollisionBit.Hero)
     }
+  }
+
+  override def getStatistic(statistic: Statistic): Option[Float] = {
+    val value:Option[Float] = super.getStatistic(statistic)
+    if (this.statsModifiers.contains(statistic))
+        Option(value.get + this.statsModifiers(statistic)*(this.levelNumber-1))
+    else
+      value
+  }
+
+  override def getStatistics: Map[Statistic, Float] = {
+    this.stats.map {case (key, value) => (key, value + this.statsModifiers.getOrElse(key, 0f))}
   }
 }
 
