@@ -43,12 +43,21 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (140,50), EntityCollisionBit.Hero)
+  private val item: Item = entitiesFactory.createItem(ItemPools.Default, (10f, 10f), (300, 220), EntityCollisionBit.Hero)
 
   private var isWorldSetted: Boolean = false
 
   // TODO: to be removed
-//  EntitiesFactoryImpl.createSlimeEnemy((HeroConstants.HERO_OFFSET._1+110, HeroConstants.HERO_OFFSET._2))
+  //private var platform: Entity = entitiesFactory.createPlatform((280, 250), (60,2))
+  //private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
+  //private var chest: Entity = entitiesFactory.createChest((10,10), (480,150))
+  //private var portal: Entity = entitiesFactory.createPortal((10,30), (200, 220))
+  //EntitiesFactoryImpl.createSkeletonEnemy((HeroConstants.HERO_OFFSET._1+70, HeroConstants.HERO_OFFSET._2))
+
+  //private var water: Entity = entitiesFactory.createWaterPool((200,290), (100,15))
+
+
+  //EntitiesFactoryImpl.createSlimeEnemy((HeroConstants.HERO_OFFSET._1+110, HeroConstants.HERO_OFFSET._2))
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)
@@ -113,7 +122,7 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
 
   private var accumulator: Float = 0f
 
-  private def worldStep() {
+  private def worldStep(): Unit = {
     val delta: Float = Gdx.graphics.getDeltaTime
 
     accumulator += Math.min(delta, 0.25f)

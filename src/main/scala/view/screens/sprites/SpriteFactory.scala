@@ -68,7 +68,7 @@ class SpriteFactoryImpl extends SpriteFactory {
       case EntityType.EnemySlime => this.defineEnemySlimeAnimation(sprite)
       case EntityType.EnemyWorm => this.defineEnemyWormAnimation(sprite)
       case EntityType.EnemyBossWizard => this.defineEnemyWizardAnimation(sprite)
-      case EntityType.EnemyBossReaper => this.defineEnemyReaperAnimation(sprite)
+//      case EntityType.EnemyBossReaper => this.defineEnemyReaperAnimation(sprite)
       case EntityType.AttackFireBall => this.defineAttackFireballAnimation(sprite)
       case EntityType.AttackEnergyBall => this.defineAttackEnergyBallAnimation(sprite)
       case EntityType.AttackSmite => this.defineAttackFireballAnimation(sprite)

@@ -5,9 +5,9 @@ import model.entities.{Entity, EntityType, State}
 import utils.ApplicationConstants
 trait SpriteViewer {
 
-  def loadSprites(entities: List[Entity])
-  def updateSprites(deltaTime: Float)
-  def drawSprites()
+  def loadSprites(entities: List[Entity]): Unit
+  def updateSprites(deltaTime: Float): Unit
+  def drawSprites(): Unit
 }
 
 class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
@@ -48,8 +48,8 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
       "worm", 90, 90, 90, 90, 0.8f)
     case EntityType.EnemyBossWizard => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/evil_wizard.pack",
       "evil_wizard", 250, 250, 250, 250, 0.9f)
-    case EntityType.EnemyBossReaper => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/reaper.pack",
-      "reaper", 211, 130, entity.getSize._1*500, entity.getSize._2*250, 1)
+//    case EntityType.EnemyBossReaper => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/reaper.pack",
+//      "reaper", 211, 130, entity.getSize._1*500, entity.getSize._2*250, 1)
     case EntityType.AttackFireBall => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/fireball.pack",
       "fireball", 46, 46, 46, 46, 1.5f)
     case EntityType.AttackEnergyBall => spriteFactory.createEntitySprite(entity.getType,"assets/sprites/energy_ball.pack",
@@ -100,18 +100,14 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
       sprite.addAnimation(State.Opening,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 1))
       sprite
-    /*case EntityType.Ladder =>
-      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/bigLadder.pack", "bigLadder", 32, 212,
-        entity.getSize._1, entity.getSize._2, 100)
+    case EntityType.Portal =>
+      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/portal.pack", "portal", 64, 62,
+        entity.getSize._1, entity.getSize._2, 150)
       sprite.addAnimation(State.Standing,
-        spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
+        spriteFactory.createSpriteAnimation(sprite, 0, 0, 7), loop = true)
+      sprite.addAnimation(State.Opening,
+        spriteFactory.createSpriteAnimation(sprite, 1, 0, 7))
       sprite
-    case EntityType.Platform =>
-      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/platform.pack", "platform", 79, 4,
-        entity.getSize._1, entity.getSize._2, 100)
-      sprite.addAnimation(State.Standing,
-        spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
-      sprite*/
     case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile | EntityType.Ladder | EntityType.Platform => null
     case _ => null
   }

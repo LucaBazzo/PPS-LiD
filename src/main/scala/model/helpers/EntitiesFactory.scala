@@ -18,6 +18,7 @@ import model.entities.{Entity, Statistic, _}
 import model.helpers.EntitiesUtilities.{isEntityOnTheLeft, isEntityOnTheRight}
 import model.movement._
 
+import java.util.concurrent.{ExecutorService, Executors}
 import scala.collection.immutable.HashMap
 
 trait EntitiesFactory {
@@ -75,6 +76,9 @@ trait EntitiesFactory {
 
   def createChest(size: (Float, Float) = (70, 70),
                   position: (Float, Float) = (0,0)): Entity
+
+  def createPortal(size: (Float, Float) = (10,30),
+                   position: (Float, Float) = (0,0)): Entity
 
   def createPlatform(position: (Float, Float),
                      size: (Float, Float)): Entity
@@ -137,7 +141,7 @@ trait EntitiesFactory {
   def addPendingEntityCreation(r:() => Unit): Unit
   def createPendingEntities(): Unit
 
-  def setEntitiesSetter(entitySetter: EntitiesSetter)
+  def setEntitiesSetter(entitySetter: EntitiesSetter): Unit
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -188,7 +192,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
       EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Enemy | EntityCollisionBit.Platform | EntityCollisionBit.Pool |
-        EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
+        EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.Portal | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, statistic)
 
@@ -463,13 +467,38 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                           position: (Float, Float) = (0, 0),
                           collisions: Short = 0): Entity = {
 
+    val sensorSize = (0f, size._2)
+    val leftSensorPosition = (position._1 - size._1 - 10, position._2)
+
+    val rightSensorPosition = (position._1 + size._1 + 10, position._2)
+
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Door,
       EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(size.PPM), position.PPM)
 
-    val immobileEntity: Entity = ImmobileEntity(EntityType.Door, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new DoorCollisionStrategy(immobileEntity.asInstanceOf[ImmobileEntity]))
-    this.level.addEntity(immobileEntity)
-    immobileEntity
+    val leftSensorBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Door,
+      EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(sensorSize.PPM), leftSensorPosition.PPM, isSensor = true)
+
+    val rightSensorBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Door,
+      EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(sensorSize.PPM), rightSensorPosition.PPM, isSensor = true)
+
+    val door: ImmobileEntity = ImmobileEntity(EntityType.Door, entityBody, size.PPM)
+
+    val leftSensor: ImmobileEntity = ImmobileEntity(EntityType.Immobile, leftSensorBody, size.PPM)
+
+    val rightSensor: ImmobileEntity = ImmobileEntity(EntityType.Immobile, rightSensorBody, size.PPM)
+
+    door.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, door, leftSensor, rightSensor))
+
+    leftSensor.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, door, leftSensor, rightSensor))
+
+    rightSensor.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, door, leftSensor, rightSensor))
+
+    this.level.addEntity(door)
+
+    this.level.addEntity(leftSensor)
+
+    this.level.addEntity(rightSensor)
+    door
   }
 
   override def createChest(size: (Float, Float), position: (Float, Float)): Entity = {
@@ -477,7 +506,27 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(size.PPM), position.PPM)
 
     val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Chest, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new ChestCollisionStrategy(immobileEntity))
+    immobileEntity.setCollisionStrategy(new ChestCollisionStrategy(this.entitiesSetter, immobileEntity))
+    this.level.addEntity(immobileEntity)
+    immobileEntity
+  }
+
+  override def createPortal(size: (Float, Float) = (10, 10),
+                          position: (Float, Float) = (0, 0)): Entity = {
+
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Portal,
+      EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(size.PPM), position.PPM)
+
+    val immobileEntity: Entity = ImmobileEntity(EntityType.Portal, entityBody, size.PPM)
+    immobileEntity.setCollisionStrategy(new PortalCollisionStrategy())
+    immobileEntity.setState(State.Opening)
+    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+    executorService.execute(() => {
+      Thread.sleep(1900)
+      immobileEntity.setState(State.Standing)
+      println("Portal opened")
+    })
+    executorService.shutdown()
     this.level.addEntity(immobileEntity)
     immobileEntity
   }
@@ -521,7 +570,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val rotatingBodyPosition = (pivotPoint._1 + rotatingBodyDistance._1.PPM, pivotPoint._2 + rotatingBodyDistance._2.PPM)
     val rotatingBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Sword,
-      EntityCollisionBit.Enemy, createPolygonalShape(rotatingBodySize.PPM), rotatingBodyPosition,
+      EntityCollisionBit.Enemy | EntityCollisionBit.Door, createPolygonalShape(rotatingBodySize.PPM), rotatingBodyPosition,
       startingAngle, gravityScale = 0, 1, 0.3f, 0.5f, isSensor = true)
 
     val circularMobileEntity =

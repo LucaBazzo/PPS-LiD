@@ -12,12 +12,12 @@ object Items extends Enumeration {
 
 object ItemPools extends Enumeration {
   type ItemPools = Value
-  val Keys, Enemy_Drops, Level_1, Level_2, Boss = Value
+  val Keys, Enemy_Drops, Default, Boss = Value
 }
 
 trait Item extends Entity with Score {
 
-  def collect(): (Statistic, Float, String)
+  def collect(): (Option[List[(Statistic, Float)]], String)
   def getEnumVal: Items.Value
   def getDesc: String
 }
@@ -28,7 +28,7 @@ abstract class ItemImpl(private val entityType:EntityType,
                         private val size: (Float, Float))
       extends ImmobileEntity(entityType, entityBody, size) with Item {
 
-  def collect(): (Statistic, Float, String)
+  def collect(): (Option[List[(Statistic, Float)]], String)
 
   def getDesc: String
 
@@ -42,9 +42,9 @@ class CakeItem(private val entityType: EntityType, private var entityBody: Entit
 
   override def getDesc: String = "The cake is a lie"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.Defence, 0.5f, this.getDesc)
+    (Option.empty, this.getDesc)
   }
 
 }
@@ -52,22 +52,22 @@ class CakeItem(private val entityType: EntityType, private var entityBody: Entit
 class WrenchItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Wrench, entityBody, size) {
   override def update(): Unit = {}
 
-  override def getDesc: String = "Debug time!"
+  override def getDesc: String = "Debug time! (DEF + and DMG +)"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.Defence, 0.5f, this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.Defence, 5f), (Statistic.Strength, 5f))), this.getDesc)
   }
 }
 
 class MapItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Map, entityBody, size) {
   override def update(): Unit = {}
 
-  override def getDesc: String = "Dungeon architect (full visible map)"
+  override def getDesc: String = "Dungeon architect (SPD +)"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.Defence, 0.5f, this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.MovementSpeed, 0.1f), (Statistic.Acceleration, 0.1f))), this.getDesc)
   }
 }
 
@@ -76,10 +76,12 @@ class SmallPotionItem(private val entityType: EntityType, private var entityBody
 
   override def getDesc: String = "Heal 25% of maximum health"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.CurrentHealth, 25, this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 250))), this.getDesc)
   }
+
+  override def getScore: Int = super.getScore / 4
 }
 
 class PotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionM, entityBody, size) {
@@ -87,10 +89,12 @@ class PotionItem(private val entityType: EntityType, private var entityBody: Ent
 
   override def getDesc: String = "Heal 50% of maximum health"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.CurrentHealth, 50, this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 500))), this.getDesc)
   }
+
+  override def getScore: Int = super.getScore / 4
 }
 
 class LargePotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionL, entityBody, size) {
@@ -98,10 +102,12 @@ class LargePotionItem(private val entityType: EntityType, private var entityBody
 
   override def getDesc: String = "Heal 75% of maximum health"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.CurrentHealth, 75, this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 750))), this.getDesc)
   }
+
+  override def getScore: Int = super.getScore / 4
 }
 
 class HugePotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionXL, entityBody, size) {
@@ -109,42 +115,44 @@ class HugePotionItem(private val entityType: EntityType, private var entityBody:
 
   override def getDesc: String = "Heal 100% of maximum health"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.CurrentHealth, 100, this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 1000))), this.getDesc)
   }
+
+  override def getScore: Int = super.getScore / 4
 }
 
 class ArmorItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Armor, entityBody, size) {
   override def update(): Unit = {}
 
-  override def getDesc: String = "You feel protected (+1 defence)"
+  override def getDesc: String = "You feel protected (DEF +++)"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.Defence, 10, this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.Defence, 30f))), this.getDesc)
   }
 }
 
 class BootsItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Boots, entityBody, size) {
   override def update(): Unit = {}
 
-  override def getDesc: String = "There's a time and place for everything, and it's now (speed +1)"
+  override def getDesc: String = "There's a time and place for everything, and it's now (SPD +++)"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.MovementSpeed, 1, this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.MovementSpeed, 0.3f))), this.getDesc)
   }
 }
 
 class BFSwordItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.BFSword, entityBody, size) {
   override def update(): Unit = {}
 
-  override def getDesc: String = "It's dangerous to go alone, take this! (dmg +1)"
+  override def getDesc: String = "It's dangerous to go alone, take this! (DMG +++)"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.Strength, 1, this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.Strength, 50f))), this.getDesc)
   }
 }
 
@@ -153,9 +161,9 @@ class KeyItem(private val entityType: EntityType, private var entityBody: Entity
 
   override def getDesc: String = "Boss Unlocked"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.Defence, 0.1f, this.getDesc)
+    (Option.empty, this.getDesc)
   }
 }
 
@@ -164,9 +172,9 @@ class SkeletonKeyItem(private val entityType: EntityType, private var entityBody
 
   override def getDesc: String = "Opens the unopenable (Boss is always unlocked)"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.Defence, 0.5f, this.getDesc)
+    (Option.empty, this.getDesc)
   }
 }
 
@@ -175,19 +183,21 @@ class BowItem(private val entityType: EntityType, private var entityBody: Entity
 
   override def getDesc: String = "New Ranged weapon"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.Defence, 0.5f, this.getDesc)
+    (Option.empty, this.getDesc)
   }
+
+  override def getScore: Int = super.getScore * 2
 }
 
 class ShieldItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Shield, entityBody, size) {
   override def update(): Unit = {}
 
-  override def getDesc: String = "Blocks Projectiles"
+  override def getDesc: String = "It should block projectiles, i guess (DEF ++)"
 
-  override def collect(): (Statistic, Float, String) = {
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Statistic.Defence, 0.5f, this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.Defence, 10f))), this.getDesc)
   }
 }
