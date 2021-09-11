@@ -1,7 +1,7 @@
 package view.inputs
 
 import com.badlogic.gdx.Input.{Buttons, Keys}
-import com.badlogic.gdx.{Gdx, InputProcessor}
+import com.badlogic.gdx.InputProcessor
 import controller.{GameEvent, ObserverManager}
 
 class GameInputProcessor(private val observerManager: ObserverManager) extends InputProcessor{
@@ -11,10 +11,10 @@ class GameInputProcessor(private val observerManager: ObserverManager) extends I
       case Keys.ESCAPE => {
         this.observerManager.notifyEvent(GameEvent.CloseApplication)
       }
-      case Keys.W | Keys.SPACE | Keys.UP => this.observerManager.notifyEvent(GameEvent.Up)
+      case Keys.W | Keys.UP => this.observerManager.notifyEvent(GameEvent.Up)
       case Keys.E => this.observerManager.notifyEvent(GameEvent.Slide)
       case Keys.S | Keys.DOWN => this.observerManager.notifyEvent(GameEvent.Down)
-      case Keys.F | Keys.ENTER => this.observerManager.notifyEvent(GameEvent.Interaction)
+      case Keys.SPACE | Keys.ENTER => this.observerManager.notifyEvent(GameEvent.Interaction)
       case _ => return false
     }
     true
