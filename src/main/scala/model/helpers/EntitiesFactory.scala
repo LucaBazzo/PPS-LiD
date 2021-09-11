@@ -34,7 +34,7 @@ trait EntitiesFactory {
                          collisions: Short = 0,
                          gravityScale: Float = 1.0f): MobileEntity
 
-  def createHeroEntity(): Hero
+  def createHeroEntity(statistics: Option[Map[Statistic, Float]]): Hero
 
   def createHeroFeet(hero: Hero): Unit
 
@@ -150,7 +150,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   private var entitiesToBeChanged: List[(Entity, Short)] = List.empty
   private var itemPool: ItemPool = _
   private var bodiesToBeDestroyed: List[Body] = List.empty
-  private val collisonMonitor: CollisionMonitor = new CollisionMonitorImpl
+  private val collisionMonitor: CollisionMonitor = new CollisionMonitorImpl
   private var pendingEntitiesCreation: List[() => Unit] = List.empty
   private var entitiesSetter: EntitiesSetter = _
 
@@ -178,27 +178,25 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     mobileEntity
   }
 
-  override def createHeroEntity(): Hero = {
+  override def createHeroEntity(statistics: Option[Map[Statistic, Float]]): Hero = {
     val position: (Float, Float) = HERO_OFFSET
 
     val size: (Float, Float) = HERO_SIZE
 
-    val statistic: Map[Statistic, Float] = Map(
-      Statistic.Health -> 1000,
-      Statistic.CurrentHealth -> 1000,
-      Statistic.Strength -> 40,
-      Statistic.MovementSpeed -> 1,
-      Statistic.Defence -> 0)
+    var stats: Map[Statistic, Float] = HERO_STATISTICS_DEFAULT
+    if(statistics.nonEmpty){
+      stats = statistics.get
+    }
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
       EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Enemy | EntityCollisionBit.Platform | EntityCollisionBit.Pool |
         EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.Portal | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
-    val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, statistic)
+    val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, stats)
 
     hero.setCollisionStrategy(new CollisionStrategyImpl())
-    hero.setMovementStrategy(new HeroMovementStrategy(hero, statistic(Statistic.MovementSpeed)))
-    hero.setAttackStrategy(new HeroAttackStrategy(hero, statistic(Statistic.Strength)))
+    hero.setMovementStrategy(new HeroMovementStrategy(hero, stats(Statistic.MovementSpeed)))
+    hero.setAttackStrategy(new HeroAttackStrategy(hero, stats(Statistic.Strength)))
 
     this.createHeroFeet(hero)
 
@@ -251,7 +249,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val immobileEntityUpper: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBodyUpper, upperSize.PPM)
     val immobileEntityLower: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBodyLower, lowerSize.PPM)
 
-    immobileEntityUpper.setCollisionStrategy(new UpperPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower, this.collisonMonitor))
+    immobileEntityUpper.setCollisionStrategy(new UpperPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower, this.collisionMonitor))
     this.level.addEntity(immobileEntityUpper)
 
     immobileEntityLower.setCollisionStrategy(new LowerPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower))
@@ -266,7 +264,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(size.PPM), position.PPM, isSensor = true)
 
     val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Ladder, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new LadderCollisionStrategy(this.collisonMonitor))
+    immobileEntity.setCollisionStrategy(new LadderCollisionStrategy(this.collisionMonitor))
     this.level.addEntity(immobileEntity)
 
     immobileEntity
@@ -306,7 +304,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
       new DoNothingOnCollision(),
-      new PatrolPlatform(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
+      new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
       new WormFireballAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
     enemy.setBehaviour(behaviours)
     enemy
@@ -359,13 +357,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                                  entityId: EntityType): EnemyImpl = {
 
     val spawnPoint = (position._1, position._2+size._2)
-
-    val levelBasedStats = stats
-      .map {case (key, value) => (key, value + this.model.getCurrentLevelNumber * statsModifiers.getOrElse(key, 0f))}
-
+    val levelBasedStats =
+      stats.map {case (key, value) => (key, value + this.model.getCurrentLevelNumber * statsModifiers.getOrElse(key, 0f))}
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
       EntityCollisionBit.Immobile | EntityCollisionBit.Sword | EntityCollisionBit.Arrow,
-      createPolygonalShape(size.PPM, true), spawnPoint.PPM)
+      createPolygonalShape(size.PPM, rounder = true), spawnPoint.PPM)
 
     val heroEntity: Hero = this.level.getEntity(e => e.getType == EntityType.Hero).asInstanceOf[Hero]
 
@@ -438,22 +434,29 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       }
     }
 
+    // randomly generate an enemy
+    val enemy:LivingEntity = spawnEnemy(spawnZonePosition)
+    // TODO: set movement direction inside a movement strategy
+    enemy.setFacing(RANDOM.nextBoolean()) // set initial movement direction
+
+    /*
     // compute number of enemies to spawn in the spawnZone
     val spawnCount: Int = Math.floor(spawnZoneSize._1 / ENEMIES_SPAWN_RATIO).toInt
-    for (_ <- 0 until spawnCount) {
+    for (_ <- 0 until 1) {
       // randomy pick spawn position inside the spawn zone. Only the horizontal axis coordinate is generated randomly
-      val spawnPosition: (Float, Float) = (RANDOM.between(spawnZonePosition._1 - spawnZoneSize._1 / 2, spawnZonePosition._1 + spawnZoneSize._1 / 2), spawnZonePosition._2)
+      val spawnPosition: (Float, Float) = (RANDOM.between(spawnZonePosition._1 - spawnZoneSize._1 / 2,
+        spawnZonePosition._1 + spawnZoneSize._1 / 2), spawnZonePosition._2)
 
       // randomly generate an enemy
       val enemy:LivingEntity = spawnEnemy(spawnPosition)
       // TODO: set movement direction inside a movement strategy
       enemy.setFacing(RANDOM.nextBoolean()) // set initial movement direction
     }
+     */
   }
 
   override def spawnBoss(spawnZoneSize: (Float, Float) = (10, 10),
                          spawnZonePosition: (Float, Float) = (0, 0)): Unit =  {
-    println(spawnZonePosition)
     this.createWizardBossEnemy(spawnZonePosition)
 
 //    def spawnEnemy(position: (Float, Float)): EnemyImpl = {
@@ -552,7 +555,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val immobileEntity: Entity = ImmobileEntity(EntityType.Lava, entityBody, size.PPM)
 
-    immobileEntity.setCollisionStrategy(new LavaCollisionStrategy(this.collisonMonitor))
+    immobileEntity.setCollisionStrategy(new LavaCollisionStrategy(this.collisionMonitor))
     this.level.addEntity(immobileEntity)
     immobileEntity
   }
@@ -772,6 +775,5 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def setEntitiesSetter(entitySetter: EntitiesSetter): Unit = this.entitiesSetter = entitySetter
-
 }
 

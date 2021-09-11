@@ -95,6 +95,12 @@ trait Hero extends LivingEntity {
    *  @return true if it touching a wall
    */
   def isTouchingWallOnSide(rightSide: Boolean = true): Boolean
+
+  /** Check if the hero health is below 0
+   *
+   *  @return true if the hero is dead
+   */
+  def isDead: Boolean
 }
 
 /** Implementation of the Entity Hero that will be command by the player.
@@ -251,6 +257,8 @@ class HeroImpl(private val entityType: EntityType,
 
   override def getFeet: Option[MobileEntity] = this.feet
 
+  override def isDead: Boolean = this.getStatistic(Statistic.CurrentHealth).get <= 0
+
   private def restoreNormalMovementStrategy(): Unit = {
     this.setMovementStrategy(new HeroMovementStrategy(this, this.getStatistic(MovementSpeed).get))
     this.getEntityBody.setGravityScale()
@@ -261,7 +269,6 @@ class HeroImpl(private val entityType: EntityType,
   private def isNotWaiting: Boolean = this.waitTimer <= 0
   private def decrementWaiting(value: Float): Unit = this.waitTimer -= value
 
-  private def isDead: Boolean = this.getStatistic(Statistic.CurrentHealth).get <= 0
   private def isFalling: Boolean = !this.isTouchingGround && this.entityBody.getBody.getLinearVelocity.y < 0
   private def isMovingHorizontally: Boolean = this.entityBody.getBody.getLinearVelocity.x != 0 && this.entityBody.getBody.getLinearVelocity.y == 0
   private def isIdle = this.entityBody.getBody.getLinearVelocity.x == 0 && this.entityBody.getBody.getLinearVelocity.y == 0

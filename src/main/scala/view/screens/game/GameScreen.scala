@@ -4,7 +4,7 @@ import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
+import com.badlogic.gdx.physics.box2d.{Box2DDebugRenderer, World}
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
@@ -15,6 +15,8 @@ import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
 import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
+
+import java.util.concurrent.{ExecutorService, Executors}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager,
@@ -38,7 +40,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
-  this.observerManager.notifyEvent(GameEvent.SetMap)
+  val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+  val task: Runnable = () => {
+    Thread.sleep(2000)
+    this.observerManager.notifyEvent(GameEvent.SetMap)
+  }
+  executorService.submit(task)
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
@@ -61,67 +68,70 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   }
 
   override def render(delta: Float): Unit = {
-    this.update(delta)
+    if(this.entitiesGetter.getWorld.nonEmpty) {
+      this.update(delta)
 
-    //clears the screen
-    Gdx.gl.glClearColor(0,0,0,1)
-    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-    super.render(delta)
+      //clears the screen
+      Gdx.gl.glClearColor(0,0,0,1)
+      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+      super.render(delta)
 
-    // TODO: Convertire Option[List[Entity]] in List[Entity] o Option[Entity]
-    val heroEntity: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Hero])
-    if(heroEntity.nonEmpty) {
-      val hero: Hero = heroEntity.get.head.asInstanceOf[Hero]
-      this.camera.position.x = hero.getPosition._1
-      this.camera.position.y = hero.getPosition._2
-//      for (item <- hero.getItemsPicked)
-//        this.hud.addNewItem(item)
-      this.hud.changeHealth(hero.getStatistics(Statistic.CurrentHealth), hero.getStatistics(Statistic.Health))
+      this.hud.setLevelNumber(this.entitiesGetter.getLevelNumber)
+
+      if(entitiesGetter.getHero.nonEmpty) {
+        val hero: Hero = entitiesGetter.getHero.get
+        this.camera.position.x = hero.getPosition._1
+        this.camera.position.y = hero.getPosition._2
+        this.hud.changeHealth(hero.getStatistics(Statistic.CurrentHealth), hero.getStatistics(Statistic.Health))
+      }
+
+      val message: Option[String] = entitiesGetter.getMessage
+      if(message.nonEmpty)
+        this.hud.setItemText(message.get)
+
+      val bossEntity: Option[List[Entity]] = entitiesGetter.getEntities(e => e.getType match {
+        case EntityType.EnemyBossWizard => true
+        case _ => false
+      })
+      // TODO: prevenire chiamate di show e hide quando la barra della vita è già visibile o invisibile
+      if (entitiesGetter.getBoss.nonEmpty &&
+        EntitiesUtilities.getEntitiesDistance(entitiesGetter.getHero.get,
+          entitiesGetter.getBoss.get) <= HEALTH_BAR_BOSS_VISIBILITY_DISTANCE.PPM) {
+        hud.showBossHealthBar()
+        val boss: LivingEntity = bossEntity.get.head.asInstanceOf[LivingEntity]
+        this.hud.changeBossHealth(boss.getStatistics(Statistic.CurrentHealth), boss.getStatistics(Statistic.Health))
+      } else {
+        hud.hideBossHealthBar()
+      }
+
+      val entities: Option[List[Entity]] = entitiesGetter.getEntities(_ => true)
+      if(entities.nonEmpty) {
+        this.spriteViewer.loadSprites(entities.get)
+        this.spriteViewer.updateSprites(delta)
+      }
+
+      this.camera.update()
+
+      this.tileMapHelper.renderWorld(orthogonalTiledMapRenderer)
+
+      //what will be shown by the camera
+      batch.setProjectionMatrix(camera.combined)
+
+      batch.begin()
+      // render objects inside
+      this.spriteViewer.drawSprites()
+      this.hud.drawHealthBar(batch)
+      batch.end()
+
+      //for debug purpose
+      val world: Option[World] = this.entitiesGetter.getWorld
+      if(world.nonEmpty) {
+        box2DDebugRenderer.render(world.get, camera.combined)
+      }
+
+      batch.setProjectionMatrix(hud.getStage.getCamera.combined)
+      hud.getStage.draw()
     }
-
-    val message: Option[String] = entitiesGetter.getMessage
-    if(message.nonEmpty)
-      this.hud.setItemText(message.get)
-
-    val bossEntity: Option[List[Entity]] = entitiesGetter.getEntities(e => e.getType match {
-      case EntityType.EnemyBossWizard => true
-      case _ => false
-    })
-    // TODO: prevenire chiamate di show e hide quando la barra della vita è già visibile o invisibile
-    if (bossEntity.get.nonEmpty &&
-      EntitiesUtilities.getEntitiesDistance(heroEntity.get.head, bossEntity.get.head) <= HEALTH_BAR_BOSS_VISIBILITY_DISTANCE.PPM) {
-      hud.showBossHealthBar()
-      val boss: LivingEntity = bossEntity.get.head.asInstanceOf[LivingEntity]
-      this.hud.changeBossHealth(boss.getStatistics(Statistic.CurrentHealth), boss.getStatistics(Statistic.Health))
-    } else {
-      hud.hideBossHealthBar()
-    }
-
-    val entities: Option[List[Entity]] = entitiesGetter.getEntities(_ => true)
-    if(entities.nonEmpty) {
-      this.spriteViewer.loadSprites(entities.get)
-      this.spriteViewer.updateSprites(delta)
-    }
-
-    this.camera.update()
-
-    this.tileMapHelper.renderWorld(orthogonalTiledMapRenderer)
-
-    //what will be shown by the camera
-    batch.setProjectionMatrix(camera.combined)
-
-    batch.begin()
-    // render objects inside
-    this.spriteViewer.drawSprites()
-    this.hud.drawHealthBar(batch)
-    this.hud.drawBossHealthBar(batch)
-    batch.end()
-
-    //for debug purpose
-    box2DDebugRenderer.render(this.entitiesGetter.getWorld, camera.combined)
-
-    batch.setProjectionMatrix(hud.getStage.getCamera.combined)
-    hud.getStage.draw()
   }
 
   override def resize(width: Int, height: Int): Unit = {
@@ -130,7 +140,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   override def dispose(): Unit = {
     orthogonalTiledMapRenderer.dispose()
-    this.entitiesGetter.getWorld.dispose()
+    if(this.entitiesGetter.getWorld.nonEmpty)
+      this.entitiesGetter.getWorld.get.dispose()
     box2DDebugRenderer.dispose()
     hud.dispose()
   }

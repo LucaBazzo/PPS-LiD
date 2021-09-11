@@ -3,7 +3,6 @@ package model
 import _root_.utils.ApplicationConstants._
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
-import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions._
 import model.collisions.{CollisionManager, EntityCollisionBit}
@@ -28,22 +27,23 @@ trait Level {
 
   def getWorld: World
 
+  def newLevel(): Unit
+
+  def dispose(): Unit
 }
 
-class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
-
-  private var score: Int = 0
+class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSetter) extends Level {
 
   private val world: World = new World(GRAVITY_FORCE, true)
   WorldUtilities.setWorld(world)
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
   entitiesFactory.setLevel(this, new ItemPoolImpl())
-  entitiesFactory.setEntitiesSetter(entitiesSetter)
+  entitiesFactory.setEntitiesSetter(this.entitiesSetter)
 
   private var entitiesList: List[Entity] = List.empty
 
-  private val hero: Hero = entitiesFactory.createHeroEntity()
+  private val hero: Hero = entitiesFactory.createHeroEntity(this.entitiesSetter.asInstanceOf[EntitiesGetter].getHeroStatistics)
   private val item: Item = entitiesFactory.createItem(ItemPools.Default, (10f, 10f), (300, 220), EntityCollisionBit.Hero)
 
   private var isWorldSetted: Boolean = false
@@ -54,46 +54,27 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   //private var chest: Entity = entitiesFactory.createChest((10,10), (480,150))
   //private var portal: Entity = entitiesFactory.createPortal((10,30), (200, 220))
   //EntitiesFactoryImpl.createSkeletonEnemy((HeroConstants.HERO_OFFSET._1+70, HeroConstants.HERO_OFFSET._2))
-
   //private var water: Entity = entitiesFactory.createWaterPool((200,290), (100,15))
-
-
   //EntitiesFactoryImpl.createSlimeEnemy((HeroConstants.HERO_OFFSET._1+110, HeroConstants.HERO_OFFSET._2))
 
   this.entitiesSetter.setEntities(entitiesList)
-  this.entitiesSetter.setWorld(this.world)
-  this.entitiesSetter.setScore(0)
+  this.entitiesSetter.setWorld(Option.apply(this.world))
 
   this.world.setContactListener(new CollisionManager(this.entitiesSetter.asInstanceOf[EntitiesGetter]))
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
-    if(actions.nonEmpty) {
-      for(command <- actions){
-        if(command.equals(GameEvent.SetMap)) {
-          this.isWorldSetted = true
-        } //else this.hero.notifyCommand(command)
-      }
-    }
 
-    if(this.isWorldSetted){
-      if(actions.nonEmpty) {
-        for(command <- actions){
-          if(!command.equals(GameEvent.SetMap)) {
-            this.hero.notifyCommand(command)
-          }
-        }
-      }
+    for(command <- actions) this.hero.notifyCommand(command)
 
-      this.worldStep()
+    this.worldStep()
 
-      EntitiesFactoryImpl.createPendingEntities()
+    EntitiesFactoryImpl.createPendingEntities()
 
-      this.entitiesList.foreach((entity: Entity) => entity.update())
+    this.entitiesList.foreach((entity: Entity) => entity.update())
 
-      this.entitiesFactory.destroyBodies()
+    this.entitiesFactory.destroyBodies()
 
-      this.entitiesFactory.applyEntityCollisionChanges()
-    }
+    this.entitiesFactory.applyEntityCollisionChanges()
   }
 
   override def addEntity(entity: Entity): Unit = {
@@ -109,9 +90,8 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     this.entitiesSetter.setEntities(this.entitiesList)
 
     // update score if the removed entity's type is Enemy or Item
-    if (entity.isInstanceOf[EnemyImpl] || entity.isInstanceOf[Item]) {
-      this.score += entity.asInstanceOf[Score].getScore
-      this.entitiesSetter.setScore(this.score)
+    if (entity.isInstanceOf[Enemy] || entity.isInstanceOf[Item]) {
+      this.entitiesSetter.addScore(entity.asInstanceOf[Score].getScore)
     }
 
     if (ENEMY_BOSS_TYPES.contains(entity.getType)) {
@@ -139,4 +119,13 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     }
   }
 
+  override def newLevel(): Unit = {
+    this.entitiesSetter.setHeroStatistics(this.hero.getStatistics)
+    this.model.requestNewLevel()
+  }
+
+  override def dispose(): Unit = {
+    this.entitiesSetter.setWorld(Option.empty)
+    this.world.dispose()
+  }
 }

@@ -11,12 +11,13 @@ trait GameLoop extends Runnable {
 class GameLoopImpl(private val model: Model, private val controller: Controller) extends GameLoop {
 
   private var actions: List[GameEvent] = List.empty
+  private var gameOverNotified: Boolean = false
 
   override def run(): Unit = {
     val currentActions = extractAndEmptyTheActions()
     this.model.update(currentActions)
 
-    if (this.model.isGameOver) this.controller.gameOver()
+    if (this.model.isGameOver && !gameOverNotified) this.gameOver()
   }
 
   override def addAction(action: GameEvent): Unit = synchronized {
@@ -27,5 +28,10 @@ class GameLoopImpl(private val model: Model, private val controller: Controller)
     val currentActions = actions map identity
     this.actions = List.empty
     currentActions
+  }
+
+  private def gameOver(): Unit = {
+    this.controller.gameOver()
+    this.gameOverNotified = true
   }
 }

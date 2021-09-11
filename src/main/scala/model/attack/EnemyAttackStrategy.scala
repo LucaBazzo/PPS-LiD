@@ -27,12 +27,20 @@ abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
   protected val visionDistance: Float = this.stats(Statistic.VisionDistance)
 
   protected var lastAttackTime:Long = 0
+  protected var isAttackFinishedOldCheck:Boolean = true
 
   override def apply(): Unit = {
     if (this.canAttack) {
       this.lastAttackTime = System.currentTimeMillis()
       spawnAttack()
     }
+
+    val isAttackFinishedNowCheck = this.isAttackFinished
+    if (isAttackFinishedNowCheck && !this.isAttackFinishedOldCheck) {
+      this.stopAttack()
+      this.sourceEntity.setState(State.Standing)
+    }
+    this.isAttackFinishedOldCheck = isAttackFinishedNowCheck
   }
 
   override def isAttackFinished: Boolean =
@@ -55,10 +63,10 @@ abstract class MeleeAttackStrategy(override protected val sourceEntity: LivingEn
 
   override def apply():Unit = {
     // remove attack box
-    if (this.isAttackFinished && this.attackInstance.isDefined) {
-      this.stopAttack()
-      this.sourceEntity.setState(State.Standing)
-    }
+//    if (this.isAttackFinished && this.attackInstance.isDefined) {
+//      this.stopAttack()
+//      this.sourceEntity.setState(State.Standing)
+//    }
 
     // activate the attack box to match the displayed animation
     if (!this.isAttackFinished) {
@@ -200,5 +208,4 @@ class WormFireballAttack(override protected val sourceEntity: LivingEntity,
   }
 
   override def stopAttack(): Unit = { }
-
 }

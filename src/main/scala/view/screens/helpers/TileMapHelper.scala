@@ -100,8 +100,10 @@ class TileMapHelper {
           case "water" => spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position,size))
           case "lava" => spawnEntity(() => EntitiesFactoryImpl.createLavaPool(position, size))
           case "enemy" =>
-            if(mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME)) spawnEntity(() => EntitiesFactoryImpl.spawnBoss(size, position))
-            else spawnEntity(() => EntitiesFactoryImpl.spawnEnemies(size, position))
+            if(mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME))
+              spawnEntity(() => EntitiesFactoryImpl.spawnBoss(size, position))
+            else
+              spawnEntity(() => EntitiesFactoryImpl.spawnEnemies(size, position))
           case "portal" => //TODO spawn portal to new world (inactive)
           case _ => println("not supported layer: " + layer.getName)
         }
@@ -112,5 +114,4 @@ class TileMapHelper {
   }
 
   private def spawnEntity(f:() => Unit): Unit = EntitiesFactoryImpl.addPendingEntityCreation(f)
-
 }
