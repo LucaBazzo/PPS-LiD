@@ -3,14 +3,13 @@ package view.screens.game
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
-import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Entity, EntityType, Hero, LivingEntity, Statistic}
+import model.collisions.ImplicitConversions.{RichFloat, RichInt}
+import model.entities._
 import model.helpers.{EntitiesGetter, EntitiesUtilities}
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
@@ -90,7 +89,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     })
     // TODO: prevenire chiamate di show e hide quando la barra della vita è già visibile o invisibile
     if (bossEntity.get.nonEmpty &&
-      EntitiesUtilities.getEntitiesDistance(heroEntity.get.head, bossEntity.get.head) <= 100.PPM) {
+      EntitiesUtilities.getEntitiesDistance(heroEntity.get.head, bossEntity.get.head) <= HEALTH_BAR_BOSS_VISIBILITY_DISTANCE.PPM) {
       hud.showBossHealthBar()
       val boss: LivingEntity = bossEntity.get.head.asInstanceOf[LivingEntity]
       this.hud.changeBossHealth(boss.getStatistics(Statistic.CurrentHealth), boss.getStatistics(Statistic.Health))
