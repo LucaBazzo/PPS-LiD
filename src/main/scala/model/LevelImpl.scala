@@ -83,7 +83,6 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
         }
       }
 
-      //this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
       this.worldStep()
 
       EntitiesFactoryImpl.createPendingEntities()

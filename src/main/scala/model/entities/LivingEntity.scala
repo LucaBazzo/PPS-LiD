@@ -7,6 +7,7 @@ import model.entities.Statistic.Statistic
 
 trait LivingEntity extends MobileEntity {
 
+  def healLife(heal: Float)
   def sufferDamage(damage: Float)
   def getLife: Float
   def setAttackStrategy(strategy: AttackStrategy)
@@ -33,6 +34,19 @@ class LivingEntityImpl(private val entityType: EntityType,
     }
   }
 
+  override def healLife(heal: Float): Unit = {
+    if(this.getStatistic(Statistic.Health).nonEmpty && this.getStatistic(Statistic.CurrentHealth).nonEmpty){
+      val currentHealth = this.getStatistic(Statistic.CurrentHealth).get
+      val totalHealth = this.getStatistic(Statistic.Health).get
+
+      val maxHeal = totalHealth - currentHealth
+      if(heal > maxHeal)
+        this.alterStatistics(Statistic.CurrentHealth, maxHeal)
+      else
+        this.alterStatistics(Statistic.CurrentHealth, heal)
+    }
+  }
+
   override def sufferDamage(damage: Float): Unit = {
     if(this.getStatistic(Statistic.Defence).nonEmpty && this.getStatistic(Statistic.CurrentHealth).nonEmpty){
       val currentHealth = this.getStatistic(Statistic.CurrentHealth).get
@@ -46,7 +60,7 @@ class LivingEntityImpl(private val entityType: EntityType,
         this.alterStatistics(Statistic.CurrentHealth, -trueDamage)
       }
       if (currentHealth <= 0) {
-        this.state = State.Dying
+        this.setState(State.Dying)
       }
     }
   }
