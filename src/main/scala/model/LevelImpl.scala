@@ -46,18 +46,18 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   private val hero: Hero = entitiesFactory.createHeroEntity()
   private val item: Item = entitiesFactory.createItem(ItemPools.Default, (10f, 10f), (300, 220), EntityCollisionBit.Hero)
 
-  private val door: Entity = entitiesFactory.createDoor((10, 30), (390, 200))
+  //private val door: Entity = entitiesFactory.createDoor((10, 30), (390, 200))
 
   private var isWorldSetted: Boolean = false
-  private var platform: Entity = entitiesFactory.createPlatform((280, 250), (60,2))
-  private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
-  private var chest: Entity = entitiesFactory.createChest((10,10), (480,150))
-  private var portal: Entity = entitiesFactory.createPortal((10,30), (200, 220))
+  //private var platform: Entity = entitiesFactory.createPlatform((280, 250), (60,2))
+  //private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
+  //private var chest: Entity = entitiesFactory.createChest((10,10), (480,150))
+  //private var portal: Entity = entitiesFactory.createPortal((10,30), (200, 220))
   //EntitiesFactoryImpl.createSkeletonEnemy((HeroConstants.HERO_OFFSET._1+70, HeroConstants.HERO_OFFSET._2))
 
   //private var water: Entity = entitiesFactory.createWaterPool((200,290), (100,15))
 
-  private var lava: Entity = entitiesFactory.createLavaPool((400,290), (100,15))
+  //private var lava: Entity = entitiesFactory.createLavaPool((400,290), (100,15))
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(this.world)
