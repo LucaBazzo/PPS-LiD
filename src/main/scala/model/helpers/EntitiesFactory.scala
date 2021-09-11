@@ -447,6 +447,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       immobileEntity.setState(State.Standing)
       println("Portal opened")
     })
+    executorService.shutdown()
     this.level.addEntity(immobileEntity)
     immobileEntity
   }

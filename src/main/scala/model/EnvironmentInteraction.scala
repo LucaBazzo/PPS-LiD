@@ -108,6 +108,7 @@ class PlatformInteraction(private val hero: Hero,
       this.platformCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
       println("Enabled platform collisions")
     })
+    executorService.shutdown()
   }
 
   private def platformCollisions(collisions: Short): Unit = {

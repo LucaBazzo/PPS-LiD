@@ -51,7 +51,7 @@ class LivingEntityImpl(private val entityType: EntityType,
     }
   }
 
-  override def getLife: Float = this.stats(Statistic.CurrentHealth)
+  override def getLife: Float = this.getStatistic(Statistic.CurrentHealth).get
 
   override def setAttackStrategy(strategy: AttackStrategy): Unit = this.attackStrategy = strategy
 

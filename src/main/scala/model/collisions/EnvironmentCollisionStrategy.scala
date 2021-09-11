@@ -92,10 +92,13 @@ class LavaCollisionStrategy(private val collisMonitor: CollisionMonitor) extends
       executorService.execute(() => {
         while(collisMonitor.isPlayerInsideLava) {
           h.sufferDamage(100)
-          println("Enabled platform collisions")
+          if(h.getLife <= 0)
+            collisMonitor.playerOutOfLava()
+          println("Taken damage from lava")
           Thread.sleep(1000)
         }
       })
+      executorService.shutdown()
     case _ =>
   }
 
@@ -127,6 +130,7 @@ class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
         lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
         println("Enabled platform collisions")
       })
+      executorService.shutdown()
     case _ =>
   }
 }
@@ -152,6 +156,7 @@ class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
         lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
         println("Enabled platform collisions")
       })
+      executorService.shutdown()
     case _ =>
   }
 }
