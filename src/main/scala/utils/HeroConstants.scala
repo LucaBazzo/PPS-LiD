@@ -15,7 +15,7 @@ object HeroConstants {
 
   val HERO_SIZE: (Float, Float) = (8.5f, 14.9f)
   val HERO_SIZE_SMALL: (Float, Float) = (8.5f, 6f)
-  val HERO_OFFSET: (Float, Float) = (230f, 210f)
+  val HERO_OFFSET: (Float, Float) = (30f, 35)
 
   val CROUCH_OFFSET: (Float, Float) = (0f, -30f)
   val CROUCH_END_OFFSET: (Float, Float) = (0f, 6f)

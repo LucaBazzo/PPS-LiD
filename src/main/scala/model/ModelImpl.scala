@@ -21,7 +21,7 @@ trait Model {
 }
 
 class ModelImpl(private val entitiesSetter: EntitiesSetter,
-                private  val rooms: Array[String]) extends Model {
+                private val tileMapHelper: TileMapHelper) extends Model {
 
   private var level: Option[Level] = Option.empty
 
@@ -79,7 +79,10 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
   }
 
   private def setWorld(): Unit = {
-    Gdx.app.postRunnable(() => TileMapHelper.setWorld(this.level.get, this.rooms))
+    Gdx.app.postRunnable(() => {
+        tileMapHelper.loadTiledMaps()
+        tileMapHelper.setWorld()
+      })
     this.isLevelActive = true
   }
 }

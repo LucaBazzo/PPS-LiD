@@ -17,8 +17,6 @@ trait View {
 
   def endGame()
 
-  def initialize()
-
   def terminate()
 
   def returnToMenu()
@@ -26,7 +24,7 @@ trait View {
 
 class ViewImpl(private val entitiesGetter: EntitiesGetter,
                private val observerManager: ObserverManager,
-               private val rooms: Array[String]) extends View {
+               private  val tileMapHelper: TileMapHelper) extends View {
 
   private val screenSetter: LostInDungeons = new LostInDungeons(this.observerManager)
 
@@ -40,13 +38,10 @@ class ViewImpl(private val entitiesGetter: EntitiesGetter,
   })
 
   override def startGame(): Unit = {
-    TileMapHelper.resetOffsets()
-    Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager, this.rooms)))
+    Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager, this.tileMapHelper)))
   }
 
   override def endGame(): Unit = Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameOverScreen(this.observerManager)))
-
-  override def initialize(): Unit = ???
 
   override def terminate(): Unit = {
     this.executorService.shutdownNow()

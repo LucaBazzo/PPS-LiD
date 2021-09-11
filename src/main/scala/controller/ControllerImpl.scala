@@ -1,13 +1,12 @@
 package controller
 
-import _root_.utils.ApplicationConstants.{GAME_LOOP_STEP, ROOM_MAP_NAMES}
+import _root_.utils.ApplicationConstants.GAME_LOOP_STEP
 import controller.GameEvent.GameEvent
 import model._
 import model.helpers.EntitiesContainerMonitor
 import view._
-
+import view.screens.helpers.TileMapHelper
 import java.util.concurrent.{ExecutorService, Executors, ScheduledExecutorService, TimeUnit}
-import scala.util.Random
 
 /** Handles almost every aspect that allows the game to run such as starting and
  * stopping the game loop, initializing view and model, saving existing game run
@@ -26,12 +25,10 @@ class ControllerImpl extends Controller with Observer {
   private val observerManager: ObserverManager = new ObserverManagerImpl()
   this.observerManager.addObserver(this)
 
-  private var rooms: Array[String] = Array("hero-room", "room1-final")
-  for(n <- 1 to 2) rooms = rooms :+ ROOM_MAP_NAMES(Random.between(0,ROOM_MAP_NAMES.size))
-//  rooms = rooms :+ "boss-room"
+  private val tileMapHelper: TileMapHelper = new TileMapHelper
 
-  private val view: View = new ViewImpl(entitiesContainer, observerManager, rooms)
-  private val model: Model = new ModelImpl(entitiesContainer, rooms)
+  private val view: View = new ViewImpl(entitiesContainer, observerManager, tileMapHelper)
+  private val model: Model = new ModelImpl(entitiesContainer, tileMapHelper)
 
   private var executorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
   private var gameLoop: GameLoop = new GameLoopImpl(model, this)

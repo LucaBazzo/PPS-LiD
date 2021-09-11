@@ -25,7 +25,6 @@ object ApplicationConstants {
   val BOSS_ROOM_MAP_NAME: String = "boss-room"
   val ROOM_MAP_NAMES: Array[String] = Array("room1-final", "room2-final", "room3-final")
 
-
   //Main Menu Screen Constants
   val DEFAULT_DISTANCE_FROM_TOP: Int = 70
   val DISTANCE_BUTTONS_DEFAULT: Int = 8
@@ -35,9 +34,9 @@ object ApplicationConstants {
   val DISTANCE_FROM_TD: Float = 3
   val DISTANCE_FROM_LR: Float = 25
 
-
   //Game Screen HUD constants
   val FONT_PATH_LABEL: String = "assets/fonts/lunch_doubly_so.fnt"
+
   val HEALTH_BAR_PATH: String = "assets/textures/health_bar.png"
   val HEALTH_BORDER_PATH: String = "assets/textures/health_bar_border.png"
   val HEALTH_BAR_BOSS_PATH: String = "assets/textures/health_bar_boss.png"
