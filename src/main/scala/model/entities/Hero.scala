@@ -281,6 +281,6 @@ class HeroImpl(private val entityType: EntityType,
 
   override def isTouchingWallOnSide(rightSide: Boolean = true): Boolean = {
     WorldUtilities.checkSideCollision(rightSide, this,
-      EntityCollisionBit.Immobile, EntityCollisionBit.Door)//, EntityCollisionBit.Platform)
+      EntityCollisionBit.Immobile, EntityCollisionBit.Door)
   }
 }

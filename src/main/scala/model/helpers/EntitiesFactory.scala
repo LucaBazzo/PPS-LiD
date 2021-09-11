@@ -223,9 +223,14 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val lowerSize = (size._1 - 2, size._2)
     val lowerPosition = (position._1, position._2 - 5)
 
-    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
+    //messo per riferimento a prima da rimuovere quando si vede che non servirà a nulla
+    /*val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
       EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape((size._1.PPM , size._2.PPM + 2.PPM )),
-      (position._1.PPM, position._2.PPM - 2.PPM))
+      (position._1.PPM, position._2.PPM - 2.PPM))*/
+
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
+      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape((size._1.PPM , size._2.PPM)),
+      (position._1.PPM, position._2.PPM))
 
     val entityBodyUpper: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
       EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(upperSize.PPM), upperPosition.PPM, isSensor = true)
