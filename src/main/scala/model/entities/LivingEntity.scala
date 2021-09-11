@@ -59,7 +59,7 @@ class LivingEntityImpl(private val entityType: EntityType,
         }
         this.alterStatistics(Statistic.CurrentHealth, -trueDamage)
       }
-      if (currentHealth <= 0) {
+      if (this.getStatistic(Statistic.CurrentHealth).get <= 0) {
         this.setState(State.Dying)
       }
     }
