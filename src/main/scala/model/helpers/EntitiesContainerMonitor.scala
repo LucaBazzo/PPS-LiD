@@ -8,7 +8,7 @@ trait EntitiesGetter {
 
   def getEntities(predicate: Entity => Boolean): Option[List[Entity]]
   def getHero: Option[Hero]
-  def getWorld: World
+  def getWorld: Option[World]
   def getScore: Int
   def getMessage: Option[String]
   def getHeroStatistics: Option[Map[Statistic, Float]]
@@ -18,8 +18,9 @@ trait EntitiesGetter {
 trait EntitiesSetter {
 
   def setEntities(entities: List[Entity]): Unit
-  def setWorld(world: World): Unit
-  def setScore(score: Int): Unit
+  def setWorld(world: Option[World]): Unit
+  def resetScore(): Unit
+  def addScore(score: Int): Unit
   def addMessage(mess: String): Unit
   def setHeroStatistics(statistics: Map[Statistic, Float])
   def setLevelNumber(number: Int): Unit
@@ -27,7 +28,7 @@ trait EntitiesSetter {
 
 class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
 
-  private var world: World = _
+  private var world: Option[World] = Option.empty
   private var messages: List[String] = List.empty
   private var entities: List[Entity] = List.empty
 
@@ -40,7 +41,7 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
     Option.apply(this.entities.filter(predicate))
   }
 
-  override def getWorld: World = synchronized {
+  override def getWorld: Option[World] = synchronized {
     this.world
   }
 
@@ -52,12 +53,16 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
     this.entities = entities
   }
 
-  override def setWorld(world: World): Unit = synchronized {
+  override def setWorld(world: Option[World]): Unit = synchronized {
     this.world = world
   }
 
-  override def setScore(score: Int): Unit = synchronized {
-    this.score = score
+  override def resetScore(): Unit = synchronized {
+    this.score = 0
+  }
+
+  override def addScore(score: Int): Unit = synchronized {
+    this.score += score
   }
 
   override def getMessage: Option[String] = {

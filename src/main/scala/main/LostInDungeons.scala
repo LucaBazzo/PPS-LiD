@@ -2,17 +2,12 @@ package main
 
 import com.badlogic.gdx.Game
 import controller.{GameEvent, ObserverManager}
-import model.helpers.EntitiesGetter
 import view.screens.menu.MainMenuScreen
 
-class LostInDungeons(private val entitiesGetter: EntitiesGetter,
-                     private val observerManager: ObserverManager,
-                     private val rooms: Array[String]) extends Game {
+class LostInDungeons(private val observerManager: ObserverManager) extends Game {
 
   override def create(): Unit = {
-    this.setScreen(new MainMenuScreen(observerManager))
-    //this.setScreen(new GameOverScreen(observerManager))
-    //this.setScreen(new GameScreen(entitiesGetter, observerManager, rooms))
+    this.setScreen(new MainMenuScreen(this.observerManager))
   }
 
   override def dispose(): Unit = {

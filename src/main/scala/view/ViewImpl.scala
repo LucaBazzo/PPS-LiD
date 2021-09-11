@@ -7,6 +7,7 @@ import main.LostInDungeons
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants.TITLE
 import view.screens.game.GameScreen
+import view.screens.helpers.TileMapHelper
 import view.screens.menu.{GameOverScreen, MainMenuScreen}
 
 import java.util.concurrent.{ExecutorService, Executors}
@@ -27,7 +28,7 @@ class ViewImpl(private val entitiesGetter: EntitiesGetter,
                private val observerManager: ObserverManager,
                private val rooms: Array[String]) extends View {
 
-  private val screenSetter: LostInDungeons = new LostInDungeons(this.entitiesGetter, this.observerManager, this.rooms)
+  private val screenSetter: LostInDungeons = new LostInDungeons(this.observerManager)
 
   val config = new Lwjgl3ApplicationConfiguration
   config.setTitle(TITLE)
@@ -39,6 +40,7 @@ class ViewImpl(private val entitiesGetter: EntitiesGetter,
   })
 
   override def startGame(): Unit = {
+    TileMapHelper.resetOffsets()
     Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager, this.rooms)))
   }
 

@@ -33,13 +33,11 @@ class ControllerImpl extends Controller with Observer {
   private val view: View = new ViewImpl(entitiesContainer, observerManager, rooms)
   private val model: Model = new ModelImpl(entitiesContainer, rooms)
 
-  private val executorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-  private val gameLoop: GameLoop = new GameLoopImpl(model, this)
-
-  this.executorService.scheduleAtFixedRate(gameLoop, 0, GAME_LOOP_STEP, TimeUnit.NANOSECONDS)
+  private var executorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+  private var gameLoop: GameLoop = new GameLoopImpl(model, this)
 
   override def handleEvent(event: GameEvent): Unit = event match {
-    case GameEvent.StartGame => this.view.startGame()
+    case GameEvent.StartGame => this.startGame()
     case GameEvent.CloseApplication => this.terminateApplication()
     case GameEvent.ReturnToMenu => this.view.returnToMenu()
     case _ => this.gameLoop.addAction(event)
@@ -48,7 +46,7 @@ class ControllerImpl extends Controller with Observer {
   override def gameOver(): Unit = {
     val executorService: ExecutorService = Executors.newSingleThreadExecutor()
     val task: Runnable = () => {
-      Thread.sleep(2000)
+      Thread.sleep(1500)
       this.stopExecutorService()
       this.view.endGame()
     }
@@ -56,6 +54,14 @@ class ControllerImpl extends Controller with Observer {
   }
 
   override def stopExecutorService(): Unit = this.executorService.shutdownNow()
+
+  private def startGame(): Unit = {
+    this.view.startGame()
+    this.model.requestStartGame()
+    this.gameLoop = new GameLoopImpl(model, this)
+    this.executorService = Executors.newSingleThreadScheduledExecutor()
+    this.executorService.scheduleAtFixedRate(gameLoop, 0, GAME_LOOP_STEP, TimeUnit.NANOSECONDS)
+  }
 
   private def terminateApplication(): Unit = {
     // terminate game loop executor

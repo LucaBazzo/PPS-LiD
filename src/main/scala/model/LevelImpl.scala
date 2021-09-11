@@ -34,8 +34,6 @@ trait Level {
 
 class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSetter) extends Level {
 
-  private var score: Int = 0
-
   private val world: World = new World(GRAVITY_FORCE, true)
   WorldUtilities.setWorld(world)
 
@@ -60,8 +58,7 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
   private var lava: Entity = entitiesFactory.createLavaPool((400,290), (100,15))
 
   this.entitiesSetter.setEntities(entitiesList)
-  this.entitiesSetter.setWorld(this.world)
-  this.entitiesSetter.setScore(0)
+  this.entitiesSetter.setWorld(Option.apply(this.world))
 
   this.world.setContactListener(new CollisionManager(this.entitiesSetter.asInstanceOf[EntitiesGetter]))
 
@@ -94,8 +91,7 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
 
     // update score if the removed entity's type is Enemy or Item
     if (entity.isInstanceOf[Enemy] || entity.isInstanceOf[Item]) {
-      this.score += entity.asInstanceOf[Score].getScore
-      this.entitiesSetter.setScore(this.score)
+      this.entitiesSetter.addScore(entity.asInstanceOf[Score].getScore)
     }
 
     if (entity.isInstanceOf[Enemy]) {
@@ -133,5 +129,8 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
     this.model.requestNewLevel()
   }
 
-  override def dispose(): Unit = this.world.dispose()
+  override def dispose(): Unit = {
+    this.entitiesSetter.setWorld(Option.empty)
+    this.world.dispose()
+  }
 }

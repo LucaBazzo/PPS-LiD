@@ -7,8 +7,8 @@ import model.entities.Statistic.Statistic
 object HeroConstants {
 
   val HERO_STATISTICS_DEFAULT: Map[Statistic, Float] = Map(
-    Statistic.Health -> 150,
-    Statistic.CurrentHealth -> 150,
+    Statistic.Health -> 1000,
+    Statistic.CurrentHealth -> 1000,
     Statistic.Strength -> 2000,
     Statistic.MovementSpeed -> 1,
     Statistic.Defence -> 0)

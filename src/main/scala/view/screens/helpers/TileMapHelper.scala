@@ -93,4 +93,8 @@ object TileMapHelper {
   private def spawnEntity(f:() => Unit): Unit =
     EntitiesFactoryImpl.addPendingEntityCreation(f)
 
+  def resetOffsets(): Unit = {
+    xOffset = 0
+    xOffsetRenderer = 0
+  }
 }
