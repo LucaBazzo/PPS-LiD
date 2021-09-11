@@ -15,8 +15,12 @@ class ItemCollisionStrategy(private val item: Item, private val entitiesMonitor:
                    h.itemPicked(item.getEnumVal)
                    entitiesMonitor.addMessage(effect._2)
                    if(effect._1.nonEmpty) {
-                     for(stat <- effect._1.get)
+                     for(stat <- effect._1.get) {
+                       if(stat._1.equals(Statistic.CurrentHealth))
+                         h.healLife(stat._2)
+                       else
                        h.alterStatistics(stat._1, stat._2)
+                     }
                    }
     case _ => println("____")
   }

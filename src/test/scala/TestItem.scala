@@ -66,6 +66,21 @@ class TestItem extends AnyFlatSpec {
     }
   }
 
+  "A Potion" should "heal the damaged Hero" in {
+    val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
+    val level: Level = new LevelImpl(monitor)
+    for (_ <- List.range(0, ENEMY_ITEMS.length)) {
+      level.spawnItem(ItemPools.Enemy_Drops)
+      val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
+      val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
+      hero.sufferDamage(999)
+      val prevLife: Float = hero.getStatistics(Statistic.CurrentHealth)
+      item.collisionDetected(Option.apply(hero))
+      val actLife: Float = hero.getStatistics(Statistic.CurrentHealth)
+      assert(item.collect()._1.get.head._2 <= (actLife - prevLife))
+    }
+  }
+
   "An item pool (excluding keys and enemy drops)" should "never give the same item twice unless it has exhausted all its items" in {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
     val level: Level = new LevelImpl(monitor)

@@ -78,7 +78,7 @@ class SmallPotionItem(private val entityType: EntityType, private var entityBody
 
   override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 25))), this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 250))), this.getDesc)
   }
 
   override def getScore: Int = super.getScore / 4
@@ -91,7 +91,7 @@ class PotionItem(private val entityType: EntityType, private var entityBody: Ent
 
   override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 50))), this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 500))), this.getDesc)
   }
 
   override def getScore: Int = super.getScore / 4
@@ -104,7 +104,7 @@ class LargePotionItem(private val entityType: EntityType, private var entityBody
 
   override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 75))), this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 750))), this.getDesc)
   }
 
   override def getScore: Int = super.getScore / 4
@@ -117,7 +117,7 @@ class HugePotionItem(private val entityType: EntityType, private var entityBody:
 
   override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 100))), this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 1000))), this.getDesc)
   }
 
   override def getScore: Int = super.getScore / 4
