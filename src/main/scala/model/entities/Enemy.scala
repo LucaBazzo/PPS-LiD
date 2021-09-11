@@ -33,11 +33,11 @@ class EnemyImpl(private val entityType: EntityType,
 
   override def update(): Unit = {
     super.update()
-    if (state != State.Dying && enemyBehaviour.isDefined) {
-      enemyBehaviour.get.apply()
+    if (state != State.Dying && this.enemyBehaviour.isDefined) {
+      this.enemyBehaviour.get.apply()
 
-      this.movementStrategy.apply()
-      this.attackStrategy.apply()
+      this.enemyBehaviour.get.getMovementStrategy.apply()
+      this.enemyBehaviour.get.getAttackStrategy.apply()
     }
   }
 
@@ -90,7 +90,8 @@ class EnemyImpl(private val entityType: EntityType,
 
 trait EnemyBehaviour {
 
-  def addBehaviour(name:String, collisionStrategy: CollisionStrategy, movementStrategy: MovementStrategy, attackStrategy: AttackStrategy): Unit
+  def addBehaviour(name:String, collisionStrategy: CollisionStrategy, movementStrategy: MovementStrategy,
+                   attackStrategy: AttackStrategy): Unit
 
   def addTransition(behaviour:String, nextBehaviour:String, predicate:Predicate): Unit
 
@@ -98,6 +99,7 @@ trait EnemyBehaviour {
 
   def getAttackStrategy: AttackStrategy
   def getMovementStrategy: MovementStrategy
+  def getCollisionStrategy: CollisionStrategy
 }
 
 class EnemyBehaviourImpl(protected val sourceEntity:LivingEntity)
@@ -108,14 +110,16 @@ class EnemyBehaviourImpl(protected val sourceEntity:LivingEntity)
 
   protected var currentBehaviour:Option[(String, CollisionStrategy, MovementStrategy, AttackStrategy)] = None
 
-  override def addBehaviour(name:String, collisionStrategy: CollisionStrategy, movementStrategy: MovementStrategy, attackStrategy: AttackStrategy): Unit = {
+  override def addBehaviour(name:String, collisionStrategy: CollisionStrategy, movementStrategy: MovementStrategy,
+                            attackStrategy: AttackStrategy): Unit = {
     if (this.behaviours.map(b => b._1).exists(n => n equals name))
       throw new IllegalArgumentException()
     else
       this.behaviours = (name, collisionStrategy, movementStrategy, attackStrategy) :: this.behaviours
 
-    if (this.behaviours.size == 1)
+    if (this.behaviours.size == 1) {
       this.currentBehaviour = Option(name, collisionStrategy, movementStrategy, attackStrategy)
+    }
   }
 
   override def addTransition(behaviour:String, nextBehaviour:String, predicate:Predicate): Unit = {
@@ -154,6 +158,8 @@ class EnemyBehaviourImpl(protected val sourceEntity:LivingEntity)
   override def getAttackStrategy: AttackStrategy = this.currentBehaviour.get._4
 
   override def getMovementStrategy: MovementStrategy = this.currentBehaviour.get._3
+
+  override def getCollisionStrategy: CollisionStrategy = this.currentBehaviour.get._2
 }
 
 // TODO: convertire in funzioni higher order?

@@ -304,7 +304,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       new DoNothingOnCollision(),
       new PatrolPlatform(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
       new WormFireballAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])))
-
     enemy.setBehaviour(behaviours)
     enemy
   }
