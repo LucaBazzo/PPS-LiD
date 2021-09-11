@@ -201,6 +201,10 @@ class HeroImpl(private val entityType: EntityType,
       .setShape(createPolygonalShape(newSize.PPM))
       .createFixture()
 
+    if(!isLittle) {
+      this.entityBody.addCoordinates(0, -size._2)
+    }
+
     /*if(!isLittle)
       this.entityBody.addCoordinates(0, -size._2 * 2 + newSize._2.PPM)
     else
@@ -210,7 +214,7 @@ class HeroImpl(private val entityType: EntityType,
 
     EntitiesFactoryImpl.createHeroFeet(this)
 
-    this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
+    //this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
   }
 
   override def itemPicked(itemType: Items): Unit = {
@@ -243,6 +247,11 @@ class HeroImpl(private val entityType: EntityType,
         this.setMovementStrategy(DoNothingMovementStrategy())
       }
       else {
+        //hurt when on ladder
+        if((this is LadderClimbing) || (this is LadderDescending) || (this is LadderIdle)){
+          this.restoreNormalMovementStrategy()
+        }
+
         this.stopHero(SHORT_WAIT_TIME)
         this.setState(State.Hurt)
       }
@@ -273,10 +282,11 @@ class HeroImpl(private val entityType: EntityType,
   private def isMovingHorizontally: Boolean = this.entityBody.getBody.getLinearVelocity.x != 0 && this.entityBody.getBody.getLinearVelocity.y == 0
   private def isIdle = this.entityBody.getBody.getLinearVelocity.x == 0 && this.entityBody.getBody.getLinearVelocity.y == 0
 
-  private def checkFalling: Boolean = isFalling && (this isNot Jumping) && (this isNot LadderDescending)
+  private def checkFalling: Boolean = isFalling && (this isNot Jumping) && (this isNot LadderDescending) && (this isNot LadderClimbing)
   private def checkRunning: Boolean = isMovingHorizontally && ((this is Jumping) || (this is Falling))
   private def checkIdle: Boolean = {
-    isIdle && !isSwordAttacking && (this isNot Crouching) && (this isNot BowAttacking) && (this isNot LadderIdle)
+    isIdle && !isSwordAttacking && (this isNot Crouching) && (this isNot BowAttacking) && (this isNot LadderIdle) &&
+    (this isNot LadderClimbing) && (this isNot LadderDescending)
   }
 
   private def checkNotLittle: Boolean = (this isNot Sliding) && (this isNot Crouching) && isLittle
