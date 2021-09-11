@@ -17,7 +17,7 @@ trait Model {
 }
 
 class ModelImpl(private val entitiesSetter: EntitiesSetter,
-                private  val rooms: Array[(String, (Integer, Integer))]) extends Model {
+                private val tileMapHelper: TileMapHelper) extends Model {
 
   private val level: Level = new LevelImpl(entitiesSetter)
   EntitiesFactoryImpl.setModel(this)
@@ -27,7 +27,10 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
     for (action <- actions) {
       if(action.equals(GameEvent.SetMap)) {
         Gdx.app.postRunnable(
-          () => TileMapHelper.setWorld(this.rooms)
+          () => {
+            tileMapHelper.loadTiledMaps
+            tileMapHelper.setWorld
+          }
         )
       }
     }

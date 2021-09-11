@@ -17,11 +17,9 @@ import view.inputs.GameInputProcessor
 import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
-import java.util.concurrent.{ExecutorService, Executors}
-
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager,
-                 private val rooms: Array[(String, (Integer, Integer))]) extends ScreenAdapter{
+                 private val tileMapHelper: TileMapHelper) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   camera.translate(300f, 300f)
@@ -31,10 +29,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private var tiledMaps: Array[TiledMap] = Array()
-  rooms.foreach(room => tiledMaps = tiledMaps :+ TileMapHelper.getTiledMap(room._1, room._2))
-
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMapRenderer(null)
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = tileMapHelper.getMapRenderer(null)
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
@@ -44,14 +39,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
-//  val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-//  val task: Runnable = () => {
-//    Thread.sleep(5000)
-//    this.observerManager.notifyEvent(GameEvent.SetMap)
-//  }
-//  executorService.submit(task)
   this.observerManager.notifyEvent(GameEvent.SetMap)
-
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
@@ -118,10 +106,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
     this.camera.update()
 
-    this.tiledMaps.foreach(tiledMap => {
-      this.orthogonalTiledMapRenderer.setMap(tiledMap)
-      orthogonalTiledMapRenderer.render()
-    })
+    this.tileMapHelper.renderWorld(orthogonalTiledMapRenderer)
 
     //what will be shown by the camera
     batch.setProjectionMatrix(camera.combined)
