@@ -4,13 +4,11 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.attack.DoNothingAttackStrategy
 import model.collisions.EntityCollisionBit
-import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State._
 import model.entities.Statistic._
 import model.helpers.{EntitiesFactoryImpl, WorldUtilities}
-import model.helpers.EntitiesFactoryImpl.createPolygonalShape
 import model.movement.{DoNothingMovementStrategy, HeroMovementStrategy}
 import model.{EntityBody, HeroInteraction}
 import utils.HeroConstants._
@@ -197,24 +195,7 @@ class HeroImpl(private val entityType: EntityType,
   override def isLittle: Boolean = this.little
 
   override def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit = {
-    this.entityBody
-      .setShape(createPolygonalShape(newSize.PPM))
-      .createFixture()
-
-    if(!isLittle) {
-      this.entityBody.addCoordinates(0, -size._2)
-    }
-
-    /*if(!isLittle)
-      this.entityBody.addCoordinates(0, -size._2 * 2 + newSize._2.PPM)
-    else
-      this.entityBody.addCoordinates(0, -size._2 + newSize._2.PPM * 2)*/
-
-    this.setSize(newSize.PPM)
-
-    EntitiesFactoryImpl.createHeroFeet(this)
-
-    //this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
+    EntitiesFactoryImpl.addPendingEntityCreation(() => EntitiesFactoryImpl.changeHeroFixture(this, newSize, addCoordinates))
   }
 
   override def itemPicked(itemType: Items): Unit = {
@@ -300,6 +281,6 @@ class HeroImpl(private val entityType: EntityType,
 
   override def isTouchingWallOnSide(rightSide: Boolean = true): Boolean = {
     WorldUtilities.checkSideCollision(rightSide, this,
-      EntityCollisionBit.Immobile, EntityCollisionBit.Platform, EntityCollisionBit.Door)
+      EntityCollisionBit.Immobile, EntityCollisionBit.Door)//, EntityCollisionBit.Platform)
   }
 }

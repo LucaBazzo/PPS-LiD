@@ -80,17 +80,17 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
 
   private def crouch(): Unit = {
     this.stopMovement()
+    entity.setLittle(true)
     entity.changeHeroFixture(HERO_SIZE_SMALL, CROUCH_OFFSET)
     entity.setState(State.Crouching)
-    entity.setLittle(true)
   }
 
   private def slide(): Unit = {
     this.entity.stopMovement()
 
     if(entity isNot Crouching) {
-      this.entity.changeHeroFixture(HERO_SIZE_SMALL, SLIDE_OFFSET)
       this.entity.setLittle(true)
+      this.entity.changeHeroFixture(HERO_SIZE_SMALL, SLIDE_OFFSET)
     }
 
     if (entity.isFacingRight) {
