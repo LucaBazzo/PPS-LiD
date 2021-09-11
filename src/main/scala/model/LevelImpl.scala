@@ -10,6 +10,7 @@ import model.collisions.{CollisionManager, EntityCollisionBit}
 import model.entities.ItemPools.ItemPools
 import model.entities._
 import model.helpers._
+import _root_.utils.EnemiesConstants._
 
 trait Level {
 
@@ -111,6 +112,10 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
     if (entity.isInstanceOf[EnemyImpl] || entity.isInstanceOf[Item]) {
       this.score += entity.asInstanceOf[Score].getScore
       this.entitiesSetter.setScore(this.score)
+    }
+
+    if (ENEMY_BOSS_TYPES.contains(entity.getType)) {
+      // TODO: mettere qui il cambio di stato del portale
     }
   }
 

@@ -32,6 +32,7 @@ object ApplicationConstants {
   val HEALTH_BORDER_PATH: String = "assets/textures/health_bar_border.png"
   val HEALTH_BAR_BOSS_PATH: String = "assets/textures/health_bar_boss.png"
   val HEALTH_BORDER_BOSS_PATH: String = "assets/textures/health_bar_border_boss.png"
+  val HEALTH_BAR_BOSS_VISIBILITY_DISTANCE = 200f
 
   val HUD_FIRST_ROW_PADDING_TOP: Float = 10
   val HUD_FIRST_ROW_PADDING_SIDE: Float = 20

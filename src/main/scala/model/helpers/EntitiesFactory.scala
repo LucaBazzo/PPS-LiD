@@ -146,7 +146,7 @@ trait EntitiesFactory {
 
 object EntitiesFactoryImpl extends EntitiesFactory {
   private var level: Level = _
-  private var model: Model = null
+  private var model: Model = _
   private var entitiesToBeChanged: List[(Entity, Short)] = List.empty
   private var itemPool: ItemPool = _
   private var bodiesToBeDestroyed: List[Body] = List.empty
@@ -360,14 +360,16 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val spawnPoint = (position._1, position._2+size._2)
 
+    val levelBasedStats = stats
+      .map {case (key, value) => (key, value + this.model.getCurrentLevelNumber * statsModifiers.getOrElse(key, 0f))}
+
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
       EntityCollisionBit.Immobile | EntityCollisionBit.Sword | EntityCollisionBit.Arrow,
       createPolygonalShape(size.PPM, true), spawnPoint.PPM)
 
     val heroEntity: Hero = this.level.getEntity(e => e.getType == EntityType.Hero).asInstanceOf[Hero]
 
-    val enemy:EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, stats, statsModifiers,
-      model.getCurrentLevelNumber, score, heroEntity)
+    val enemy:EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, levelBasedStats, score, heroEntity)
     this.level.addEntity(enemy)
     enemy
   }
