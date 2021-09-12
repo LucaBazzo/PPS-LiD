@@ -8,7 +8,7 @@ import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
 import com.badlogic.gdx.math.Rectangle
 import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
-import model.entities.EntityType
+import model.entities.{EntityType, ItemPools}
 import model.helpers.EntitiesFactoryImpl
 
 import scala.util.Random
@@ -16,7 +16,7 @@ import scala.util.Random
 class TileMapHelper {
 
   private val scale: Float = 1/(PIXELS_PER_METER/2)
-  private var keyLocation: String = null
+  private var keyLocation: String = _
 
   //array: TiledMap, mapName, mapOffset
   private var tiledMapList: Array[(TiledMap, String, (Integer, Integer))] = Array()
@@ -29,7 +29,7 @@ class TileMapHelper {
     //scelgo casualmente 6 stanze da mettere nel world (le stanze non devono ripetersi)
     var innerRooms: Array[String] = Array()
     while (innerRooms.length < 6){
-      val room: String = INNER_ROOM_MAP_NAMES(Random.nextInt(INNER_ROOM_MAP_NAMES.size))
+      val room: String = INNER_ROOM_MAP_NAMES(Random.nextInt(INNER_ROOM_MAP_NAMES.length))
       if(!innerRooms.contains(room)) innerRooms = innerRooms :+ room
     }
 
@@ -61,7 +61,7 @@ class TileMapHelper {
       })
 
       orthogonalTiledMapRenderer.setMap(tiledMap._1)
-      orthogonalTiledMapRenderer.render
+      orthogonalTiledMapRenderer.render()
     })
   }
 
@@ -89,13 +89,16 @@ class TileMapHelper {
           case "ground" => spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
           case "bridge" => spawnEntity(() => EntitiesFactoryImpl.createPlatform(position, size))
           case "door" =>
-            if(mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME)){} //TODO spawn boss room door
+            if(mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME))
+              EntitiesFactoryImpl.createBossDoor(size, position)
             else spawnEntity(() => EntitiesFactoryImpl.createDoor(size, position))
           case "chest" =>
             if(mapName.equalsIgnoreCase(TOP_KEY_ITEM_ROOM_NAME) || mapName.equalsIgnoreCase(BOTTOM_KEY_ITEM_ROOM_NAME))
-              if (mapName.contains(keyLocation)) {} //TODO spawnare la chiave per il boss
-              else {} //TODO spawnare un oggetto speciale
-            else spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
+              if (mapName.contains(keyLocation))
+                spawnEntity(() => EntitiesFactoryImpl.createItem(ItemPools.Keys, size, position))
+              else
+                spawnEntity(() => EntitiesFactoryImpl.createItem(ItemPools.Default, size, position))
+            else spawnEntity(() => EntitiesFactoryImpl.createChest(size, position))
           case "ladder" => spawnEntity(() => EntitiesFactoryImpl.createLadder(position, size))
           case "water" => spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position,size))
           case "lava" => spawnEntity(() => EntitiesFactoryImpl.createLavaPool(position, size))
@@ -104,7 +107,7 @@ class TileMapHelper {
               spawnEntity(() => EntitiesFactoryImpl.spawnBoss(size, position))
             else
               spawnEntity(() => EntitiesFactoryImpl.spawnEnemies(size, position))
-          case "portal" => //TODO spawn portal to new world (inactive)
+          case "portal" => spawnEntity(() => EntitiesFactoryImpl.createPortal(size, position))
           case _ => println("not supported layer: " + layer.getName)
         }
       })

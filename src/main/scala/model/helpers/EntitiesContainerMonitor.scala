@@ -1,6 +1,7 @@
 package model.helpers
 
 import com.badlogic.gdx.physics.box2d.World
+import model.entities.Items.Items
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, Hero, LivingEntity}
 import utils.EnemiesConstants.ENEMY_BOSS_TYPES
@@ -13,6 +14,7 @@ trait EntitiesGetter {
   def getWorld: Option[World]
   def getScore: Int
   def getMessage: Option[String]
+  def hasHeroPickedUpItem: Option[Items]
   def getHeroStatistics: Option[Map[Statistic, Float]]
   def getLevelNumber: Int
 }
@@ -24,7 +26,8 @@ trait EntitiesSetter {
   def resetScore(): Unit
   def addScore(score: Int): Unit
   def addMessage(mess: String): Unit
-  def setHeroStatistics(statistics: Map[Statistic, Float])
+  def heroJustPickedUpItem(item: Items): Unit
+  def setHeroStatistics(statistics: Map[Statistic, Float]): Unit
   def setLevelNumber(number: Int): Unit
 }
 
@@ -33,7 +36,7 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
   private var world: Option[World] = Option.empty
   private var messages: List[String] = List.empty
   private var entities: List[Entity] = List.empty
-
+  private var heroPickedUpAnItem: Option[Items] = Option.empty
   private var levelNumber = 0
   private var score: Int = 0
 
@@ -97,4 +100,12 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
   override def setLevelNumber(levelNumber: Int): Unit = this.levelNumber = levelNumber
 
   override def getLevelNumber: Int = this.levelNumber
+
+  override def hasHeroPickedUpItem: Option[Items] = {
+    val res = this.heroPickedUpAnItem
+    this.heroPickedUpAnItem = Option.empty
+    res
+  }
+
+  override def heroJustPickedUpItem(item: Items): Unit = this.heroPickedUpAnItem = Option.apply(item)
 }

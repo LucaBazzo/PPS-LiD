@@ -138,7 +138,8 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
   }
 
   def addNewItem(item: Items): Unit = {
-    if(! this.itemsPicked.contains(item)) {
+    if(! this.itemsPicked.contains(item) && ! (item == Items.PotionS || item == Items.PotionM ||
+      item == Items.PotionL || item == Items.PotionXL)) {
       item match {
         case Items.BFSword =>
           addItemToTable("assets/textures/sword.png")
@@ -163,6 +164,12 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
           this.itemsPicked = item :: this.itemsPicked
         case Items.Wrench =>
           addItemToTable("assets/textures/wrench.png")
+          this.itemsPicked = item :: this.itemsPicked
+        case Items.Armor =>
+          addItemToTable("assets/textures/Armor.png")
+          this.itemsPicked = item :: this.itemsPicked
+        case Items.Bow =>
+          addItemToTable("assets/textures/greatbow.png")
           this.itemsPicked = item :: this.itemsPicked
         case _ => throw new UnsupportedOperationException
       }

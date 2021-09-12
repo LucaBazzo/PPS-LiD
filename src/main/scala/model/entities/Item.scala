@@ -18,7 +18,7 @@ object ItemPools extends Enumeration {
 trait Item extends Entity with Score {
 
   def collect(): (Option[List[(Statistic, Float)]], String)
-  def getEnumVal: Items.Value
+  def getName: Items.Value
   def getDesc: String
 }
 
@@ -32,7 +32,7 @@ abstract class ItemImpl(private val entityType:EntityType,
 
   def getDesc: String
 
-  override def getEnumVal: Items = itemName
+  override def getName: Items = itemName
 
   override def getScore: Int = 1000
 }

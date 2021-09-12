@@ -72,6 +72,10 @@ trait EntitiesFactory {
                  position: (Float, Float) = (0, 0),
                  collisions: Short = 0): Entity
 
+  def createBossDoor(size: (Float, Float) = (10, 10),
+                 position: (Float, Float) = (0, 0),
+                 collisions: Short = 0): Entity
+
   def createChest(size: (Float, Float) = (70, 70),
                   position: (Float, Float) = (0,0)): Entity
 
@@ -139,9 +143,9 @@ trait EntitiesFactory {
   def addPendingEntityCreation(r:() => Unit): Unit
   def createPendingEntities(): Unit
 
-  def setEntitiesSetter(entitySetter: EntitiesSetter)
+  def setEntitiesSetter(entitySetter: EntitiesSetter): Unit
 
-  def changeHeroFixture(hero: Hero, newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0))
+  def changeHeroFixture(hero: Hero, newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit
 
   def createAirAttackPattern(entityType: EntityType = EntityType.Mobile,
                              bodySize: (Float, Float),
@@ -491,10 +495,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 //    spawnEnemy(position)
   }
 
-  override def createDoor(size: (Float, Float) = (10, 10),
-                          position: (Float, Float) = (0, 0),
-                          collisions: Short = 0): Entity = {
-
+  private def createDoorWithSensors(size: (Float, Float),
+                                    position: (Float, Float)): (ImmobileEntity, ImmobileEntity, ImmobileEntity) = {
     val sensorSize = (0f, size._2)
     val leftSensorPosition = (position._1 - size._1 - 10, position._2)
 
@@ -515,18 +517,48 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val rightSensor: ImmobileEntity = ImmobileEntity(EntityType.Immobile, rightSensorBody, size.PPM)
 
-    door.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, door, leftSensor, rightSensor))
+    (door, leftSensor, rightSensor)
+  }
 
-    leftSensor.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, door, leftSensor, rightSensor))
+  override def createDoor(size: (Float, Float) = (10, 10),
+                          position: (Float, Float) = (0, 0),
+                          collisions: Short = 0): Entity = {
 
-    rightSensor.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, door, leftSensor, rightSensor))
+    val doors = createDoorWithSensors(size, position)
 
-    this.level.addEntity(door)
+    doors._1.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, doors._1, doors._2, doors._3))
 
-    this.level.addEntity(leftSensor)
+    doors._2.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, doors._1, doors._2, doors._3))
 
-    this.level.addEntity(rightSensor)
-    door
+    doors._3.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesSetter, doors._1, doors._2, doors._3))
+
+    this.level.addEntity(doors._1)
+
+    this.level.addEntity(doors._2)
+
+    this.level.addEntity(doors._3)
+    doors._1
+  }
+
+  override def createBossDoor(size: (Float, Float) = (10, 10),
+                          position: (Float, Float) = (0, 0),
+                          collisions: Short = 0): Entity = {
+
+    val doors = createDoorWithSensors(size, position)
+
+    doors._1.setCollisionStrategy(new BossDoorCollisionStrategy(this.entitiesSetter, doors._1, doors._2, doors._3))
+
+    doors._2.setCollisionStrategy(new BossDoorCollisionStrategy(this.entitiesSetter, doors._1, doors._2, doors._3))
+
+    doors._3.setCollisionStrategy(new BossDoorCollisionStrategy(this.entitiesSetter, doors._1, doors._2, doors._3))
+
+    this.level.addEntity(doors._1)
+
+    this.level.addEntity(doors._2)
+
+    this.level.addEntity(doors._3)
+
+    doors._1
   }
 
   override def createChest(size: (Float, Float), position: (Float, Float)): Entity = {
@@ -545,16 +577,9 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Portal,
       EntityCollisionBit.Hero | EntityCollisionBit.Sword, createPolygonalShape(size.PPM), position.PPM)
 
-    val immobileEntity: Entity = ImmobileEntity(EntityType.Portal, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new PortalCollisionStrategy())
-    immobileEntity.setState(State.Opening)
-    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-    executorService.execute(() => {
-      Thread.sleep(1900)
-      immobileEntity.setState(State.Standing)
-      println("Portal opened")
-    })
-    executorService.shutdown()
+    val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Portal, entityBody, size.PPM)
+    immobileEntity.setCollisionStrategy(new PortalCollisionStrategy(immobileEntity, this.level))
+    immobileEntity.setState(State.Closed)
     this.level.addEntity(immobileEntity)
     immobileEntity
   }
@@ -820,5 +845,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def setEntitiesSetter(entitySetter: EntitiesSetter): Unit = this.entitiesSetter = entitySetter
+
 }
 

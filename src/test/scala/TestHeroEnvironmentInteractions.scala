@@ -1,6 +1,6 @@
 import controller.GameEvent._
 import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl}
+import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import model.{HeroInteraction, LadderInteraction, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -12,7 +12,7 @@ class TestHeroEnvironmentInteractions extends AnyFlatSpec{
   private var heroInteraction: Option[HeroInteraction] = Option.empty
 
   private def initialize(): Unit = {
-    new LevelImpl(null, new EntitiesContainerMonitor)
+    new LevelImpl(null, new EntitiesContainerMonitor, new ItemPoolImpl())
     hero = EntitiesFactoryImpl.createHeroEntity(Option.empty)
     heroInteraction = Option.apply(HeroInteraction(interactionCommand, new LadderInteraction(hero)))
   }

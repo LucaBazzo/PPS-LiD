@@ -3,13 +3,13 @@ package model
 import com.badlogic.gdx.Gdx
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter}
+import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter, ItemPool, ItemPoolImpl}
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 import view.screens.helpers.TileMapHelper
 
 trait Model {
 
-  def update(actions: List[GameEvent])
+  def update(actions: List[GameEvent]): Unit
 
   def getCurrentLevelNumber: Int
 
@@ -26,7 +26,7 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
   EntitiesFactoryImpl.setModel(this)
 
   private var level: Option[Level] = Option.empty
-
+  private val itemPool: ItemPool = new ItemPoolImpl()
   private var levelNumber: Int = 0
   private var isLevelActive: Boolean = false
   private var requestedNewLevel: Boolean = false
@@ -74,7 +74,7 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
 
     this.levelNumber += 1
     this.entitiesSetter.setLevelNumber(this.levelNumber)
-    this.level = Option.apply(new LevelImpl(this, entitiesSetter))
+    this.level = Option.apply(new LevelImpl(this, entitiesSetter, this.itemPool))
 
     if(this.levelNumber > 1)
       this.setWorld()
