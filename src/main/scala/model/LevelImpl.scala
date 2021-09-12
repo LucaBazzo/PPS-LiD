@@ -5,7 +5,7 @@ import _root_.utils.EnemiesConstants._
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
-import model.collisions.CollisionManager
+import model.collisions.{CollisionManager, EntityCollisionBit}
 import model.collisions.ImplicitConversions._
 import model.entities.ItemPools.ItemPools
 import model.entities._
@@ -48,7 +48,7 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
   private var isWorldSetted: Boolean = false
 
   // TODO: to be removed
-  //private val item: Item = entitiesFactory.createItem(ItemPools.Default, (10f, 10f), (300, 220), EntityCollisionBit.Hero)
+  private val item: Item = entitiesFactory.createItem(ItemPools.Default, (10f, 10f), (300, 220), EntityCollisionBit.Hero)
   //private var platform: Entity = entitiesFactory.createPlatform((280, 250), (60,2))
   //private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
   //private var chest: Entity = entitiesFactory.createChest((10,10), (480,150))
@@ -61,6 +61,7 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
 //
 //  EntitiesFactoryImpl.createImmobileEntity(size=(100, 10),
 //    position=(0, 10000), collisions = (EntityCollisionBit.Hero|EntityCollisionBit.Enemy).toShort)
+
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(Option.apply(this.world))
