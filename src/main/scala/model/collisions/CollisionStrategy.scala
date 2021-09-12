@@ -1,7 +1,7 @@
 package model.collisions
 
-import model.entities.Statistic.Statistic
-import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
+import model.Level
+import model.entities.{Entity, Hero}
 
 
 trait CollisionStrategy {
@@ -13,4 +13,11 @@ class DoNothingOnCollision() extends CollisionStrategy {
   override def apply(entity: Entity): Unit = {}
 
   override def release(entity: Entity): Unit = {}
+}
+
+class NewLevelOnCollision(level: Level) extends DoNothingOnCollision {
+  override def apply(entity: Entity): Unit = entity match {
+    case h: Hero => this.level.newLevel()
+    case _ =>
+  }
 }

@@ -4,13 +4,11 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.attack.DoNothingAttackStrategy
 import model.collisions.EntityCollisionBit
-import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State._
 import model.entities.Statistic._
 import model.helpers.{EntitiesFactoryImpl, WorldUtilities}
-import model.helpers.EntitiesFactoryImpl.createPolygonalShape
 import model.movement.{DoNothingMovementStrategy, HeroMovementStrategy}
 import model.{EntityBody, HeroInteraction}
 import utils.HeroConstants._
@@ -95,6 +93,12 @@ trait Hero extends LivingEntity {
    *  @return true if it touching a wall
    */
   def isTouchingWallOnSide(rightSide: Boolean = true): Boolean
+
+  /** Check if the hero health is below 0
+   *
+   *  @return true if the hero is dead
+   */
+  def isDead: Boolean
 }
 
 /** Implementation of the Entity Hero that will be command by the player.
@@ -191,20 +195,7 @@ class HeroImpl(private val entityType: EntityType,
   override def isLittle: Boolean = this.little
 
   override def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit = {
-    this.entityBody
-      .setShape(createPolygonalShape(newSize.PPM))
-      .createFixture()
-
-    /*if(!isLittle)
-      this.entityBody.addCoordinates(0, -size._2 * 2 + newSize._2.PPM)
-    else
-      this.entityBody.addCoordinates(0, -size._2 + newSize._2.PPM * 2)*/
-
-    this.setSize(newSize.PPM)
-
-    EntitiesFactoryImpl.createHeroFeet(this)
-
-    this.entityBody.addCoordinates(addCoordinates._1.PPM, addCoordinates._2.PPM)
+    EntitiesFactoryImpl.addPendingEntityCreation(() => EntitiesFactoryImpl.changeHeroFixture(this, newSize, addCoordinates))
   }
 
   override def itemPicked(itemType: Items): Unit = {
@@ -237,6 +228,11 @@ class HeroImpl(private val entityType: EntityType,
         this.setMovementStrategy(DoNothingMovementStrategy())
       }
       else {
+        //hurt when on ladder
+        if((this is LadderClimbing) || (this is LadderDescending) || (this is LadderIdle)){
+          this.restoreNormalMovementStrategy()
+        }
+
         this.stopHero(SHORT_WAIT_TIME)
         this.setState(State.Hurt)
       }
@@ -251,6 +247,8 @@ class HeroImpl(private val entityType: EntityType,
 
   override def getFeet: Option[MobileEntity] = this.feet
 
+  override def isDead: Boolean = this.getStatistic(Statistic.CurrentHealth).get <= 0
+
   private def restoreNormalMovementStrategy(): Unit = {
     this.setMovementStrategy(new HeroMovementStrategy(this, this.getStatistic(MovementSpeed).get))
     this.getEntityBody.setGravityScale()
@@ -261,15 +259,15 @@ class HeroImpl(private val entityType: EntityType,
   private def isNotWaiting: Boolean = this.waitTimer <= 0
   private def decrementWaiting(value: Float): Unit = this.waitTimer -= value
 
-  private def isDead: Boolean = this.getStatistic(Statistic.CurrentHealth).get <= 0
   private def isFalling: Boolean = !this.isTouchingGround && this.entityBody.getBody.getLinearVelocity.y < 0
   private def isMovingHorizontally: Boolean = this.entityBody.getBody.getLinearVelocity.x != 0 && this.entityBody.getBody.getLinearVelocity.y == 0
   private def isIdle = this.entityBody.getBody.getLinearVelocity.x == 0 && this.entityBody.getBody.getLinearVelocity.y == 0
 
-  private def checkFalling: Boolean = isFalling && (this isNot Jumping) && (this isNot LadderDescending)
+  private def checkFalling: Boolean = isFalling && (this isNot Jumping) && (this isNot LadderDescending) && (this isNot LadderClimbing)
   private def checkRunning: Boolean = isMovingHorizontally && ((this is Jumping) || (this is Falling))
   private def checkIdle: Boolean = {
-    isIdle && !isSwordAttacking && (this isNot Crouching) && (this isNot BowAttacking) && (this isNot LadderIdle)
+    isIdle && !isSwordAttacking && (this isNot Crouching) && (this isNot BowAttacking) && (this isNot LadderIdle) &&
+    (this isNot LadderClimbing) && (this isNot LadderDescending)
   }
 
   private def checkNotLittle: Boolean = (this isNot Sliding) && (this isNot Crouching) && isLittle
@@ -283,6 +281,6 @@ class HeroImpl(private val entityType: EntityType,
 
   override def isTouchingWallOnSide(rightSide: Boolean = true): Boolean = {
     WorldUtilities.checkSideCollision(rightSide, this,
-      EntityCollisionBit.Immobile, EntityCollisionBit.Platform, EntityCollisionBit.Door)
+      EntityCollisionBit.Immobile, EntityCollisionBit.Door)
   }
 }

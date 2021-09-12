@@ -1,20 +1,31 @@
 package utils
 
 import model.collisions.ImplicitConversions._
+import model.entities.Statistic
+import model.entities.Statistic.Statistic
 
 object HeroConstants {
 
+  val HERO_STATISTICS_DEFAULT: Map[Statistic, Float] = Map(
+    Statistic.Health -> 1000,
+    Statistic.CurrentHealth -> 1000,
+    Statistic.Strength -> 2000,
+    Statistic.MovementSpeed -> 1,
+    Statistic.Defence -> 0)
+
   val HERO_SIZE: (Float, Float) = (8.5f, 14.9f)
   val HERO_SIZE_SMALL: (Float, Float) = (8.5f, 6f)
-  val HERO_OFFSET: (Float, Float) = (30f, 30)
+
+  //boss room: (2658.0f,90.0f)
+  val HERO_OFFSET: (Float, Float) = (30f, 35)
 
   val CROUCH_OFFSET: (Float, Float) = (0f, -30f)
   val CROUCH_END_OFFSET: (Float, Float) = (0f, 6f)
   val SLIDE_OFFSET: (Float, Float) = (0f, -30f)
 
   val RUN_VELOCITY: Float = 60f.PPM
-  val JUMP_VELOCITY: Float = 170f.PPM
-  val SLIDE_VELOCITY: Float = 150f.PPM
+  val JUMP_VELOCITY: Float = 175f.PPM
+  val SLIDE_VELOCITY: Float = 200f.PPM
 
   val LADDER_CLIMB_VELOCITY: Float = 60f.PPM
 

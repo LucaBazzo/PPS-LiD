@@ -59,13 +59,13 @@ class LivingEntityImpl(private val entityType: EntityType,
         }
         this.alterStatistics(Statistic.CurrentHealth, -trueDamage)
       }
-      if (currentHealth <= 0) {
+      if (this.getStatistic(Statistic.CurrentHealth).get <= 0) {
         this.setState(State.Dying)
       }
     }
   }
 
-  override def getLife: Float = this.stats(Statistic.CurrentHealth)
+  override def getLife: Float = this.getStatistic(Statistic.CurrentHealth).get
 
   override def setAttackStrategy(strategy: AttackStrategy): Unit = this.attackStrategy = strategy
 

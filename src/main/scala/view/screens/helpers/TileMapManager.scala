@@ -40,15 +40,16 @@ class TileMapHelper {
       (getTiledMap(WORLD_BOTTOM_BORDER_NAME), null, WORLD_BOTTOM_BORDER_OFFSET),
       (getTiledMap(HERO_ROOM_MAP_NAME), null, HERO_ROOM_OFFSET),
       (getTiledMap(BOSS_ROOM_MAP_NAME), BOSS_ROOM_MAP_NAME, BOSS_ROOM_OFFSET),
-      (getTiledMap(TOP_KEY_ITEM_ROOM_NAME), TOP_KEY_ITEM_ROOM_NAME, TOP_KEY_ITEM_ROOM_OFFSET),
-      (getTiledMap(BOTTOM_KEY_ITEM_ROOM_NAME), BOTTOM_KEY_ITEM_ROOM_NAME, BOTTOM_KEY_ITEM_ROOM_OFFSET),
       (getTiledMap(innerRooms(0)), null, INNER_ROOM_MAP_OFFSET(0)),
       (getTiledMap(innerRooms(1)), null, INNER_ROOM_MAP_OFFSET(1)),
       (getTiledMap(innerRooms(2)), null, INNER_ROOM_MAP_OFFSET(2)),
       (getTiledMap(innerRooms(3)), null, INNER_ROOM_MAP_OFFSET(3)),
       (getTiledMap(innerRooms(4)), null, INNER_ROOM_MAP_OFFSET(4)),
       (getTiledMap(innerRooms(5)), null, INNER_ROOM_MAP_OFFSET(5)),
-      (getTiledMap(INNER_BORDER_NAMES(Random.nextInt(INNER_BORDER_NAMES.length))), null, INNER_BORDER_OFFSET))
+      (getTiledMap(INNER_BORDER_NAMES(Random.nextInt(INNER_BORDER_NAMES.length))), null, INNER_BORDER_OFFSET),
+      (getTiledMap(TOP_KEY_ITEM_ROOM_NAME), TOP_KEY_ITEM_ROOM_NAME, TOP_KEY_ITEM_ROOM_OFFSET),
+      (getTiledMap(BOTTOM_KEY_ITEM_ROOM_NAME), BOTTOM_KEY_ITEM_ROOM_NAME, BOTTOM_KEY_ITEM_ROOM_OFFSET),
+    )
   }
 
   def renderWorld(orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer) : Unit = {
@@ -95,14 +96,14 @@ class TileMapHelper {
             if(mapName!=null && (mapName.equalsIgnoreCase(TOP_KEY_ITEM_ROOM_NAME) || mapName.equalsIgnoreCase(BOTTOM_KEY_ITEM_ROOM_NAME)))
               if (mapName.contains(keyLocation)) {} //TODO spawnare la chiave per il boss
               else {} //TODO spawnare un oggetto speciale
-            else spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
+            else spawnEntity(() => EntitiesFactoryImpl.createChest(size, position))
           case "ladder" => spawnEntity(() => EntitiesFactoryImpl.createLadder(position, size))
           case "water" => spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position,size))
           case "lava" => spawnEntity(() => EntitiesFactoryImpl.createLavaPool(position, size))
           case "enemy" =>
-            if(mapName!=null && mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME)) spawnEntity(() => EntitiesFactoryImpl.createWizardBossEnemy(position))
-            else spawnEntity(() => EntitiesFactoryImpl.createEnemies(size, position))
-          case "portal" => //TODO spawn portal to new world (inactive)
+            if(mapName!=null && mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME)) spawnEntity(() => EntitiesFactoryImpl.spawnBoss(position))
+            else spawnEntity(() => EntitiesFactoryImpl.spawnEnemies(size, position))
+          case "portal" => spawnEntity(() => EntitiesFactoryImpl.createPortal(size, position))
           case _ => println("not supported layer: " + layer.getName)
         }
       })
