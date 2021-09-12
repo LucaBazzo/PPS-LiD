@@ -33,10 +33,11 @@ class EnemyImpl(private val entityType: EntityType,
 
       this.movementStrategy = this.enemyBehaviour.get.getMovementStrategy
       this.attackStrategy = this.enemyBehaviour.get.getAttackStrategy
+      
+      this.movementStrategy.apply()
+      this.attackStrategy.apply()
     }
 
-    this.movementStrategy.apply()
-    this.attackStrategy.apply()
   }
 
   override def setBehaviour(enemyBehaviour: EnemyBehaviour): Unit = this.enemyBehaviour = Option(enemyBehaviour)
@@ -59,7 +60,6 @@ class EnemyImpl(private val entityType: EntityType,
 
     if (ENEMY_BOSS_TYPES.contains(this.getType)) {
       if (this.heroEntity.getItemsPicked.contains((i:Items) => i == Items.Bow)) {
-        // TODO: cambiare ItemPools.Enemy_Drops con la giusta item pool
         EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
           position=(this.getPosition._1, this.getPosition._2).MPP,
           collisions = EntityCollisionBit.Hero)

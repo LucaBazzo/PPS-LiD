@@ -62,12 +62,6 @@ abstract class MeleeAttackStrategy(override protected val sourceEntity: LivingEn
   protected var attackTimer: Long = 0
 
   override def apply():Unit = {
-    // remove attack box
-//    if (this.isAttackFinished && this.attackInstance.isDefined) {
-//      this.stopAttack()
-//      this.sourceEntity.setState(State.Standing)
-//    }
-
     // activate the attack box to match the displayed animation
     if (!this.isAttackFinished) {
       val attackProgress: Long = System.currentTimeMillis() - this.attackTimer
