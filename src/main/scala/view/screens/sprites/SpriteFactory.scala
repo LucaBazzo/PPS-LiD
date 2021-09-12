@@ -264,6 +264,11 @@ class SpriteFactoryImpl extends SpriteFactory {
     heroSprite.addAnimation(State.Dying,
       this.createSpriteAnimationFromTwoRows(heroSprite, 8, 6, 6,
         9, 0, 5,0.18f))
+    heroSprite.addAnimation(State.AirDownAttacking,
+      this.createSpriteAnimationFromTwoRows(heroSprite, 14, 4, 6,
+        15, 0, 0))
+    heroSprite.addAnimation(State.AirDownAttackingEnd,
+      this.createSpriteAnimation(heroSprite, 15, 1, 3, 0.18f))
   }
 
   private  def defineEnemySkeletonAnimation(sprite:EntitySprite): Unit = {

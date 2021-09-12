@@ -6,6 +6,7 @@ import model.collisions.ImplicitConversions._
 import model.entities.State._
 import model.entities._
 import model.helpers.EntitiesFactoryImpl
+import model.movement.DoNothingMovementStrategy
 import utils.HeroConstants._
 
 /** Implementation of the Hero Attack Strategy with sword and bow.
@@ -23,6 +24,7 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
   override def apply(command: GameEvent): Unit = {
     if (checkCommand(command)) {
       command match {
+        case GameEvent.Attack if isInAir => this.setAirAttack()
         case GameEvent.Attack => this.setSwordAttack()
         case GameEvent.BowAttack => this.setBowAttack()
       }
@@ -57,7 +59,7 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
   private def checkCommand(command: GameEvent): Boolean = {
     command match {
       case GameEvent.Attack => return (entity is Running) || (entity is Standing) ||
-        (entity is Attack01) || (entity is Attack02)
+        (entity is Attack01) || (entity is Attack02) || isInAir
       case GameEvent.BowAttack => return isBowPicked &&
         ((entity is Running) || (entity is Standing))
       case _ => throw new UnsupportedOperationException
@@ -67,7 +69,6 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
 
   private def setSwordAttack(): Unit = {
     this.entity.stopMovement()
-    //this.entity.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(this.entity))))
 
     this.entity.getState match {
       case State.Attack01 if this.attackTimer < WAIT_FOR_ANOTHER_CONSECUTIVE_ATTACK => this.secondSwordAttack()
@@ -144,6 +145,20 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
       this.entity.getPosition, rotatingBodyDistance, angularVelocity, startingAngle, this.entity))
   }
 
+  private def setAirAttack(): Unit = {
+    entity.stopMovement()
+    entity.setMovementStrategy(DoNothingMovementStrategy())
+    entity.setVelocityY(-AIR_DOWN_ATTACK_VELOCITY)
+    this.setAirSwordPattern(AIR_SWORD_ATTACK_SIZE, AIR_SWORD_ATTACK_OFFSET)
+    entity setState AirDownAttacking
+    entity setAirAttacking true
+  }
+
+  private def setAirSwordPattern(bodySize: (Float, Float), bodyDistance: (Float, Float)): Unit = {
+    this.attackPattern = Option.apply(EntitiesFactoryImpl.createAirAttackPattern(EntityType.Mobile,
+      bodySize, bodyDistance, this.entity))
+  }
+
   private def setBowAttack(): Unit = {
     this.entity.stopMovement()
     this.entity.setState(State.BowAttacking)
@@ -159,4 +174,6 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
   }
 
   private def isBowPicked: Boolean = this.entity.isItemPicked(Items.Bow)
+
+  private def isInAir: Boolean = (entity is Jumping) || (entity is Somersault) || (entity is Falling)
 }

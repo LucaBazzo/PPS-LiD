@@ -99,6 +99,12 @@ trait Hero extends LivingEntity {
    *  @return true if the hero is dead
    */
   def isDead: Boolean
+
+  /** Notify the hero if he is doing an air attack.
+   *
+   *  @param isAttacking true if the air attack has begun
+   */
+  def setAirAttacking(isAttacking: Boolean): Unit
 }
 
 /** Implementation of the Entity Hero that will be command by the player.
@@ -121,6 +127,8 @@ class HeroImpl(private val entityType: EntityType,
 
   private var little: Boolean = false
   private var waitTimer: Float = 0
+
+  private var isAirAttacking: Boolean = false
 
   override def notifyCommand(command: GameEvent): Unit = {
     if(this.interaction.nonEmpty && this.interaction.get.command == command)
@@ -153,12 +161,17 @@ class HeroImpl(private val entityType: EntityType,
       if(this.isSlidingFinished)
         this.stopMovement()
 
+      if(isAirAttackFinished)
+        this.finishAirAttack()
+
       if(isDead)
         this.setState(State.Dying)
       else if(checkFalling)
         this.setState(State.Falling)
       else if(checkRunning)
         this.setState(State.Running)
+      else if(!isFalling && (this is AirDownAttacking))
+        this.setAirDownAttackEnd()
       else if(checkIdle)
         this.setState(State.Standing)
 
@@ -247,6 +260,13 @@ class HeroImpl(private val entityType: EntityType,
 
   override def getFeet: Option[MobileEntity] = this.feet
 
+  override def isTouchingWallOnSide(rightSide: Boolean = true): Boolean = {
+    WorldUtilities.checkSideCollision(rightSide, this,
+      EntityCollisionBit.Immobile, EntityCollisionBit.Door)
+  }
+
+  override def setAirAttacking(isAttacking: Boolean): Unit = this.isAirAttacking = isAttacking
+
   override def isDead: Boolean = this.getStatistic(Statistic.CurrentHealth).get <= 0
 
   private def restoreNormalMovementStrategy(): Unit = {
@@ -263,7 +283,7 @@ class HeroImpl(private val entityType: EntityType,
   private def isMovingHorizontally: Boolean = this.entityBody.getBody.getLinearVelocity.x != 0 && this.entityBody.getBody.getLinearVelocity.y == 0
   private def isIdle = this.entityBody.getBody.getLinearVelocity.x == 0 && this.entityBody.getBody.getLinearVelocity.y == 0
 
-  private def checkFalling: Boolean = isFalling && (this isNot Jumping) && (this isNot LadderDescending) && (this isNot LadderClimbing)
+  private def checkFalling: Boolean = isFalling && (this isNot Jumping) && (this isNot LadderDescending) && (this isNot LadderClimbing) && (this isNot AirDownAttacking)
   private def checkRunning: Boolean = isMovingHorizontally && ((this is Jumping) || (this is Falling))
   private def checkIdle: Boolean = {
     isIdle && !isSwordAttacking && (this isNot Crouching) && (this isNot BowAttacking) && (this isNot LadderIdle) &&
@@ -272,15 +292,22 @@ class HeroImpl(private val entityType: EntityType,
 
   private def checkNotLittle: Boolean = (this isNot Sliding) && (this isNot Crouching) && isLittle
   private def isSwordAttacking: Boolean = (this is Attack01) || (this is Attack02) || (this is Attack03)
-  private def isSwordAttackFinished: Boolean = this.isSwordAttacking && this.attackStrategy.isAttackFinished
   private def isBowAttackFinished: Boolean = (this is BowAttacking) && this.attackStrategy.isAttackFinished
   private def isSlidingFinished: Boolean = {
     (this.entityBody.getBody.getLinearVelocity.x <= 1 && (this is Sliding) && isFacingRight) ||
       (this.entityBody.getBody.getLinearVelocity.x >= -1 && (this is Sliding) && !isFacingRight)
   }
 
-  override def isTouchingWallOnSide(rightSide: Boolean = true): Boolean = {
-    WorldUtilities.checkSideCollision(rightSide, this,
-      EntityCollisionBit.Immobile, EntityCollisionBit.Door)
+  private def setAirDownAttackEnd(): Unit = {
+    this.stopHero(LONG_WAIT_TIME)
+    this.setState(AirDownAttackingEnd)
+  }
+
+  private def isAirAttackFinished: Boolean = isAirAttacking && (this isNot AirDownAttacking) && (this isNot AirDownAttackingEnd)
+
+  private def finishAirAttack(): Unit = {
+    this.attackStrategy.stopAttack()
+    this.restoreNormalMovementStrategy()
+    this.setAirAttacking(false)
   }
 }

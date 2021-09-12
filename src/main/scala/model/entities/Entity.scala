@@ -14,7 +14,7 @@ object State extends Enumeration {
   val Standing, Crouching, Sliding,
       Running, Jumping, Falling, Somersault,
       LadderClimbing, LadderDescending, LadderIdle,
-      Attack01, Attack02, Attack03, BowAttacking,
+      Attack01, Attack02, Attack03, BowAttacking, AirDownAttacking, AirDownAttackingEnd,
       Dying, Hurt, pickingItem, Opening = Value
 }
 
