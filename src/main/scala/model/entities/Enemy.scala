@@ -31,9 +31,12 @@ class EnemyImpl(private val entityType: EntityType,
     if (state != State.Dying && this.enemyBehaviour.isDefined) {
       this.enemyBehaviour.get.apply()
 
-      this.enemyBehaviour.get.getMovementStrategy.apply()
-      this.enemyBehaviour.get.getAttackStrategy.apply()
+      this.movementStrategy = this.enemyBehaviour.get.getMovementStrategy
+      this.attackStrategy = this.enemyBehaviour.get.getAttackStrategy
     }
+
+    this.movementStrategy.apply()
+    this.attackStrategy.apply()
   }
 
   override def setBehaviour(enemyBehaviour: EnemyBehaviour): Unit = this.enemyBehaviour = Option(enemyBehaviour)

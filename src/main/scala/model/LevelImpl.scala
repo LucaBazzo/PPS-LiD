@@ -1,15 +1,15 @@
 package model
 
 import _root_.utils.ApplicationConstants._
+import _root_.utils.EnemiesConstants._
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
+import model.collisions.CollisionManager
 import model.collisions.ImplicitConversions._
-import model.collisions.{CollisionManager, EntityCollisionBit}
 import model.entities.ItemPools.ItemPools
 import model.entities._
 import model.helpers._
-import _root_.utils.EnemiesConstants._
 
 trait Level {
 
@@ -44,11 +44,11 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity(this.entitiesSetter.asInstanceOf[EntitiesGetter].getHeroStatistics)
-  private val item: Item = entitiesFactory.createItem(ItemPools.Default, (10f, 10f), (300, 220), EntityCollisionBit.Hero)
 
   private var isWorldSetted: Boolean = false
 
   // TODO: to be removed
+  //private val item: Item = entitiesFactory.createItem(ItemPools.Default, (10f, 10f), (300, 220), EntityCollisionBit.Hero)
   //private var platform: Entity = entitiesFactory.createPlatform((280, 250), (60,2))
   //private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
   //private var chest: Entity = entitiesFactory.createChest((10,10), (480,150))
@@ -56,6 +56,11 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
   //EntitiesFactoryImpl.createSkeletonEnemy((HeroConstants.HERO_OFFSET._1+70, HeroConstants.HERO_OFFSET._2))
   //private var water: Entity = entitiesFactory.createWaterPool((200,290), (100,15))
   //EntitiesFactoryImpl.createSlimeEnemy((HeroConstants.HERO_OFFSET._1+110, HeroConstants.HERO_OFFSET._2))
+
+//  EntitiesFactoryImpl.createSlimeEnemy((0, 10010))
+//
+//  EntitiesFactoryImpl.createImmobileEntity(size=(100, 10),
+//    position=(0, 10000), collisions = (EntityCollisionBit.Hero|EntityCollisionBit.Enemy).toShort)
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(Option.apply(this.world))

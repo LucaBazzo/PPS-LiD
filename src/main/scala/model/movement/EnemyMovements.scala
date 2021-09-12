@@ -29,8 +29,7 @@ class FaceTarget(val sourceEntity: MobileEntity, val targetEntity: Entity) exten
   override def stopMovement(): Unit = { }
 }
 
-class PatrolPlatform(val sourceEntity: MobileEntity,
-                     val targetEntity: Entity) extends MovementStrategy {
+class PatrolPlatform(val sourceEntity: MobileEntity) extends MovementStrategy {
 
   protected val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
   protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
@@ -80,8 +79,8 @@ class PatrolPlatform(val sourceEntity: MobileEntity,
 }
 
 class PatrolAndStop(override val sourceEntity:MobileEntity,
-                    override val targetEntity:Entity)
-  extends PatrolPlatform(sourceEntity, targetEntity) {
+                    val targetEntity:Entity)
+  extends PatrolPlatform(sourceEntity) {
 
   protected val visionDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance).get
   protected val visionAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle).get

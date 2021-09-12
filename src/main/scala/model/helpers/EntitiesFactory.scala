@@ -10,7 +10,7 @@ import com.badlogic.gdx.physics.box2d.joints.{RevoluteJointDef, WeldJointDef}
 import model._
 import model.attack._
 import model.collisions.ImplicitConversions._
-import model.collisions._
+import model.collisions.{EntityCollisionBit, _}
 import model.entities.EntityType.EntityType
 import model.entities.ItemPools.ItemPools
 import model.entities.Statistic.Statistic
@@ -141,7 +141,9 @@ trait EntitiesFactory {
   def addPendingEntityCreation(r:() => Unit): Unit
   def createPendingEntities(): Unit
 
-  def setEntitiesSetter(entitySetter: EntitiesSetter): Unit
+  def setEntitiesSetter(entitySetter: EntitiesSetter)
+
+  def changeHeroFixture(hero: Hero, newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0))
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -189,8 +191,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     }
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Enemy | EntityCollisionBit.Platform | EntityCollisionBit.Pool |
-        EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.Portal | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
+      EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Platform | EntityCollisionBit.Pool |
+        EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, stats)
 
@@ -204,6 +206,18 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     hero
   }
 
+  override def changeHeroFixture(hero: Hero, newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit = {
+    hero.getEntityBody
+      .setShape(createPolygonalShape(newSize.PPM))
+      .createFixture()
+
+    hero.getEntityBody.addCoordinates(0, -hero.getSize._2 + newSize._2.PPM)
+
+    hero.setSize(newSize.PPM)
+
+    EntitiesFactoryImpl.createHeroFeet(hero)
+  }
+
   override def createHeroFeet(hero: Hero): Unit = {
     if(hero.getFeet.nonEmpty) {
       EntitiesFactoryImpl.destroyBody(hero.getFeet.get.getBody)
@@ -213,7 +227,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val feetSize: (Float, Float) = (8.0f, 0.2f)
     val bodyPosition = hero.getPosition - (0, hero.getSize._2)
     val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Enemy | EntityCollisionBit.Immobile | EntityCollisionBit.Platform, createEdgeShape(feetSize),
+      EntityCollisionBit.Immobile | EntityCollisionBit.Platform | EntityCollisionBit.Door, createEdgeShape(feetSize),
       bodyPosition, gravityScale = 0, friction = 0.8f)
     EntitiesFactoryImpl.createJoint(hero.getBody, feetBody.getBody)
 
@@ -233,8 +247,14 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val lowerSize = (size._1 - 2, size._2)
     val lowerPosition = (position._1, position._2 - 5)
 
+    //messo per riferimento a prima da rimuovere quando si vede che non servirà a nulla
+    /*val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
+      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape((size._1.PPM , size._2.PPM + 2.PPM )),
+      (position._1.PPM, position._2.PPM - 2.PPM))*/
+
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
-      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(size.PPM), position.PPM)
+      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape((size._1.PPM , size._2.PPM)),
+      (position._1.PPM, position._2.PPM))
 
     val entityBodyUpper: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
       EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(upperSize.PPM), upperPosition.PPM, isSensor = true)

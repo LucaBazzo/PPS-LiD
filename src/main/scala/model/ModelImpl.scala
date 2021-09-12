@@ -82,9 +82,9 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
 
   private def setWorld(): Unit = {
     Gdx.app.postRunnable(() => {
-        tileMapHelper.loadTiledMaps()
-        tileMapHelper.setWorld()
-      })
+      tileMapHelper.loadTiledMaps()
+      tileMapHelper.setWorld()
+    })
     this.isLevelActive = true
   }
 }
