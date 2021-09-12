@@ -26,6 +26,7 @@ class ApplyDamage(private val target: Entity => Boolean,
 
   override def apply(entity: Entity): Unit = {
     if (target(entity)) {
+      println("ENTITY " + entity + " suffer damage")
       entity.asInstanceOf[LivingEntity].sufferDamage(stats(Statistic.Strength))
     }
   }

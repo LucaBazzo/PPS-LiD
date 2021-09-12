@@ -32,8 +32,6 @@ trait EntitiesFactory {
 
   def createHeroEntity(statistics: Option[Map[Statistic, Float]]): Hero
 
-  def createHeroFeet(hero: Hero): Unit
-
   def createEnemyEntity(position: (Float, Float),
                         size: (Float, Float),
                         stats: Map[Statistic, Float],
@@ -125,6 +123,11 @@ trait EntitiesFactory {
   def setEntitiesSetter(entitySetter: EntitiesSetter)
 
   def changeHeroFixture(hero: Hero, newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0))
+
+  def createAirAttackPattern(entityType: EntityType = EntityType.Mobile,
+                             bodySize: (Float, Float),
+                             bodyDistance: (Float, Float),
+                             sourceEntity: LivingEntity): MobileEntity
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -168,7 +171,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
       EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Platform | EntityCollisionBit.Pool |
-        EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 0.8f)
+        EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 1.2f)
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, stats)
 
@@ -194,7 +197,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     EntitiesFactoryImpl.createHeroFeet(hero)
   }
 
-  override def createHeroFeet(hero: Hero): Unit = {
+  private def createHeroFeet(hero: Hero): Unit = {
     if(hero.getFeet.nonEmpty) {
       EntitiesFactoryImpl.destroyBody(hero.getFeet.get.getBody)
       EntitiesFactoryImpl.removeEntity(hero.getFeet.get)
@@ -204,7 +207,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val bodyPosition = hero.getPosition - (0, hero.getSize._2)
     val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
       EntityCollisionBit.Immobile | EntityCollisionBit.Platform | EntityCollisionBit.Door, createEdgeShape(feetSize),
-      bodyPosition, gravityScale = 0, friction = 0.8f)
+      bodyPosition, gravityScale = 0, friction = 1.2f)
     EntitiesFactoryImpl.createJoint(hero.getBody, feetBody.getBody)
 
     val heroFeet: MobileEntity = new MobileEntityImpl(EntityType.Mobile, feetBody, feetSize.PPM)
@@ -472,6 +475,28 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     this.level.addEntity(circularMobileEntity)
     circularMobileEntity
+  }
+
+  override def createAirAttackPattern(entityType: EntityType = EntityType.Mobile,
+                                      bodySize: (Float, Float),
+                                      bodyDistance: (Float, Float),
+                                      sourceEntity: LivingEntity): MobileEntity = {
+
+    val pivotPoint: (Float, Float) = sourceEntity.getPosition
+
+    val bodyPosition = (pivotPoint._1 + bodyDistance._1.PPM, pivotPoint._2 + bodyDistance._2.PPM)
+
+    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Sword,
+      EntityCollisionBit.Enemy | EntityCollisionBit.Door, createPolygonalShape(bodySize.PPM),
+      bodyPosition, gravityScale = 0, friction = 1.2f, isSensor = true)
+
+    EntitiesFactoryImpl.createJoint(sourceEntity.getBody, entityBody.getBody)
+
+    val airSword: MobileEntity = new AirSwordMobileEntity(EntityType.Mobile, entityBody, bodySize.PPM)
+    airSword.setCollisionStrategy(new ApplyDamage((e:Entity) => e.isInstanceOf[Enemy], sourceEntity.getStatistics))
+
+    this.level.addEntity(airSword)
+    airSword
   }
 
   override def createFireballAttack(sourceEntity: LivingEntity, targetEntity: Entity): MobileEntity = {
