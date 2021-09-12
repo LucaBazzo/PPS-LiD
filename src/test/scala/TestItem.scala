@@ -19,14 +19,9 @@ class TestItem extends AnyFlatSpec {
     monitor
   }
 
-  "A Level" must "start with an Item from default pool" in {
-    val monitor: EntitiesContainerMonitor = this.initialize()
-    val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
-    assert(DEFAULT_ITEMS.contains(item.getName))
-  }
-
   "In a Level" should "spawn items from every pool" in {
     val monitor: EntitiesContainerMonitor = this.initialize()
+    EntitiesFactoryImpl.createItem(ItemPools.Default)
     val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
     EntitiesFactoryImpl.createItem(ItemPools.Boss)
     val item2: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
@@ -87,7 +82,7 @@ class TestItem extends AnyFlatSpec {
     val monitor: EntitiesContainerMonitor = this.initialize()
     var itemList1: List[Items] = List()
     var itemList2: List[Items] = List()
-    for(_ <- List.range(0, DEFAULT_ITEMS.length - 1))
+    for(_ <- List.range(0, DEFAULT_ITEMS.length))
     {
       EntitiesFactoryImpl.createItem(ItemPools.Default)
     }
@@ -112,7 +107,7 @@ class TestItem extends AnyFlatSpec {
     var itemList1: List[Items] = List()
     var itemList2: List[Items] = List()
 
-    for(_ <- List.range(0, DEFAULT_ITEMS.length + 1))
+    for(_ <- List.range(0, DEFAULT_ITEMS.length + 2))
     {
       EntitiesFactoryImpl.createItem(ItemPools.Default)
     }
