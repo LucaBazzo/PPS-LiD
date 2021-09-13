@@ -45,6 +45,7 @@ class ViewImpl(private val entitiesGetter: EntitiesGetter,
 
   override def terminate(): Unit = {
     this.executorService.shutdownNow()
+//    Gdx.app.postRunnable(() => Gdx.app.exit())
     Gdx.app.exit()
   }
 

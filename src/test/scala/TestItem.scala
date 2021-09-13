@@ -74,7 +74,7 @@ class TestItem extends AnyFlatSpec {
       val prevLife: Float = hero.getStatistics(Statistic.CurrentHealth)
       item.collisionDetected(Option.apply(hero))
       val actLife: Float = hero.getStatistics(Statistic.CurrentHealth)
-      assert(item.collect()._1.get.head._2 <= (actLife - prevLife))
+      assert(item.collect()._1.get.head._2 <= (actLife - prevLife + 1))
     }
   }
 
