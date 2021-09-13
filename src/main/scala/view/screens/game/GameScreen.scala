@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
 import model.collisions.ImplicitConversions.{RichFloat, RichInt}
+import model.entities.Items.Items
 import model.entities._
 import model.helpers.{EntitiesGetter, EntitiesUtilities}
 import utils.ApplicationConstants._
@@ -83,6 +84,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         this.camera.position.x = hero.getPosition._1
         this.camera.position.y = hero.getPosition._2
         this.hud.changeHealth(hero.getStatistics(Statistic.CurrentHealth), hero.getStatistics(Statistic.Health))
+        val itemPicked: Option[Items] = entitiesGetter.hasHeroPickedUpItem
+        if(itemPicked.nonEmpty)
+          this.hud.addNewItem(itemPicked.get)
       }
 
       val message: Option[String] = entitiesGetter.getMessage

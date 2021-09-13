@@ -4,8 +4,8 @@
   <image source="../textures/final-tileset.png" width="208" height="208"/>
   <tile id="135">
    <animation>
-    <frame tileid="135" duration="100"/>
-    <frame tileid="167" duration="100"/>
+    <frame tileid="135" duration="300"/>
+    <frame tileid="167" duration="300"/>
    </animation>
   </tile>
   <tile id="209">

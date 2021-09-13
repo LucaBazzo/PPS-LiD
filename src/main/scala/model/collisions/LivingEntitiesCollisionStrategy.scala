@@ -15,7 +15,7 @@ class FeetCollisionStrategy extends DoNothingOnCollision {
 
 class CollisionStrategyImpl extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
-    case i:Item =>  println("Collect item: " + i.getEnumVal)
+    case i:Item =>  println("Collect item: " + i.getName)
     case _ => println("Collision Detected with" + entity.toString)
   }
 }

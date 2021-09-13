@@ -107,6 +107,8 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 7), loop = true)
       sprite.addAnimation(State.Opening,
         spriteFactory.createSpriteAnimation(sprite, 1, 0, 7))
+      sprite.addAnimation(State.Closed,
+        spriteFactory.createSpriteAnimation(sprite, 1, 3, 3))
       sprite
     case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile | EntityType.Ladder | EntityType.Platform => null
     case _ => null

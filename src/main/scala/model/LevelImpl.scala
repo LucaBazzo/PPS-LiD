@@ -11,6 +11,8 @@ import model.entities.ItemPools.ItemPools
 import model.entities._
 import model.helpers._
 
+import java.util.concurrent.{ExecutorService, Executors}
+
 trait Level {
 
   def updateEntities(actions: List[GameEvent]): Unit
@@ -23,8 +25,6 @@ trait Level {
 
   def getEntities(predicate: Entity => Boolean): List[Entity]
 
-  def spawnItem(pool: ItemPools.ItemPools): Unit
-
   def getWorld: World
 
   def newLevel(): Unit
@@ -32,13 +32,13 @@ trait Level {
   def dispose(): Unit
 }
 
-class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSetter) extends Level {
+class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSetter, private val itemPool: ItemPool) extends Level {
 
   private val world: World = new World(GRAVITY_FORCE, true)
   WorldUtilities.setWorld(world)
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
-  entitiesFactory.setLevel(this, new ItemPoolImpl())
+  entitiesFactory.setLevel(this, itemPool)
   entitiesFactory.setEntitiesSetter(this.entitiesSetter)
 
   private var entitiesList: List[Entity] = List.empty
@@ -46,22 +46,6 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
   private val hero: Hero = entitiesFactory.createHeroEntity(this.entitiesSetter.asInstanceOf[EntitiesGetter].getHeroStatistics)
 
   private var isWorldSetted: Boolean = false
-
-  // TODO: to be removed
-  private val item: Item = entitiesFactory.createItem(ItemPools.Default, (10f, 10f), (300, 220), EntityCollisionBit.Hero)
-  //private var platform: Entity = entitiesFactory.createPlatform((280, 250), (60,2))
-  //private var ladder: Entity = entitiesFactory.createLadder((280,200),(10,100))
-  //private var chest: Entity = entitiesFactory.createChest((10,10), (480,150))
-  //private var portal: Entity = entitiesFactory.createPortal((10,30), (200, 220))
-  //EntitiesFactoryImpl.createSkeletonEnemy((HeroConstants.HERO_OFFSET._1+70, HeroConstants.HERO_OFFSET._2))
-  //private var water: Entity = entitiesFactory.createWaterPool((200,290), (100,15))
-  //EntitiesFactoryImpl.createSlimeEnemy((HeroConstants.HERO_OFFSET._1+110, HeroConstants.HERO_OFFSET._2))
-
-//  EntitiesFactoryImpl.createSlimeEnemy((0, 10010))
-//
-//  EntitiesFactoryImpl.createImmobileEntity(size=(100, 10),
-//    position=(0, 10000), collisions = (EntityCollisionBit.Hero|EntityCollisionBit.Enemy).toShort)
-
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(Option.apply(this.world))
@@ -101,15 +85,19 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
     }
 
     if (ENEMY_BOSS_TYPES.contains(entity.getType)) {
-      // TODO: mettere qui il cambio di stato del portale
+      val portal = this.getEntity(x => x.getType == EntityType.Portal)
+      portal.setState(State.Opening)
+      val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+      executorService.execute(() => {
+        Thread.sleep(1900)
+        portal.setState(State.Standing)
+        println("Portal opened")
+      })
+      //executorService.shutdown()
     }
   }
 
   override def getWorld: World = this.world
-
-  override def spawnItem(pool: ItemPools): Unit = {
-    entitiesFactory.createItem(pool)
-  }
 
   private var accumulator: Float = 0f
 
@@ -127,6 +115,8 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
 
   override def newLevel(): Unit = {
     this.entitiesSetter.setHeroStatistics(this.hero.getStatistics)
+    this.itemPool.resetBossPool()
+    this.hero.loseItem(Items.Key)
     this.model.requestLevel()
   }
 

@@ -3,7 +3,7 @@ package model.collisions
 import controller.GameEvent
 import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
 import model.helpers.EntitiesSetter
-import model.{ChestInteraction, DoorInteraction, HeroInteraction, LadderInteraction, PlatformInteraction}
+import model.{ChestInteraction, DoorInteraction, HeroInteraction, LadderInteraction, Level, PlatformInteraction}
 
 import java.util.concurrent.{ExecutorService, Executors}
 
@@ -12,8 +12,9 @@ class ItemCollisionStrategy(private val item: Item, private val entitiesMonitor:
     case h:Hero => println("Hero picked up item")
                    val effect = item.collect()
                    println(effect._2 + "\n +" + item.getScore + " points")
-                   h.itemPicked(item.getEnumVal)
+                   h.itemPicked(item.getName)
                    entitiesMonitor.addMessage(effect._2)
+                   entitiesMonitor.heroJustPickedUpItem(item.getName)
                    if(effect._1.nonEmpty) {
                      for(stat <- effect._1.get) {
                        if(stat._1.equals(Statistic.CurrentHealth))
@@ -31,11 +32,10 @@ class DoorCollisionStrategy(private val entitySetter: EntitiesSetter,
                             private val doorSensorLeft: ImmobileEntity,
                             private val doorSensorRight: ImmobileEntity) extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => {
-      this.entitySetter.addMessage("Press F to open the door")
+    case h: Hero =>
+      this.entitySetter.addMessage("Press Space to open the door")
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new DoorInteraction(h, this.door,
         doorSensorLeft, doorSensorRight))))
-    }
     case _: CircularMobileEntity => println("Hero destroyed door")
       this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
       this.doorSensorLeft.changeCollisions(EntityCollisionBit.OpenedDoor)
@@ -58,7 +58,7 @@ class BossDoorCollisionStrategy(private val entitySetter: EntitiesSetter,
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => if(h.isItemPicked(Items.Key) || h.isItemPicked(Items.SkeletonKey))
         {
-          this.entitySetter.addMessage("Press F to open the door")
+          this.entitySetter.addMessage("Press Space to open the door")
           h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new DoorInteraction(h,this.door,
             doorSensorLeft,doorSensorRight))))
         }
@@ -89,10 +89,11 @@ class WaterCollisionStrategy() extends DoNothingOnCollision {
 }
 
 class LavaCollisionStrategy(private val collisMonitor: CollisionMonitor) extends DoNothingOnCollision {
-  val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+  var executorService: ExecutorService = _
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => println("Hero stands in lava")
       collisMonitor.playerInLava()
+      this.executorService = Executors.newSingleThreadExecutor()
       executorService.execute(() => {
         while(collisMonitor.isPlayerInsideLava) {
           h.sufferDamage(100)
@@ -102,13 +103,13 @@ class LavaCollisionStrategy(private val collisMonitor: CollisionMonitor) extends
           Thread.sleep(1000)
         }
       })
-      executorService.shutdown()
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
     case _: Hero => println("Hero out of lava")
       collisMonitor.playerOutOfLava()
+      executorService.shutdown()
     case _ =>
   }
 }
@@ -118,7 +119,7 @@ class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
                                 private val lowerPlatform: ImmobileEntity,
                                      private val monitor: CollisionMonitor) extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero standing on Platform" + "\n")
+    case h: Hero => println("Hero standing on Platform")
                     h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new PlatformInteraction(h,
                       this.upperPlatform, this.platform, this.lowerPlatform, monitor))))
     case _ =>
@@ -154,7 +155,7 @@ class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
     case _: Hero => println("Hero leaving Platform")
       val executorService: ExecutorService = Executors.newSingleThreadExecutor()
       executorService.execute(() => {
-        Thread.sleep(1000)
+        Thread.sleep(1200)
         platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
         upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
         lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
@@ -168,23 +169,24 @@ class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
 class ChestCollisionStrategy(private val entitiesSetter: EntitiesSetter,
                              private val chest: ImmobileEntity) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => print("Hero touches chest" + "\n")
+    case h: Hero => println("Hero touches chest")
       this.entitiesSetter.addMessage("Press F to open the chest")
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new ChestInteraction(h,chest))))
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
-    case h:Hero => print("Hero not touching chest anymore" + "\n")
+    case h:Hero => println("Hero not touching chest anymore")
       h.setEnvironmentInteraction(Option.empty)
     case _ =>
   }
 }
 
-class PortalCollisionStrategy() extends CollisionStrategy {
+class PortalCollisionStrategy(private val portal: ImmobileEntity, private val level: Level) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => print("Hero touches portal" + "\n")
-      //h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new PortalInteraction(h))))
+    case h: Hero => println("Hero touches portal")
+      if(this.portal.getState == State.Standing)
+        this.level.newLevel()
     case _ =>
   }
 

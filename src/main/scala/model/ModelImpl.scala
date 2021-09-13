@@ -3,12 +3,17 @@ package model
 import controller.GameEvent.GameEvent
 import controller.{GameEvent, Observer}
 import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter}
+import model.collisions.EntityCollisionBit
+import model.collisions.ImplicitConversions.RichFloat
+import model.entities.{EntityType, Statistic}
+import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter, ItemPool, ItemPoolImpl}
+import model.movement.PatrolPlatform
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 import view.screens.helpers.TileMapHelper
 
 trait Model {
 
-  def update(actions: List[GameEvent])
+  def update(actions: List[GameEvent]): Unit
 
   def getCurrentLevelNumber: Int
 
@@ -30,7 +35,7 @@ class ModelImpl(private val controller: Observer,
   EntitiesFactoryImpl.setModel(this)
 
   private var level: Option[Level] = Option.empty
-
+  private val itemPool: ItemPool = new ItemPoolImpl()
   private var levelNumber: Int = 0
   private var isLevelActive: Boolean = false
   private var requestedNewLevel: Boolean = false
@@ -78,7 +83,7 @@ class ModelImpl(private val controller: Observer,
 
     this.levelNumber += 1
     this.entitiesSetter.setLevelNumber(this.levelNumber)
-    this.level = Option.apply(new LevelImpl(this, entitiesSetter))
+    this.level = Option.apply(new LevelImpl(this, entitiesSetter, this.itemPool))
 
     if(this.levelNumber > 1)
       this.loadWorld()

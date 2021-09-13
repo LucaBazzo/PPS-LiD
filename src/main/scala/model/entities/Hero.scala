@@ -73,7 +73,7 @@ trait Hero extends LivingEntity {
    *
    *  @param feet a mobile entity that will be attached at the bottom of the hero body
    */
-  def setFeet(feet: MobileEntity)
+  def setFeet(feet: MobileEntity): Unit
 
   /** Returns the hero's feet.
    *
@@ -105,6 +105,12 @@ trait Hero extends LivingEntity {
    *  @param isAttacking true if the air attack has begun
    */
   def setAirAttacking(isAttacking: Boolean): Unit
+
+  /** Remove one of Hero's held items
+   *
+   *  @param item item to be losed
+   */
+  def loseItem(item: Items): Unit
 }
 
 /** Implementation of the Entity Hero that will be command by the player.
@@ -221,6 +227,10 @@ class HeroImpl(private val entityType: EntityType,
   override def getItemsPicked: List[Items] = this.itemsPicked
 
   override def isItemPicked(item: Items): Boolean = this.itemsPicked.contains(item)
+
+  override def loseItem(item: Items): Unit = {
+    this.itemsPicked = this.itemsPicked.filter(x => x != item)
+  }
 
   override def setEnvironmentInteraction(interaction: Option[HeroInteraction]): Unit = {
     this.interaction = interaction

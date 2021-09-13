@@ -2,7 +2,7 @@ import controller.GameEvent._
 import model.LevelImpl
 import model.entities.Statistic._
 import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl}
+import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 import utils.HeroConstants.JUMP_VELOCITY
 
@@ -12,7 +12,7 @@ class TestHero extends AnyFlatSpec{
 
   private def initialize(): Unit = {
     //TODO null temporaneo
-    new LevelImpl(null, new EntitiesContainerMonitor)
+    new LevelImpl(null, new EntitiesContainerMonitor, new ItemPoolImpl())
     hero = EntitiesFactoryImpl.createHeroEntity(Option.empty)
   }
 
