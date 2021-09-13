@@ -66,6 +66,11 @@ object WorldUtilities extends WorldUtilities {
       output = canFixturesCollide(sourceFixture, fixture)
       !output // automatically stop consecutive queries if a match has been found
     }, x1, y1, x2, y2)
+
+    // testing utility (inefficient AF)
+    // import model.collisions.ImplicitConversions._
+    // EntitiesFactoryImpl.createImmobileEntity(size=(x2-x1, y2-y1).MPP, position=((x2+x1)/2, (y2+y1)/2).MPP)
+
     output
   }
 
@@ -146,16 +151,16 @@ object WorldUtilities extends WorldUtilities {
   override def isPathObstructedOnTheLeft(body: Body, size:(Float, Float), offset:Float = 5f.PPM): Boolean = {
     val position = body.getWorldCenter
     checkCollision(
-      position.x - size._1 / 2 - offset, position.y - size._2 / 2,
-      position.x - size._1 / 2 - offset, position.y + size._2 / 2,
+      position.x - size._1 - offset, position.y - size._2/2,
+      position.x - size._1 - offset, position.y + size._2/2,
       body)
   }
 
   override def isPathObstructedOnTheRight(body: Body, size:(Float, Float), offset:Float = 5f.PPM): Boolean = {
     val position = body.getWorldCenter
     checkCollision(
-      position.x + size._1 / 2 + offset, position.y - size._2 / 2,
-      position.x + size._1 / 2 + offset, position.y + size._2 / 2,
+      position.x + size._1 + offset, position.y - size._2/2,
+      position.x + size._1 + offset, position.y + size._2/2,
       body)
   }
 
