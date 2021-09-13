@@ -49,6 +49,8 @@ trait AttackStrategy {
  */
 case class DoNothingAttackStrategy() extends AttackStrategy {
 
+  override def apply(): Unit = { }
+
   override def apply(command: GameEvent): Unit = {}
 
   override def stopAttack(): Unit = {}

@@ -339,7 +339,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
 
     // first behaviour - do nothing for some time
-    behaviours.addBehaviour("1", new DoNothingOnCollision(), new DoNotMove(), new DoNotAttack())
+    behaviours.addBehaviour("1", new DoNothingOnCollision(), DoNothingMovementStrategy(), DoNothingAttackStrategy())
 
     // second behaviour - attack hero if near
     val p2AttackStrategy = new WizardFirstAttack(enemy, targetEntity)

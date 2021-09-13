@@ -4,14 +4,6 @@ import com.badlogic.gdx.math.Vector2
 import model.entities.{Entity, MobileEntity, State, Statistic}
 import model.helpers.EntitiesUtilities._
 
-// TODO: replace with MovementStratey.DoNothingMovementStrategy
-class DoNotMove() extends MovementStrategy {
-  override def apply(): Unit = { }
-
-  override def stopMovement(): Unit = { }
-
-}
-
 class FaceTarget(val sourceEntity: MobileEntity, val targetEntity: Entity) extends MovementStrategy {
 
   override def apply(): Unit = {

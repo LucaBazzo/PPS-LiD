@@ -4,7 +4,7 @@ import model.EntityBody
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl
-import model.movement.{DoNotMove, MovementStrategy}
+import model.movement.{DoNothingMovementStrategy, MovementStrategy}
 import model.collisions.ImplicitConversions._
 
 object Statistic extends Enumeration {
@@ -46,7 +46,7 @@ class MobileEntityImpl(private val entityType: EntityType,
 
   private var facingRight: Boolean = true
 
-  protected var movementStrategy: MovementStrategy = new DoNotMove()
+  protected var movementStrategy: MovementStrategy = new DoNothingMovementStrategy()
 
   override def update(): Unit = {
     // TODO: chiedere a luca perchè non si può fare la move qui
