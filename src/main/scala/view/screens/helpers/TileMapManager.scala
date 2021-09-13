@@ -9,7 +9,7 @@ import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
 import com.badlogic.gdx.math.Rectangle
 import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
-import model.entities.EntityType
+import model.entities.{EntityType, ItemPools}
 import model.helpers.EntitiesFactoryImpl
 
 import scala.util.Random
@@ -91,19 +91,25 @@ class TileMapHelper {
           case "ground" => spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
           case "bridge" => spawnEntity(() => EntitiesFactoryImpl.createPlatform(position, size))
           case "door" =>
-            if(mapName!=null && mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME)){} //TODO spawn boss room door
+            if(mapName!=null && mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME))
+              EntitiesFactoryImpl.createBossDoor(size, position)
             else spawnEntity(() => EntitiesFactoryImpl.createDoor(size, position))
           case "chest" =>
             if(mapName!=null && (mapName.equalsIgnoreCase(TOP_KEY_ITEM_ROOM_NAME) || mapName.equalsIgnoreCase(BOTTOM_KEY_ITEM_ROOM_NAME)))
-              if (mapName.contains(keyLocation)) {} //TODO spawnare la chiave per il boss
-              else {} //TODO spawnare un oggetto speciale
+              if (mapName.contains(keyLocation))
+                spawnEntity(() => EntitiesFactoryImpl.createItem(ItemPools.Keys, size, position))
+              else
+                spawnEntity(() => EntitiesFactoryImpl.createItem(ItemPools.Default, size, position))
+
             else spawnEntity(() => EntitiesFactoryImpl.createChest(size, position))
           case "ladder" => spawnEntity(() => EntitiesFactoryImpl.createLadder(position, size))
           case "water" => spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position,size))
           case "lava" => spawnEntity(() => EntitiesFactoryImpl.createLavaPool(position, size))
           case "enemy" =>
-            if(mapName!=null && mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME)) spawnEntity(() => EntitiesFactoryImpl.spawnBoss(position))
-            else spawnEntity(() => EntitiesFactoryImpl.spawnEnemies(size, position))
+            if(mapName!=null && mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME))
+              spawnEntity(() => EntitiesFactoryImpl.spawnBoss(size, position))
+            else
+              spawnEntity(() => EntitiesFactoryImpl.spawnEnemies(size, position))
           case "portal" => spawnEntity(() => EntitiesFactoryImpl.createPortal(size, position))
           case _ => println("not supported layer: " + layer.getName)
         }
