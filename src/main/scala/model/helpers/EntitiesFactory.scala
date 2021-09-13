@@ -40,6 +40,7 @@ trait EntitiesFactory {
                         size: (Float, Float),
                         stats: Map[Statistic, Float],
                         statsModifiers: Map[Statistic, Float],
+                        levelNumber: Int = 0,
                         score: Int,
                         entityId: EntityType): EnemyImpl
 
@@ -299,7 +300,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createSkeletonEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy:EnemyImpl = createEnemyEntity(position, SKELETON_SIZE,
-      SKELETON_STATS, STATS_MODIFIER, SKELETON_SCORE, EntityType.EnemySkeleton)
+      SKELETON_STATS, STATS_MODIFIER, this.model.getCurrentLevelNumber, SKELETON_SCORE, EntityType.EnemySkeleton)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -313,7 +314,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createSlimeEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy:EnemyImpl = createEnemyEntity(position,
-      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, SLIME_SCORE, EntityType.EnemySlime)
+      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, this.model.getCurrentLevelNumber, SLIME_SCORE, EntityType.EnemySlime)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -326,7 +327,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createWormEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy:EnemyImpl = createEnemyEntity(position, WORM_SIZE,
-      WORM_STATS, STATS_MODIFIER, WORM_SCORE, EntityType.EnemyWorm)
+      WORM_STATS, STATS_MODIFIER, this.model.getCurrentLevelNumber, WORM_SCORE, EntityType.EnemyWorm)
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
@@ -338,14 +339,14 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createWizardBossEnemy(position: (Float, Float)): EnemyImpl = {
-    val enemy:EnemyImpl = createEnemyEntity(position, WIZARD_BOSS_SIZE, WIZARD_BOSS_STATS, STATS_MODIFIER, WIZARD_BOSS_SCORE,
-      EntityType.EnemyBossWizard)
+    val enemy:EnemyImpl = createEnemyEntity(position, WIZARD_BOSS_SIZE, WIZARD_BOSS_STATS, STATS_MODIFIER,
+      this.model.getCurrentLevelNumber, WIZARD_BOSS_SCORE, EntityType.EnemyBossWizard)
     val targetEntity:Entity = this.level.getEntity(e => e.isInstanceOf[Hero])
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
 
     // first behaviour - do nothing for some time
-    behaviours.addBehaviour("1", new DoNothingOnCollision(), new DoNotMove(), new DoNotAttack())
+    behaviours.addBehaviour("1", new DoNothingOnCollision(), DoNothingMovementStrategy(), DoNothingAttackStrategy())
 
     // second behaviour - attack hero if near
     val p2AttackStrategy = new WizardFirstAttack(enemy, targetEntity)
@@ -380,12 +381,13 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                                  size: (Float, Float),
                                  stats: Map[Statistic, Float],
                                  statsModifiers: Map[Statistic, Float],
+                                 levelNumber: Int = 0,
                                  score: Int,
                                  entityId: EntityType): EnemyImpl = {
 
     val spawnPoint = (position._1, position._2+size._2)
     val levelBasedStats =
-      stats.map {case (key, value) => (key, value + this.model.getCurrentLevelNumber * statsModifiers.getOrElse(key, 0f))}
+      stats.map {case (key, value) => (key, value + levelNumber * statsModifiers.getOrElse(key, 0f))}
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
       EntityCollisionBit.Immobile | EntityCollisionBit.Sword | EntityCollisionBit.Arrow,
       createPolygonalShape(size.PPM, rounder = true), spawnPoint.PPM)

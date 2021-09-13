@@ -4,26 +4,13 @@ import com.badlogic.gdx.math.Vector2
 import model.entities.{Entity, MobileEntity, State, Statistic}
 import model.helpers.EntitiesUtilities._
 
-// TODO: replace with MovementStratey.DoNothingMovementStrategy
-class DoNotMove() extends MovementStrategy {
-  override def apply(): Unit = { }
-
-  override def stopMovement(): Unit = { }
-
-}
-
 class FaceTarget(val sourceEntity: MobileEntity, val targetEntity: Entity) extends MovementStrategy {
-
-  private var isFacingRight: Boolean = isEntityOnTheRight(sourceEntity, targetEntity)
 
   override def apply(): Unit = {
     val facingRightCheck = isEntityOnTheRight(sourceEntity, targetEntity)
 
     // prevents continuous calls to sourceEntity.setFacing
-    if (facingRightCheck != isFacingRight) {
-      this.isFacingRight = facingRightCheck
-      this.sourceEntity.setFacing(facingRightCheck)
-    }
+    this.sourceEntity.setFacing(facingRightCheck)
   }
 
   override def stopMovement(): Unit = { }
@@ -37,7 +24,7 @@ class PatrolPlatform(val sourceEntity: MobileEntity) extends MovementStrategy {
   override def apply(): Unit = {
     val canMoveToTheLeft: Boolean = !isPathObstructedOnTheLeft(this.sourceEntity) && isFloorPresentOnTheLeft(this.sourceEntity)
     val canMoveToTheRight: Boolean = !isPathObstructedOnTheRight(this.sourceEntity) && isFloorPresentOnTheRight(this.sourceEntity)
-
+//    println(isPathObstructedOnTheLeft(this.sourceEntity), isFloorPresentOnTheLeft(this.sourceEntity), isPathObstructedOnTheRight(this.sourceEntity) , isFloorPresentOnTheRight(this.sourceEntity))
     if (!canMoveToTheLeft && !this.sourceEntity.isFacingRight || !canMoveToTheRight && this.sourceEntity.isFacingRight) {
       this.stopMovement()
       this.changeDirection()
@@ -85,7 +72,7 @@ class PatrolAndStop(override val sourceEntity:MobileEntity,
   protected val visionDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance).get
   protected val visionAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle).get
 
-  protected var lastIsTargetNear: Boolean = this.isTargetNearby
+  protected var lastIsTargetNear: Boolean = false
 
   override def apply(): Unit = {
     // prevents enemy movement if he is already attacking

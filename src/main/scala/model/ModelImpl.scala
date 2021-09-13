@@ -3,7 +3,11 @@ package model
 import com.badlogic.gdx.Gdx
 import controller.GameEvent
 import controller.GameEvent.GameEvent
+import model.collisions.EntityCollisionBit
+import model.collisions.ImplicitConversions.RichFloat
+import model.entities.{EntityType, Statistic}
 import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter, ItemPool, ItemPoolImpl}
+import model.movement.PatrolPlatform
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 import view.screens.helpers.TileMapHelper
 
@@ -84,6 +88,18 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
     Gdx.app.postRunnable(() => {
       tileMapHelper.loadTiledMaps()
       tileMapHelper.setWorld()
+
+      // testing platform
+      /*EntitiesFactoryImpl.createImmobileEntity(size=(100, 10),
+        position=(0, 0), collisions = (EntityCollisionBit.Hero | EntityCollisionBit.Enemy).toShort)
+
+      EntitiesFactoryImpl.createImmobileEntity(size=(10, 100),
+        position=(100, 0), collisions = (EntityCollisionBit.Hero | EntityCollisionBit.Enemy).toShort)
+
+      val enemy = EntitiesFactoryImpl.createEnemyEntity((60, 10), (20, 20), Map(
+        Statistic.MaxMovementSpeed -> 40f.PPM,
+        Statistic.Acceleration -> 5f.PPM), Map(), 0, 0, EntityType.Enemy)
+      enemy.setMovementStrategy(new PatrolPlatform(enemy))*/
     })
     this.isLevelActive = true
   }

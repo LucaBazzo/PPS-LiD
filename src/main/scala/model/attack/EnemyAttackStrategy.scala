@@ -7,15 +7,6 @@ import model.helpers.EntitiesUtilities._
 import utils.EnemiesConstants
 import utils.EnemiesConstants.{SKELETON_ATTACK_OFFSET, SKELETON_ATTACK_SIZE, SLIME_ATTACK_OFFSET, SLIME_ATTACK_SIZE, WIZARD_BOSS_ATTACK1_OFFSET, WIZARD_BOSS_ATTACK1_SIZE, WIZARD_BOSS_ATTACK2_OFFSET, WIZARD_BOSS_ATTACK2_SIZE}
 
-// TODO: rimpiazzare con AttackStrategy.DoNothingAttackStrategy
-class DoNotAttack() extends AttackStrategy {
-  override def apply(): Unit = { }
-
-  override def isAttackFinished: Boolean = true
-
-  override def stopAttack(): Unit = { }
-}
-
 abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
                                    protected val targetEntity: Entity)
   extends AttackStrategy {

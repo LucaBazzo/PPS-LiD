@@ -31,12 +31,13 @@ class EnemyImpl(private val entityType: EntityType,
 
   override def update(): Unit = {
     super.update()
-    if (state != State.Dying && this.enemyBehaviour.isDefined) {
-      this.enemyBehaviour.get.apply()
+    if (state != State.Dying) {
+      if (this.enemyBehaviour.isDefined) {
+        this.enemyBehaviour.get.apply()
 
-      this.movementStrategy = this.enemyBehaviour.get.getMovementStrategy
-      this.attackStrategy = this.enemyBehaviour.get.getAttackStrategy
-      
+        this.movementStrategy = this.enemyBehaviour.get.getMovementStrategy
+        this.attackStrategy = this.enemyBehaviour.get.getAttackStrategy
+      }
       this.movementStrategy.apply()
       this.attackStrategy.apply()
     }
