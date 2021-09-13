@@ -1,8 +1,7 @@
 package model
 
-import com.badlogic.gdx.Gdx
-import controller.GameEvent
 import controller.GameEvent.GameEvent
+import controller.{GameEvent, Observer}
 import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter}
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 import view.screens.helpers.TileMapHelper
@@ -18,9 +17,14 @@ trait Model {
   def requestStartGame(): Unit
 
   def requestNewLevel(): Unit
+
+  def loadWorld(): Unit
+
+  def requestLevel(): Unit
 }
 
-class ModelImpl(private val entitiesSetter: EntitiesSetter,
+class ModelImpl(private val controller: Observer,
+                private val entitiesSetter: EntitiesSetter,
                 private val tileMapHelper: TileMapHelper) extends Model {
 
   EntitiesFactoryImpl.setModel(this)
@@ -37,7 +41,7 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
 
     if(level.nonEmpty) {
       if(actions.exists(g => g equals GameEvent.SetMap))
-        this.setWorld()
+        this.loadWorld()
 
       //TODO scegliere un altro metodo invece della filter
       if(this.isLevelActive)
@@ -77,14 +81,15 @@ class ModelImpl(private val entitiesSetter: EntitiesSetter,
     this.level = Option.apply(new LevelImpl(this, entitiesSetter))
 
     if(this.levelNumber > 1)
-      this.setWorld()
+      this.loadWorld()
   }
 
-  private def setWorld(): Unit = {
-    Gdx.app.postRunnable(() => {
-      tileMapHelper.loadTiledMaps()
-      tileMapHelper.setWorld()
-    })
+  override def loadWorld(): Unit = {
+    tileMapHelper.setWorld()
     this.isLevelActive = true
+  }
+
+  override def requestLevel(): Unit = {
+    this.controller.handleEvent(GameEvent.StartGame)
   }
 }

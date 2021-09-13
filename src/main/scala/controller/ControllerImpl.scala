@@ -1,11 +1,13 @@
 package controller
 
 import _root_.utils.ApplicationConstants.GAME_LOOP_STEP
+import com.badlogic.gdx.Gdx
 import controller.GameEvent.GameEvent
 import model._
 import model.helpers.EntitiesContainerMonitor
 import view._
 import view.screens.helpers.TileMapHelper
+
 import java.util.concurrent.{ExecutorService, Executors, ScheduledExecutorService, TimeUnit}
 
 /** Handles almost every aspect that allows the game to run such as starting and
@@ -28,7 +30,7 @@ class ControllerImpl extends Controller with Observer {
   private val tileMapHelper: TileMapHelper = new TileMapHelper
 
   private val view: View = new ViewImpl(entitiesContainer, observerManager, tileMapHelper)
-  private val model: Model = new ModelImpl(entitiesContainer, tileMapHelper)
+  private val model: Model = new ModelImpl(this, entitiesContainer, tileMapHelper)
 
   private var executorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
   private var gameLoop: GameLoop = new GameLoopImpl(model, this)
@@ -37,6 +39,7 @@ class ControllerImpl extends Controller with Observer {
     case GameEvent.StartGame => this.startGame()
     case GameEvent.CloseApplication => this.terminateApplication()
     case GameEvent.ReturnToMenu => this.view.returnToMenu()
+    case GameEvent.MapLoaded => this.newLevel()
     case _ => this.gameLoop.addAction(event)
   }
 
@@ -53,11 +56,25 @@ class ControllerImpl extends Controller with Observer {
   override def stopExecutorService(): Unit = this.executorService.shutdownNow()
 
   private def startGame(): Unit = {
-    this.view.startGame()
-    this.model.requestStartGame()
-    this.gameLoop = new GameLoopImpl(model, this)
-    this.executorService = Executors.newSingleThreadScheduledExecutor()
-    this.executorService.scheduleAtFixedRate(gameLoop, 0, GAME_LOOP_STEP, TimeUnit.NANOSECONDS)
+    if(this.entitiesContainer.getLevelNumber == 0)
+      this.view.startGame()
+    Gdx.app.postRunnable(() => {
+      tileMapHelper.loadTiledMaps()
+      this.handleEvent(GameEvent.MapLoaded)
+    })
+  }
+
+  private def newLevel(): Unit = {
+    if(this.entitiesContainer.getLevelNumber == 0) {
+      this.model.requestStartGame()
+      this.gameLoop = new GameLoopImpl(model, this)
+      this.executorService = Executors.newSingleThreadScheduledExecutor()
+      this.executorService.scheduleAtFixedRate(gameLoop, 0, GAME_LOOP_STEP, TimeUnit.NANOSECONDS)
+      this.handleEvent(GameEvent.SetMap)
+    }
+    else {
+      this.model.requestNewLevel()
+    }
   }
 
   private def terminateApplication(): Unit = {

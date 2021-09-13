@@ -127,7 +127,7 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
 
   override def newLevel(): Unit = {
     this.entitiesSetter.setHeroStatistics(this.hero.getStatistics)
-    this.model.requestNewLevel()
+    this.model.requestLevel()
   }
 
   override def dispose(): Unit = {

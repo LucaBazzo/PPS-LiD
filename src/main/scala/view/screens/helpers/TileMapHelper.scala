@@ -76,6 +76,8 @@ class TileMapHelper {
   def loadRoomObjects(tiledMap: TiledMap, mapName:String, offset: (Integer, Integer)): Unit = {
     var rect: Rectangle = new Rectangle()
 
+    println("LOAD")
+
     tiledMap.getLayers.forEach(layer => {
       layer.getObjects.forEach(obj => {
         rect = obj.asInstanceOf[RectangleMapObject].getRectangle

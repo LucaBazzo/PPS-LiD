@@ -230,7 +230,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val feetSize: (Float, Float) = (8.0f, 0.2f)
     val bodyPosition = hero.getPosition - (0, hero.getSize._2)
     val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Immobile | EntityCollisionBit.Platform | EntityCollisionBit.Door, createEdgeShape(feetSize),
+      EntityCollisionBit.Immobile | EntityCollisionBit.Platform | EntityCollisionBit.Door, createPolygonalShape(feetSize.PPM, true),//createEdgeShape(feetSize),
       bodyPosition, gravityScale = 0, friction = 1.2f)
     EntitiesFactoryImpl.createJoint(hero.getBody, feetBody.getBody)
 
@@ -441,7 +441,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       collisions, createPolygonalShape(size.PPM), position.PPM)
 
     val immobileEntity: Entity = ImmobileEntity(entityType, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
+    immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())//new NewLevelOnCollision(this.level)
     this.level.addEntity(immobileEntity)
     immobileEntity
   }

@@ -16,8 +16,6 @@ import view.inputs.GameInputProcessor
 import view.screens.helpers.TileMapHelper
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
-import java.util.concurrent.{ExecutorService, Executors}
-
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager,
                  private val tileMapHelper: TileMapHelper) extends ScreenAdapter{
@@ -40,12 +38,14 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
-  val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+  /*val executorService: ExecutorService = Executors.newSingleThreadExecutor()
   val task: Runnable = () => {
     Thread.sleep(2000)
     this.observerManager.notifyEvent(GameEvent.SetMap)
   }
-  executorService.submit(task)
+  executorService.submit(task)*/
+
+  //this.observerManager.notifyEvent(GameEvent.SetMap)
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
