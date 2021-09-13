@@ -17,6 +17,7 @@ trait EntitiesGetter {
   def hasHeroPickedUpItem: Option[Items]
   def getHeroStatistics: Option[Map[Statistic, Float]]
   def getLevelNumber: Int
+  def isLevelReady: Boolean
 }
 
 trait EntitiesSetter {
@@ -29,6 +30,7 @@ trait EntitiesSetter {
   def heroJustPickedUpItem(item: Items): Unit
   def setHeroStatistics(statistics: Map[Statistic, Float]): Unit
   def setLevelNumber(number: Int): Unit
+  def setLevelReady(ready: Boolean): Unit
 }
 
 class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
@@ -41,6 +43,8 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
   private var score: Int = 0
 
   private var heroStatistics: Option[Map[Statistic, Float]] = Option.empty
+
+  private var levelReady: Boolean = false
 
   override def getEntities(predicate: Entity => Boolean): Option[List[Entity]] = synchronized {
     Option.apply(this.entities.filter(predicate))
@@ -108,4 +112,8 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
   }
 
   override def heroJustPickedUpItem(item: Items): Unit = this.heroPickedUpAnItem = Option.apply(item)
+
+  override def isLevelReady: Boolean = this.levelReady
+
+  override def setLevelReady(ready: Boolean): Unit = this.levelReady = ready
 }

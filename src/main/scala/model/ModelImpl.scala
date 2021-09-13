@@ -2,12 +2,7 @@ package model
 
 import controller.GameEvent.GameEvent
 import controller.{GameEvent, Observer}
-import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter}
-import model.collisions.EntityCollisionBit
-import model.collisions.ImplicitConversions.RichFloat
-import model.entities.{EntityType, Statistic}
-import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter, ItemPool, ItemPoolImpl}
-import model.movement.PatrolPlatform
+import model.helpers._
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 import view.screens.helpers.TileMapHelper
 
@@ -78,8 +73,10 @@ class ModelImpl(private val controller: Observer,
 
     this.entitiesSetter.setEntities(List.empty)
 
-    if(level.nonEmpty)
+    if(level.nonEmpty) {
+      this.entitiesSetter.setLevelReady(false)
       this.level.get.dispose()
+    }
 
     this.levelNumber += 1
     this.entitiesSetter.setLevelNumber(this.levelNumber)
@@ -92,6 +89,7 @@ class ModelImpl(private val controller: Observer,
   override def loadWorld(): Unit = {
     tileMapHelper.setWorld()
     this.isLevelActive = true
+    this.entitiesSetter.setLevelReady(true)
   }
 
   override def requestLevel(): Unit = {

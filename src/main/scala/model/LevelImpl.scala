@@ -5,9 +5,8 @@ import _root_.utils.EnemiesConstants._
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
-import model.collisions.{CollisionManager, EntityCollisionBit}
+import model.collisions.CollisionManager
 import model.collisions.ImplicitConversions._
-import model.entities.ItemPools.ItemPools
 import model.entities._
 import model.helpers._
 
@@ -44,8 +43,6 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
   private var entitiesList: List[Entity] = List.empty
 
   private val hero: Hero = entitiesFactory.createHeroEntity(this.entitiesSetter.asInstanceOf[EntitiesGetter].getHeroStatistics)
-
-  private var isWorldSetted: Boolean = false
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(Option.apply(this.world))
@@ -122,6 +119,6 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
 
   override def dispose(): Unit = {
     this.entitiesSetter.setWorld(Option.empty)
-    this.world.dispose()
+    //this.world.dispose()
   }
 }

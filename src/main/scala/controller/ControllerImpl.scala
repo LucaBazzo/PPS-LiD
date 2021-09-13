@@ -56,8 +56,7 @@ class ControllerImpl extends Controller with Observer {
   override def stopExecutorService(): Unit = this.executorService.shutdownNow()
 
   private def startGame(): Unit = {
-    if(this.entitiesContainer.getLevelNumber == 0)
-      this.view.startGame()
+    this.view.startGame()
     Gdx.app.postRunnable(() => {
       tileMapHelper.loadTiledMaps()
       this.handleEvent(GameEvent.MapLoaded)

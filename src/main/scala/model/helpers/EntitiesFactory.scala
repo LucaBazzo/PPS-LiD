@@ -231,10 +231,10 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       EntitiesFactoryImpl.removeEntity(hero.getFeet.get)
     }
 
-    val feetSize: (Float, Float) = (8.0f, 0.2f)
+    val feetSize: (Float, Float) = (8.0f, 0.1f)
     val bodyPosition = hero.getPosition - (0, hero.getSize._2)
     val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Immobile | EntityCollisionBit.Platform | EntityCollisionBit.Door, createPolygonalShape(feetSize.PPM, true),//createEdgeShape(feetSize),
+      EntityCollisionBit.Immobile | EntityCollisionBit.Platform | EntityCollisionBit.Door, createPolygonalShape(feetSize.PPM, rounder = true),//createEdgeShape(feetSize),
       bodyPosition, gravityScale = 0, friction = 1.2f)
     EntitiesFactoryImpl.createJoint(hero.getBody, feetBody.getBody)
 
