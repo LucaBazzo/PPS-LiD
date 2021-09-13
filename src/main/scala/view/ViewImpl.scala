@@ -7,20 +7,26 @@ import main.LostInDungeons
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants.TITLE
 import view.screens.game.GameScreen
+import view.screens.helpers.TileMapHelper
+import view.screens.menu.{GameOverScreen, MainMenuScreen}
 
 import java.util.concurrent.{ExecutorService, Executors}
 
 trait View {
   def startGame()
+
   def endGame()
-  def initialize()
+
   def terminate()
+
+  def returnToMenu()
 }
 
 class ViewImpl(private val entitiesGetter: EntitiesGetter,
-               private val observerManager: ObserverManager) extends View {
+               private val observerManager: ObserverManager,
+               private  val tileMapHelper: TileMapHelper) extends View {
 
-  private val screenSetter: LostInDungeons = new LostInDungeons(this.entitiesGetter, this.observerManager)
+  private val screenSetter: LostInDungeons = new LostInDungeons(this.observerManager)
 
   val config = new Lwjgl3ApplicationConfiguration
   config.setTitle(TITLE)
@@ -32,15 +38,16 @@ class ViewImpl(private val entitiesGetter: EntitiesGetter,
   })
 
   override def startGame(): Unit = {
-    Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager)))
+    Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager, this.tileMapHelper)))
   }
 
-  override def endGame(): Unit = ???
-
-  override def initialize(): Unit = ???
+  override def endGame(): Unit = Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameOverScreen(this.observerManager)))
 
   override def terminate(): Unit = {
-    this.executorService.shutdown()
+    this.executorService.shutdownNow()
+//    Gdx.app.postRunnable(() => Gdx.app.exit())
     Gdx.app.exit()
   }
+
+  override def returnToMenu(): Unit = Gdx.app.postRunnable(() => this.screenSetter.setScreen(new MainMenuScreen(this.observerManager)))
 }

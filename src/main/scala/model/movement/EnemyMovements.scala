@@ -1,130 +1,159 @@
 package model.movement
 
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d._
-import controller.GameEvent.GameEvent
-import model.collisions.EntityType
-import model.collisions.ImplicitConversions.RichInt
-import model.entities.Entity
-import model.helpers.WorldUtilities.{checkBodyIsVisible, checkPointCollision, getBodiesDistance, isTargetOnTheRight}
+import model.entities.{Entity, MobileEntity, State, Statistic}
+import model.helpers.EntitiesUtilities._
 
-class DoNotMove() extends MovementStrategy {
-  override def apply(): Unit = { }
-
-  override def apply(command: GameEvent): Unit = ???
-
-  override def stopMovement(): Unit = ???
-}
-
-abstract class PatrolPlatform(val entity: Entity, val world: World) extends MovementStrategy {
-  // TODO: move statistics to enemy class
-  protected val maxMovementSpeed: Float = 30.PPM // maximum horizontal velocity
-  protected val acceleration: Float = 10.PPM // strength of the force applied
-  // TODO: link to implementation
-  protected var lastMovementTime: Long = 0 // last time a force was applied to the body
-  protected val movementImpulseFrequency: Float = 5000 // movement impulse frequency
-
-  protected var isMovingLeft: Boolean = true
+class FaceTarget(val sourceEntity: MobileEntity, val targetEntity: Entity) extends MovementStrategy {
 
   override def apply(): Unit = {
-    val canMoveToTheLeft: Boolean = checkMoveToTheLeft
-    val canMoveToTheRight: Boolean = checkMoveToTheRight
+    val facingRightCheck = isEntityOnTheRight(sourceEntity, targetEntity)
 
-    // change direction
-    if (!canMoveToTheLeft && isMovingLeft || !canMoveToTheRight && !isMovingLeft)
-      entity.getBody.setLinearVelocity(0, entity.getBody.getLinearVelocity.y)
+    // prevents continuous calls to sourceEntity.setFacing
+    this.sourceEntity.setFacing(facingRightCheck)
+  }
 
-    if (!canMoveToTheLeft && isMovingLeft) isMovingLeft = false
-    if (!canMoveToTheRight && !isMovingLeft) isMovingLeft = true
+  override def stopMovement(): Unit = { }
+}
 
-    // apply movement to entity's body
-    if (canMoveToTheLeft || canMoveToTheRight ) {
-      if (isMovingLeft) {
-        entity.getBody.applyLinearImpulse(new Vector2(-acceleration, 0), entity.getBody.getWorldCenter, true)
-        if (entity.getBody.getLinearVelocity.x <= -maxMovementSpeed)
-          entity.getBody.setLinearVelocity(-maxMovementSpeed, entity.getBody.getLinearVelocity.y)
-      } else if (!isMovingLeft) {
-        entity.getBody.applyLinearImpulse(new Vector2(+acceleration, 0), entity.getBody.getWorldCenter, true)
-        if (entity.getBody.getLinearVelocity.x >= maxMovementSpeed)
-          entity.getBody.setLinearVelocity(maxMovementSpeed, entity.getBody.getLinearVelocity.y)
+class PatrolPlatform(val sourceEntity: MobileEntity) extends MovementStrategy {
+
+  protected val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
+  protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
+
+  override def apply(): Unit = {
+    val canMoveToTheLeft: Boolean = !isPathObstructedOnTheLeft(this.sourceEntity) && isFloorPresentOnTheLeft(this.sourceEntity)
+    val canMoveToTheRight: Boolean = !isPathObstructedOnTheRight(this.sourceEntity) && isFloorPresentOnTheRight(this.sourceEntity)
+//    println(isPathObstructedOnTheLeft(this.sourceEntity), isFloorPresentOnTheLeft(this.sourceEntity), isPathObstructedOnTheRight(this.sourceEntity) , isFloorPresentOnTheRight(this.sourceEntity))
+    if (!canMoveToTheLeft && !this.sourceEntity.isFacingRight || !canMoveToTheRight && this.sourceEntity.isFacingRight) {
+      this.stopMovement()
+      this.changeDirection()
+    }
+
+     if (canMoveToTheLeft || canMoveToTheRight ) {
+       this.move()
+       this.sourceEntity.setState(State.Running)
+     } else
+       this.sourceEntity.setState(State.Standing)
+  }
+
+  override def stopMovement(): Unit = {
+    this.sourceEntity.getBody.setLinearVelocity(0, this.sourceEntity.getBody.getLinearVelocity.y)
+  }
+
+  protected def changeDirection(): Unit = {
+    this.sourceEntity.setFacing(right = !this.sourceEntity.isFacingRight)
+  }
+
+  protected def move(): Unit = {
+    // apply movement force
+    val movementForce = if (!this.sourceEntity.isFacingRight) -this.acceleration else this.acceleration
+    this.sourceEntity.getBody.applyLinearImpulse(
+      new Vector2(movementForce, 0), this.sourceEntity.getBody.getWorldCenter, true)
+
+
+    // TODO: convertire come ha detto Luca
+    // limit horizontal speed
+    if (Math.abs(this.sourceEntity.getBody.getLinearVelocity.x) > this.maxMovementSpeed) {
+      val maxMovementForce: Vector2 = new Vector2(0f, this.sourceEntity.getBody.getLinearVelocity.y)
+      if (this.sourceEntity.getBody.getLinearVelocity.x > this.maxMovementSpeed)
+        maxMovementForce.x = this.maxMovementSpeed
+      if (this.sourceEntity.getBody.getLinearVelocity.x < -this.maxMovementSpeed)
+        maxMovementForce.x = -this.maxMovementSpeed
+      this.sourceEntity.getBody.setLinearVelocity(maxMovementForce)
+    }
+  }
+}
+
+class PatrolAndStop(override val sourceEntity:MobileEntity,
+                    val targetEntity:Entity)
+  extends PatrolPlatform(sourceEntity) {
+
+  protected val visionDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance).get
+  protected val visionAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle).get
+
+  protected var lastIsTargetNear: Boolean = false
+
+  override def apply(): Unit = {
+    // prevents enemy movement if he is already attacking
+    if (!Array(State.Attack01, State.Attack02, State.Attack03).contains(this.sourceEntity.getState)) {
+      val isTargetNearbyCheck = this.isTargetNearby
+
+      // face the target entity if near
+      if (isTargetNearbyCheck &&
+        (!this.sourceEntity.isFacingRight && isEntityOnTheRight(this.sourceEntity, this.targetEntity) ||
+          this.sourceEntity.isFacingRight && isEntityOnTheLeft(this.sourceEntity, this.targetEntity))) {
+        this.changeDirection()
       }
+
+      // stop moving when the target entity is near
+      if (isTargetNearbyCheck && !this.lastIsTargetNear) {
+        this.stopMovement()
+        this.sourceEntity.setState(State.Standing)
+      } else if (!isTargetNearbyCheck) {
+        super.apply()
+      }
+      this.lastIsTargetNear = isTargetNearbyCheck
     }
   }
 
-  override def apply(command: GameEvent): Unit = ???
-
-  override def stopMovement(): Unit = ???
-
-  protected def checkMoveToTheLeft: Boolean
-  protected def checkMoveToTheRight: Boolean
+  protected def isTargetNearby: Boolean = {
+    isEntityVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
+      getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
+  }
 }
 
-//class PlatformPatrolWithSensors(override val entity: Entity, override  val world: World)
-//  extends PatrolPlatform(entity, world) {
-//  // populate the body with movement specific sensors
-//  val lowerLeftSensor: Fixture = createLowerLeftSensor(entity.getBody)
-//  val lowerRightSensor: Fixture = createLowerRightSensor(entity.getBody)
-//
-//  override protected def checkMoveToTheLeft: Boolean =
-//    sensorIsIntersectingWith(lowerLeftSensor, EntitiesBits.WORLD_CATEGORY_BIT, world)
-//
-//  override protected def checkMoveToTheRight: Boolean =
-//    sensorIsIntersectingWith(lowerRightSensor, EntitiesBits.WORLD_CATEGORY_BIT, world)
-//
-//}
+class ChaseTarget(val sourceEntity:MobileEntity,
+                  val targetEntity:Entity) extends MovementStrategy {
 
-class PlatformPatrolWithAABBTests(override val entity: Entity, override  val world: World)
-  extends PatrolPlatform(entity, world) {
+  protected val visionDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance).get
+  protected val visionAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle).get
+  protected val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
+  protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
 
-  override protected def checkMoveToTheLeft: Boolean =
-    !checkPointCollision(world, entity.getPosition._1 - entity.getSize._1 - 5.PPM,
-      entity.getPosition._2, EntityType.Immobile) &&
-      checkPointCollision(world, entity.getPosition._1 - entity.getSize._1 - 5.PPM,
-        entity.getPosition._2 - entity.getSize._2 - 5.PPM, EntityType.Immobile)
-
-  override protected def checkMoveToTheRight: Boolean =
-    !checkPointCollision(world, entity.getPosition._1 + entity.getSize._1 + 5.PPM,
-      entity.getPosition._2, EntityType.Immobile) &&
-      checkPointCollision(world, entity.getPosition._1 + entity.getSize._1 + 5.PPM,
-        entity.getPosition._2 - entity.getSize._2 - 5.PPM, EntityType.Immobile)
-}
-
-class PatrolAndStopIfNearHero(override val entity:Entity, override val world: World, val targetEntity:Entity) extends PlatformPatrolWithAABBTests(entity, world) {
-  // TODO: move statistics to enemy class
-  protected val maxDistance: Float = 40.PPM
-  protected val visibilityMaxHorizontalAngle: Float = 30 // defines a vision "cone" originating from the entity
+  protected var isTargetLeft: Boolean = false
 
   override def apply(): Unit = {
-    if (!isHeroNear) {
-      super.apply()
+
+    val canMoveToTheLeft: Boolean = !isPathObstructedOnTheLeft(this.sourceEntity) && isFloorPresentOnTheLeft(this.sourceEntity)
+    val canMoveToTheRight: Boolean = !isPathObstructedOnTheRight(this.sourceEntity) && isFloorPresentOnTheRight(this.sourceEntity)
+
+    this.isTargetLeft = isEntityOnTheLeft(this.sourceEntity, this.targetEntity)
+
+    val isTargetVisible: Boolean = isEntityVisible(this.sourceEntity, this.targetEntity)
+
+    if (!Array(State.Attack01, State.Attack02, State.Attack03).contains(this.sourceEntity.getState)) {
+      if (!canMoveToTheLeft && isTargetLeft ||
+        !canMoveToTheRight && !isTargetLeft ||
+        !isTargetVisible ||
+        getEntitiesDistance(this.sourceEntity, this.targetEntity) < this.visionDistance) {
+        this.sourceEntity.setState(State.Standing)
+        this.stopMovement()
+      } else {
+        this.sourceEntity.setState(State.Running)
+        this.move()
+      }
+      this.sourceEntity.setFacing(right = !isTargetLeft)
     } else {
-      entity.getBody.setLinearVelocity(0, entity.getBody.getLinearVelocity.y)
+      this.stopMovement()
     }
   }
 
-  protected def isHeroNear: Boolean = {
-    checkBodyIsVisible(world, entity.getBody, targetEntity.getBody, visibilityMaxHorizontalAngle) &&
-      getBodiesDistance(entity.getBody, targetEntity.getBody) <= maxDistance
-  }
-}
+  protected def move(): Unit = {
+    // apply movement force
+    val movementForce = if (this.isTargetLeft) -this.acceleration else this.acceleration
+    this.sourceEntity.setVelocityX(this.sourceEntity.getVelocity._1 + movementForce)
 
-class PatrolAndStopIfFacingHero(override val entity:Entity, override val world: World, val targetEntity:Entity) extends PlatformPatrolWithAABBTests(entity, world) {
-  // TODO: move statistics to enemy class
-  protected val maxDistance: Float = 40.PPM
-  protected val visibilityMaxHorizontalAngle: Float = 30 // defines a vision "cone" originating from the entity
-
-  override def apply(): Unit = {
-    if (isHeroNear && (isTargetOnTheRight(entity.getBody, targetEntity.getBody) && !isMovingLeft
-      || !isTargetOnTheRight(entity.getBody, targetEntity.getBody) && isMovingLeft)) {
-      entity.getBody.setLinearVelocity(0, entity.getBody.getLinearVelocity.y)
-    } else {
-      super.apply()
+    // limit horizontal speed
+    if (Math.abs(this.sourceEntity.getVelocity._1) > this.maxMovementSpeed) {
+      var maxMovementForce: Float = 0
+      if (this.sourceEntity.getBody.getLinearVelocity.x > this.maxMovementSpeed)
+        maxMovementForce = this.maxMovementSpeed
+      if (this.sourceEntity.getBody.getLinearVelocity.x < -this.maxMovementSpeed)
+        maxMovementForce = -this.maxMovementSpeed
+      this.sourceEntity.setVelocityX(maxMovementForce)
     }
   }
 
-  protected def isHeroNear: Boolean = {
-    checkBodyIsVisible(world, entity.getBody, targetEntity.getBody, visibilityMaxHorizontalAngle) &&
-      getBodiesDistance(entity.getBody, targetEntity.getBody) <= maxDistance
-  }
+  override def stopMovement(): Unit = this.sourceEntity.getBody.setLinearVelocity(0, this.sourceEntity.getBody.getLinearVelocity.y)
 }
-

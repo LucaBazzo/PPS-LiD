@@ -1,54 +1,70 @@
 package model
 
-import _root_.utils.ApplicationConstants.{GRAVITY_FORCE, POSITION_ITERATIONS, TIME_STEP, VELOCITY_ITERATIONS}
+import _root_.utils.ApplicationConstants._
+import _root_.utils.EnemiesConstants._
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
-import model.collisions.CollisionManager
-import model.entities.ItemPools.ItemPools
-import model.entities.{Enemy, Entity, Hero, Item, ItemPools}
-import model.helpers.{EntitiesFactory, EntitiesFactoryImpl, EntitiesSetter, ItemPoolImpl}
-import model.world.WorldCreator
+import model.collisions.{CollisionManager, EntityCollisionBit}
 import model.collisions.ImplicitConversions._
+import model.entities.ItemPools.ItemPools
+import model.entities._
+import model.helpers._
+
+import java.util.concurrent.{ExecutorService, Executors}
 
 trait Level {
 
-  def updateEntities(actions: List[GameEvent])
+  def updateEntities(actions: List[GameEvent]): Unit
 
-  def addEntity(entity: Entity)
-  def removeEntity(entity: Entity)
+  def addEntity(entity: Entity): Unit
+
+  def removeEntity(entity: Entity): Unit
+
   def getEntity(predicate: Entity => Boolean): Entity
-  def spawnItem(pool: ItemPools.ItemPools)
+
+  def getEntities(predicate: Entity => Boolean): List[Entity]
+
   def getWorld: World
+
+  def newLevel(): Unit
+
+  def dispose(): Unit
 }
 
-class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
+class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSetter, private val itemPool: ItemPool) extends Level {
 
   private val world: World = new World(GRAVITY_FORCE, true)
+  WorldUtilities.setWorld(world)
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
-  entitiesFactory.setLevel(this, new ItemPoolImpl())
+  entitiesFactory.setLevel(this, itemPool)
+  entitiesFactory.setEntitiesSetter(this.entitiesSetter)
 
   private var entitiesList: List[Entity] = List.empty
 
-  private val hero: Hero = entitiesFactory.createHeroEntity()
-  private val enemy: Enemy = entitiesFactory.createEnemyEntity()
-  private val item: Item = entitiesFactory.createItem(ItemPools.Level_1, (10f, 10f), (40,20))
+  private val hero: Hero = entitiesFactory.createHeroEntity(this.entitiesSetter.asInstanceOf[EntitiesGetter].getHeroStatistics)
 
-  new WorldCreator(this)
+  private var isWorldSetted: Boolean = false
 
   this.entitiesSetter.setEntities(entitiesList)
-  this.entitiesSetter.setWorld(this.world)
+  this.entitiesSetter.setWorld(Option.apply(this.world))
 
-  this.world.setContactListener(new CollisionManager(this))
+  this.world.setContactListener(new CollisionManager(this.entitiesSetter.asInstanceOf[EntitiesGetter]))
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
-    if(actions.nonEmpty) {
-      for(command <- actions) this.hero.notifyCommand(command)
-    }
+
+    for(command <- actions) this.hero.notifyCommand(command)
+
+    this.worldStep()
+
+    EntitiesFactoryImpl.createPendingEntities()
 
     this.entitiesList.foreach((entity: Entity) => entity.update())
 
-    this.world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+    this.entitiesFactory.destroyBodies()
+
+    this.entitiesFactory.applyEntityCollisionChanges()
   }
 
   override def addEntity(entity: Entity): Unit = {
@@ -57,15 +73,55 @@ class LevelImpl(private val entitiesSetter: EntitiesSetter) extends Level {
   }
 
   override def getEntity(predicate: Entity => Boolean): Entity = entitiesList.filter(predicate).head
+  override def getEntities(predicate: Entity => Boolean): List[Entity] = entitiesList.filter(predicate)
 
   override def removeEntity(entity: Entity): Unit = {
     this.entitiesList = this.entitiesList.filterNot((e: Entity) => e.equals(entity))
     this.entitiesSetter.setEntities(this.entitiesList)
+
+    // update score if the removed entity's type is Enemy or Item
+    if (entity.isInstanceOf[Enemy] || entity.isInstanceOf[Item]) {
+      this.entitiesSetter.addScore(entity.asInstanceOf[Score].getScore)
+    }
+
+    if (ENEMY_BOSS_TYPES.contains(entity.getType)) {
+      val portal = this.getEntity(x => x.getType == EntityType.Portal)
+      portal.setState(State.Opening)
+      val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+      executorService.execute(() => {
+        Thread.sleep(1900)
+        portal.setState(State.Standing)
+        println("Portal opened")
+      })
+      //executorService.shutdown()
+    }
   }
 
   override def getWorld: World = this.world
 
-  override def spawnItem(pool: ItemPools): Unit = {
-    this.addEntity(entitiesFactory.createItem(pool))
+  private var accumulator: Float = 0f
+
+  private def worldStep(): Unit = {
+    val delta: Float = Gdx.graphics.getDeltaTime
+
+    accumulator += Math.min(delta, 0.25f)
+
+    while (accumulator >= TIME_STEP) {
+      accumulator -= TIME_STEP
+
+      world.step(TIME_STEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS)
+    }
+  }
+
+  override def newLevel(): Unit = {
+    this.entitiesSetter.setHeroStatistics(this.hero.getStatistics)
+    this.itemPool.resetBossPool()
+    this.hero.loseItem(Items.Key)
+    this.model.requestLevel()
+  }
+
+  override def dispose(): Unit = {
+    this.entitiesSetter.setWorld(Option.empty)
+    this.world.dispose()
   }
 }

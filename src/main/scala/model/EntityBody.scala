@@ -11,16 +11,20 @@ trait EntityBody {
 
   def createBody(bodyType: BodyType = BodyType.StaticBody,
                  position: (Float, Float) = (0,0),
-                 angle: Float = 0, gravity: Boolean = true): EntityBody
+                 angle: Float = 0, gravityScale: Float = 1.0f): EntityBody
 
-  def setEntityType(entityType: Short): EntityBody
+  def setEntityCollisionBit(entityCollisionBit: Short): EntityBody
+  def getEntityCollisionBit(): Short
   def setShape(shape: Shape): EntityBody
   def setCollisions(entitiesTypes: Short): EntityBody
+  def getEntityCollisions(): Short
   def setFixtureValues(density: Float = 0, friction: Float = 2, restitution: Float = 0, isSensor: Boolean = false): EntityBody
   def createFixture()
 
   def setPosition(position: (Float, Float), angle: Float = 0)
   def addCoordinates(x: Float, y: Float)
+
+  def setGravityScale(gravityScale: Float = 1.0f)
 }
 
 class EntityBodyImpl extends EntityBody {
@@ -31,10 +35,14 @@ class EntityBodyImpl extends EntityBody {
 
   override def getBody: Body = this.body
 
-  override def setEntityType(entityType: Short): EntityBody = {
-    this.fixtureDef.filter.categoryBits = entityType
+  override def setEntityCollisionBit(entityCollisionBit: Short): EntityBody = {
+    this.fixtureDef.filter.categoryBits = entityCollisionBit
     this
   }
+
+  override def getEntityCollisionBit(): Short = this.fixtureDef.filter.categoryBits
+
+  override def getEntityCollisions(): Short = this.fixtureDef.filter.maskBits
 
   override def setCollisions(entitiesTypes: Short): EntityBody = {
     this.fixtureDef.filter.maskBits = entitiesTypes
@@ -64,14 +72,13 @@ class EntityBodyImpl extends EntityBody {
 
   override def createBody(bodyType: BodyType = BodyType.StaticBody,
                           position: (Float, Float) = (0,0),
-                          angle: Float = 0, gravity: Boolean = true): EntityBody = {
+                          angle: Float = 0, gravityScale: Float = 1.0f): EntityBody = {
     val bodyDef: BodyDef = new BodyDef()
 
     bodyDef.position.set(position)
     bodyDef.`type` = bodyType
     bodyDef.angle = angle
-
-    if(!gravity) bodyDef.gravityScale = 0
+    bodyDef.gravityScale = gravityScale
 
     if(this.body != null) EntitiesFactoryImpl.destroyBody(this.body)
     this.body = EntitiesFactoryImpl.createBody(bodyDef)
@@ -83,4 +90,6 @@ class EntityBodyImpl extends EntityBody {
 
   override def addCoordinates(x: Float, y: Float): Unit =
     this.body.setTransform(this.body.getPosition.add(x, y), 0)
+
+  override def setGravityScale(gravityScale: Float): Unit = this.body.setGravityScale(gravityScale)
 }

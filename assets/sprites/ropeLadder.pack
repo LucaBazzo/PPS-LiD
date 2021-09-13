@@ -1,0 +1,12 @@
+
+ropeLadder.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+rope_ladder
+  rotate: false
+  xy: 1, 1
+  size: 32, 53
+  orig: 32, 53
+  offset: 0, 0
+  index: -1

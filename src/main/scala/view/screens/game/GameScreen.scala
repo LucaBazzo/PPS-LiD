@@ -4,80 +4,55 @@ import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
+import com.badlogic.gdx.physics.box2d.{Box2DDebugRenderer, World}
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model.collisions.ImplicitConversions.RichInt
-import model.entities.{Entity, Hero, Item, State}
-import model.helpers.EntitiesGetter
+import model.collisions.ImplicitConversions.{RichFloat, RichInt}
+import model.entities.Items.Items
+import model.entities._
+import model.helpers.{EntitiesGetter, EntitiesUtilities}
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
 import view.screens.helpers.TileMapHelper
-import view.screens.sprites.{EntitySprite, SpriteFactory, SpriteFactoryImpl}
+import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
-                 private val observerManager: ObserverManager) extends ScreenAdapter{
+                 private val observerManager: ObserverManager,
+                 private val tileMapHelper: TileMapHelper) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
+  camera.translate(300f, 300f)
   private val batch: SpriteBatch = new SpriteBatch()
 
   private val box2DDebugRenderer: Box2DDebugRenderer = new Box2DDebugRenderer()
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = TileMapHelper.getMap("assets/maps/map0.tmx")
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = tileMapHelper.getMapRenderer(null)
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
-  //this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
+  this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
 
-  private val spriteFactory: SpriteFactory = new SpriteFactoryImpl()
-  private val itemSprite: EntitySprite = spriteFactory.createEntitySprite("items", 32,
-    32, 10, 10, 2)
-  this.itemSprite.addAnimation(State.Standing,
-    spriteFactory.createSpriteAnimation(itemSprite, 0, 0, 0, 0.20f))
-
-  private val heroSprite: EntitySprite = spriteFactory.createHeroSprite("hero", 50, 37)
-  this.defineHeroSpriteAnimations()
+  private val spriteViewer: SpriteViewer = new SpriteViewerImpl(this.batch)
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
-  private def defineHeroSpriteAnimations(): Unit = {
-    this.heroSprite.addAnimation(State.Standing,
-      spriteFactory.createSpriteAnimation(heroSprite, 0, 0, 3, 0.18f),
-      loop = true)
-    this.heroSprite.addAnimation(State.Running,
-      spriteFactory.createSpriteAnimation(heroSprite, 1, 1, 6),
-      loop = true)
-    this.heroSprite.addAnimation(State.Jumping,
-      spriteFactory.createSpriteAnimation(heroSprite, 2, 0, 3))
-    this.heroSprite.addAnimation(State.Falling,
-      spriteFactory.createSpriteAnimation(heroSprite, 3, 1, 2),
-      loop = true)
-    this.heroSprite.addAnimation(State.Sliding,
-      spriteFactory.createSpriteAnimation(heroSprite, 3, 3, 6))
-    this.heroSprite.addAnimation(State.Crouch,
-      spriteFactory.createSpriteAnimationFromTwoRows(heroSprite, 0, 4, 6,
-        1,0,0,0.18f),
-      loop = true)
-    this.heroSprite.addAnimation(State.Attack01,
-      spriteFactory.createSpriteAnimation(heroSprite, 6, 0, 6))
-    this.heroSprite.addAnimation(State.Attack02,
-      spriteFactory.createSpriteAnimation(heroSprite, 7, 0, 3, 0.20f))
-    this.heroSprite.addAnimation(State.Attack03,
-      spriteFactory.createSpriteAnimationFromTwoRows(heroSprite, 7, 4, 6,
-        8, 0, 2))
-    this.heroSprite.addAnimation(State.Somersault,
-      spriteFactory.createSpriteAnimationFromTwoRows(heroSprite, 2, 4, 6,
-        3, 0, 0), loop = true)
-
+  /*val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+  val task: Runnable = () => {
+    Thread.sleep(2000)
+    this.observerManager.notifyEvent(GameEvent.SetMap)
   }
+  executorService.submit(task)*/
+
+  //this.observerManager.notifyEvent(GameEvent.SetMap)
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
 
-    //old world step
+    //TODO add the changeHealth method when the get of the hero is done correctly
+    this.hud.setCurrentScore(this.entitiesGetter.getScore)
 
     //it will render only what the camera can see
     this.orthogonalTiledMapRenderer.setView(camera)
@@ -94,50 +69,73 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   }
 
   override def render(delta: Float): Unit = {
-    this.update(delta)
+    if(this.entitiesGetter.getWorld.nonEmpty) {
+      this.update(delta)
 
-    //clears the screen
-    Gdx.gl.glClearColor(0,0,0,1)
-    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-    super.render(delta)
+      //clears the screen
+      Gdx.gl.glClearColor(0,0,0,1)
+      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+      super.render(delta)
 
-    val entities: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Hero])
-    if(entities.nonEmpty) {
-      val hero: Hero = entities.get.head.asInstanceOf[Hero]
-      this.camera.position.x = hero.getPosition._1
-      this.camera.position.y = hero.getPosition._2
+      this.hud.setLevelNumber(this.entitiesGetter.getLevelNumber)
 
-      this.heroSprite.update(delta, hero)
+      if(entitiesGetter.getHero.nonEmpty) {
+        val hero: Hero = entitiesGetter.getHero.get
+        this.camera.position.x = hero.getPosition._1
+        this.camera.position.y = hero.getPosition._2
+        this.hud.changeHealth(hero.getStatistics(Statistic.CurrentHealth), hero.getStatistics(Statistic.Health))
+        val itemPicked: Option[Items] = entitiesGetter.hasHeroPickedUpItem
+        if(itemPicked.nonEmpty)
+          this.hud.addNewItem(itemPicked.get)
+      }
+
+      val message: Option[String] = entitiesGetter.getMessage
+      if(message.nonEmpty)
+        this.hud.setItemText(message.get)
+
+      val bossEntity: Option[List[Entity]] = entitiesGetter.getEntities(e => e.getType match {
+        case EntityType.EnemyBossWizard => true
+        case _ => false
+      })
+      // TODO: prevenire chiamate di show e hide quando la barra della vita è già visibile o invisibile
+      if (entitiesGetter.getBoss.nonEmpty &&
+        EntitiesUtilities.getEntitiesDistance(entitiesGetter.getHero.get,
+          entitiesGetter.getBoss.get) <= HEALTH_BAR_BOSS_VISIBILITY_DISTANCE.PPM) {
+        hud.showBossHealthBar()
+        val boss: LivingEntity = bossEntity.get.head.asInstanceOf[LivingEntity]
+        this.hud.changeBossHealth(boss.getStatistics(Statistic.CurrentHealth), boss.getStatistics(Statistic.Health))
+      } else {
+        hud.hideBossHealthBar()
+      }
+
+      val entities: Option[List[Entity]] = entitiesGetter.getEntities(_ => true)
+      if(entities.nonEmpty) {
+        this.spriteViewer.loadSprites(entities.get)
+        this.spriteViewer.updateSprites(delta)
+      }
+
+      this.camera.update()
+
+      this.tileMapHelper.renderWorld(orthogonalTiledMapRenderer)
+
+      //what will be shown by the camera
+      batch.setProjectionMatrix(camera.combined)
+
+      batch.begin()
+      // render objects inside
+      this.spriteViewer.drawSprites()
+      this.hud.drawHealthBar(batch)
+      batch.end()
+
+      //for debug purpose
+      val world: Option[World] = this.entitiesGetter.getWorld
+      if(world.nonEmpty) {
+        box2DDebugRenderer.render(world.get, camera.combined)
+      }
+
+      batch.setProjectionMatrix(hud.getStage.getCamera.combined)
+      hud.getStage.draw()
     }
-
-    val items: Option[List[Entity]] = entitiesGetter.getEntities((x: Entity) => x.isInstanceOf[Item])
-    if(items.nonEmpty) {
-      val item: Item = items.get.head.asInstanceOf[Item]
-      this.itemSprite.update(delta, item)
-    }
-
-    this.camera.update()
-
-    // render the map
-    orthogonalTiledMapRenderer.render()
-
-    //what will be shown by the camera
-
-    batch.setProjectionMatrix(camera.combined)
-
-
-    batch.begin()
-    // render objects inside
-    this.heroSprite.draw(batch)
-    this.itemSprite.draw(batch)
-
-    batch.end()
-
-    //for debug purpose
-    box2DDebugRenderer.render(this.entitiesGetter.getWorld, camera.combined)
-
-    batch.setProjectionMatrix(hud.getStage().getCamera.combined)
-    hud.getStage().draw()
   }
 
   override def resize(width: Int, height: Int): Unit = {
@@ -146,7 +144,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   override def dispose(): Unit = {
     orthogonalTiledMapRenderer.dispose()
-    this.entitiesGetter.getWorld.dispose()
+    if(this.entitiesGetter.getWorld.nonEmpty)
+      this.entitiesGetter.getWorld.get.dispose()
     box2DDebugRenderer.dispose()
     hud.dispose()
   }

@@ -2,9 +2,8 @@ package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.{Animation, Batch, Sprite, TextureRegion}
 import model.collisions.ImplicitConversions.RichFloat
-import model.entities.{Entity, Hero, MobileEntity, State}
 import model.entities.State.State
-import utils.ApplicationConstants.PIXELS_PER_METER
+import model.entities.{Entity, Hero, MobileEntity, State}
 
 trait EntitySprite extends Sprite {
 
@@ -17,9 +16,14 @@ trait EntitySprite extends Sprite {
   def getIntWidth: Int = super.getWidth.asInstanceOf[Int]
 
   def getIntHeight: Int = super.getHeight.asInstanceOf[Int]
+
+//  def cloneEntitySprite(): EntitySprite
 }
 
-class EntitySpriteImpl(width: Float, height: Float) extends EntitySprite {
+class EntitySpriteImpl(regionName: String,
+                       width: Float,
+                       height: Float)
+  extends EntitySprite {
 
   private var animations: Map[State, Animation[TextureRegion]] = Map()
   private var loops: Map[State, Boolean] = Map()
@@ -47,11 +51,11 @@ class EntitySpriteImpl(width: Float, height: Float) extends EntitySprite {
     this.previousState = state
 
     this.setPosition(entity)
-    //println(state)
   }
 
   override def setPosition(entity: Entity): Unit = {
-    super.setPosition(entity.getPosition._1 - this.getWidth / 2, entity.getPosition._2 - this.getHeight / 2)
+    super.setPosition(entity.getPosition._1 - this.getWidth / 2,
+      entity.getPosition._2 - this.getHeight / 2)
   }
 
   private def getFrame(state: State): TextureRegion = animations(state).getKeyFrame(stateTimer, loops(state))
@@ -71,18 +75,17 @@ class EntitySpriteImpl(width: Float, height: Float) extends EntitySprite {
     this.setSize(this.width.PPM, this.height.PPM)
     super.draw(batch)
   }
-
 }
 
-class HeroEntitySprite(width: Float, height: Float) extends EntitySpriteImpl(width, height) {
+class HeroEntitySprite(regionName: String, width: Float, height: Float)
+  extends EntitySpriteImpl(regionName, width, height) {
 
   override def setPosition(entity: Entity): Unit = {
     if(entity.asInstanceOf[Hero].isLittle)
       super.setPosition(entity.getPosition._1 - this.getWidth / 2,
-        entity.getPosition._2 - this.getHeight / 2 + 9.3f.PPM)
+        entity.getPosition._2 - this.getHeight / 2 + 11.5f.PPM)
     else
       super.setPosition(entity.getPosition._1 - this.getWidth / 2,
-        entity.getPosition._2 - this.getHeight / 2 + 4f.PPM)
+        entity.getPosition._2 - this.getHeight / 2 + 2.5f.PPM)
   }
 }
-
