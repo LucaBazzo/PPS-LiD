@@ -12,31 +12,50 @@ import view.screens.menu.{GUIFactory, GameScreen}
 
 import java.util.concurrent.{ExecutorService, Executors}
 
+/** Manages the current screen of the application
+ */
 trait View {
 
+  /** Change the current screen and start the game.
+   *
+   */
   def startGame()
 
+  /** Set the Game Over Screen, is called when the hero is dead.
+   *
+   */
   def endGame()
 
+  /** Return to the Main Menu Screen.
+   *
+   */
   def returnToMenu()
 
+  /** Close the application.
+   *
+   */
   def terminate()
 }
 
+/** Handles the graphics part of the game
+ *
+ *  @param entitiesGetter monitor that contains the entities of the Model, used to place sprites, score, level number
+ *  @param observerManager observer for the messages from View to Controller
+ *  @param tileMapHelper class for map rendering
+ */
 class ViewImpl(private val entitiesGetter: EntitiesGetter,
                private val observerManager: ObserverManager,
                private val tileMapHelper: TileMapHelper) extends View {
 
   private val screenSetter: LostInDungeons = new LostInDungeons(this.observerManager)
 
+  //configuration for the libgdx application
   val config = new Lwjgl3ApplicationConfiguration
   config.setTitle(TITLE)
   config.setWindowIcon(FileType.Internal, ICON_PATH)
 
   val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-  executorService.submit(() => {
-    new Lwjgl3Application(screenSetter, config)
-  })
+  executorService.submit(() => new Lwjgl3Application(screenSetter, config))
 
   override def startGame(): Unit = {
     Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager, this.tileMapHelper)))

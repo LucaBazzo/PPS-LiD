@@ -10,20 +10,35 @@ import com.badlogic.gdx.{Gdx, Screen}
 import controller.{GameEvent, ObserverManager}
 import utils.ApplicationConstants._
 
+/** Represents an interactive screen with buttons and images
+ */
 trait MenuScreen extends Screen {
 
+  /** Add a button to the container of the screen
+   *
+   *  @param button the button that will be added
+   */
   def addButton(button: TextButton): Unit
+
+  /** Return the container that contains the graphics components
+   *
+   *  @return the stage
+   */
   def getStage: Stage
 }
 
 
-/**
- * Abstract class containing the components for the menu creation.
+/** Abstract class containing the components for the menu creation.
+ *
+ *  @param observerManager observer for the messages from View to Controller
+ *  @param backgroundImagePath the path to the background image
+ *  @param distanceFromTop an empty space between the top and the buttons
+ *  @param distanceButtonDefault the distance between buttons
  */
 abstract class MenuScreenImpl(private val observerManager: ObserverManager,
-                     private val backgroundImagePath: String,
-                     private val distanceFromTop: Int = DEFAULT_DISTANCE_FROM_TOP,
-                     private val distanceButtonDefault: Int = DISTANCE_BUTTONS_DEFAULT) extends MenuScreen {
+                              private val backgroundImagePath: String,
+                              private val distanceFromTop: Int = DEFAULT_DISTANCE_FROM_TOP,
+                              private val distanceButtonDefault: Int = DISTANCE_BUTTONS_DEFAULT) extends MenuScreen {
 
   // Setting the view
   private val camera: Camera = new OrthographicCamera()
@@ -71,6 +86,9 @@ abstract class MenuScreenImpl(private val observerManager: ObserverManager,
 
   override def resize(width: Int, height: Int): Unit = this.viewport.update(width, height)
 
+  override def dispose(): Unit = observerManager.notifyEvent(GameEvent.CloseApplication)
+
+  //the methods below are required for Screen implementation, not useful for these types of menus
   override def show(): Unit = {}
 
   override def pause(): Unit = {}
@@ -78,10 +96,15 @@ abstract class MenuScreenImpl(private val observerManager: ObserverManager,
   override def resume(): Unit = {}
 
   override def hide(): Unit = {}
-
-  override def dispose(): Unit = observerManager.notifyEvent(GameEvent.CloseApplication)
 }
 
+/** Implementation for the Main Menu of the application.
+ *
+ *  @param observerManager observer for the messages from View to Controller
+ *  @param backgroundImagePath the path to the background image
+ *  @param distanceFromTop an empty space between the top and the buttons
+ *  @param distanceButtonDefault the distance between buttons
+ */
 case class MainMenuScreen(private val observerManager: ObserverManager,
                           private val backgroundImagePath: String,
                           private val distanceFromTop: Int = DEFAULT_DISTANCE_FROM_TOP,
@@ -94,6 +117,13 @@ case class MainMenuScreen(private val observerManager: ObserverManager,
   }
 }
 
+/** Implementation for the Game Over Menu of the application.
+ *
+ *  @param observerManager observer for the messages from View to Controller
+ *  @param backgroundImagePath the path to the background image
+ *  @param distanceFromTop an empty space between the top and the buttons
+ *  @param distanceButtonDefault the distance between buttons
+ */
 case class GameOverScreen(private val observerManager: ObserverManager,
                           private val backgroundImagePath: String,
                           private val distanceFromTop: Int = DEFAULT_DISTANCE_FROM_TOP,
