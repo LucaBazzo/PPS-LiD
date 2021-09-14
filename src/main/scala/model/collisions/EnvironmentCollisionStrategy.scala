@@ -173,7 +173,7 @@ class ChestCollisionStrategy(private val entitiesSetter: EntitiesSetter,
 
 class PortalCollisionStrategy(private val portal: ImmobileEntity, private val level: Level) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero touches portal")
+    case _: Hero => println("Hero touches portal")
       if(this.portal.getState == State.Standing)
         this.level.newLevel()
     case _ =>

@@ -198,7 +198,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     }
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Platform | EntityCollisionBit.PlatformSensor | EntityCollisionBit.Pool |
+      EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.PlatformSensor | EntityCollisionBit.Pool |
         EntityCollisionBit.Item | EntityCollisionBit.Portal | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 1.2f)
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, stats)
@@ -248,7 +248,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createPlatform(position: (Float, Float),
                               size: (Float, Float)): Entity = {
 
-    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
+    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Immobile,
       EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(size.PPM),
       position.PPM)
 
