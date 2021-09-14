@@ -25,7 +25,7 @@ object EntityType extends Enumeration {
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
       EnemySkeleton, EnemySlime, EnemyWorm, EnemyBossWizard, // EnemyBossReaper, // EnemyGhost
-      Platform, Door, Ladder, Water, Lava, Chest, Portal,
+      Platform, PlatformSensor, Door, Ladder, Water, Lava, Chest, Portal,
       AttackFireBall, AttackEnergyBall, AttackSmite, AttackArrow = Value
 }
 

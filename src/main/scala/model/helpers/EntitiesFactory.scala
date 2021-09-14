@@ -198,7 +198,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     }
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Platform | EntityCollisionBit.Pool |
+      EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Platform | EntityCollisionBit.PlatformSensor | EntityCollisionBit.Pool |
         EntityCollisionBit.Item | EntityCollisionBit.Portal | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 1.2f)
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, stats)
@@ -234,7 +234,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val feetSize: (Float, Float) = (8.0f, 0.1f)
     val bodyPosition = hero.getPosition - (0, hero.getSize._2)
     val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
-      EntityCollisionBit.Immobile | EntityCollisionBit.Platform | EntityCollisionBit.Door, createPolygonalShape(feetSize.PPM, rounder = true),//createEdgeShape(feetSize),
+      EntityCollisionBit.Immobile | EntityCollisionBit.PlatformSensor | EntityCollisionBit.Door, createPolygonalShape(feetSize.PPM, rounder = true),//createEdgeShape(feetSize),
       bodyPosition, gravityScale = 0, friction = 1.2f)
     EntitiesFactoryImpl.createJoint(hero.getBody, feetBody.getBody)
 
@@ -248,41 +248,41 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def createPlatform(position: (Float, Float),
                               size: (Float, Float)): Entity = {
 
-    val upperSize = (size._1 - 2, size._2)
-    val upperPosition = (position._1, position._2 + 1)
-
-    val lowerSize = (size._1 - 2, size._2)
-    val lowerPosition = (position._1, position._2 - 5)
-
-    //messo per riferimento a prima da rimuovere quando si vede che non servirà a nulla
-    /*val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
-      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape((size._1.PPM , size._2.PPM + 2.PPM )),
-      (position._1.PPM, position._2.PPM - 2.PPM))*/
-
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
-      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape((size._1.PPM , size._2.PPM)),
-      (position._1.PPM, position._2.PPM))
-
-    val entityBodyUpper: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
-      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(upperSize.PPM), upperPosition.PPM, isSensor = true)
-
-    val entityBodyLower: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Platform,
-      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(lowerSize.PPM), lowerPosition.PPM, isSensor = true)
+      EntityCollisionBit.Hero | EntityCollisionBit.Enemy, createPolygonalShape(size.PPM),
+      position.PPM)
 
     val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBody, size.PPM)
     immobileEntity.setCollisionStrategy(new DoNothingOnCollision)
     this.level.addEntity(immobileEntity)
 
-    val immobileEntityUpper: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBodyUpper, upperSize.PPM)
-    val immobileEntityLower: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBodyLower, lowerSize.PPM)
-
-    immobileEntityUpper.setCollisionStrategy(new UpperPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower, this.collisionMonitor))
-    this.level.addEntity(immobileEntityUpper)
-
-    immobileEntityLower.setCollisionStrategy(new LowerPlatformCollisionStrategy(immobileEntity, immobileEntityUpper, immobileEntityLower))
-    this.level.addEntity(immobileEntityLower)
+    createPlatformSensor(size, position, immobileEntity, sizeXOffset = -2f, sizeYOffset = -size._2, positionYOffset = size._2 + 1f, isTopSensor = true)
+    createPlatformSensor(size, position, immobileEntity, sizeXOffset = -2f, sizeYOffset = -size._2, positionYOffset = - size._2 - 5f)
+    createPlatformSensor(size, position, immobileEntity, sizeXOffset = -size._1, sizeYOffset = 1, positionXOffset = +size._1 + 2f, positionYOffset = -2)
+    createPlatformSensor(size, position, immobileEntity, sizeXOffset = -size._1, sizeYOffset = 1, positionXOffset = -size._1 - 2f, positionYOffset = -2)
 
     immobileEntity
+  }
+
+  private def createPlatformSensor(size: (Float, Float), position: (Float, Float), mainPlatform: ImmobileEntity, sizeXOffset: Float = 0, sizeYOffset: Float = 0,
+                                   positionXOffset: Float = 0, positionYOffset: Float = 0, isTopSensor: Boolean = false): Unit = {
+
+    val realSize: (Float, Float) = size + (sizeXOffset, sizeYOffset)
+    val realPosition: (Float, Float) = position + (positionXOffset, positionYOffset)
+
+    val sensorBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.PlatformSensor,
+      EntityCollisionBit.Hero, createPolygonalShape(realSize.PPM),
+      realPosition.PPM, isSensor = true)
+
+    val sensorEntity: ImmobileEntity = ImmobileEntity(EntityType.PlatformSensor, sensorBody, realSize.PPM)
+
+    sensorEntity.setCollisionStrategy(if(isTopSensor)
+      new UpperPlatformCollisionStrategy(mainPlatform, this.collisionMonitor)
+        else
+      new LowerPlatformCollisionStrategy(mainPlatform, this.collisionMonitor))
+
+    this.level.addEntity(sensorEntity)
+
   }
 
   override def createLadder(position: (Float, Float),

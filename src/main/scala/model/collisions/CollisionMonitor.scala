@@ -12,11 +12,18 @@ trait CollisionMonitor {
   def playerQuitLadder(): Unit
 
   def playerOnLadder(): Unit
+
+  def isPlayerTouchingPlatformEdges: Boolean
+
+  def playerTouchesPlatformEdge(): Unit
+
+  def playerQuitPlatform(): Unit
 }
 
 class CollisionMonitorImpl extends CollisionMonitor {
   private var insideLava: Boolean = false
   private var onLadder: Boolean = false
+  private var touchingPlatformEdges: Boolean = false
 
   override def isPlayerInsideLava: Boolean = synchronized {
     this.insideLava
@@ -40,5 +47,17 @@ class CollisionMonitorImpl extends CollisionMonitor {
 
   override def playerOnLadder(): Unit = synchronized {
     this.onLadder = true
+  }
+
+  override def isPlayerTouchingPlatformEdges: Boolean = synchronized {
+    this.touchingPlatformEdges
+  }
+
+  override def playerTouchesPlatformEdge(): Unit = synchronized {
+    this.touchingPlatformEdges = true
+  }
+
+  override def playerQuitPlatform(): Unit = synchronized {
+    this.touchingPlatformEdges = false
   }
 }

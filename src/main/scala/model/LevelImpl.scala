@@ -46,6 +46,7 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(Option.apply(this.world))
+  //this.entitiesFactory.createPlatform((100,40), (100,3))
   this.world.setContactListener(new CollisionManager(this.entitiesSetter.asInstanceOf[EntitiesGetter]))
 
   override def updateEntities(actions: List[GameEvent]): Unit = {

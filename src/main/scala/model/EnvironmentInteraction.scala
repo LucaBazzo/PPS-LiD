@@ -94,9 +94,7 @@ class ChestInteraction(private val hero: Hero, private val chest: ImmobileEntity
 }
 
 class PlatformInteraction(private val hero: Hero,
-                          private val upperPlatform: Entity,
                           private val platform: Entity,
-                          private val lowerPlatform: Entity,
                           private val monitor: CollisionMonitor) extends EnvironmentInteraction {
 
   override def apply(): Unit = {
@@ -104,19 +102,8 @@ class PlatformInteraction(private val hero: Hero,
       hero.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(hero))))
     else
       hero.setEnvironmentInteraction(Option.empty)
-    this.platformCollisions(EntityCollisionBit.Enemy)
-    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-    executorService.execute(() => {
-      Thread.sleep(1000)
-      this.platformCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-      println("Enabled platform collisions")
-    })
-    executorService.shutdown()
+    platform.changeCollisions(EntityCollisionBit.Enemy)
+    println("Enabled platform collisions")
   }
 
-  private def platformCollisions(collisions: Short): Unit = {
-    platform.changeCollisions(collisions)
-    upperPlatform.changeCollisions(collisions)
-    lowerPlatform.changeCollisions(collisions)
-  }
 }
