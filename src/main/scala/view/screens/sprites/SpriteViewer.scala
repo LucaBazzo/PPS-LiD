@@ -117,7 +117,7 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
   private def createItemSprite(entity: Entity, row: Int, column: Int): EntitySprite = {
     val sprite = spriteFactory.createEntitySprite(entity.getType,
       ApplicationConstants.SPRITES_PACK_LOCATION, "items", 32,
-      32, entity.getSize._1, entity.getSize._2, 2)
+      34, 15, 15, 1)
     sprite.addAnimation(State.Standing,
       spriteFactory.createSpriteAnimation(sprite, row, column, column))
     sprite

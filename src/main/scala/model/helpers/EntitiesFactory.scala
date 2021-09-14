@@ -199,7 +199,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
       EntityCollisionBit.Immobile | EntityCollisionBit.Ladder | EntityCollisionBit.Platform | EntityCollisionBit.Pool |
-        EntityCollisionBit.Item | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 1.2f)
+        EntityCollisionBit.Item | EntityCollisionBit.Portal | EntityCollisionBit.Door | EntityCollisionBit.EnemyAttack, createPolygonalShape(size.PPM), position.PPM, friction = 1.2f)
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, stats)
 
@@ -402,8 +402,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                           size: (Float, Float) = (5f, 5f),
                           position: (Float, Float) = (0, 0),
                           collisions: Short = EntityCollisionBit.Hero): Item = {
-    val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Item,
-      collisions, createPolygonalShape(size.PPM), position.PPM)
+    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Item,
+      collisions | EntityCollisionBit.Immobile, createPolygonalShape(size.PPM), position.PPM)
     val item: Item = itemPool.getItem(entityBody, size, PoolName)
     item.setCollisionStrategy(new ItemCollisionStrategy(item, this.entitiesSetter))
     this.level.addEntity(item)
@@ -443,10 +443,10 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                                     collisions: Short = 0): Entity = {
 
     val entityBody: EntityBody = defineEntityBody(BodyType.StaticBody, entityCollisionBit,
-      collisions, createPolygonalShape(size.PPM), position.PPM)
+      collisions | EntityCollisionBit.Item, createPolygonalShape(size.PPM), position.PPM)
 
     val immobileEntity: Entity = ImmobileEntity(entityType, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())//new NewLevelOnCollision(this.level)
+    immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())
     this.level.addEntity(immobileEntity)
     immobileEntity
   }
