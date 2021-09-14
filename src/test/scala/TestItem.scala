@@ -57,7 +57,7 @@ class TestItem extends AnyFlatSpec {
         preStat = hero.getStatistics(effect._1.get.head._1)
         incStat = effect._1.get.head._2
       }
-      item.collisionDetected(Option.apply(hero))
+      item.collisionDetected(hero)
       if (effect._1.nonEmpty)
         assert(hero.getStatistics(effect._1.get.head._1) == preStat + incStat)
       assert(hero.getItemsPicked.head == item.getName)
@@ -72,7 +72,7 @@ class TestItem extends AnyFlatSpec {
       val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
       hero.sufferDamage(999)
       val prevLife: Float = hero.getStatistics(Statistic.CurrentHealth)
-      item.collisionDetected(Option.apply(hero))
+      item.collisionDetected(hero)
       val actLife: Float = hero.getStatistics(Statistic.CurrentHealth)
       assert(item.collect()._1.get.head._2 <= (actLife - prevLife + 1))
     }
