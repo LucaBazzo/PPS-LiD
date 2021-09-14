@@ -85,12 +85,12 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
     case EntityType.BFSwordItem =>
       createItemSprite(entity, 1, 6)
     case EntityType.Door =>
-      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/ironDoor.pack", "ironDoor1", 80, 67,
+      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/ironDoor.pack", "ironDoor0", 80, 67,
         entity.getSize._1 + 0.5f, entity.getSize._2, 120)
       sprite.addAnimation(State.Standing,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
       sprite.addAnimation(State.Opening,
-        spriteFactory.createSpriteAnimation(sprite, 0, 0, 2))
+        spriteFactory.createSpriteAnimation(sprite, 0, 0, 3))
       sprite
     case EntityType.Chest =>
       val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/chest.pack", "ChestClosed", 64, 68,
