@@ -1,4 +1,4 @@
-package view.screens.game
+package view.screens.menu
 
 import com.badlogic.gdx.graphics.g2d.{SpriteBatch, TextureRegion}
 import com.badlogic.gdx.graphics.{Color, OrthographicCamera, Texture}

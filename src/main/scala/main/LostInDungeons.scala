@@ -2,12 +2,12 @@ package main
 
 import com.badlogic.gdx.Game
 import controller.{GameEvent, ObserverManager}
-import view.screens.menu.MainMenuScreen
+import view.screens.menu.GUIFactory
 
 class LostInDungeons(private val observerManager: ObserverManager) extends Game {
 
   override def create(): Unit = {
-    this.setScreen(new MainMenuScreen(this.observerManager))
+    this.setScreen(GUIFactory.createMainMenuScreen(this.observerManager))
   }
 
   override def dispose(): Unit = {
