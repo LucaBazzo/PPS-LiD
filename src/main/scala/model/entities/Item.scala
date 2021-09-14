@@ -74,6 +74,19 @@ class MapItem(private val entityType: EntityType, private var entityBody: Entity
 class SmallPotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionS, entityBody, size) {
   override def update(): Unit = {}
 
+  override def getDesc: String = "Heal 10% of maximum health"
+
+  override def collect(): (Option[List[(Statistic, Float)]], String) = {
+    this.destroyEntity()
+    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 100))), this.getDesc)
+  }
+
+  override def getScore: Int = super.getScore / 4
+}
+
+class PotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionM, entityBody, size) {
+  override def update(): Unit = {}
+
   override def getDesc: String = "Heal 25% of maximum health"
 
   override def collect(): (Option[List[(Statistic, Float)]], String) = {
@@ -84,27 +97,14 @@ class SmallPotionItem(private val entityType: EntityType, private var entityBody
   override def getScore: Int = super.getScore / 4
 }
 
-class PotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionM, entityBody, size) {
-  override def update(): Unit = {}
-
-  override def getDesc: String = "Heal 50% of maximum health"
-
-  override def collect(): (Option[List[(Statistic, Float)]], String) = {
-    this.destroyEntity()
-    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 500))), this.getDesc)
-  }
-
-  override def getScore: Int = super.getScore / 4
-}
-
 class LargePotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionL, entityBody, size) {
   override def update(): Unit = {}
 
-  override def getDesc: String = "Heal 75% of maximum health"
+  override def getDesc: String = "Heal 35% of maximum health"
 
   override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 750))), this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 350))), this.getDesc)
   }
 
   override def getScore: Int = super.getScore / 4
@@ -113,11 +113,11 @@ class LargePotionItem(private val entityType: EntityType, private var entityBody
 class HugePotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionXL, entityBody, size) {
   override def update(): Unit = {}
 
-  override def getDesc: String = "Heal 100% of maximum health"
+  override def getDesc: String = "Heal 50% of maximum health"
 
   override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 1000))), this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.CurrentHealth, 500))), this.getDesc)
   }
 
   override def getScore: Int = super.getScore / 4

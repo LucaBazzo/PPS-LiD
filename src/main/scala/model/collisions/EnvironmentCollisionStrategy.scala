@@ -115,53 +115,42 @@ class LavaCollisionStrategy(private val collisMonitor: CollisionMonitor) extends
 }
 
 class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
-                                private val upperPlatform: ImmobileEntity,
-                                private val lowerPlatform: ImmobileEntity,
                                      private val monitor: CollisionMonitor) extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => println("Hero standing on Platform")
+                    this.monitor.playerTouchesPlatformEdge()
                     h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new PlatformInteraction(h,
-                      this.upperPlatform, this.platform, this.lowerPlatform, monitor))))
+                      this.platform, this.monitor))))
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
     case _: Hero => println("Hero leaving Platform")
-      val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-      executorService.execute(() => {
-        Thread.sleep(1000)
+      if(! this.monitor.isPlayerTouchingPlatformEdges) {
         platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
         println("Enabled platform collisions")
-      })
-      executorService.shutdown()
+      }
+      this.monitor.playerQuitPlatform()
     case _ =>
   }
 }
 
 class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
-                                private val upperPlatform: ImmobileEntity,
-                                private val lowerPlatform: ImmobileEntity) extends DoNothingOnCollision {
+                                     private val monitor: CollisionMonitor) extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => println("Hero touching lower Platform")
+      this.monitor.playerTouchesPlatformEdge()
       platform.changeCollisions(EntityCollisionBit.Enemy)
-      upperPlatform.changeCollisions(EntityCollisionBit.Enemy)
-      lowerPlatform.changeCollisions(EntityCollisionBit.Enemy)
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
     case _: Hero => println("Hero leaving Platform")
-      val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-      executorService.execute(() => {
-        Thread.sleep(1200)
+      if(! this.monitor.isPlayerTouchingPlatformEdges) {
         platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
         println("Enabled platform collisions")
-      })
-      executorService.shutdown()
+      }
+      this.monitor.playerQuitPlatform()
     case _ =>
   }
 }
@@ -184,7 +173,7 @@ class ChestCollisionStrategy(private val entitiesSetter: EntitiesSetter,
 
 class PortalCollisionStrategy(private val portal: ImmobileEntity, private val level: Level) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero touches portal")
+    case _: Hero => println("Hero touches portal")
       if(this.portal.getState == State.Standing)
         this.level.newLevel()
     case _ =>

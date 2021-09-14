@@ -44,7 +44,6 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
 
   this.entitiesSetter.setEntities(entitiesList)
   this.entitiesSetter.setWorld(Option.apply(this.world))
-
   this.world.setContactListener(new CollisionManager(this.entitiesSetter.asInstanceOf[EntitiesGetter]))
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
@@ -84,11 +83,11 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
       portal.setState(State.Opening)
       val executorService: ExecutorService = Executors.newSingleThreadExecutor()
       executorService.execute(() => {
-        Thread.sleep(1900)
+        Thread.sleep(1000)
         portal.setState(State.Standing)
         println("Portal opened")
       })
-      //executorService.shutdown()
+      executorService.shutdown()
     }
   }
 

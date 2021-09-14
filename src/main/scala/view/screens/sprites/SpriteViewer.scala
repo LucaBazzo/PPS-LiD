@@ -85,16 +85,16 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
     case EntityType.BFSwordItem =>
       createItemSprite(entity, 1, 6)
     case EntityType.Door =>
-      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/ironDoor.pack", "ironDoor1", 80, 67,
-        entity.getSize._1 + 0.5f, entity.getSize._2, 120)
+      val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/ironDoor.pack", "ironDoor0", 80, 67,
+        80, 67, 1)
       sprite.addAnimation(State.Standing,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
       sprite.addAnimation(State.Opening,
-        spriteFactory.createSpriteAnimation(sprite, 0, 0, 2))
+        spriteFactory.createSpriteAnimation(sprite, 0, 0, 3))
       sprite
     case EntityType.Chest =>
       val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/chest.pack", "ChestClosed", 64, 68,
-        entity.getSize._1, entity.getSize._2, 100)
+        64, 68, 1)
       sprite.addAnimation(State.Standing,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
       sprite.addAnimation(State.Opening,
@@ -102,7 +102,7 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
       sprite
     case EntityType.Portal =>
       val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/portal.pack", "portal", 64, 62,
-        entity.getSize._1, entity.getSize._2, 150)
+        64, 62, 1)
       sprite.addAnimation(State.Standing,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 7), loop = true)
       sprite.addAnimation(State.Opening,
@@ -117,7 +117,7 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
   private def createItemSprite(entity: Entity, row: Int, column: Int): EntitySprite = {
     val sprite = spriteFactory.createEntitySprite(entity.getType,
       ApplicationConstants.SPRITES_PACK_LOCATION, "items", 32,
-      32, entity.getSize._1, entity.getSize._2, 2)
+      34, 15, 15, 1)
     sprite.addAnimation(State.Standing,
       spriteFactory.createSpriteAnimation(sprite, row, column, column))
     sprite
