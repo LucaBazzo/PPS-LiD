@@ -77,13 +77,13 @@ class BossDoorCollisionStrategy(private val entitySetter: EntitiesSetter,
 class WaterCollisionStrategy() extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => println("Hero stands in water")
-      h.alterStatistics(Statistic.MovementSpeed, -0.7f)
+      h.alterStatistics(Statistic.MovementSpeed, -0.3f)
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
     case h: Hero => println("Hero out of water")
-      h.alterStatistics(Statistic.MovementSpeed, +0.7f)
+      h.alterStatistics(Statistic.MovementSpeed, +0.3f)
     case _ =>
   }
 }
@@ -159,7 +159,7 @@ class ChestCollisionStrategy(private val entitiesSetter: EntitiesSetter,
                              private val chest: ImmobileEntity) extends CollisionStrategy {
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => println("Hero touches chest")
-      this.entitiesSetter.addMessage("Press F to open the chest")
+      this.entitiesSetter.addMessage("Press Space to open the chest")
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new ChestInteraction(h,chest))))
     case _ =>
   }

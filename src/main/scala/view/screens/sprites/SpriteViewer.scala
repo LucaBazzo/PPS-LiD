@@ -94,7 +94,7 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
       sprite
     case EntityType.Chest =>
       val sprite = spriteFactory.createEntitySprite(entity.getType, "assets/sprites/chest.pack", "ChestClosed", 64, 68,
-        64, 68, 1)
+        64, 68, 0.2f)
       sprite.addAnimation(State.Standing,
         spriteFactory.createSpriteAnimation(sprite, 0, 0, 0))
       sprite.addAnimation(State.Opening,
