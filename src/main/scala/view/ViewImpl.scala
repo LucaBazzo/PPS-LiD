@@ -1,11 +1,12 @@
 package view
 
+import com.badlogic.gdx.Files.FileType
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.{Lwjgl3Application, Lwjgl3ApplicationConfiguration}
 import controller.ObserverManager
 import main.LostInDungeons
 import model.helpers.EntitiesGetter
-import utils.ApplicationConstants.TITLE
+import utils.ApplicationConstants.{ICON_PATH, TITLE}
 import view.screens.game.GameScreen
 import view.screens.helpers.TileMapHelper
 import view.screens.menu.{GameOverScreen, MainMenuScreen}
@@ -30,7 +31,7 @@ class ViewImpl(private val entitiesGetter: EntitiesGetter,
 
   val config = new Lwjgl3ApplicationConfiguration
   config.setTitle(TITLE)
-  //config.addIcon(ICON_PATH, FileType.Internal)
+  config.setWindowIcon(FileType.Internal, ICON_PATH)
 
   val executorService: ExecutorService = Executors.newSingleThreadExecutor()
   executorService.submit(() => {

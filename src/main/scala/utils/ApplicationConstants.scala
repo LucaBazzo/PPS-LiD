@@ -8,6 +8,8 @@ object ApplicationConstants {
 
   val TITLE = "Lost in Dungeons"
 
+  val ICON_PATH = "assets/sprites/lid_icon.png"
+
   val WIDTH_SCREEN: Int = 400
   val HEIGHT_SCREEN: Int = 208
 
