@@ -3,35 +3,37 @@ package model.collisions
 import controller.GameEvent
 import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
 import model.helpers.EntitiesSetter
-import model.{ChestInteraction, DoorInteraction, HeroInteraction, LadderInteraction, Level, PlatformInteraction}
+import model._
 
-import java.util.concurrent.{ExecutorService, Executors}
-
-class ItemCollisionStrategy(private val item: Item, private val entitiesMonitor: EntitiesSetter) extends DoNothingOnCollision {
-  override def apply(entity: Entity): Unit = entity match {
-    case h:Hero => println("Hero picked up item")
-                   val effect = item.collect()
-                   println(effect._2 + "\n +" + item.getScore + " points")
-                   h.itemPicked(item.getName)
-                   entitiesMonitor.addMessage(effect._2)
-                   entitiesMonitor.heroJustPickedUpItem(item.getName)
-                   if(effect._1.nonEmpty) {
-                     for(stat <- effect._1.get) {
-                       if(stat._1.equals(Statistic.CurrentHealth))
-                         h.healLife(stat._2)
-                       else
-                       h.alterStatistics(stat._1, stat._2)
-                     }
-                   }
-    case _ => println("____")
+case class ItemCollisionStrategy(private val item: Item,
+                            private val entitiesMonitor: EntitiesSetter) extends CollisionStrategyImpl {
+  override def contact(entity: Entity): Unit = {
+    entity match {
+      case h:Hero =>
+        println("Hero picked up item")
+        val effect = item.collect()
+        println(effect._2 + "\n +" + item.getScore + " points")
+        h.itemPicked(item.getName)
+        entitiesMonitor.addMessage(effect._2)
+        entitiesMonitor.heroJustPickedUpItem(item.getName)
+        if(effect._1.nonEmpty) {
+          for(stat <- effect._1.get) {
+            if(stat._1.equals(Statistic.CurrentHealth))
+              h.healLife(stat._2)
+            else
+              h.alterStatistics(stat._1, stat._2)
+          }
+        }
+      case _ =>
+    }
   }
 }
 
-class DoorCollisionStrategy(private val entitySetter: EntitiesSetter,
+case class DoorCollisionStrategy(private val entitySetter: EntitiesSetter,
                             private val door: ImmobileEntity,
                             private val doorSensorLeft: ImmobileEntity,
-                            private val doorSensorRight: ImmobileEntity) extends DoNothingOnCollision {
-  override def apply(entity: Entity): Unit = entity match {
+                            private val doorSensorRight: ImmobileEntity) extends CollisionStrategyImpl {
+  override def contact(entity: Entity): Unit = entity match {
     case h: Hero =>
       this.entitySetter.addMessage("Press Space to open the door")
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new DoorInteraction(h, this.door,
@@ -50,12 +52,12 @@ class DoorCollisionStrategy(private val entitySetter: EntitiesSetter,
   }
 }
 
-class BossDoorCollisionStrategy(private val entitySetter: EntitiesSetter,
+case class BossDoorCollisionStrategy(private val entitySetter: EntitiesSetter,
                                 private val door: ImmobileEntity,
                                 private val doorSensorLeft: ImmobileEntity,
-                                private val doorSensorRight: ImmobileEntity) extends DoNothingOnCollision {
+                                private val doorSensorRight: ImmobileEntity) extends CollisionStrategyImpl {
 
-  override def apply(entity: Entity): Unit = entity match {
+  override def contact(entity: Entity): Unit = entity match {
     case h: Hero => if(h.isItemPicked(Items.Key) || h.isItemPicked(Items.SkeletonKey))
         {
           this.entitySetter.addMessage("Press Space to open the door")
@@ -74,8 +76,8 @@ class BossDoorCollisionStrategy(private val entitySetter: EntitiesSetter,
 
 }
 
-class WaterCollisionStrategy() extends DoNothingOnCollision {
-  override def apply(entity: Entity): Unit = entity match {
+case class WaterCollisionStrategy() extends CollisionStrategyImpl {
+  override def contact(entity: Entity): Unit = entity match {
     case h: Hero => println("Hero stands in water")
       h.alterStatistics(Statistic.MovementSpeed, -0.7f)
     case _ =>
@@ -88,63 +90,77 @@ class WaterCollisionStrategy() extends DoNothingOnCollision {
   }
 }
 
-class LavaCollisionStrategy(private val collisMonitor: CollisionMonitor) extends DoNothingOnCollision {
-  var executorService: ExecutorService = _
-  override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero stands in lava")
-      collisMonitor.playerInLava()
-      this.executorService = Executors.newSingleThreadExecutor()
-      executorService.execute(() => {
-        while(collisMonitor.isPlayerInsideLava) {
-          h.sufferDamage(100)
-          if(h.getLife <= 0)
-            collisMonitor.playerOutOfLava()
-          println("Taken damage from lava")
-          Thread.sleep(1000)
-        }
-      })
+case class LavaCollisionStrategy() extends CollisionStrategyImpl {
+  private var timer:Long = 0
+  private var hero:Option[Hero] = Option.empty
+  private val LAVA_DAMAGE_TIME: Long = 1000
+  private val LAVA_DAMAGE: Float = 100
+
+  override def contact(entity: Entity): Unit = entity match {
+    case hero: Hero =>
+      println("Hero stands in lava")
+      this.hero = Option(hero)
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
     case _: Hero => println("Hero out of lava")
-      collisMonitor.playerOutOfLava()
-      executorService.shutdown()
+      this.hero = Option.empty
     case _ =>
+  }
+
+  override def apply(): Unit = {
+    val now:Long = System.currentTimeMillis()
+    if (this.hero.isDefined && System.currentTimeMillis() - this.timer > LAVA_DAMAGE_TIME) {
+      hero.get.sufferDamage(LAVA_DAMAGE)
+      println("Taken damage from lava")
+      this.timer = now
+    }
   }
 }
 
-class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
+case class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
                                 private val upperPlatform: ImmobileEntity,
                                 private val lowerPlatform: ImmobileEntity,
-                                     private val monitor: CollisionMonitor) extends DoNothingOnCollision {
-  override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero standing on Platform")
-                    h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new PlatformInteraction(h,
-                      this.upperPlatform, this.platform, this.lowerPlatform, monitor))))
+                                     private val monitor: CollisionMonitor) extends CollisionStrategyImpl {
+  private val PLATFORM_DEACTIVATION_TIME: Long = 1000
+  private var timer:Long = 0
+
+  override def contact(entity: Entity): Unit = entity match {
+    case h: Hero =>
+      println("Hero standing on Platform")
+      h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new PlatformInteraction(h,
+        this.upperPlatform, this.platform, this.lowerPlatform, monitor))))
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
     case _: Hero => println("Hero leaving Platform")
-      val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-      executorService.execute(() => {
-        Thread.sleep(1000)
-        platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        println("Enabled platform collisions")
-      })
-      executorService.shutdown()
+      this.timer = System.currentTimeMillis()
     case _ =>
+  }
+
+  override def apply(): Unit = {
+    super.apply()
+    if (this.timer != 0 && System.currentTimeMillis() - this.timer > PLATFORM_DEACTIVATION_TIME) {
+      platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      println("Enabled platform collisions 1")
+      this.timer = 0
+    }
   }
 }
 
-class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
+case class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
                                 private val upperPlatform: ImmobileEntity,
-                                private val lowerPlatform: ImmobileEntity) extends DoNothingOnCollision {
-  override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero touching lower Platform")
+                                private val lowerPlatform: ImmobileEntity) extends CollisionStrategyImpl {
+  private val PLATFORM_DEACTIVATION_TIME: Long = 1200
+  private var timer:Long = 0
+  
+  override def contact(entity: Entity): Unit = entity match {
+    case _: Hero => 
+      println("Hero touching lower Platform")
       platform.changeCollisions(EntityCollisionBit.Enemy)
       upperPlatform.changeCollisions(EntityCollisionBit.Enemy)
       lowerPlatform.changeCollisions(EntityCollisionBit.Enemy)
@@ -152,39 +168,46 @@ class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
   }
 
   override def release(entity: Entity): Unit = entity match {
-    case _: Hero => println("Hero leaving Platform")
-      val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-      executorService.execute(() => {
-        Thread.sleep(1200)
-        platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        println("Enabled platform collisions")
-      })
-      executorService.shutdown()
+    case _: Hero =>
+      this.timer = System.currentTimeMillis()
+      println("Hero leaving Platform")
     case _ =>
+  }
+
+  override def apply(): Unit = {
+    super.apply()
+    if (this.timer != 0 && System.currentTimeMillis() - this.timer > PLATFORM_DEACTIVATION_TIME) {
+      platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      println("Enabled platform collisions 2")
+      this.timer = 0
+    }
   }
 }
 
-class ChestCollisionStrategy(private val entitiesSetter: EntitiesSetter,
-                             private val chest: ImmobileEntity) extends CollisionStrategy {
-  override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero touches chest")
+case class ChestCollisionStrategy(private val entitiesSetter: EntitiesSetter,
+                             private val chest: ImmobileEntity) extends CollisionStrategyImpl {
+  override def contact(entity: Entity): Unit = entity match {
+    case h: Hero =>
+      println("Hero touches chest")
       this.entitiesSetter.addMessage("Press F to open the chest")
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new ChestInteraction(h,chest))))
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
-    case h:Hero => println("Hero not touching chest anymore")
+    case h:Hero =>
+      println("Hero not touching chest anymore")
       h.setEnvironmentInteraction(Option.empty)
     case _ =>
   }
+
 }
 
-class PortalCollisionStrategy(private val portal: ImmobileEntity, private val level: Level) extends CollisionStrategy {
-  override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero touches portal")
+case class PortalCollisionStrategy(private val portal: ImmobileEntity, private val level: Level) extends CollisionStrategyImpl {
+  override def contact(entity: Entity): Unit = entity match {
+    case _: Hero => println("Hero touches portal")
       if(this.portal.getState == State.Standing)
         this.level.newLevel()
     case _ =>
@@ -197,8 +220,8 @@ class PortalCollisionStrategy(private val portal: ImmobileEntity, private val le
   }
 }
 
-class LadderCollisionStrategy(private val monitor: CollisionMonitor) extends CollisionStrategy {
-  override def apply(entity: Entity): Unit = entity match {
+case class LadderCollisionStrategy(private val monitor: CollisionMonitor) extends CollisionStrategyImpl {
+  override def contact(entity: Entity): Unit = entity match {
     case h: Hero => print("Hero touches ladder" + "\n")
                     monitor.playerOnLadder()
                     h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(h))))

@@ -1,19 +1,20 @@
 package model.entities
 
+import model.behaviour.EnemyBehaviours
 import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl
-import model.{EnemyBehaviour, EntityBody, Score}
+import model.{EntityBody, Score}
 import utils.EnemiesConstants.{ENEMY_BOSS_TYPES, ENEMY_TYPES}
 
 import scala.util.Random
 
 trait Enemy {
   // TODO: rifattorizzare a livello di living entity?
-  def setBehaviour(enemyBehaviour: EnemyBehaviour): Unit
+  def setBehaviour(enemyBehaviour: EnemyBehaviours): Unit
 }
 
 class EnemyImpl(private val entityType: EntityType,
@@ -24,7 +25,7 @@ class EnemyImpl(private val entityType: EntityType,
                 private val heroEntity: Hero) extends LivingEntityImpl(entityType, entityBody, size, stats)
           with LivingEntity with Score with Enemy {
 
-  var enemyBehaviour:Option[EnemyBehaviour] = None
+  var behaviours:Option[EnemyBehaviours] = None
   private val rand = new Random
 
   override def getScore: Int = this.score
@@ -32,11 +33,11 @@ class EnemyImpl(private val entityType: EntityType,
   override def update(): Unit = {
     super.update()
     if (state != State.Dying) {
-      if (this.enemyBehaviour.isDefined) {
-        this.enemyBehaviour.get.apply()
+      if (this.behaviours.isDefined) {
+        this.behaviours.get.update()
 
-        this.movementStrategy = this.enemyBehaviour.get.getMovementStrategy
-        this.attackStrategy = this.enemyBehaviour.get.getAttackStrategy
+        this.movementStrategy = this.behaviours.get.getMovementStrategy
+        this.attackStrategy = this.behaviours.get.getAttackStrategy
       }
       this.movementStrategy.apply()
       this.attackStrategy.apply()
@@ -44,12 +45,12 @@ class EnemyImpl(private val entityType: EntityType,
 
   }
 
-  override def setBehaviour(enemyBehaviour: EnemyBehaviour): Unit = this.enemyBehaviour = Option(enemyBehaviour)
+  override def setBehaviour(behaviours: EnemyBehaviours): Unit = this.behaviours = Option(behaviours)
 
   override def sufferDamage(damage: Float): Unit = {
     super.sufferDamage(damage)
     if (this.state == State.Dying) {
-      this.enemyBehaviour.get.getAttackStrategy.stopAttack()
+      this.behaviours.get.getAttackStrategy.stopAttack()
     }
   }
 

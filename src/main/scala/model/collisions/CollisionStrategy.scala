@@ -5,19 +5,27 @@ import model.entities.{Entity, Hero}
 
 
 trait CollisionStrategy {
-  def apply(entity: Entity): Unit
+  def apply(): Unit
+
+  def contact(entity: Entity): Unit
   def release(entity: Entity): Unit
 }
 
-class DoNothingOnCollision() extends CollisionStrategy {
-  override def apply(entity: Entity): Unit = {}
+abstract class CollisionStrategyImpl() extends CollisionStrategy {
+  override def contact(entity: Entity): Unit = { }
 
-  override def release(entity: Entity): Unit = {}
+  override def release(entity: Entity): Unit = { }
+
+  override def apply(): Unit = { }
 }
 
-class NewLevelOnCollision(level: Level) extends DoNothingOnCollision {
-  override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => this.level.newLevel()
-    case _ =>
+case class DoNothingCollisionStrategy() extends CollisionStrategyImpl {
+}
+
+case class NewLevelOnCollision(level: Level) extends CollisionStrategyImpl {
+  override def contact(entity: Entity): Unit = {
+    entity match {
+      case h:Hero => this.level.newLevel()
+    }
   }
 }

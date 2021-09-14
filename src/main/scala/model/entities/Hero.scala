@@ -162,7 +162,6 @@ class HeroImpl(private val entityType: EntityType,
   }
 
   override def update(): Unit = {
-
     if(isNotWaiting) {
       if(this.isSlidingFinished)
         this.stopMovement()

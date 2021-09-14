@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import model.EntityBody
-import model.collisions.{CollisionStrategy, DoNothingOnCollision}
+import model.collisions.{CollisionStrategy, DoNothingCollisionStrategy}
 import model.entities.EntityType.EntityType
 import model.entities.State.State
 import model.helpers.EntitiesFactoryImpl
@@ -53,9 +53,9 @@ trait Entity {
 
   def setCollisionStrategy(collisionStrategy: CollisionStrategy): Unit
 
-  def collisionDetected(entity: Option[Entity]): Unit
+  def collisionDetected(entity: Entity): Unit
 
-  def collisionReleased(entity: Option[Entity]): Unit
+  def collisionReleased(entity: Entity): Unit
 
   //TODO ricontrollare in futuro
   def getBody: Body
@@ -71,12 +71,14 @@ trait Entity {
   def isColliding: Boolean
 }
 
+// TODO: var size serve?
+
 abstract class EntityImpl(private val entityType: EntityType,
                           private var entityBody: EntityBody,
                           private var size: (Float, Float)) extends Entity {
 
   protected var state: State = State.Standing
-  protected var collisionStrategy: CollisionStrategy = new DoNothingOnCollision()
+  protected var collisionStrategy: CollisionStrategy = new DoNothingCollisionStrategy()
   private var collidingEntities: Int = 0
 
   override def getState: State = this.state
@@ -98,21 +100,20 @@ abstract class EntityImpl(private val entityType: EntityType,
   override def setCollisionStrategy(collisionStrategy: CollisionStrategy): Unit =
     this.collisionStrategy = collisionStrategy
 
-  override def collisionDetected(entity: Option[Entity]): Unit = {
-    if(entity.nonEmpty)
-      this.collisionStrategy.apply(entity.get)
+  override def collisionDetected(entity: Entity): Unit = {
+    this.collisionStrategy.contact(entity)
     this.collidingEntities += 1
   }
 
-  override def collisionReleased(entity: Option[Entity]): Unit = {
-    if(entity.nonEmpty)
-      this.collisionStrategy.release(entity.get)
+  override def collisionReleased(entity: Entity): Unit = {
+    this.collisionStrategy.release(entity)
     this.collidingEntities -= 1
   }
 
   override def isColliding: Boolean = this.collidingEntities > 0
 
   override def destroyEntity(): Unit = {
+    println("destroying entity", this)
     EntitiesFactoryImpl.destroyBody(this.getBody)
     this.getBody.getJointList.toArray().foreach(j => {
       EntitiesFactoryImpl.destroyBody(j.other)
@@ -127,12 +128,19 @@ abstract class EntityImpl(private val entityType: EntityType,
   override def changeCollisions(entityType: Short): Unit = EntitiesFactoryImpl.changeCollisions(this, entityType)
 
   override def getType: EntityType = this.entityType
+
+  override def update(): Unit = {
+    this.collisionStrategy.apply()
+  }
 }
 
+// TODO: remove ImmobileEntity?
 case class ImmobileEntity(private var entityType: EntityType,
                           private var entityBody: EntityBody,
                           private val size: (Float, Float))
   extends EntityImpl(entityType, entityBody, size) {
 
-  override def update(): Unit = {}
+  override def update(): Unit = {
+    this.collisionStrategy.apply()
+  }
 }

@@ -50,16 +50,19 @@ object ImplicitConversions {
 
   implicit class RichFloat(base: Float) {
     def PPM: Float = base / PIXELS_PER_METER
+
+    def MPP: Float = base * PIXELS_PER_METER
   }
 
   implicit class RichInt(base: Int) {
     def PPM: Float = base / PIXELS_PER_METER
+
+    def MPP: Float = base * PIXELS_PER_METER
   }
 
   implicit class RichTuple2(base: (Float, Float)) {
     def PPM: (Float, Float) = base / PIXELS_PER_METER
 
-    // TODO: da rimuovere
     def MPP: (Float, Float) = base * PIXELS_PER_METER
 
     def INV: (Float, Float) = (-base._1, -base._2)
@@ -76,7 +79,6 @@ object ImplicitConversions {
 
   }
 }
-
 case class CollidingEntities(firstEntity: Option[Entity], secondEntity: Option[Entity])
 
 // TODO: come gestire collissioni continue?
@@ -86,19 +88,19 @@ class CollisionManager(private val entitiesGetter: EntitiesGetter) extends Conta
   override def beginContact(contact: Contact): Unit = {
     val collidingEntities: CollidingEntities = getCollidingEntities(contact)
 
-    if(collidingEntities.firstEntity.nonEmpty)
-      collidingEntities.firstEntity.get.collisionDetected(collidingEntities.secondEntity)
-    if(collidingEntities.secondEntity.nonEmpty)
-      collidingEntities.secondEntity.get.collisionDetected(collidingEntities.firstEntity)
+    if(collidingEntities.firstEntity.nonEmpty && collidingEntities.secondEntity.nonEmpty) {
+      collidingEntities.firstEntity.get.collisionDetected(collidingEntities.secondEntity.get)
+      collidingEntities.secondEntity.get.collisionDetected(collidingEntities.firstEntity.get)
+    }
   }
 
   override def endContact(contact: Contact): Unit = {
     val collidingEntities: CollidingEntities = getCollidingEntities(contact)
 
-    if(collidingEntities.firstEntity.nonEmpty)
-      collidingEntities.firstEntity.get.collisionReleased(collidingEntities.secondEntity)
-    if(collidingEntities.secondEntity.nonEmpty)
-      collidingEntities.secondEntity.get.collisionReleased(collidingEntities.firstEntity)
+    if(collidingEntities.firstEntity.nonEmpty && collidingEntities.secondEntity.nonEmpty) {
+      collidingEntities.firstEntity.get.collisionReleased(collidingEntities.secondEntity.get)
+      collidingEntities.secondEntity.get.collisionReleased(collidingEntities.firstEntity.get)
+    }
   }
 
   override def preSolve(contact: Contact, manifold: Manifold): Unit = {

@@ -66,7 +66,7 @@ class TestHero extends AnyFlatSpec{
     //the hero touches the ground
     hero.setVelocityY(0)
     val platform: Entity = EntitiesFactoryImpl.createImmobileEntity()
-    hero.getFeet.get.collisionDetected(Option.apply(platform))
+    hero.getFeet.get.collisionDetected(platform)
 
     hero.update()
 
@@ -76,7 +76,7 @@ class TestHero extends AnyFlatSpec{
     assertResult(State.Standing)(hero.getState)
 
     hero.notifyCommand(Up)
-    hero.getFeet.get.collisionReleased(Option.apply(platform))
+    hero.getFeet.get.collisionReleased(platform)
     hero.update()
     assertResult(State.Jumping)(hero.getState)
 
@@ -98,7 +98,7 @@ class TestHero extends AnyFlatSpec{
 
     //the hero touches the ground
     hero.setVelocityY(0)
-    hero.getFeet.get.collisionDetected(Option.apply(platform))
+    hero.getFeet.get.collisionDetected(platform)
 
     hero.update()
 
