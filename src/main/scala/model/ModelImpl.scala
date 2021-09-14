@@ -21,6 +21,8 @@ trait Model {
   def loadWorld(): Unit
 
   def requestLevel(): Unit
+
+  def disposeLevel(): Unit
 }
 
 class ModelImpl(private val controller: Observer,
@@ -73,10 +75,7 @@ class ModelImpl(private val controller: Observer,
 
     this.entitiesSetter.setEntities(List.empty)
 
-    if(level.nonEmpty) {
-      this.entitiesSetter.setLevelReady(false)
-      this.level.get.dispose()
-    }
+    this.disposeLevel()
 
     this.levelNumber += 1
     this.entitiesSetter.setLevelNumber(this.levelNumber)
@@ -94,5 +93,13 @@ class ModelImpl(private val controller: Observer,
 
   override def requestLevel(): Unit = {
     this.controller.handleEvent(GameEvent.StartGame)
+  }
+
+  override def disposeLevel(): Unit = {
+    if(level.nonEmpty) {
+      this.entitiesSetter.setLevelReady(false)
+      this.entitiesSetter.setWorld(Option.empty)
+      this.level = Option.empty
+    }
   }
 }

@@ -49,6 +49,9 @@ class ControllerImpl extends Controller with Observer {
       Thread.sleep(1500)
       this.stopExecutorService()
       this.view.endGame()
+      Thread.sleep(300)
+      this.model.disposeLevel()
+      this.entitiesContainer.setLevelNumber(0)
     }
     executorService.submit(task)
   }

@@ -1,7 +1,7 @@
 package model.collisions
 
 import model.entities.Statistic.Statistic
-import model.entities.{Entity, Item, LivingEntity, Statistic}
+import model.entities.{Entity, LivingEntity, Statistic}
 
 class FeetCollisionStrategy extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
@@ -10,13 +10,6 @@ class FeetCollisionStrategy extends DoNothingOnCollision {
 
   override def release(entity: Entity): Unit = entity match {
     case _ => println("Foot Release Detected with" + entity.toString)
-  }
-}
-
-class CollisionStrategyImpl extends DoNothingOnCollision {
-  override def apply(entity: Entity): Unit = entity match {
-    case i:Item =>  println("Collect item: " + i.getName)
-    case _ => println("Collision Detected with" + entity.toString)
   }
 }
 

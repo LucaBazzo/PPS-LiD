@@ -27,8 +27,6 @@ trait Level {
   def getWorld: World
 
   def newLevel(): Unit
-
-  def dispose(): Unit
 }
 
 class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSetter, private val itemPool: ItemPool) extends Level {
@@ -115,10 +113,5 @@ class LevelImpl(private val model: Model, private val entitiesSetter: EntitiesSe
     this.itemPool.resetBossPool()
     this.hero.loseItem(Items.Key)
     this.model.requestLevel()
-  }
-
-  override def dispose(): Unit = {
-    this.entitiesSetter.setWorld(Option.empty)
-    //this.world.dispose()
   }
 }

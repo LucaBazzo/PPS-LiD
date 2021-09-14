@@ -203,7 +203,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, stats)
 
-    hero.setCollisionStrategy(new CollisionStrategyImpl())
+    hero.setCollisionStrategy(new DoNothingOnCollision())
     hero.setMovementStrategy(new HeroMovementStrategy(hero, stats(Statistic.MovementSpeed)))
     hero.setAttackStrategy(new HeroAttackStrategy(hero, stats(Statistic.Strength)))
 
@@ -446,7 +446,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       collisions, createPolygonalShape(size.PPM), position.PPM)
 
     val immobileEntity: Entity = ImmobileEntity(entityType, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new CollisionStrategyImpl())//new NewLevelOnCollision(this.level)
+    immobileEntity.setCollisionStrategy(new DoNothingOnCollision())
     this.level.addEntity(immobileEntity)
     immobileEntity
   }
