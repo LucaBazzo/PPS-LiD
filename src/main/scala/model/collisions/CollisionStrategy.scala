@@ -8,7 +8,7 @@ trait CollisionStrategy {
   def release(entity: Entity): Unit
 }
 
-class DoNothingOnCollision() extends CollisionStrategy {
+case class DoNothingOnCollision() extends CollisionStrategy {
   override def apply(entity: Entity): Unit = {}
 
   override def release(entity: Entity): Unit = {}

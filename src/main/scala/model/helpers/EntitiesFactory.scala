@@ -190,7 +190,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val hero: Hero = new HeroImpl(EntityType.Hero, entityBody, size.PPM, stats)
 
-    hero.setCollisionStrategy(new DoNothingOnCollision())
+    hero.setCollisionStrategy(DoNothingOnCollision())
     hero.setMovementStrategy(new HeroMovementStrategy(hero, stats(Statistic.MovementSpeed)))
     hero.setAttackStrategy(new HeroAttackStrategy(hero, stats(Statistic.Strength)))
 
@@ -218,7 +218,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       this.removeEntity(hero.getFeet.get)
     }
 
-    val feetSize: (Float, Float) = (8.0f, 0.1f)
+    val feetSize: (Float, Float) = FEET_SIZE
     val bodyPosition = hero.getPosition - (0, hero.getSize._2)
     val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
       HERO_FEET_COLLISIONS, createPolygonalShape(feetSize.PPM, rounder = true),
@@ -226,7 +226,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     this.createJoint(hero.getBody, feetBody.getBody)
 
     val heroFeet: MobileEntity = new MobileEntityImpl(EntityType.Mobile, feetBody, feetSize.PPM)
-    heroFeet.setCollisionStrategy(new DoNothingOnCollision())
+    heroFeet.setCollisionStrategy(DoNothingOnCollision())
 
     hero.setFeet(heroFeet)
     this.entitiesContainer.addEntity(heroFeet)
@@ -239,7 +239,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       PLATFORM_COLLISIONS, createPolygonalShape(size.PPM), position.PPM)
 
     val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Platform, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new DoNothingOnCollision)
+    immobileEntity.setCollisionStrategy(DoNothingOnCollision())
     this.entitiesContainer.addEntity(immobileEntity)
 
     createPlatformSensor(size, position, immobileEntity, sizeXOffset = -2f, sizeYOffset = -size._2, positionYOffset = size._2 + 1f, isTopSensor = true)
@@ -289,7 +289,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
-      new DoNothingOnCollision(),
+      DoNothingOnCollision(),
       new PatrolAndStop(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero])),
       new SkeletonAttack(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero])))
 
@@ -303,7 +303,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
-      new DoNothingOnCollision(),
+      DoNothingOnCollision(),
       new PatrolAndStop(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero])),
       new SlimeAttack(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero])))
     enemy.setBehaviour(behaviours)
@@ -316,7 +316,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
     behaviours.addBehaviour("",
-      new DoNothingOnCollision(),
+      DoNothingOnCollision(),
       new PatrolAndStop(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero])),
       new WormFireballAttack(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero])))
     enemy.setBehaviour(behaviours)
@@ -331,19 +331,19 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val behaviours:EnemyBehaviour = new EnemyBehaviourImpl(enemy)
 
     // first behaviour - do nothing for some time
-    behaviours.addBehaviour("1", new DoNothingOnCollision(), DoNothingMovementStrategy(), DoNothingAttackStrategy())
+    behaviours.addBehaviour("1", DoNothingOnCollision(), DoNothingMovementStrategy(), DoNothingAttackStrategy())
 
     // second behaviour - attack hero if near
     val p2AttackStrategy = new WizardFirstAttack(enemy, targetEntity)
-    behaviours.addBehaviour("2", new DoNothingOnCollision(), new ChaseTarget(enemy, targetEntity), p2AttackStrategy)
+    behaviours.addBehaviour("2", DoNothingOnCollision(), new ChaseTarget(enemy, targetEntity), p2AttackStrategy)
 
     // third behaviour - attack hero if near (with another attack)
     val p3AttackStrategy = new WizardSecondAttack(enemy, targetEntity)
-    behaviours.addBehaviour("3", new DoNothingOnCollision(), new ChaseTarget(enemy, targetEntity), p3AttackStrategy)
+    behaviours.addBehaviour("3", DoNothingOnCollision(), new ChaseTarget(enemy, targetEntity), p3AttackStrategy)
 
     // fourth behaviour - attack hero with ranged attacks
     val p4AttackStrategy = new WizardEnergyBallAttack(enemy, targetEntity)
-    behaviours.addBehaviour("4", new DoNothingOnCollision(), new FaceTarget(enemy, targetEntity), p4AttackStrategy)
+    behaviours.addBehaviour("4", DoNothingOnCollision(), new FaceTarget(enemy, targetEntity), p4AttackStrategy)
 
     // add conditional transitions between behaviours
     behaviours.addTransition("1", "2", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
@@ -373,10 +373,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val spawnPoint = (position._1, position._2+size._2)
     val levelBasedStats =
       stats.map {case (key, value) => (key, value + levelNumber * statsModifiers.getOrElse(key, 0f))}
+
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
       ENEMY_COLLISIONS, createPolygonalShape(size.PPM, rounder = true), spawnPoint.PPM)
 
-    val heroEntity: Hero = this.entitiesContainer.getEntity(e => e.getType == EntityType.Hero).asInstanceOf[Hero]
+    val heroEntity: Hero = this.entitiesContainer.getHero.get
 
     val enemy:EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, levelBasedStats, score, heroEntity)
     this.entitiesContainer.addEntity(enemy)
@@ -425,7 +426,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       collisions, createPolygonalShape(size.PPM), position.PPM)
 
     val immobileEntity: Entity = ImmobileEntity(entityType, entityBody, size.PPM)
-    immobileEntity.setCollisionStrategy(new DoNothingOnCollision())
+    immobileEntity.setCollisionStrategy(DoNothingOnCollision())
     this.entitiesContainer.addEntity(immobileEntity)
     immobileEntity
   }
@@ -648,13 +649,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     // compute bullet spawn point
     val attackXOffset:Float = if (sourceEntity.isFacingRight) offset._1.PPM else -offset._1.PPM
     val attackYOffset:Float = offset._2.PPM
-    val position = (sourceEntity.getBody.getWorldCenter.x+attackXOffset,
-      sourceEntity.getBody.getWorldCenter.y+attackYOffset)
+    val position = (sourceEntity.getBody.getWorldCenter.x + attackXOffset,
+      sourceEntity.getBody.getWorldCenter.y + attackYOffset)
 
     // create a body inside the game world
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.EnemyAttack,
-      FIREBALL_COLLISIONS,
-      this.createCircleShape(size._1.PPM), (position.x, position.y), isSensor = true)
+      FIREBALL_COLLISIONS, this.createCircleShape(size._1.PPM), position, isSensor = true)
     entityBody.getBody.setBullet(true)
 
     // create an entity representing the bullet
