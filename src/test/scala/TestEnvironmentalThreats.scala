@@ -1,4 +1,4 @@
-import model.{Level, LevelImpl}
+import model.LevelImpl
 import model.entities.{Entity, EntityType, Hero, Statistic}
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -58,6 +58,7 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
 
   private def initialize(): EntitiesContainerMonitor = {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
+    EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
     //TODO null temporaneo
     new LevelImpl(null, monitor, new ItemPoolImpl())
     EntitiesFactoryImpl.createLavaPool((10,10), (100,10))

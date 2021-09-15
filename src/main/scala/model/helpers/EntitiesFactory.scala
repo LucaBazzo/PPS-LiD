@@ -25,7 +25,7 @@ trait EntitiesFactory {
 
   def setEntitiesContainerMonitor(entitiesContainerMonitor: EntitiesContainerMonitor): Unit
 
-  def setItemPool(pool: ItemPool): Unit
+  def setLevel(level: Level, pool: ItemPool): Unit
 
   def createMobileEntity(entityType: EntityType = EntityType.Mobile,
                          size: (Float, Float) = (10, 10),
@@ -148,6 +148,7 @@ trait EntitiesFactory {
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
+  private var level: Level = _
   private var itemPool: ItemPool = _
   private val collisionMonitor: CollisionMonitor = new CollisionMonitorImpl
   private var pendingFunctions: List[() => Unit] = List.empty
@@ -156,7 +157,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def setEntitiesContainerMonitor(entitiesContainerMonitor: EntitiesContainerMonitor): Unit =
     this.entitiesContainer = entitiesContainerMonitor
 
-  override def setItemPool(pool: ItemPool): Unit = {
+  override def setLevel(level: Level, pool: ItemPool): Unit = {
+    this.level = level
     this.itemPool = pool
   }
 
@@ -559,8 +561,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       PORTAL_COLLISIONS, createPolygonalShape(size.PPM), position.PPM)
 
     val immobileEntity: ImmobileEntity = ImmobileEntity(EntityType.Portal, entityBody, size.PPM)
-    //TODO mettere a posto
-    immobileEntity.setCollisionStrategy(new PortalCollisionStrategy(immobileEntity, null))//this.level))
+    immobileEntity.setCollisionStrategy(new PortalCollisionStrategy(immobileEntity, this.level))
     immobileEntity.setState(State.Closed)
     this.entitiesContainer.addEntity(immobileEntity)
     immobileEntity

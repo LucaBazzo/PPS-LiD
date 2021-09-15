@@ -8,6 +8,7 @@ class TestLadder extends AnyFlatSpec {
 
   private def initialize(): EntitiesContainerMonitor = {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
+    EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
     //TODO null temporaneo
     val _: Level = new LevelImpl(null, monitor, new ItemPoolImpl())
     monitor

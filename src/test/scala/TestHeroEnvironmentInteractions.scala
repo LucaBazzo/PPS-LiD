@@ -12,8 +12,10 @@ class TestHeroEnvironmentInteractions extends AnyFlatSpec{
   private var heroInteraction: Option[HeroInteraction] = Option.empty
 
   private def initialize(): Unit = {
-    new LevelImpl(null, new EntitiesContainerMonitor, new ItemPoolImpl())
-    hero = EntitiesFactoryImpl.createHeroEntity(Option.empty)
+    val entitiesContainer: EntitiesContainerMonitor = new EntitiesContainerMonitor
+    EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
+    new LevelImpl(null, entitiesContainer, new ItemPoolImpl())
+    hero = entitiesContainer.getHero.get
     heroInteraction = Option.apply(HeroInteraction(interactionCommand, new LadderInteraction(hero)))
   }
 

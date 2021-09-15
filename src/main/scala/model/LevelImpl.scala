@@ -24,7 +24,7 @@ class LevelImpl(private val model: Model,
   WorldUtilities.setWorld(world)
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
-  entitiesFactory.setItemPool(itemPool)
+  entitiesFactory.setLevel(this, itemPool)
 
   this.entitiesContainer.setEntities(List.empty)
   this.entitiesContainer.setWorld(Option.apply(this.world))

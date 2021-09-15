@@ -1,6 +1,6 @@
 import controller.GameEvent
+import model.LevelImpl
 import model.entities.{EntityType, Hero, ImmobileEntity, State}
-import model.{Level, LevelImpl}
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -27,6 +27,7 @@ class TestChest extends AnyFlatSpec {
 
   private def initialize(): EntitiesContainerMonitor = {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
+    EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
     //TODO null temporaneo
     new LevelImpl(null, monitor, new ItemPoolImpl())
     EntitiesFactoryImpl.createChest((10,10), (480,150))
