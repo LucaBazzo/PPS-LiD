@@ -80,7 +80,7 @@ class EntityBodyImpl extends EntityBody {
     bodyDef.angle = angle
     bodyDef.gravityScale = gravityScale
 
-    if(this.body != null) EntitiesFactoryImpl.destroyBody(this.body)
+    if(this.body != null) EntitiesFactoryImpl.pendingDestroyBody(this.body)
     this.body = EntitiesFactoryImpl.createBody(bodyDef)
     this
   }

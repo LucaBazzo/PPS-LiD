@@ -4,7 +4,7 @@ import _root_.utils.ApplicationConstants.GAME_LOOP_STEP
 import com.badlogic.gdx.Gdx
 import controller.GameEvent.GameEvent
 import model._
-import model.helpers.EntitiesContainerMonitor
+import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl}
 import view._
 import view.screens.helpers.TileMapHelper
 
@@ -40,6 +40,8 @@ class ControllerImpl extends Controller with Observer {
 
   private var executorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
   private var gameLoop: GameLoop = new GameLoopImpl(model, this)
+
+  EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
 
   override def handleEvent(event: GameEvent): Unit = event match {
     case GameEvent.StartGame => this.startGame()

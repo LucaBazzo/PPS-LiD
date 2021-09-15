@@ -214,7 +214,7 @@ class HeroImpl(private val entityType: EntityType,
   override def isLittle: Boolean = this.little
 
   override def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit = {
-    EntitiesFactoryImpl.addPendingEntityCreation(() => EntitiesFactoryImpl.changeHeroFixture(this, newSize, addCoordinates))
+    EntitiesFactoryImpl.addPendingFunction(() => EntitiesFactoryImpl.changeHeroFixture(this, newSize, addCoordinates))
   }
 
   override def itemPicked(itemType: Items): Unit = {

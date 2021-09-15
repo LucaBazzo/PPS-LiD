@@ -59,19 +59,16 @@ class EnemyImpl(private val entityType: EntityType,
     if (ENEMY_TYPES.contains(this.entityType)) {
       if(rand.nextInt(10) <= 2)
       EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
-        position=(this.getPosition._1, this.getPosition._2).MPP,
-        collisions = EntityCollisionBit.Hero)
+        position=(this.getPosition._1, this.getPosition._2).MPP)
     }
 
     if (ENEMY_BOSS_TYPES.contains(this.getType)) {
       if (this.heroEntity.getItemsPicked.contains((i:Items) => i == Items.Bow)) {
         EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
-          position=(this.getPosition._1, this.getPosition._2).MPP,
-          collisions = EntityCollisionBit.Hero)
+          position=(this.getPosition._1, this.getPosition._2).MPP)
       } else
         EntitiesFactoryImpl.createItem(ItemPools.Boss,
-          position=(this.getPosition._1, this.getPosition._2).MPP,
-          collisions = EntityCollisionBit.Hero)
+          position=(this.getPosition._1, this.getPosition._2).MPP)
     }
   }
 }

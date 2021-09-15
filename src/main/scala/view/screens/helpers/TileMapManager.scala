@@ -8,9 +8,9 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
 import com.badlogic.gdx.math.Rectangle
 import model.collisions.EntityCollisionBit
-import model.collisions.ImplicitConversions._
 import model.entities.{EntityType, ItemPools}
 import model.helpers.EntitiesFactoryImpl
+import utils.CollisionConstants.IMMOBILE_COLLISIONS
 
 import scala.util.Random
 
@@ -88,7 +88,7 @@ class TileMapHelper {
           rect.getY*2 + rect.getHeight - offset._2*16)
 
         layer.getName match {
-          case "ground" => spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
+          case "ground" => spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, IMMOBILE_COLLISIONS))
           case "bridge" => spawnEntity(() => EntitiesFactoryImpl.createPlatform(position, size))
           case "door" =>
             if(mapName!=null && mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME))
@@ -119,6 +119,6 @@ class TileMapHelper {
 
   }
 
-  private def spawnEntity(f:() => Unit): Unit = EntitiesFactoryImpl.addPendingEntityCreation(f)
+  private def spawnEntity(f:() => Unit): Unit = EntitiesFactoryImpl.addPendingFunction(f)
 
 }

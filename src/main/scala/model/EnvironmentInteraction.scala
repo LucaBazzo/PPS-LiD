@@ -4,12 +4,9 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions.RichTuple2
 import model.collisions.{CollisionMonitor, EntityCollisionBit}
-import model.entities.{Entity, Hero, ImmobileEntity, ItemPools, State, Statistic}
+import model.entities._
 import model.helpers.EntitiesFactoryImpl
 import model.movement.{HeroMovementStrategy, LadderClimbMovementStrategy}
-
-import java.util.concurrent.{ExecutorService, Executors}
-import javax.swing.text.ElementIterator
 
 /** Represent the hero interaction with a certain environment interaction. The hero will start
  *  the interaction when the command given is notified to him
@@ -85,9 +82,9 @@ class ChestInteraction(private val hero: Hero, private val chest: ImmobileEntity
 
   override def apply(): Unit = {
     chest.setState(State.Opening)
-    chest.changeCollisions(EntityCollisionBit.DestroyedDoor)
+    chest.changeCollisions(EntityCollisionBit.OpenedDoor)
     val itemPos: (Float, Float) = chest.getPosition
-    EntitiesFactoryImpl.addPendingEntityCreation(() =>
+    EntitiesFactoryImpl.addPendingFunction(() =>
       EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops, (8,8), itemPos.MPP))
     hero.setEnvironmentInteraction(Option.empty)
   }

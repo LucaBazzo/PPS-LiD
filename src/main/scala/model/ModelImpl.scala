@@ -26,10 +26,8 @@ trait Model {
 }
 
 class ModelImpl(private val controller: Observer,
-                private val entitiesSetter: EntitiesSetter,
+                private val entitiesContainer: EntitiesContainerMonitor,
                 private val tileMapHelper: TileMapHelper) extends Model {
-
-  EntitiesFactoryImpl.setModel(this)
 
   private var level: Option[Level] = Option.empty
   private val itemPool: ItemPool = new ItemPoolImpl()
@@ -52,8 +50,8 @@ class ModelImpl(private val controller: Observer,
   }
 
   override def isGameOver: Boolean = {
-    if(this.entitiesSetter.asInstanceOf[EntitiesGetter].getHero.nonEmpty)
-      return this.entitiesSetter.asInstanceOf[EntitiesGetter].getHero.get.isDead
+    if(this.entitiesContainer.getHero.nonEmpty)
+      return this.entitiesContainer.getHero.get.isDead
     false
   }
 
@@ -62,8 +60,8 @@ class ModelImpl(private val controller: Observer,
 
   override def requestStartGame(): Unit = {
     this.levelNumber = 0
-    this.entitiesSetter.resetScore()
-    this.entitiesSetter.setHeroStatistics(HERO_STATISTICS_DEFAULT)
+    this.entitiesContainer.resetScore()
+    this.entitiesContainer.setHeroStatistics(HERO_STATISTICS_DEFAULT)
     this.requestNewLevel()
   }
 
@@ -73,13 +71,13 @@ class ModelImpl(private val controller: Observer,
     this.isLevelActive = false
     this.requestedNewLevel = false
 
-    this.entitiesSetter.setEntities(List.empty)
+    this.entitiesContainer.setEntities(List.empty)
 
     this.disposeLevel()
 
     this.levelNumber += 1
-    this.entitiesSetter.setLevelNumber(this.levelNumber)
-    this.level = Option.apply(new LevelImpl(this, entitiesSetter, this.itemPool))
+    this.entitiesContainer.setLevelNumber(this.levelNumber)
+    this.level = Option.apply(new LevelImpl(this, entitiesContainer, this.itemPool))
 
     if(this.levelNumber > 1)
       this.loadWorld()
@@ -88,7 +86,7 @@ class ModelImpl(private val controller: Observer,
   override def loadWorld(): Unit = {
     tileMapHelper.setWorld()
     this.isLevelActive = true
-    this.entitiesSetter.setLevelReady(true)
+    this.entitiesContainer.setLevelReady(true)
   }
 
   override def requestLevel(): Unit = {
@@ -97,8 +95,8 @@ class ModelImpl(private val controller: Observer,
 
   override def disposeLevel(): Unit = {
     if(level.nonEmpty) {
-      this.entitiesSetter.setLevelReady(false)
-      this.entitiesSetter.setWorld(Option.empty)
+      this.entitiesContainer.setLevelReady(false)
+      this.entitiesContainer.setWorld(Option.empty)
       this.level = Option.empty
     }
   }

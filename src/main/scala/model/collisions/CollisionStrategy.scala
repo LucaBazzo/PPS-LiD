@@ -1,7 +1,6 @@
 package model.collisions
 
-import model.Level
-import model.entities.{Entity, Hero}
+import model.entities.Entity
 
 
 trait CollisionStrategy {

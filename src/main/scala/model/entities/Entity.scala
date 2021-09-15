@@ -113,9 +113,9 @@ abstract class EntityImpl(private val entityType: EntityType,
   override def isColliding: Boolean = this.collidingEntities > 0
 
   override def destroyEntity(): Unit = {
-    EntitiesFactoryImpl.destroyBody(this.getBody)
+    EntitiesFactoryImpl.pendingDestroyBody(this.getBody)
     this.getBody.getJointList.toArray().foreach(j => {
-      EntitiesFactoryImpl.destroyBody(j.other)
+      EntitiesFactoryImpl.pendingDestroyBody(j.other)
     })
     EntitiesFactoryImpl.removeEntity(this)
   }
@@ -124,7 +124,7 @@ abstract class EntityImpl(private val entityType: EntityType,
 
   override def getEntityBody: EntityBody = this.entityBody
 
-  override def changeCollisions(entityType: Short): Unit = EntitiesFactoryImpl.changeCollisions(this, entityType)
+  override def changeCollisions(entityType: Short): Unit = EntitiesFactoryImpl.pendingChangeCollisions(this, entityType)
 
   override def getType: EntityType = this.entityType
 }

@@ -104,7 +104,7 @@ class CircularMobileEntity(private val entityType: EntityType,
                            private val statistics:Map[Statistic, Float],
                            private val pivotBody: EntityBody) extends MobileEntityImpl(entityType, entityBody, size, statistics) {
 
-  EntitiesFactoryImpl.createJoint(this.pivotBody.getBody, this.entityBody.getBody)
+  EntitiesFactoryImpl.pendingJointCreation(this.pivotBody.getBody, this.entityBody.getBody)
 }
 
 class AirSwordMobileEntity(private val entityType: EntityType,
@@ -113,7 +113,7 @@ class AirSwordMobileEntity(private val entityType: EntityType,
                            private val statistics:Map[Statistic, Float] = Map()) extends MobileEntityImpl(entityType, entityBody, size, statistics) {
 
   override def destroyEntity(): Unit = {
-    EntitiesFactoryImpl.destroyBody(this.getBody)
+    EntitiesFactoryImpl.pendingDestroyBody(this.getBody)
     EntitiesFactoryImpl.removeEntity(this)
   }
 }

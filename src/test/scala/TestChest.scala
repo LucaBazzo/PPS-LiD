@@ -20,7 +20,7 @@ class TestChest extends AnyFlatSpec {
     val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
     chest.collisionDetected(Option.apply(hero))
     hero.notifyCommand(GameEvent.Interaction)
-    EntitiesFactoryImpl.createPendingEntities()
+    EntitiesFactoryImpl.applyPendingFunctions()
     assert(monitor.getEntities(x => x.getType == EntityType.PotionItem || x.getType == EntityType.SmallPotionItem ||
       x.getType == EntityType.LargePotionItem || x.getType == EntityType.HugePotionItem).get.nonEmpty)
   }

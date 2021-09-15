@@ -24,10 +24,9 @@ object EntityCollisionBit {
   val Sword: Short = getNextBitValue
   val Door: Short = getNextBitValue
   val OpenedDoor: Short = getNextBitValue
-  val DestroyedDoor: Short = getNextBitValue
   val Arrow: Short = getNextBitValue
   val EnemyAttack: Short = getNextBitValue
-  //val Platform: Short = getNextBitValue
+  val Platform: Short = getNextBitValue
   val PlatformSensor: Short = getNextBitValue
   val Ladder: Short = getNextBitValue
   val Portal: Short = getNextBitValue

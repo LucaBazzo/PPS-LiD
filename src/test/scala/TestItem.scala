@@ -39,8 +39,8 @@ class TestItem extends AnyFlatSpec {
     for(item <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
       item.asInstanceOf[Item].collect()
 
-    EntitiesFactoryImpl.destroyBodies()
-    EntitiesFactoryImpl.applyEntityCollisionChanges()
+    /*EntitiesFactoryImpl.destroyBodies()
+    EntitiesFactoryImpl.applyEntityCollisionChanges()*/
     assert(monitor.getEntities(x => x.isInstanceOf[Item]).get.isEmpty)
   }
 
