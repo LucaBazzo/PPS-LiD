@@ -1,4 +1,4 @@
-package view.screens.game
+package view.screens.menu
 
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._

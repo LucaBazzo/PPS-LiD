@@ -4,13 +4,16 @@ import com.badlogic.gdx.Input.{Buttons, Keys}
 import com.badlogic.gdx.InputProcessor
 import controller.{GameEvent, ObserverManager}
 
+/** Class that implements the inputProcessor interface for the management of
+ *  the buttons from the keyboard.
+ *
+ *  @param observerManager The manager that send messages from View to Controller
+ */
 class GameInputProcessor(private val observerManager: ObserverManager) extends InputProcessor{
 
   override def keyDown(i: Int): Boolean = {
     i match {
-      case Keys.ESCAPE => {
-        this.observerManager.notifyEvent(GameEvent.CloseApplication)
-      }
+      case Keys.ESCAPE => this.observerManager.notifyEvent(GameEvent.CloseApplication)
       case Keys.W | Keys.UP => this.observerManager.notifyEvent(GameEvent.Up)
       case Keys.E => this.observerManager.notifyEvent(GameEvent.Slide)
       case Keys.S | Keys.DOWN => this.observerManager.notifyEvent(GameEvent.Down)
@@ -40,11 +43,12 @@ class GameInputProcessor(private val observerManager: ObserverManager) extends I
     true
   }
 
-  override def touchUp(i: Int, i1: Int, i2: Int, i3: Int): Boolean = {false}
+  // This and the methods below are not implemented because they are not useful as input for the game
+  override def touchUp(i: Int, i1: Int, i2: Int, i3: Int): Boolean = false
 
-  override def touchDragged(i: Int, i1: Int, i2: Int): Boolean = {false}
+  override def touchDragged(i: Int, i1: Int, i2: Int): Boolean = false
 
-  override def mouseMoved(i: Int, i1: Int): Boolean = {false}
+  override def mouseMoved(i: Int, i1: Int): Boolean = false
 
-  override def scrolled(v: Float, v1: Float): Boolean = {false}
+  override def scrolled(v: Float, v1: Float): Boolean = false
 }
