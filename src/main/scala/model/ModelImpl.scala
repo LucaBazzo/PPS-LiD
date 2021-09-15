@@ -2,14 +2,9 @@ package model
 
 import controller.GameEvent.GameEvent
 import controller.{GameEvent, Observer}
-import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter}
-import model.collisions.EntityCollisionBit
-import model.collisions.ImplicitConversions.RichFloat
-import model.entities.{EntityType, Statistic}
 import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter, ItemPool, ItemPoolImpl}
-import model.movement.PatrolPlatform
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
-import view.screens.helpers.TileMapHelper
+import model.world.TileMapManager
 
 trait Model {
 
@@ -30,7 +25,7 @@ trait Model {
 
 class ModelImpl(private val controller: Observer,
                 private val entitiesSetter: EntitiesSetter,
-                private val tileMapHelper: TileMapHelper) extends Model {
+                private val tileMapManager: TileMapManager) extends Model {
 
   EntitiesFactoryImpl.setModel(this)
 
@@ -90,7 +85,7 @@ class ModelImpl(private val controller: Observer,
   }
 
   override def loadWorld(): Unit = {
-    tileMapHelper.setWorld()
+    tileMapManager.createWorldEntities()
     this.isLevelActive = true
   }
 
