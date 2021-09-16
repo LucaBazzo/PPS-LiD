@@ -2,7 +2,7 @@ package model
 
 import controller.GameEvent.GameEvent
 import controller.{GameEvent, Observer}
-import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter, ItemPool, ItemPoolImpl}
+import model.helpers.{EntitiesGetter, EntitiesSetter, ItemPool, ItemPoolImpl}
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 import view.screens.helpers.TileMapHelper
 
@@ -26,8 +26,6 @@ trait Model {
 class ModelImpl(private val controller: Observer,
                 private val entitiesSetter: EntitiesSetter,
                 private val tileMapHelper: TileMapHelper) extends Model {
-
-  EntitiesFactoryImpl.setModel(this)
 
   private var level: Option[Level] = Option.empty
   private val itemPool: ItemPool = new ItemPoolImpl()

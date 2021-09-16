@@ -77,12 +77,11 @@ object EnemiesConstants {
   )
 
   val STATS_MODIFIER: Map[Statistic, Float] = Map(
-    Statistic.Strength -> 0.5f,
+    Statistic.Strength -> 1f,
     Statistic.Health -> 5f,
     Statistic.CurrentHealth -> 5f,
     Statistic.Defence -> 1f,
-    Statistic.MaxMovementSpeed -> 10f.PPM,
-    Statistic.Acceleration -> 5f.PPM,
+    Statistic.MaxMovementSpeed -> 1f.PPM
   )
 
   val WIZARD_BOSS_SIZE: (Float, Float) = (13f, 25f)

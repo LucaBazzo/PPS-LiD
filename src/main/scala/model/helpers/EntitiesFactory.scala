@@ -26,8 +26,6 @@ trait EntitiesFactory {
 
   def setLevel(level: Level, pool: ItemPool): Unit
 
-  def setModel(model: Model): Unit
-
   def createMobileEntity(entityType: EntityType = EntityType.Mobile,
                          size: (Float, Float) = (10, 10),
                          position: (Float, Float) = (0, 0),
@@ -41,7 +39,6 @@ trait EntitiesFactory {
                         size: (Float, Float),
                         stats: Map[Statistic, Float],
                         statsModifiers: Map[Statistic, Float],
-                        levelNumber: Int = 0,
                         score: Int,
                         entityId: EntityType): EnemyImpl
 
@@ -157,7 +154,6 @@ trait EntitiesFactory {
 
 object EntitiesFactoryImpl extends EntitiesFactory {
   private var level: Level = _
-  private var model: Model = _
   private var entitiesToBeChanged: List[(Entity, Short)] = List.empty
   private var itemPool: ItemPool = _
   private var bodiesToBeDestroyed: List[Body] = List.empty
@@ -168,10 +164,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def setLevel(level: Level, pool: ItemPool): Unit = {
     this.level = level
     this.itemPool = pool
-  }
-
-  override def setModel(model: Model): Unit = {
-    this.model = model
   }
 
   override def createMobileEntity(entityType: EntityType = EntityType.Mobile,
@@ -302,7 +294,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createSkeletonEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy:EnemyImpl = createEnemyEntity(position, SKELETON_SIZE,
-      SKELETON_STATS, STATS_MODIFIER, this.model.getCurrentLevelNumber, SKELETON_SCORE, EntityType.EnemySkeleton)
+      SKELETON_STATS, STATS_MODIFIER, SKELETON_SCORE, EntityType.EnemySkeleton)
 
     val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
     behaviours.addBehaviour((DoNothingCollisionStrategy(),
@@ -314,7 +306,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createSlimeEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy:EnemyImpl = createEnemyEntity(position,
-      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, this.model.getCurrentLevelNumber, SLIME_SCORE, EntityType.EnemySlime)
+      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, SLIME_SCORE, EntityType.EnemySlime)
 
     val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
     behaviours.addBehaviour((DoNothingCollisionStrategy(),
@@ -326,7 +318,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createWormEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy:EnemyImpl = createEnemyEntity(position, WORM_SIZE,
-      WORM_STATS, STATS_MODIFIER, this.model.getCurrentLevelNumber, WORM_SCORE, EntityType.EnemyWorm)
+      WORM_STATS, STATS_MODIFIER, WORM_SCORE, EntityType.EnemyWorm)
 
     val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
     behaviours.addBehaviour((DoNothingCollisionStrategy(),
@@ -338,7 +330,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def createWizardBossEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy:EnemyImpl = createEnemyEntity(position, WIZARD_BOSS_SIZE, WIZARD_BOSS_STATS, STATS_MODIFIER,
-      this.model.getCurrentLevelNumber, WIZARD_BOSS_SCORE, EntityType.EnemyBossWizard)
+      WIZARD_BOSS_SCORE, EntityType.EnemyBossWizard)
     val targetEntity:Entity = this.level.getEntity(e => e.isInstanceOf[Hero])
 
     val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
@@ -379,11 +371,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                                  size: (Float, Float),
                                  stats: Map[Statistic, Float],
                                  statsModifiers: Map[Statistic, Float],
-                                 levelNumber: Int = 0,
                                  score: Int,
                                  entityId: EntityType): EnemyImpl = {
 
     val spawnPoint = (position._1, position._2+size._2)
+    val levelNumber = this.entitiesSetter.asInstanceOf[EntitiesGetter].getLevelNumber
     val levelBasedStats =
       stats.map {case (key, value) => (key, value + levelNumber * statsModifiers.getOrElse(key, 0f))}
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
