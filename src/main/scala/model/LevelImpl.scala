@@ -5,9 +5,8 @@ import _root_.utils.EnemiesConstants._
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
-import model.collisions.{CollisionManager, EntityCollisionBit}
+import model.collisions.CollisionManager
 import model.collisions.ImplicitConversions._
-import model.entities.ItemPools.ItemPools
 import model.entities._
 import model.helpers._
 

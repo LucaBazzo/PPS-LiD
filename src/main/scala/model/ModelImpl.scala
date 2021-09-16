@@ -2,12 +2,7 @@ package model
 
 import controller.GameEvent.GameEvent
 import controller.{GameEvent, Observer}
-import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter}
-import model.collisions.EntityCollisionBit
-import model.collisions.ImplicitConversions.RichFloat
-import model.entities.{EntityType, Statistic}
 import model.helpers.{EntitiesFactoryImpl, EntitiesGetter, EntitiesSetter, ItemPool, ItemPoolImpl}
-import model.movement.PatrolPlatform
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 import view.screens.helpers.TileMapHelper
 

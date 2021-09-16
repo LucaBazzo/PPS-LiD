@@ -8,9 +8,8 @@ import model.entities.Items.Items
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl
 import model.{EntityBody, Score}
+import utils.ApplicationConstants.RANDOM
 import utils.EnemiesConstants.{ENEMY_BOSS_TYPES, ENEMY_TYPES}
-
-import scala.util.Random
 
 trait Enemy {
   // TODO: rifattorizzare a livello di living entity?
@@ -26,7 +25,6 @@ class EnemyImpl(private val entityType: EntityType,
           with LivingEntity with Score with Enemy {
 
   var behaviours:Option[EnemyBehaviours] = None
-  private val rand = new Random
 
   override def getScore: Int = this.score
 
@@ -34,7 +32,7 @@ class EnemyImpl(private val entityType: EntityType,
     super.update()
     if (state != State.Dying) {
       if (this.behaviours.isDefined) {
-        this.behaviours.get.update()
+        this.behaviours.get.update
 
         this.movementStrategy = this.behaviours.get.getMovementStrategy
         this.attackStrategy = this.behaviours.get.getAttackStrategy
@@ -58,7 +56,7 @@ class EnemyImpl(private val entityType: EntityType,
     super.destroyEntity()
 
     if (ENEMY_TYPES.contains(this.entityType)) {
-      if(rand.nextInt(10) <= 2)
+      if(RANDOM.nextInt(10) <= 2)
       EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
         position=(this.getPosition._1, this.getPosition._2).MPP,
         collisions = EntityCollisionBit.Hero)
