@@ -18,7 +18,9 @@ object HeroConstants {
   val FEET_SIZE: (Float, Float) = (8.0f, 0.1f)
 
   //boss room: (2658.0f,90.0f) (2258.0f,90.0f)
-  val HERO_OFFSET: (Float, Float) = (30f, 45)
+  val HERO_POSITION: (Float, Float) = (30f, 45)
+
+  val HERO_FRICTION: Float = 1.2f
 
   val CROUCH_OFFSET: (Float, Float) = (0f, -30f)
   val CROUCH_END_OFFSET: (Float, Float) = (0f, 6f)
@@ -38,6 +40,8 @@ object HeroConstants {
   val WAIT_FOR_ANOTHER_CONSECUTIVE_ATTACK: Int = 75
 
   val ATTACK_STRATEGY_TIMER_DECREMENT: Int = 3
+
+  val SWORD_ATTACK_DENSITY: Float = 1f
 
   val FIRST_SWORD_ATTACK_SIZE: (Float, Float) = (1f, 10f)
   val FIRST_SWORD_ATTACK_OFFSET: (Float, Float) = (0, -15f)
@@ -61,8 +65,11 @@ object HeroConstants {
 
   val BOW_ATTACK_DURATION: Int = 175
   val BOW_ATTACK_STARTING_TIME: Int = 20
+  val ARROW_SIZE: (Float, Float) = (8, 1)
 
   val AIR_SWORD_ATTACK_SIZE: (Float, Float) = (12f, 3f)
   val AIR_SWORD_ATTACK_OFFSET: (Float, Float) = (0, -10f)
+
+  val PIVOT_SIZE: (Float, Float) = (2f, 2f)
 
 }

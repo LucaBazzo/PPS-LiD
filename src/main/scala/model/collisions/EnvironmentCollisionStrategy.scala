@@ -1,7 +1,7 @@
 package model.collisions
 
 import controller.GameEvent
-import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
+import model.entities.{Entity, Hero, ImmobileEntity, Item, _}
 import model.helpers.EntitiesSetter
 import model.{ChestInteraction, DoorInteraction, HeroInteraction, LadderInteraction, Level, PlatformInteraction}
 import utils.EnvironmentConstants._
@@ -37,7 +37,8 @@ class DoorCollisionStrategy(private val entitySetter: EntitiesSetter,
       this.entitySetter.addMessage("Press Space to open the door")
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new DoorInteraction(h, this.door,
         doorSensorLeft, doorSensorRight))))
-    case _: CircularMobileEntity => println("Hero destroyed door")
+    case m: MobileEntity if m.getEntityBody.getEntityCollisionBit() == EntityCollisionBit.Sword =>
+      println("Hero destroyed door")
       this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
       this.doorSensorLeft.changeCollisions(EntityCollisionBit.OpenedDoor)
       this.doorSensorRight.changeCollisions(EntityCollisionBit.OpenedDoor)

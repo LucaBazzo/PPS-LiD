@@ -77,8 +77,4 @@ class LivingEntityImpl(private val entityType: EntityType,
       case _ =>
     }
   }
-
-  //  override def getStatistics[A <: Int](): HashMap[Statistic, A] = statistics
-  //
-  //  override def alterStatistics[A <: Int](statistic: Statistic, alteration: A): Unit = statistics(statistic) -> alteration
 }

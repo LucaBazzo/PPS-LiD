@@ -1,16 +1,20 @@
 package model.entities
 
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.attack.DoNothingAttackStrategy
-import model.collisions.EntityCollisionBit
+import model.attack.{DoNothingAttackStrategy, HeroAttackStrategy}
+import model.collisions.{DoNothingOnCollision, EntityCollisionBit}
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State._
 import model.entities.Statistic._
+import model.helpers.EntitiesFactoryImpl.{createPolygonalShape, defineEntityBody}
 import model.helpers.{EntitiesFactoryImpl, WorldUtilities}
 import model.movement.{DoNothingMovementStrategy, HeroMovementStrategy}
 import model.{EntityBody, HeroInteraction}
+import utils.CollisionConstants.{HERO_COLLISIONS, HERO_FEET_COLLISIONS}
+import model.collisions.ImplicitConversions._
 import utils.HeroConstants._
 
 /** Represents the entity that will be moved by the player, it can move or attack
@@ -108,10 +112,61 @@ trait Hero extends LivingEntity {
 
   /** Remove one of Hero's held items
    *
-   *  @param item item to be losed
+   *  @param item item to be lost
    */
   def loseItem(item: Items): Unit
 }
+
+object Hero {
+
+  def apply(stats: Map[Statistic, Float] = HERO_STATISTICS_DEFAULT): Hero = {
+    val hero: Hero = new HeroImpl(EntityType.Hero, createEntityBody(), HERO_SIZE.PPM, stats)
+
+    hero.setCollisionStrategy(DoNothingOnCollision())
+    hero.setMovementStrategy(new HeroMovementStrategy(hero, stats(Statistic.MovementSpeed)))
+    hero.setAttackStrategy(new HeroAttackStrategy(hero, stats(Statistic.Strength)))
+
+    this.createHeroFeet(hero)
+    EntitiesFactoryImpl.addEntity(hero)
+    hero
+  }
+
+  def changeHeroSize(hero: Hero, newSize: (Float, Float)): Unit = {
+    hero.getEntityBody
+      .setShape(createPolygonalShape(newSize.PPM))
+      .createFixture()
+
+    hero.getEntityBody.addCoordinates(0, -hero.getSize._2 + newSize._2.PPM)
+    hero.setSize(newSize.PPM)
+
+    this.createHeroFeet(hero)
+  }
+
+  private def createHeroFeet(hero: Hero): Unit = {
+    if(hero.getFeet.nonEmpty) {
+      EntitiesFactoryImpl.destroyBody(hero.getFeet.get.getBody)
+      EntitiesFactoryImpl.removeEntity(hero.getFeet.get)
+    }
+
+    val bodyPosition = hero.getPosition - (0, hero.getSize.y)
+    val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
+      HERO_FEET_COLLISIONS, createPolygonalShape(FEET_SIZE.PPM, rounder = true),
+      bodyPosition, gravityScale = 0, friction = HERO_FRICTION)
+    EntitiesFactoryImpl.createJoint(hero.getBody, feetBody.getBody)
+
+    val heroFeet: MobileEntity = new MobileEntityImpl(EntityType.Mobile, feetBody, FEET_SIZE.PPM)
+    heroFeet.setCollisionStrategy(DoNothingOnCollision())
+
+    hero.setFeet(heroFeet)
+    EntitiesFactoryImpl.addEntity(heroFeet)
+  }
+
+  private def createEntityBody(size: (Float, Float) = HERO_SIZE,
+                               position: (Float, Float) = HERO_POSITION): EntityBody =
+    defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
+    HERO_COLLISIONS, createPolygonalShape(size.PPM), position.PPM, friction = HERO_FRICTION)
+}
+
 
 /** Implementation of the Entity Hero that will be command by the player.
  *
@@ -214,7 +269,7 @@ class HeroImpl(private val entityType: EntityType,
   override def isLittle: Boolean = this.little
 
   override def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit = {
-    EntitiesFactoryImpl.addPendingFunction(() => EntitiesFactoryImpl.changeHeroFixture(this, newSize, addCoordinates))
+    EntitiesFactoryImpl.addPendingFunction(() => Hero.changeHeroSize(this, newSize))
   }
 
   override def itemPicked(itemType: Items): Unit = {

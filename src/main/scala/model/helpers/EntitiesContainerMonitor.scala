@@ -6,6 +6,7 @@ import model.entities.Items.Items
 import model.entities.Statistic.Statistic
 import model.entities.{Enemy, Entity, EntityType, Hero, Item, LivingEntity, State}
 import utils.EnemiesConstants.ENEMY_BOSS_TYPES
+import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 
 import java.util.concurrent.{ExecutorService, Executors}
 
@@ -19,7 +20,7 @@ trait EntitiesGetter {
   def getScore: Int
   def getMessage: Option[String]
   def hasHeroPickedUpItem: Option[Items]
-  def getHeroStatistics: Option[Map[Statistic, Float]]
+  def getHeroStatistics: Map[Statistic, Float]
   def getLevelNumber: Int
   def isLevelReady: Boolean
 
@@ -52,7 +53,7 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
   private var levelNumber = 0
   private var score: Int = 0
 
-  private var heroStatistics: Option[Map[Statistic, Float]] = Option.empty
+  private var heroStatistics: Map[Statistic, Float] = HERO_STATISTICS_DEFAULT
 
   private var levelReady: Boolean = false
 
@@ -109,9 +110,9 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
     Option.empty
   }
 
-  override def getHeroStatistics: Option[Map[Statistic, Float]] = this.heroStatistics
+  override def getHeroStatistics: Map[Statistic, Float] = this.heroStatistics
 
-  override def setHeroStatistics(statistics: Map[Statistic, Float]): Unit = this.heroStatistics = Option.apply(statistics)
+  override def setHeroStatistics(statistics: Map[Statistic, Float]): Unit = this.heroStatistics = statistics
 
   override def setLevelNumber(levelNumber: Int): Unit = this.levelNumber = levelNumber
 

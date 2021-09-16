@@ -45,4 +45,6 @@ object CollisionConstants {
 
   val ENEMY_MELEE_ATTACK_COLLISIONS: Short = EntityCollisionBit.Hero
 
+  val ARROW_COLLISIONS: Short = EntityCollisionBit.Immobile | EntityCollisionBit.Enemy
+
 }
