@@ -17,10 +17,28 @@ object Items extends Enumeration {
   val Armor, Cake, Boots, Shield, Map, Wrench, Key, PotionS, PotionM, PotionL, PotionXL, SkeletonKey, Bow, BFSword = Value
 }
 
+/** Represent the Item, something that can be picked up and grant
+ *  power ups
+ *
+ */
 trait Item extends Entity with Score {
 
+  /** The item is picked up. Then disappear from the map
+   *
+   * @return the power up (in altered statistics) granted by the item
+   */
   def collect(): (Option[List[(Statistic, Float)]], String)
+
+  /** Get the name of the item
+   *
+   * @return item's name as Items Enumeration value
+   */
   def getName: Items.Value
+
+  /** Get the description of the item (often a reference to other games)
+   *
+   * @return a String containing the description
+   */
   def getDesc: String
 }
 
@@ -42,6 +60,14 @@ object Item {
 
 }
 
+/** Abstract implemetation of Item trait, further implementations must define
+ *  the description and the effect of the item
+ *
+ * @param entityType the type of the entity
+ * @param itemName the name of the item
+ * @param entityBody the Box2D body that represent the item
+ * @param size the size of the Box2D rectangle containing the item
+ */
 abstract class ItemImpl(private val entityType:EntityType,
                         private val itemName: Items.Value,
                         private var entityBody: EntityBody,
@@ -59,6 +85,8 @@ abstract class ItemImpl(private val entityType:EntityType,
   override def getScore: Int = ITEM_SCORE
 }
 
+
+
 class CakeItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Cake, entityBody, size) {
 
   override def getDesc: String = CAKE_DESCRIPTION
@@ -71,7 +99,6 @@ class CakeItem(private val entityType: EntityType, private var entityBody: Entit
 }
 
 class WrenchItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Wrench, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = WRENCH_DESCRIPTION
 
@@ -82,7 +109,6 @@ class WrenchItem(private val entityType: EntityType, private var entityBody: Ent
 }
 
 class MapItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Map, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = MAP_DESCRIPTION
 
@@ -93,7 +119,6 @@ class MapItem(private val entityType: EntityType, private var entityBody: Entity
 }
 
 class SmallPotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionS, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = SMALL_POTION_DESCRIPTION
 
@@ -106,7 +131,6 @@ class SmallPotionItem(private val entityType: EntityType, private var entityBody
 }
 
 class PotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionM, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = POTION_DESCRIPTION
 
@@ -119,7 +143,6 @@ class PotionItem(private val entityType: EntityType, private var entityBody: Ent
 }
 
 class LargePotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionL, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = LARGE_POTION_DESCRIPTION
 
@@ -132,7 +155,6 @@ class LargePotionItem(private val entityType: EntityType, private var entityBody
 }
 
 class HugePotionItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.PotionXL, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = HUGE_POTION_DESCRIPTION
 
@@ -145,7 +167,6 @@ class HugePotionItem(private val entityType: EntityType, private var entityBody:
 }
 
 class ArmorItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Armor, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = ARMOR_DESCRIPTION
 
@@ -156,7 +177,6 @@ class ArmorItem(private val entityType: EntityType, private var entityBody: Enti
 }
 
 class BootsItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Boots, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = BOOTS_DESCRIPTION
 
@@ -167,7 +187,6 @@ class BootsItem(private val entityType: EntityType, private var entityBody: Enti
 }
 
 class BFSwordItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.BFSword, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = BFSWORD_DESCRIPTION
 
@@ -178,7 +197,6 @@ class BFSwordItem(private val entityType: EntityType, private var entityBody: En
 }
 
 class KeyItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Key, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = KEY_DESCRIPTION
 
@@ -189,7 +207,6 @@ class KeyItem(private val entityType: EntityType, private var entityBody: Entity
 }
 
 class SkeletonKeyItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.SkeletonKey, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = SKELETON_KEY_DESCRIPTION
 
@@ -200,7 +217,6 @@ class SkeletonKeyItem(private val entityType: EntityType, private var entityBody
 }
 
 class BowItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Bow, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = BOW_DESCRIPTION
 
@@ -213,7 +229,6 @@ class BowItem(private val entityType: EntityType, private var entityBody: Entity
 }
 
 class ShieldItem(private val entityType: EntityType, private var entityBody: EntityBody, private val size: (Float, Float)) extends ItemImpl(entityType, Items.Shield, entityBody, size) {
-  override def update(): Unit = {}
 
   override def getDesc: String = SHIELD_DESCRIPTION
 
