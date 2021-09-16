@@ -50,9 +50,9 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
       this.restoreNormalMovementStrategy()
       val state: State = this.entity.getState
       if(!state.equals(State.Jumping) && !state.equals(State.Somersault))
-        this.entity.setState(State.Jumping)
-      else
         this.entity.setState(State.Falling)
+      else
+        this.entity.setState(State.Jumping)
     }
 
     this.applied = !applied
@@ -91,7 +91,8 @@ class ChestInteraction(private val hero: Hero, private val chest: ImmobileEntity
     chest.changeCollisions(EntityCollisionBit.OpenedDoor)
     val itemPos: (Float, Float) = chest.getPosition
     EntitiesFactoryImpl.addPendingFunction(() =>
-      EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops, DEFAULT_POTION_SIZE, itemPos.MPP))
+      Item(ItemPools.Enemy_Drops, EntitiesFactoryImpl.getItemPool(),
+        EntitiesFactoryImpl.getEntitiesContainerMonitor(), DEFAULT_POTION_SIZE, itemPos.MPP))
     hero.setEnvironmentInteraction(Option.empty)
   }
 }

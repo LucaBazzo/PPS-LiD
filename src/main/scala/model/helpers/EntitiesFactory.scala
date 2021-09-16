@@ -4,7 +4,6 @@ import _root_.utils.ApplicationConstants._
 import _root_.utils.CollisionConstants._
 import _root_.utils.EnemiesConstants._
 import _root_.utils.EnvironmentConstants._
-import _root_.utils.ItemConstants._
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d._
@@ -24,6 +23,10 @@ trait EntitiesFactory {
 
   def setEntitiesContainerMonitor(entitiesContainerMonitor: EntitiesContainerMonitor): Unit
 
+  def getEntitiesContainerMonitor(): EntitiesContainerMonitor
+
+  def getItemPool(): ItemPool
+
   def setLevel(level: Level, pool: ItemPool): Unit
 
   def createEnemyEntity(position: (Float, Float),
@@ -41,11 +44,6 @@ trait EntitiesFactory {
   def createWormEnemy(position: (Float, Float)): EnemyImpl
 
   def createWizardBossEnemy(position: (Float, Float)): EnemyImpl
-
-  def createItem(PoolName: ItemPools,
-                 size: (Float, Float) = DEFAULT_ITEM_SIZE,
-                 position: (Float, Float) = DEFAULT_ITEM_POSITION,
-                 collisions: Short = EntityCollisionBit.Hero): Item
 
   def createPolygonalShape(size: (Float, Float), rounder:Boolean = false): Shape
 
@@ -144,6 +142,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
   override def setEntitiesContainerMonitor(entitiesContainerMonitor: EntitiesContainerMonitor): Unit =
     this.entitiesContainer = entitiesContainerMonitor
+
+  override def getEntitiesContainerMonitor(): EntitiesContainerMonitor =
+    this.entitiesContainer
+
+  override def getItemPool(): ItemPool =
+    this.itemPool
 
   override def setLevel(level: Level, pool: ItemPool): Unit = {
     this.level = level
@@ -306,18 +310,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val enemy:EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, levelBasedStats, score, heroEntity)
     this.entitiesContainer.addEntity(enemy)
     enemy
-  }
-
-  override def createItem(PoolName: ItemPools,
-                          size: (Float, Float) = (5f, 5f),
-                          position: (Float, Float) = (0, 0),
-                          collisions: Short = ITEM_COLLISIONS): Item = {
-    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Item,
-      collisions, createPolygonalShape(size.PPM), position.PPM)
-    val item: Item = itemPool.getItem(entityBody, size, PoolName)
-    item.setCollisionStrategy(new ItemCollisionStrategy(item, this.entitiesContainer))
-    this.entitiesContainer.addEntity(item)
-    item
   }
 
   override def createPolygonalShape(size: (Float, Float), rounder:Boolean = false): Shape = {

@@ -1,9 +1,15 @@
 package model.entities
 
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
+import model.collisions.{EntityCollisionBit, ItemCollisionStrategy}
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.Statistic.Statistic
+import model.helpers.{EntitiesContainerMonitor, ItemPool}
+import model.helpers.EntitiesFactoryImpl.{createPolygonalShape, defineEntityBody, itemPool}
+import model.helpers.ItemPools.ItemPools
 import model.{EntityBody, Score}
+import model.collisions.ImplicitConversions._
 import utils.ItemConstants._
 
 object Items extends Enumeration {
@@ -16,6 +22,24 @@ trait Item extends Entity with Score {
   def collect(): (Option[List[(Statistic, Float)]], String)
   def getName: Items.Value
   def getDesc: String
+}
+
+object Item {
+
+  def apply(PoolName: ItemPools,
+            itemPool: ItemPool,
+            entitiesMonitor: EntitiesContainerMonitor,
+             size: (Float, Float) = DEFAULT_ITEM_SIZE,
+             position: (Float, Float) = DEFAULT_ITEM_POSITION,
+             collisions: Short = EntityCollisionBit.Hero | EntityCollisionBit.Immobile): Item = {
+    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Item,
+      collisions, createPolygonalShape(size.PPM), position.PPM)
+    val item: Item = itemPool.getItem(entityBody, size, PoolName)
+    item.setCollisionStrategy(new ItemCollisionStrategy(item, entitiesMonitor))
+    entitiesMonitor.addEntity(item)
+    item
+  }
+
 }
 
 abstract class ItemImpl(private val entityType:EntityType,

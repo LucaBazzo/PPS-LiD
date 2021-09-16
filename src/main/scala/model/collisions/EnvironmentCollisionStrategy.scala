@@ -151,7 +151,7 @@ class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
   override def release(entity: Entity): Unit = entity match {
     case _: Hero => println("Hero leaving Platform")
       this.platformReleaseCollision()
-    case e: MobileEntity => if(e.getType.equals(EntityType.HeroFeet)) this.platformReleaseCollision()
+    case _ =>
 
   }
 
