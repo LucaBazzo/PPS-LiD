@@ -7,7 +7,7 @@ trait WorldMapUtilities {
 
   def getMapRenderer(tiledMap: TiledMap): OrthogonalTiledMapRenderer
 
-  def updateTiledMapList(): Unit
+  def updateTiledMapList(seed: Int): Unit
 
   def renderWorld(orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer): Unit
 

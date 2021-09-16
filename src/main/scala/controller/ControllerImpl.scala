@@ -1,6 +1,6 @@
 package controller
 
-import _root_.utils.ApplicationConstants.GAME_LOOP_STEP
+import _root_.utils.ApplicationConstants.{GAME_LOOP_STEP, RANDOM_SEED}
 import com.badlogic.gdx.Gdx
 import controller.GameEvent.GameEvent
 import model._
@@ -59,7 +59,7 @@ class ControllerImpl extends Controller with Observer {
     if(this.entitiesContainer.getLevelNumber == 0)
       this.view.startGame()
     Gdx.app.postRunnable(() => {
-      tileMapManager.updateTiledMapList()
+      tileMapManager.updateTiledMapList(RANDOM_SEED)
       this.handleEvent(GameEvent.MapLoaded)
     })
   }

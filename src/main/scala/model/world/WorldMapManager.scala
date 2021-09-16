@@ -1,6 +1,6 @@
 package model.world
 
-import _root_.utils.ApplicationConstants.{PIXELS_PER_METER, RANDOM_SEED}
+import _root_.utils.ApplicationConstants.PIXELS_PER_METER
 import _root_.utils.MapConstants._
 import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
@@ -21,15 +21,17 @@ class TileMapManager extends WorldMapUtilities {
 
   private var tiledMapList: List[RichTiledMapInfo] = List.empty
 
+  def getTiledMapList: List[RichTiledMapInfo] = tiledMapList
+
   override def getMapRenderer(tiledMap: TiledMap): OrthogonalTiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap, scale)
 
-  override def updateTiledMapList(): Unit = {
+  override def updateTiledMapList(seed: Int): Unit = {
 
-    if(RANDOM_SEED%2 == 0) keyLocation = "TOP"
+    if(seed%2 == 0) keyLocation = "TOP"
     else keyLocation = "BOTTOM"
 
     //scelgo casualmente 6 stanze da mettere nel world (le stanze non devono ripetersi)
-    val innerRooms: List[String] = getNonStaticRooms(RANDOM_SEED)
+    val innerRooms: List[String] = getNonStaticRooms(seed)
 
     innerRooms.foreach(elem => println(elem))
     this.tiledMapList = List(
