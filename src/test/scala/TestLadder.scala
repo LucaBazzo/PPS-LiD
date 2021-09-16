@@ -22,7 +22,7 @@ class TestLadder extends AnyFlatSpec {
     hero.notifyCommand(GameEvent.Interaction)
     assert(hero.getState == State.LadderIdle)
     hero.notifyCommand(GameEvent.Interaction)
-    assert(hero.getState == State.Jumping)
+    assert(hero.getState == State.Falling)
   }
 
 }
