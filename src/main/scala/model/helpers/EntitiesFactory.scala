@@ -305,8 +305,11 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def createSlimeEnemy(position: (Float, Float)): EnemyImpl = {
+    // easter egg: a slime could rarely be displayed as Pacman with a 5% chance
+    val enemyType =  if (RANDOM.nextInt(100) <= 5) EntityType.EnemyPacman else EntityType.EnemySlime
+
     val enemy:EnemyImpl = createEnemyEntity(position,
-      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, SLIME_SCORE, EntityType.EnemySlime)
+      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, SLIME_SCORE, enemyType)
 
     val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
     behaviours.addBehaviour((DoNothingCollisionStrategy(),
@@ -379,7 +382,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val levelBasedStats =
       stats.map {case (key, value) => (key, value + levelNumber * statsModifiers.getOrElse(key, 0f))}
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
-      EntityCollisionBit.Immobile | EntityCollisionBit.Platform  | EntityCollisionBit.Sword | EntityCollisionBit.Arrow,
+      EntityCollisionBit.Immobile | EntityCollisionBit.Platform  | EntityCollisionBit.Sword | EntityCollisionBit.Arrow |
+        EntityCollisionBit.Door,
       createPolygonalShape(size.PPM, rounder = true), spawnPoint.PPM)
 
     val heroEntity: Hero = this.level.getEntity(e => e.getType == EntityType.Hero).asInstanceOf[Hero]
