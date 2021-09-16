@@ -24,9 +24,9 @@ object EntityType extends Enumeration {
       Mobile, Immobile, Enemy, SpawnZone, //this values will not show any sprite
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
-      EnemySkeleton, EnemySlime, EnemyWorm, EnemyBossWizard, // EnemyBossReaper, // EnemyGhost
+      EnemySkeleton, EnemySlime, EnemyPacman, EnemyWorm, EnemyBossWizard, // EnemyGhost
       Platform, Door, Ladder, Water, Lava, Chest, Portal,
-      AttackFireBall, AttackEnergyBall, AttackSmite, AttackArrow = Value
+      AttackFireBall, AttackEnergyBall, AttackArrow = Value
 }
 
 trait Entity {
