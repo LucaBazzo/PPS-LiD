@@ -9,15 +9,16 @@ import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.{RevoluteJointDef, WeldJointDef}
 import model._
 import model.attack._
-import model.behaviour.{EnemyBehaviours, EnemyBehavioursImpl, RandomTruePredicate, TargetIsFarPredicate, TargetIsNearPredicate}
+import model.behaviour.{EnemyBehaviours, EnemyBehavioursImpl, NotPredicate, RandomTruePredicate}
 import model.collisions.ImplicitConversions._
 import model.collisions.{EntityCollisionBit, _}
 import model.entities.EntityType.EntityType
 import model.entities.ItemPools.ItemPools
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, Statistic, _}
-import model.helpers.EntitiesUtilities.{isEntityOnTheLeft, isEntityOnTheRight}
+import model.helpers.EntitiesUtilities.{getEntitiesDistance, isEntityOnTheLeft, isEntityOnTheRight}
 import model.movement._
+import model.behaviour.RichPredicates._
 
 import scala.collection.immutable.HashMap
 
@@ -135,8 +136,8 @@ trait EntitiesFactory {
   def applyEntityCollisionChanges(): Unit
 
   // TODO: convertire createEnemies in createSpawnZone e lasicare a levelImpl la generazione dei nemici nelle zone di spawn
-  def spawnEnemies(size: (Float, Float) = (10, 10),
-                   position: (Float, Float) = (0, 0)): Unit
+  def spawnEnemy(size: (Float, Float) = (10, 10),
+                 position: (Float, Float) = (0, 0)): Unit
 
   def spawnBoss(size: (Float, Float) = (10, 10),
                 position: (Float, Float) = (0, 0)): Unit
@@ -304,11 +305,9 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       SKELETON_STATS, STATS_MODIFIER, this.model.getCurrentLevelNumber, SKELETON_SCORE, EntityType.EnemySkeleton)
 
     val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
-    behaviours.addBehaviour("",
-      (DoNothingCollisionStrategy(),
-      new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
+    behaviours.addBehaviour((DoNothingCollisionStrategy(),
+      EnemyMovementStrategy(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
       new SkeletonAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero]))))
-
     enemy.setBehaviour(behaviours)
     enemy
   }
@@ -318,9 +317,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, this.model.getCurrentLevelNumber, SLIME_SCORE, EntityType.EnemySlime)
 
     val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
-    behaviours.addBehaviour("",(
-      DoNothingCollisionStrategy(),
-      new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
+    behaviours.addBehaviour((DoNothingCollisionStrategy(),
+      EnemyMovementStrategy(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
       new SlimeAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero]))))
     enemy.setBehaviour(behaviours)
     enemy
@@ -331,9 +329,8 @@ object EntitiesFactoryImpl extends EntitiesFactory {
       WORM_STATS, STATS_MODIFIER, this.model.getCurrentLevelNumber, WORM_SCORE, EntityType.EnemyWorm)
 
     val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
-    behaviours.addBehaviour("",
-      (DoNothingCollisionStrategy(),
-      new PatrolAndStop(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
+    behaviours.addBehaviour((DoNothingCollisionStrategy(),
+      EnemyMovementStrategy(enemy, this.level.getEntity(e => e.isInstanceOf[Hero])),
       new WormFireballAttack(enemy, this.level.getEntity(e => e.isInstanceOf[Hero]))))
     enemy.setBehaviour(behaviours)
     enemy
@@ -347,32 +344,32 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
 
     // first behaviour - do nothing for some time
-    behaviours.addBehaviour("1", (DoNothingCollisionStrategy(), DoNothingMovementStrategy(), DoNothingAttackStrategy()))
+    val b1 = behaviours.addBehaviour((DoNothingCollisionStrategy(), DoNothingMovementStrategy(), DoNothingAttackStrategy()))
 
     // second behaviour - attack hero if near
     val p2AttackStrategy = new WizardFirstAttack(enemy, targetEntity)
-    behaviours.addBehaviour("2", (DoNothingCollisionStrategy(), new ChaseTarget(enemy, targetEntity), p2AttackStrategy))
+    val b2 = behaviours.addBehaviour((DoNothingCollisionStrategy(), new ChaseTarget(enemy, targetEntity), p2AttackStrategy))
 
     // third behaviour - attack hero if near (with another attack)
     val p3AttackStrategy = new WizardSecondAttack(enemy, targetEntity)
-    behaviours.addBehaviour("3", (DoNothingCollisionStrategy(), new ChaseTarget(enemy, targetEntity), p3AttackStrategy))
+    val b3 = behaviours.addBehaviour((DoNothingCollisionStrategy(), new ChaseTarget(enemy, targetEntity), p3AttackStrategy))
 
     // fourth behaviour - attack hero with ranged attacks
     val p4AttackStrategy = new WizardEnergyBallAttack(enemy, targetEntity)
-    behaviours.addBehaviour("4", (DoNothingCollisionStrategy(), new FaceTarget(enemy, targetEntity), p4AttackStrategy))
+    val b4 = behaviours.addBehaviour((DoNothingCollisionStrategy(), FaceTarget(enemy, targetEntity), p4AttackStrategy))
 
     // add conditional transitions between behaviours
-    behaviours.addTransition("1", "2", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
-    behaviours.addTransition("1", "3", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
+    behaviours.addTransition(b1, b2, () => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM)
+    behaviours.addTransition(b1, b3, () => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM)
 
-    behaviours.addTransition("2", "3", new RandomTruePredicate(0.5f))
-    behaviours.addTransition("2", "4", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
+    behaviours.addTransition(b2, b3, RandomTruePredicate(0.5f))
+    behaviours.addTransition(b2, b4, NotPredicate(() => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM))
 
-    behaviours.addTransition("3", "2", new RandomTruePredicate(0.5f))
-    behaviours.addTransition("3", "4", new TargetIsFarPredicate(enemy, targetEntity, 100f.PPM))
+    behaviours.addTransition(b3, b2, RandomTruePredicate(0.5f))
+    behaviours.addTransition(b3, b4, NotPredicate(() => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM))
 
-    behaviours.addTransition("4", "2", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
-    behaviours.addTransition("4", "3", new TargetIsNearPredicate(enemy, targetEntity, 100f.PPM))
+    behaviours.addTransition(b4, b2, () => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM)
+    behaviours.addTransition(b4, b3, () => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM)
 
     enemy.setBehaviour(behaviours)
     enemy
@@ -453,49 +450,18 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     immobileEntity
   }
 
-  override def spawnEnemies(spawnZoneSize: (Float, Float) = (10, 10),
-                            spawnZonePosition: (Float, Float) = (0, 0)): Unit =  {
-
-    def spawnEnemy(position: (Float, Float)): EnemyImpl = {
-      RANDOM.shuffle(ENEMY_TYPES).head match {
-        case EntityType.EnemySkeleton => this.createSkeletonEnemy((position.x, position.y))
-        case EntityType.EnemyWorm => this.createWormEnemy((position.x, position.y))
-        case EntityType.EnemySlime => this.createSlimeEnemy((position.x, position.y))
-      }
+  override def spawnEnemy(size: (Float, Float) = (10, 10),
+                          position: (Float, Float) = (0, 0)): Unit =  {
+    RANDOM.shuffle(ENEMY_TYPES).head match {
+      case EntityType.EnemySkeleton => this.createSkeletonEnemy((position.x, position.y))
+      case EntityType.EnemyWorm => this.createWormEnemy((position.x, position.y))
+      case EntityType.EnemySlime => this.createSlimeEnemy((position.x, position.y))
     }
-
-    // randomly generate an enemy
-    val enemy:LivingEntity = spawnEnemy(spawnZonePosition)
-    // TODO: set movement direction inside a movement strategy
-    enemy.setFacing(RANDOM.nextBoolean()) // set initial movement direction
-
-    /*
-    // compute number of enemies to spawn in the spawnZone
-    val spawnCount: Int = Math.floor(spawnZoneSize._1 / ENEMIES_SPAWN_RATIO).toInt
-    for (_ <- 0 until 1) {
-      // randomy pick spawn position inside the spawn zone. Only the horizontal axis coordinate is generated randomly
-      val spawnPosition: (Float, Float) = (RANDOM.between(spawnZonePosition._1 - spawnZoneSize._1 / 2,
-        spawnZonePosition._1 + spawnZoneSize._1 / 2), spawnZonePosition._2)
-
-      // randomly generate an enemy
-      val enemy:LivingEntity = spawnEnemy(spawnPosition)
-      // TODO: set movement direction inside a movement strategy
-      enemy.setFacing(RANDOM.nextBoolean()) // set initial movement direction
-    }
-     */
   }
 
   override def spawnBoss(spawnZoneSize: (Float, Float) = (10, 10),
                          spawnZonePosition: (Float, Float) = (0, 0)): Unit =  {
     this.createWizardBossEnemy(spawnZonePosition)
-
-//    def spawnEnemy(position: (Float, Float)): EnemyImpl = {
-//      RANDOM.shuffle(ENEMY_TYPES).head match {
-//        case EntityType.EnemyBossWizard => this.createWizardBossEnemy((position.x, position.y))
-//        //        case EntityType.EnemyBossReaper => this.createReaperBossEnemy((position.x, position.y))
-//      }
-//    }
-//    spawnEnemy(position)
   }
 
   private def createDoorWithSensors(size: (Float, Float),

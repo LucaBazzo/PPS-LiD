@@ -109,7 +109,7 @@ class TileMapHelper {
             if(mapName!=null && mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME))
               spawnEntity(() => EntitiesFactoryImpl.spawnBoss(size, position))
             else
-              spawnEntity(() => EntitiesFactoryImpl.spawnEnemies(size, position))
+              spawnEntity(() => EntitiesFactoryImpl.spawnEnemy(size, position))
           case "portal" => spawnEntity(() => EntitiesFactoryImpl.createPortal(size, position))
           case _ => println("not supported layer: " + layer.getName)
         }

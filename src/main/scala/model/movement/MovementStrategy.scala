@@ -26,6 +26,11 @@ trait MovementStrategy {
    *
    */
   def alterSpeed(alteration: Float): Unit = ???
+
+
+  def onBegin(): Unit = ???
+
+  def onEnd(): Unit = ???
 }
 
 /** Movement strategy that does nothing.
@@ -40,4 +45,8 @@ case class DoNothingMovementStrategy() extends MovementStrategy {
   override def stopMovement(): Unit = {}
 
   override def alterSpeed(alteration: Float): Unit = {}
+
+  override def onBegin(): Unit = {}
+
+  override def onEnd(): Unit = {}
 }

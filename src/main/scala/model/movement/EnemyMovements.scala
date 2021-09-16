@@ -1,159 +1,168 @@
 package model.movement
 
-import com.badlogic.gdx.math.Vector2
+import model.behaviour.RichPredicates.funcToPredicate
+import model.behaviour.{NotPredicate, _}
 import model.entities.{Entity, MobileEntity, State, Statistic}
 import model.helpers.EntitiesUtilities._
+import utils.EnemiesConstants.ENEMIES_ACTIVATION_DISTANCE
 
-class FaceTarget(val sourceEntity: MobileEntity, val targetEntity: Entity) extends MovementStrategy {
+// TODO: rifattorizzare i predicati usati spesso in delel classi Predicate
 
-  override def apply(): Unit = {
-    val facingRightCheck = isEntityOnTheRight(sourceEntity, targetEntity)
-
-    // prevents continuous calls to sourceEntity.setFacing
-    this.sourceEntity.setFacing(facingRightCheck)
-  }
-
-  override def stopMovement(): Unit = { }
-}
-
-class PatrolPlatform(val sourceEntity: MobileEntity) extends MovementStrategy {
-
-  protected val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
-  protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
+abstract class BehaviourMovementStrategy extends MovementStrategy {
+  protected val behaviour: MovementBehaviours = new MovementBehavioursImpl()
 
   override def apply(): Unit = {
-    val canMoveToTheLeft: Boolean = !isPathObstructedOnTheLeft(this.sourceEntity) && isFloorPresentOnTheLeft(this.sourceEntity)
-    val canMoveToTheRight: Boolean = !isPathObstructedOnTheRight(this.sourceEntity) && isFloorPresentOnTheRight(this.sourceEntity)
-//    println(isPathObstructedOnTheLeft(this.sourceEntity), isFloorPresentOnTheLeft(this.sourceEntity), isPathObstructedOnTheRight(this.sourceEntity) , isFloorPresentOnTheRight(this.sourceEntity))
-    if (!canMoveToTheLeft && !this.sourceEntity.isFacingRight || !canMoveToTheRight && this.sourceEntity.isFacingRight) {
-      this.stopMovement()
-      this.changeDirection()
-    }
-
-     if (canMoveToTheLeft || canMoveToTheRight ) {
-       this.move()
-       this.sourceEntity.setState(State.Running)
-     } else
-       this.sourceEntity.setState(State.Standing)
+    this.behaviour.update
+    this.behaviour.getCurrentBehaviour.apply()
   }
 
   override def stopMovement(): Unit = {
-    this.sourceEntity.getBody.setLinearVelocity(0, this.sourceEntity.getBody.getLinearVelocity.y)
+    this.behaviour.getCurrentBehaviour.stopMovement()
   }
 
-  protected def changeDirection(): Unit = {
-    this.sourceEntity.setFacing(right = !this.sourceEntity.isFacingRight)
-  }
+  override def onBegin(): Unit = this.behaviour.getCurrentBehaviour.onBegin()
 
-  protected def move(): Unit = {
-    // apply movement force
-    val movementForce = if (!this.sourceEntity.isFacingRight) -this.acceleration else this.acceleration
-    this.sourceEntity.getBody.applyLinearImpulse(
-      new Vector2(movementForce, 0), this.sourceEntity.getBody.getWorldCenter, true)
-
-
-    // TODO: convertire come ha detto Luca
-    // limit horizontal speed
-    if (Math.abs(this.sourceEntity.getBody.getLinearVelocity.x) > this.maxMovementSpeed) {
-      val maxMovementForce: Vector2 = new Vector2(0f, this.sourceEntity.getBody.getLinearVelocity.y)
-      if (this.sourceEntity.getBody.getLinearVelocity.x > this.maxMovementSpeed)
-        maxMovementForce.x = this.maxMovementSpeed
-      if (this.sourceEntity.getBody.getLinearVelocity.x < -this.maxMovementSpeed)
-        maxMovementForce.x = -this.maxMovementSpeed
-      this.sourceEntity.getBody.setLinearVelocity(maxMovementForce)
-    }
-  }
+  override def onEnd(): Unit = this.behaviour.getCurrentBehaviour.onEnd()
 }
 
-class PatrolAndStop(override val sourceEntity:MobileEntity,
-                    val targetEntity:Entity)
-  extends PatrolPlatform(sourceEntity) {
+case class DisabledMovementStrategy(sourceEntity: MobileEntity,
+                                    targetEntity: Entity,
+                                    strategy: MovementStrategy) extends BehaviourMovementStrategy {
+  val b1: MovementStrategy = behaviour.addBehaviour(DoNothingMovementStrategy())
+  val b2: MovementStrategy = behaviour.addBehaviour(strategy)
 
-  protected val visionDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance).get
-  protected val visionAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle).get
-
-  protected var lastIsTargetNear: Boolean = false
-
-  override def apply(): Unit = {
-    // prevents enemy movement if he is already attacking
-    if (!Array(State.Attack01, State.Attack02, State.Attack03).contains(this.sourceEntity.getState)) {
-      val isTargetNearbyCheck = this.isTargetNearby
-
-      // face the target entity if near
-      if (isTargetNearbyCheck &&
-        (!this.sourceEntity.isFacingRight && isEntityOnTheRight(this.sourceEntity, this.targetEntity) ||
-          this.sourceEntity.isFacingRight && isEntityOnTheLeft(this.sourceEntity, this.targetEntity))) {
-        this.changeDirection()
-      }
-
-      // stop moving when the target entity is near
-      if (isTargetNearbyCheck && !this.lastIsTargetNear) {
-        this.stopMovement()
-        this.sourceEntity.setState(State.Standing)
-      } else if (!isTargetNearbyCheck) {
-        super.apply()
-      }
-      this.lastIsTargetNear = isTargetNearbyCheck
-    }
-  }
-
-  protected def isTargetNearby: Boolean = {
-    isEntityVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
-      getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
-  }
+  behaviour.addTransition(b1, b2,
+    () => getEntitiesDistance(this.sourceEntity, this.targetEntity) <= ENEMIES_ACTIVATION_DISTANCE)
+  behaviour.addTransition(b2, b1, NotPredicate(
+    () => getEntitiesDistance(this.sourceEntity, this.targetEntity) <= ENEMIES_ACTIVATION_DISTANCE))
 }
 
-class ChaseTarget(val sourceEntity:MobileEntity,
-                  val targetEntity:Entity) extends MovementStrategy {
+case class EnemyMovementStrategy(sourceEntity: MobileEntity,
+                                 targetEntity: Entity) extends BehaviourMovementStrategy {
 
-  protected val visionDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance).get
-  protected val visionAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle).get
-  protected val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
-  protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
+  case class InnerMovementStrategy(sourceEntity: MobileEntity,
+                                   targetEntity: Entity) extends BehaviourMovementStrategy {
 
-  protected var isTargetLeft: Boolean = false
+    // TODO: magic number qui, codice duplicato
+    private val visionAngle: Float = sourceEntity.getStatistic(Statistic.VisionAngle).get
+    private val minDistance = sourceEntity.getStatistic(Statistic.VisionDistance).get
+
+    private val isTargetVisible: () => Boolean =
+      () => isEntityVisible(this.sourceEntity, this.targetEntity, visionAngle)
+    private val isTargetNear: () => Boolean =
+      () => getEntitiesDistance(this.sourceEntity, this.targetEntity) <= minDistance
+    private val isPathWalkable: () => Boolean =
+      () => (!isPathObstructedOnTheLeft(sourceEntity, vOffset = 0) &&
+        isFloorPresentOnTheLeft(sourceEntity, vOffset = 0) &&
+        isEntityOnTheLeft(this.sourceEntity, this.targetEntity)) ||
+        (!isPathObstructedOnTheRight(sourceEntity, vOffset = 0) &&
+          isFloorPresentOnTheRight(sourceEntity, vOffset = 0) &&
+          isEntityOnTheRight(this.sourceEntity, this.targetEntity))
+
+    private val b1: MovementStrategy = behaviour.addBehaviour(PatrolMovementStrategy(sourceEntity))
+    private val b2: MovementStrategy = behaviour.addBehaviour(FaceTarget(sourceEntity, targetEntity))
+    private val b3: MovementStrategy = behaviour.addBehaviour(ChaseTarget(sourceEntity, targetEntity))
+    private val b4: MovementStrategy = behaviour.addBehaviour(DoNothingMovementStrategy())
+
+    behaviour.addTransition(b1, b2, AllPredicate(List(isTargetNear, isTargetVisible)))
+    behaviour.addTransition(b2, b1, NotPredicate(isTargetVisible))
+    behaviour.addTransition(b2, b3, AllPredicate(List(NotPredicate(isTargetNear), isTargetVisible, isPathWalkable)))
+    behaviour.addTransition(b3, b2, AllPredicate(List(isTargetNear, isTargetVisible)))
+    behaviour.addTransition(b3, b1, NotPredicate(isTargetVisible))
+    behaviour.addTransition(b3, b4, NotPredicate(isPathWalkable))
+    behaviour.addTransition(b4, b1, RandomTruePredicate(30))
+    behaviour.addTransition(b4, b2, AllPredicate(List(isTargetNear, isTargetVisible)))
+    behaviour.addTransition(b4, b3, AllPredicate(List(NotPredicate(isTargetNear), isTargetVisible, isPathWalkable)))
+  }
+
+  this.behaviour.addBehaviour(DisabledMovementStrategy(this.sourceEntity, this.targetEntity,
+    InnerMovementStrategy(this.sourceEntity, this.targetEntity)))
+
+}
+
+case class PatrolMovementStrategy(sourceEntity: MobileEntity) extends BehaviourMovementStrategy {
+
+  private val canMoveToTheLeft: () => Boolean =
+    () => !isPathObstructedOnTheLeft(sourceEntity, vOffset = 0) &&
+      isFloorPresentOnTheLeft(sourceEntity, vOffset = 0)
+  private val canMoveToTheRight: () => Boolean =
+    () => !isPathObstructedOnTheRight(sourceEntity, vOffset = 0) &&
+      isFloorPresentOnTheRight(sourceEntity, vOffset = 0)
+
+  private val b1: MovementStrategy = behaviour.addBehaviour(DoNothingMovementStrategy())
+  private val b2: MovementStrategy = behaviour.addBehaviour(MovingMovementStrategy(sourceEntity, right=false))
+  private val b3: MovementStrategy = behaviour.addBehaviour(MovingMovementStrategy(sourceEntity, right=true))
+
+  behaviour.addTransition(b1, b2, () => !this.sourceEntity.isFacingRight)
+  behaviour.addTransition(b2, b3, NotPredicate(canMoveToTheLeft))
+
+  behaviour.addTransition(b1, b3, () => this.sourceEntity.isFacingRight)
+  behaviour.addTransition(b3, b2, NotPredicate(canMoveToTheRight))
+}
+
+
+case class MovingMovementStrategy(sourceEntity: MobileEntity, right:Boolean) extends BehaviourMovementStrategy {
+  private val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
+  private val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
 
   override def apply(): Unit = {
-
-    val canMoveToTheLeft: Boolean = !isPathObstructedOnTheLeft(this.sourceEntity) && isFloorPresentOnTheLeft(this.sourceEntity)
-    val canMoveToTheRight: Boolean = !isPathObstructedOnTheRight(this.sourceEntity) && isFloorPresentOnTheRight(this.sourceEntity)
-
-    this.isTargetLeft = isEntityOnTheLeft(this.sourceEntity, this.targetEntity)
-
-    val isTargetVisible: Boolean = isEntityVisible(this.sourceEntity, this.targetEntity)
-
-    if (!Array(State.Attack01, State.Attack02, State.Attack03).contains(this.sourceEntity.getState)) {
-      if (!canMoveToTheLeft && isTargetLeft ||
-        !canMoveToTheRight && !isTargetLeft ||
-        !isTargetVisible ||
-        getEntitiesDistance(this.sourceEntity, this.targetEntity) < this.visionDistance) {
-        this.sourceEntity.setState(State.Standing)
-        this.stopMovement()
-      } else {
-        this.sourceEntity.setState(State.Running)
-        this.move()
-      }
-      this.sourceEntity.setFacing(right = !isTargetLeft)
+    if (this.right) {
+      this.sourceEntity.setVelocityX(this.sourceEntity.getVelocity._1 + this.acceleration)
+      if (this.sourceEntity.getVelocity._1 > this.maxMovementSpeed)
+        this.sourceEntity.setVelocityX(this.maxMovementSpeed)
     } else {
-      this.stopMovement()
+      this.sourceEntity.setVelocityX(this.sourceEntity.getVelocity._1 - this.acceleration)
+      if (this.sourceEntity.getVelocity._1 < -this.maxMovementSpeed)
+        this.sourceEntity.setVelocityX(-this.maxMovementSpeed)
     }
   }
 
-  protected def move(): Unit = {
-    // apply movement force
-    val movementForce = if (this.isTargetLeft) -this.acceleration else this.acceleration
-    this.sourceEntity.setVelocityX(this.sourceEntity.getVelocity._1 + movementForce)
-
-    // limit horizontal speed
-    if (Math.abs(this.sourceEntity.getVelocity._1) > this.maxMovementSpeed) {
-      var maxMovementForce: Float = 0
-      if (this.sourceEntity.getBody.getLinearVelocity.x > this.maxMovementSpeed)
-        maxMovementForce = this.maxMovementSpeed
-      if (this.sourceEntity.getBody.getLinearVelocity.x < -this.maxMovementSpeed)
-        maxMovementForce = -this.maxMovementSpeed
-      this.sourceEntity.setVelocityX(maxMovementForce)
-    }
+  override def stopMovement(): Unit = {
+    this.sourceEntity.setVelocityX(0)
   }
 
-  override def stopMovement(): Unit = this.sourceEntity.getBody.setLinearVelocity(0, this.sourceEntity.getBody.getLinearVelocity.y)
+  override def onBegin(): Unit = {
+    this.stopMovement()
+    this.sourceEntity.setFacing(right = this.right)
+    this.sourceEntity.setState(State.Running)
+  }
+
+  override def onEnd(): Unit = {
+    this.stopMovement()
+    this.sourceEntity.setState(State.Standing)
+  }
+}
+
+case class FaceTarget(sourceEntity: MobileEntity,
+                      targetEntity: Entity) extends MovementStrategy {
+
+  override def apply(): Unit = {
+    this.sourceEntity.setFacing(right = isEntityOnTheRight(sourceEntity, targetEntity))
+  }
+
+  override def stopMovement(): Unit = { }
+
+  override def onBegin(): Unit = {
+    this.sourceEntity.setState(State.Standing)
+  }
+
+  override def onEnd(): Unit = { }
+}
+
+
+case class ChaseTarget(sourceEntity:MobileEntity,
+                       targetEntity:Entity) extends BehaviourMovementStrategy {
+
+  val b1: MovementStrategy = behaviour.addBehaviour(DoNothingMovementStrategy())
+  val b2: MovementStrategy = behaviour.addBehaviour(MovingMovementStrategy(sourceEntity, right=false))
+  val b3: MovementStrategy = behaviour.addBehaviour(MovingMovementStrategy(sourceEntity, right=true))
+
+  behaviour.addTransition(b1, b2, () => !isEntityOnTheRight(this.sourceEntity, this.targetEntity))
+  behaviour.addTransition(b1, b3, () => isEntityOnTheRight(this.sourceEntity, this.targetEntity))
+  behaviour.addTransition(b2, b3, () => isEntityOnTheRight(this.sourceEntity, this.targetEntity))
+  behaviour.addTransition(b3, b2, () => !isEntityOnTheRight(this.sourceEntity, this.targetEntity))
+
+  override def apply(): Unit = {
+    super.apply()
+  }
 }
