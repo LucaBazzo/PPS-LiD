@@ -59,7 +59,7 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
     command match {
       case GameEvent.Attack => return (entity is Running) || (entity is Standing) ||
         (entity is Attack01) || (entity is Attack02) || isInAir
-      case GameEvent.BowAttack => return !isBowPicked &&
+      case GameEvent.BowAttack => return isBowPicked &&
         ((entity is Running) || (entity is Standing))
       case _ => throw new UnsupportedOperationException
     }

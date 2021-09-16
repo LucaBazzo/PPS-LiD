@@ -261,7 +261,6 @@ class HeroImpl(private val entityType: EntityType,
           this.setState(State.Standing)
         }
       }
-
     } else this.decrementWaiting(WAIT_TIME_DECREMENT)  //for sliding and crouch redefinition of body
   }
 
