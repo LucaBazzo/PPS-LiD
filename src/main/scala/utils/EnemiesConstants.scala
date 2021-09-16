@@ -93,7 +93,7 @@ object EnemiesConstants {
   val WIZARD_BOSS_ATTACK3_SIZE: (Float, Float) = (10, 10)
   val WIZARD_BOSS_ATTACK3_OFFSET: (Float, Float) = (13, 25)
 
-  val SLIME_SIZE: (Float, Float) = (13f, 10f)
+  val SLIME_SIZE: (Float, Float) = (23f, 12f)
   val SLIME_SCORE: Int = 100
   val SLIME_ATTACK_SIZE: (Float, Float) = (7f, 15f)
   val SLIME_ATTACK_OFFSET: (Float, Float) = (10f, 5f)
@@ -103,7 +103,7 @@ object EnemiesConstants {
   val SKELETON_ATTACK_SIZE: (Float, Float) = (23f, 23f)
   val SKELETON_ATTACK_OFFSET: (Float, Float) = (20f, 5f)
 
-  val WORM_SIZE: (Float, Float) = (19f, 11f)
+  val WORM_SIZE: (Float, Float) = (19f, 12f)
   val WORM_SCORE: Int = 100
   val WORM_FIREBALL_ATTACK_OFFSET: (Float, Float) = (10f, 10f)
   val WORM_FIREBALL_ATTACK_SIZE: (Float, Float) = (7f, 7f)
