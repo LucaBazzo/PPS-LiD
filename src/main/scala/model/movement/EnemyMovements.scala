@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import model.entities.{Entity, MobileEntity, State, Statistic}
 import model.helpers.EntitiesUtilities._
 
-class FaceTarget(val sourceEntity: MobileEntity, val targetEntity: Entity) extends MovementStrategy {
+class FaceTarget(val sourceEntity: MobileEntity, val targetEntity: Entity) extends DoNothingMovementStrategy {
 
   override def apply(): Unit = {
     val facingRightCheck = isEntityOnTheRight(sourceEntity, targetEntity)
@@ -16,7 +16,7 @@ class FaceTarget(val sourceEntity: MobileEntity, val targetEntity: Entity) exten
   override def stopMovement(): Unit = { }
 }
 
-class PatrolPlatform(val sourceEntity: MobileEntity) extends MovementStrategy {
+class PatrolPlatform(val sourceEntity: MobileEntity) extends DoNothingMovementStrategy {
 
   protected val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
   protected val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
@@ -104,7 +104,7 @@ class PatrolAndStop(override val sourceEntity:MobileEntity,
 }
 
 class ChaseTarget(val sourceEntity:MobileEntity,
-                  val targetEntity:Entity) extends MovementStrategy {
+                  val targetEntity:Entity) extends DoNothingMovementStrategy {
 
   protected val visionDistance: Float = this.sourceEntity.getStatistic(Statistic.VisionDistance).get
   protected val visionAngle: Float = this.sourceEntity.getStatistic(Statistic.VisionAngle).get

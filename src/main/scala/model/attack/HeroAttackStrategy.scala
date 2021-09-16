@@ -5,7 +5,6 @@ import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions._
 import model.entities.State._
 import model.entities._
-import model.helpers.EntitiesFactoryImpl
 import model.movement.DoNothingMovementStrategy
 import utils.HeroConstants._
 
@@ -15,7 +14,7 @@ import utils.HeroConstants._
  *  @param entity the entity that generates the attacks
  *  @param strength the damage that each attack will do
  */
-class HeroAttackStrategy(private val entity: Hero, private var strength: Float) extends AttackStrategy {
+class HeroAttackStrategy(private val entity: Hero, private var strength: Float) extends DoNothingAttackStrategy {
 
   private var attackPattern: Option[MobileEntity] = Option.empty
   private var attackTimer: Float = 0
@@ -60,7 +59,7 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
     command match {
       case GameEvent.Attack => return (entity is Running) || (entity is Standing) ||
         (entity is Attack01) || (entity is Attack02) || isInAir
-      case GameEvent.BowAttack => return isBowPicked &&
+      case GameEvent.BowAttack => return !isBowPicked &&
         ((entity is Running) || (entity is Standing))
       case _ => throw new UnsupportedOperationException
     }

@@ -7,7 +7,7 @@ import model.collisions.{CollisionMonitor, EntityCollisionBit}
 import model.entities.State.State
 import model.entities._
 import model.helpers.{EntitiesFactoryImpl, ItemPools}
-import model.movement.{HeroMovementStrategy, LadderClimbMovementStrategy}
+import model.movement.{HeroMovements, LadderClimbMovementStrategy}
 import utils.ItemConstants._
 
 /** Represent the hero interaction with a certain environment interaction. The hero will start
@@ -65,7 +65,7 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
   }
 
   private def restoreNormalMovementStrategy(): Unit = {
-    this.entity.setMovementStrategy(new HeroMovementStrategy(this.entity, this.entity.getStatistic(Statistic.MovementSpeed).get))
+    this.entity.setMovementStrategy(new HeroMovements(this.entity, this.entity.getStatistic(Statistic.MovementSpeed).get))
     this.entity.getEntityBody.setGravityScale()
     this.entity.setState(State.Falling)
     this.entity.getBody.setAwake(true)

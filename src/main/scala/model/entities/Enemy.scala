@@ -1,6 +1,5 @@
 package model.entities
 
-import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
@@ -31,7 +30,7 @@ class EnemyImpl(private val entityType: EntityType,
 
   override def update(): Unit = {
     super.update()
-    if (state != State.Dying) {
+    if (getState != State.Dying) {
       if (this.enemyBehaviour.isDefined) {
         this.enemyBehaviour.get.apply()
 
@@ -48,7 +47,7 @@ class EnemyImpl(private val entityType: EntityType,
 
   override def sufferDamage(damage: Float): Unit = {
     super.sufferDamage(damage)
-    if (this.state == State.Dying) {
+    if (this.getState == State.Dying) {
       this.enemyBehaviour.get.getAttackStrategy.stopAttack()
     }
   }

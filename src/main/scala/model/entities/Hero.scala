@@ -11,7 +11,7 @@ import model.entities.State._
 import model.entities.Statistic._
 import model.helpers.EntitiesFactoryImpl.{createPolygonalShape, defineEntityBody}
 import model.helpers.{EntitiesFactoryImpl, WorldUtilities}
-import model.movement.{DoNothingMovementStrategy, HeroMovementStrategy}
+import model.movement.{DoNothingMovementStrategy, HeroMovements}
 import model.{EntityBody, HeroInteraction}
 import utils.CollisionConstants.{HERO_COLLISIONS, HERO_FEET_COLLISIONS}
 import model.collisions.ImplicitConversions._
@@ -43,9 +43,9 @@ trait Hero extends LivingEntity {
   /** Changes the hero box that will collide with another entities.
    *
    *  @param newSize the new size of the box
-   *  @param addCoordinates the offset from the previous position
    */
-  def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit
+  def changeHeroFixture(newSize: (Float, Float)): Unit =
+    EntitiesFactoryImpl.addPendingFunction(() => Hero.changeHeroSize(this, newSize))
 
   def getItemsPicked: List[Items]
   /** Called when the hero pick an important item.
@@ -85,25 +85,6 @@ trait Hero extends LivingEntity {
    */
   def getFeet: Option[MobileEntity]
 
-  /** Check if the hero is touching the ground with the feet.
-   *
-   *  @return true if it touching the ground
-   */
-  def isTouchingGround: Boolean
-
-  /** Check if the hero is touching the wall on a specific side.
-   *
-   *  @param rightSide witch side the touching will be checked
-   *  @return true if it touching a wall
-   */
-  def isTouchingWallOnSide(rightSide: Boolean = true): Boolean
-
-  /** Check if the hero health is below 0
-   *
-   *  @return true if the hero is dead
-   */
-  def isDead: Boolean
-
   /** Notify the hero if he is doing an air attack.
    *
    *  @param isAttacking true if the air attack has begun
@@ -115,6 +96,28 @@ trait Hero extends LivingEntity {
    *  @param item item to be lost
    */
   def loseItem(item: Items): Unit
+
+  /** Check if the hero is touching the ground with the feet.
+   *
+   *  @return true if it touching the ground
+   */
+  def isTouchingGround: Boolean = if(getFeet.nonEmpty) getFeet.get.isColliding else false
+
+  /** Check if the hero is touching the wall on a specific side.
+   *
+   *  @param rightSide witch side the touching will be checked
+   *  @return true if it touching a wall
+   */
+  def isTouchingWallOnSide(rightSide: Boolean = true): Boolean = {
+    WorldUtilities.checkSideCollision(rightSide, this,
+      EntityCollisionBit.Immobile, EntityCollisionBit.Door)
+  }
+
+  /** Check if the hero health is below 0
+   *
+   *  @return true if the hero is dead
+   */
+  def isDead: Boolean = getStatistic(Statistic.CurrentHealth).get <= 0
 }
 
 object Hero {
@@ -123,7 +126,7 @@ object Hero {
     val hero: Hero = new HeroImpl(EntityType.Hero, createEntityBody(), HERO_SIZE.PPM, stats)
 
     hero.setCollisionStrategy(DoNothingOnCollision())
-    hero.setMovementStrategy(new HeroMovementStrategy(hero, stats(Statistic.MovementSpeed)))
+    hero.setMovementStrategy(new HeroMovements(hero, stats(Statistic.MovementSpeed)))
     hero.setAttackStrategy(new HeroAttackStrategy(hero, stats(Statistic.Strength)))
 
     this.createHeroFeet(hero)
@@ -131,6 +134,11 @@ object Hero {
     hero
   }
 
+  /** Change the hero size and sets new feet
+   *
+   *  @param hero the player
+   *  @param newSize the new dimension of the hero
+   */
   def changeHeroSize(hero: Hero, newSize: (Float, Float)): Unit = {
     hero.getEntityBody
       .setShape(createPolygonalShape(newSize.PPM))
@@ -237,7 +245,7 @@ class HeroImpl(private val entityType: EntityType,
         this.setState(State.Standing)
 
       if(checkNotLittle) {
-        this.changeHeroFixture(HERO_SIZE, CROUCH_END_OFFSET)
+        this.changeHeroFixture(HERO_SIZE)
         this.setLittle(false)
       }
 
@@ -257,20 +265,12 @@ class HeroImpl(private val entityType: EntityType,
     } else this.decrementWaiting(WAIT_TIME_DECREMENT)  //for sliding and crouch redefinition of body
   }
 
-  override def setState(state: State): Unit = {
-    super.setState(state)
-  }
-
   override def setLittle(little: Boolean): Unit = {
     this.little = little
     this.stopHero(SHORT_WAIT_TIME)
   }
 
   override def isLittle: Boolean = this.little
-
-  override def changeHeroFixture(newSize: (Float, Float), addCoordinates: (Float, Float) = (0,0)): Unit = {
-    EntitiesFactoryImpl.addPendingFunction(() => Hero.changeHeroSize(this, newSize))
-  }
 
   override def itemPicked(itemType: Items): Unit = {
     this.stopHero(LONG_WAIT_TIME)
@@ -317,25 +317,14 @@ class HeroImpl(private val entityType: EntityType,
     }
   }
 
-  override def stopMovement(): Unit = super.stopMovement()
-
-  override def isTouchingGround: Boolean = if(this.feet.nonEmpty) this.feet.get.isColliding else false
-
   override def setFeet(feet: MobileEntity): Unit = this.feet = Option.apply(feet)
 
   override def getFeet: Option[MobileEntity] = this.feet
 
-  override def isTouchingWallOnSide(rightSide: Boolean = true): Boolean = {
-    WorldUtilities.checkSideCollision(rightSide, this,
-      EntityCollisionBit.Immobile, EntityCollisionBit.Door)
-  }
-
   override def setAirAttacking(isAttacking: Boolean): Unit = this.isAirAttacking = isAttacking
 
-  override def isDead: Boolean = this.getStatistic(Statistic.CurrentHealth).get <= 0
-
   private def restoreNormalMovementStrategy(): Unit = {
-    this.setMovementStrategy(new HeroMovementStrategy(this, this.getStatistic(MovementSpeed).get))
+    this.setMovementStrategy(new HeroMovements(this, this.getStatistic(MovementSpeed).get))
     this.getEntityBody.setGravityScale()
     this.setState(State.Falling)
     this.getBody.setAwake(true)
