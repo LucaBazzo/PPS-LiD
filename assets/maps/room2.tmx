@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="40" height="40" tilewidth="8" tileheight="8" infinite="0" backgroundcolor="#1b2037" nextlayerid="13" nextobjectid="82">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="40" height="40" tilewidth="8" tileheight="8" infinite="0" backgroundcolor="#1b2037" nextlayerid="13" nextobjectid="84">
  <tileset firstgid="1" name="Final_tileset" tilewidth="8" tileheight="8" tilecount="676" columns="26" objectalignment="topleft">
   <image source="../textures/final-tileset.png" width="208" height="208"/>
   <tile id="135">
@@ -141,8 +141,8 @@
 2147483701,55,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,79,80,80,2147483727,0,0,2147483703,53,
 2147483701,113,0,0,0,0,0,0,136,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,548,0,0,2147483703,53,
 1,106,2147483675,135,0,0,0,0,162,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,574,0,0,2147483703,53,
-4,1,54,28,2147483675,135,81,115,88,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,136,0,0,0,113,116,0,600,0,599,81,53,
-2,80,80,80,1,106,28,106,28,2147483675,113,116,0,0,0,0,0,0,0,625,0,0,0,0,0,0,0,0,162,0,115,266,27,2147483675,0,574,0,106,106,54,
+4,1,54,28,2147483675,135,81,115,88,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,136,0,0,266,113,116,0,600,0,599,81,53,
+2,80,80,80,1,106,28,106,28,2147483675,113,116,0,0,0,0,0,0,0,625,0,0,0,0,0,0,0,0,162,0,115,27,28,2147483675,0,574,0,106,106,54,
 2147483701,0,0,0,79,80,80,80,80,7,28,2147483675,115,0,0,0,0,0,116,27,55,0,0,0,0,0,0,0,135,547,27,106,2,2147483727,0,600,0,79,80,1,
 2147483701,55,0,0,0,316,0,267,0,79,80,54,2147483675,261,262,263,261,262,27,2147483701,0,0,0,0,0,0,135,27,106,28,6,80,2147483727,2147484221,0,574,0,0,2147483703,53,
 2147483701,0,0,0,0,0,0,162,0,0,135,53,5,28,28,28,28,106,1,1,2147483675,261,262,263,261,262,27,3,3,1,2147483727,2147484273,267,0,0,652,0,0,2147483703,53,
@@ -289,16 +289,16 @@
   <object id="58" x="184" y="200" width="16" height="8"/>
   <object id="59" x="216" y="168" width="48" height="8"/>
   <object id="60" x="208" y="176" width="40" height="8"/>
-  <object id="61" x="240" y="160" width="32" height="8"/>
-  <object id="62" x="256" y="152" width="16" height="8"/>
+  <object id="61" x="240" y="160" width="8" height="8"/>
   <object id="65" x="256" y="112" width="32" height="16"/>
   <object id="66" x="280" y="96" width="32" height="16"/>
   <object id="67" x="288" y="112" width="24" height="8"/>
-  <object id="81" x="256" y="128" width="8" height="24"/>
+  <object id="83" x="248" y="152" width="24" height="16"/>
  </objectgroup>
  <objectgroup id="12" name="door">
   <object id="79" x="224" y="288" width="8" height="24"/>
   <object id="80" x="72" y="288" width="8" height="24"/>
+  <object id="82" x="256" y="128" width="8" height="24"/>
  </objectgroup>
  <objectgroup id="7" name="bridge">
   <object id="5" x="8" y="40" width="8"/>
@@ -331,7 +331,7 @@
  <objectgroup id="10" name="enemy">
   <object id="68" x="56" y="152"/>
   <object id="69" x="152" y="160"/>
-  <object id="70" x="248" y="160"/>
+  <object id="70" x="232" y="160"/>
   <object id="71" x="72" y="264"/>
   <object id="72" x="120" y="312"/>
   <object id="73" x="160" y="248"/>
