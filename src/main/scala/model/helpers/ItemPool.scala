@@ -1,22 +1,28 @@
 package model.helpers
 
 import model.EntityBody
-import model.collisions.EntityCollisionBit
-import model.entities.ItemPools.ItemPools
 import model.entities.Items.Items
 import model.entities._
+import model.helpers.ItemPools.ItemPools
 
 import scala.util.Random
 
+object ItemPools extends Enumeration {
+  type ItemPools = Value
+  val Keys, Enemy_Drops, Default, Boss = Value
+}
+
 trait ItemPool {
   def getItem(entityBody: EntityBody, size: (Float, Float), PoolName: ItemPools): ItemImpl
+
+  def resetBossPool(): Unit
 }
 
 class ItemPoolImpl extends ItemPool {
 
-  private var level1_Item_List: List[Items] = List(Items.Cake, Items.Wrench, Items.Map)
-  private var level2_Item_List: List[Items] = level1_Item_List ++ List(Items.Armor, Items.SkeletonKey, Items.Boots, Items.BFSword)
-  private var boss_Item_List: List[Items] = List(Items.Bow, Items.Shield)
+  private var default_Item_List: List[Items] = List(Items.Cake, Items.Wrench, Items.Map, Items.Armor,
+    Items.SkeletonKey, Items.Boots, Items.BFSword, Items.Shield)
+  private var boss_Item_List: List[Items] = List(Items.Bow)
   private val map_Item_List: List[Items] = List(Items.Key)
   private val enemy_Item_List: List[Items] = List(Items.PotionS, Items.PotionM, Items.PotionL, Items.PotionXL)
   private val rand = new Random
@@ -43,13 +49,9 @@ class ItemPoolImpl extends ItemPool {
   }
 
   private def pickItemFromPool(poolName: ItemPools): Items = poolName match {
-    case ItemPools.Level_1 =>
-      val item = pickRandomItemFromList(level1_Item_List)
-      level1_Item_List = level1_Item_List.filter(x => x != item)
-      item
-    case ItemPools.Level_2 =>
-      val item = pickRandomItemFromList(level2_Item_List)
-      level2_Item_List = level2_Item_List.filter(x => x != item)
+    case ItemPools.Default =>
+      val item = pickRandomItemFromList(default_Item_List)
+      default_Item_List = default_Item_List.filter(x => x != item)
       item
     case ItemPools.Boss =>
       val item = pickRandomItemFromList(boss_Item_List)
@@ -64,6 +66,8 @@ class ItemPoolImpl extends ItemPool {
     if(itemList.nonEmpty)
       itemList(rand.nextInt(itemList.length))
     else
-      Items.Cake
+      Items.Wrench
   }
+
+  override def resetBossPool(): Unit = this.boss_Item_List = List(Items.Bow)
 }

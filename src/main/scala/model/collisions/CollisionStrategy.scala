@@ -1,7 +1,6 @@
 package model.collisions
 
-import model.entities.Statistic.Statistic
-import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
+import model.entities.Entity
 
 
 trait CollisionStrategy {
@@ -9,7 +8,7 @@ trait CollisionStrategy {
   def release(entity: Entity): Unit
 }
 
-class DoNothingOnCollision() extends CollisionStrategy {
+case class DoNothingOnCollision() extends CollisionStrategy {
   override def apply(entity: Entity): Unit = {}
 
   override def release(entity: Entity): Unit = {}

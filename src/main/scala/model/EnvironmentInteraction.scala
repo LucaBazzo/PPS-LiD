@@ -2,11 +2,13 @@ package model
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
+import model.collisions.ImplicitConversions.RichTuple2
 import model.collisions.{CollisionMonitor, EntityCollisionBit}
-import model.entities.{Entity, Hero, State, Statistic}
+import model.entities.State.State
+import model.entities._
+import model.helpers.{EntitiesFactoryImpl, ItemPools}
 import model.movement.{HeroMovementStrategy, LadderClimbMovementStrategy}
-
-import java.util.concurrent.{ExecutorService, Executors}
+import utils.ItemConstants._
 
 /** Represent the hero interaction with a certain environment interaction. The hero will start
  *  the interaction when the command given is notified to him
@@ -44,8 +46,14 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
 
     if(!applied)
       this.startLadderInteraction()
-    else
+    else {
       this.restoreNormalMovementStrategy()
+      val state: State = this.entity.getState
+      if(!state.equals(State.Jumping) && !state.equals(State.Somersault))
+        this.entity.setState(State.Falling)
+      else
+        this.entity.setState(State.Jumping)
+    }
 
     this.applied = !applied
   }
@@ -64,20 +72,32 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
   }
 }
 
-class DoorInteraction(hero: Hero, door: Entity) extends EnvironmentInteraction {
+class DoorInteraction(hero: Hero, door: Entity, leftSensor: Entity, rightSensor: Entity) extends EnvironmentInteraction {
 
   override def apply(): Unit = {
     this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
+    this.leftSensor.changeCollisions(EntityCollisionBit.OpenedDoor)
+    this.rightSensor.changeCollisions(EntityCollisionBit.OpenedDoor)
     this.door.setState(State.Opening)
     this.hero.setEnvironmentInteraction(Option.empty)
     print("Hero opened door")
   }
 }
 
+class ChestInteraction(private val hero: Hero, private val chest: ImmobileEntity) extends EnvironmentInteraction {
+
+  override def apply(): Unit = {
+    chest.setState(State.Opening)
+    chest.changeCollisions(EntityCollisionBit.OpenedDoor)
+    val itemPos: (Float, Float) = chest.getPosition
+    EntitiesFactoryImpl.addPendingFunction(() =>
+      EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops, DEFAULT_POTION_SIZE, itemPos.MPP))
+    hero.setEnvironmentInteraction(Option.empty)
+  }
+}
+
 class PlatformInteraction(private val hero: Hero,
-                          private val upperPlatform: Entity,
                           private val platform: Entity,
-                          private val lowerPlatform: Entity,
                           private val monitor: CollisionMonitor) extends EnvironmentInteraction {
 
   override def apply(): Unit = {
@@ -86,15 +106,7 @@ class PlatformInteraction(private val hero: Hero,
     else
       hero.setEnvironmentInteraction(Option.empty)
     platform.changeCollisions(EntityCollisionBit.Enemy)
-    upperPlatform.changeCollisions(EntityCollisionBit.Enemy)
-    lowerPlatform.changeCollisions(EntityCollisionBit.Enemy)
-    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-    executorService.execute(() => {
-      Thread.sleep(1000)
-      platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-      upperPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-      lowerPlatform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-      println("Enabled platform collisions")
-    })
+    println("Enabled platform collisions")
   }
+
 }

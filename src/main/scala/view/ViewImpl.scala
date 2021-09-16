@@ -1,47 +1,72 @@
 package view
 
+import com.badlogic.gdx.Files.FileType
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.{Lwjgl3Application, Lwjgl3ApplicationConfiguration}
 import controller.ObserverManager
 import main.LostInDungeons
 import model.helpers.EntitiesGetter
-import utils.ApplicationConstants.TITLE
-import view.screens.game.GameScreen
+import utils.ApplicationConstants.{ICON_PATH, TITLE}
+import view.screens.helpers.TileMapManager
+import view.screens.menu.{GUIFactory, GameScreen}
 
 import java.util.concurrent.{ExecutorService, Executors}
 
+/** Manages the current screen of the application
+ */
 trait View {
+
+  /** Change the current screen and start the game.
+   *
+   */
   def startGame()
+
+  /** Set the Game Over Screen, is called when the hero is dead.
+   *
+   */
   def endGame()
-  def initialize()
+
+  /** Return to the Main Menu Screen.
+   *
+   */
+  def returnToMenu()
+
+  /** Close the application.
+   *
+   */
   def terminate()
 }
 
+/** Handles the graphics part of the game
+ *
+ *  @param entitiesGetter monitor that contains the entities of the Model, used to place sprites, score, level number
+ *  @param observerManager observer for the messages from View to Controller
+ *  @param tileMapHelper class for map rendering
+ */
 class ViewImpl(private val entitiesGetter: EntitiesGetter,
                private val observerManager: ObserverManager,
-               private val rooms: Array[String]) extends View {
+               private val tileMapHelper: TileMapManager) extends View {
 
-  private val screenSetter: LostInDungeons = new LostInDungeons(this.entitiesGetter, this.observerManager, this.rooms)
+  private val screenSetter: LostInDungeons = new LostInDungeons(this.observerManager)
 
+  //configuration for the libgdx application
   val config = new Lwjgl3ApplicationConfiguration
   config.setTitle(TITLE)
-  //config.addIcon(ICON_PATH, FileType.Internal)
+  config.setWindowIcon(FileType.Internal, ICON_PATH)
 
   val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-  executorService.submit(() => {
-    new Lwjgl3Application(screenSetter, config)
-  })
+  executorService.submit(() => new Lwjgl3Application(screenSetter, config))
 
   override def startGame(): Unit = {
-    Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager, this.rooms)))
+    Gdx.app.postRunnable(() => this.screenSetter.setScreen(new GameScreen(this.entitiesGetter, this.observerManager, this.tileMapHelper)))
   }
 
-  override def endGame(): Unit = ???
+  override def endGame(): Unit = Gdx.app.postRunnable(() => this.screenSetter.setScreen(GUIFactory.createGameOverScreen(this.observerManager)))
 
-  override def initialize(): Unit = ???
+  override def returnToMenu(): Unit = Gdx.app.postRunnable(() => this.screenSetter.setScreen(GUIFactory.createMainMenuScreen(this.observerManager)))
 
   override def terminate(): Unit = {
-    this.executorService.shutdown()
+    this.executorService.shutdownNow()
     Gdx.app.exit()
   }
 }

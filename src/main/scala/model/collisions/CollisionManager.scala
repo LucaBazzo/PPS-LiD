@@ -24,11 +24,12 @@ object EntityCollisionBit {
   val Sword: Short = getNextBitValue
   val Door: Short = getNextBitValue
   val OpenedDoor: Short = getNextBitValue
-  val DestroyedDoor: Short = getNextBitValue
   val Arrow: Short = getNextBitValue
   val EnemyAttack: Short = getNextBitValue
   val Platform: Short = getNextBitValue
+  val PlatformSensor: Short = getNextBitValue
   val Ladder: Short = getNextBitValue
+  val Portal: Short = getNextBitValue
   val Pool: Short = getNextBitValue
 
   private def getNextBitValue: Short = {
@@ -58,7 +59,6 @@ object ImplicitConversions {
   implicit class RichTuple2(base: (Float, Float)) {
     def PPM: (Float, Float) = base / PIXELS_PER_METER
 
-    // TODO: da rimuovere
     def MPP: (Float, Float) = base * PIXELS_PER_METER
 
     def INV: (Float, Float) = (-base._1, -base._2)

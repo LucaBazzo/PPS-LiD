@@ -1,7 +1,7 @@
 package model.entities
 
 import model.EntityBody
-import model.attack.{AttackStrategy, DoNotAttack}
+import model.attack.{AttackStrategy, DoNothingAttackStrategy}
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
 
@@ -19,7 +19,7 @@ class LivingEntityImpl(private val entityType: EntityType,
                        private var stats: Map[Statistic, Float])
   extends MobileEntityImpl(entityType, entityBody, size, stats) with LivingEntity {
 
-  protected var attackStrategy: AttackStrategy = new DoNotAttack()
+  protected var attackStrategy: AttackStrategy = DoNothingAttackStrategy()
 
   protected var dyingStateTimer:Long = 0
   protected val dyingStateDuration:Long = 1000
@@ -59,13 +59,13 @@ class LivingEntityImpl(private val entityType: EntityType,
         }
         this.alterStatistics(Statistic.CurrentHealth, -trueDamage)
       }
-      if (currentHealth <= 0) {
+      if (this.getStatistic(Statistic.CurrentHealth).get <= 0) {
         this.setState(State.Dying)
       }
     }
   }
 
-  override def getLife: Float = this.stats(Statistic.CurrentHealth)
+  override def getLife: Float = this.getStatistic(Statistic.CurrentHealth).get
 
   override def setAttackStrategy(strategy: AttackStrategy): Unit = this.attackStrategy = strategy
 

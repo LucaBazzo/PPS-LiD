@@ -2,15 +2,19 @@ package main
 
 import com.badlogic.gdx.Game
 import controller.{GameEvent, ObserverManager}
-import model.helpers.EntitiesGetter
-import view.screens.game.GameScreen
+import view.screens.menu.GUIFactory
 
-class LostInDungeons(private val entitiesGetter: EntitiesGetter,
-                     private val observerManager: ObserverManager,
-                     private val rooms: Array[String]) extends Game {
+/** The class that represents the whole game, start the application from the menu.
+ *
+ *  @param observerManager observer for the messages from View to Controller
+ */
+class LostInDungeons(private val observerManager: ObserverManager) extends Game {
 
+  /** Create the game. This method is called automatically when this class is instantiated.
+   *
+   */
   override def create(): Unit = {
-    this.setScreen(new GameScreen(entitiesGetter, observerManager, rooms))
+    this.setScreen(GUIFactory.createMainMenuScreen(this.observerManager))
   }
 
   override def dispose(): Unit = {

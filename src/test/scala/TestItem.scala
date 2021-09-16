@@ -1,136 +1,129 @@
 import model.entities.Items.Items
 import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl}
+import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl, ItemPools}
 import model.{Level, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class TestItem extends AnyFlatSpec {
 
-  private val LEVEL_1_ITEMS: List[Items] = List(Items.Cake, Items.Wrench, Items.Map)
-  private val LEVEL_2_ITEMS: List[Items] = LEVEL_1_ITEMS ++ List(Items.Armor, Items.SkeletonKey, Items.Boots, Items.BFSword)
-  private val BOSS_ITEMS: List[Items] = List(Items.Bow, Items.Shield)
+  private val DEFAULT_ITEMS: List[Items] = List(Items.Cake, Items.Wrench, Items.Map,
+    Items.Armor, Items.SkeletonKey, Items.Boots, Items.BFSword, Items.Shield)
+  private val BOSS_ITEMS: List[Items] = List(Items.Bow)
   private val MAP_ITEMS: List[Items] = List(Items.Key)
   private val ENEMY_ITEMS: List[Items] = List(Items.PotionS, Items.PotionM, Items.PotionL, Items.PotionXL)
 
-  "A Level" must "start with an Item from level 1 pool" in {
+  private def initialize(): EntitiesContainerMonitor = {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
-    val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
-    assert(LEVEL_1_ITEMS.contains(item.getEnumVal))
+    EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
+    //TODO null temporaneo
+    val _: Level = new LevelImpl(null, monitor, new ItemPoolImpl())
+    monitor
   }
 
-  "In a Level" should "be able to spawn items from every pool" in {
-    val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
-    level.spawnItem(ItemPools.Level_2)
-    val item2: Item = monitor.getEntities(x => x.isInstanceOf[Item]
-      && LEVEL_2_ITEMS.contains(x.asInstanceOf[Item].getEnumVal)).get.head.asInstanceOf[Item]
-    level.spawnItem(ItemPools.Boss)
+  "In a Level" should "spawn items from every pool" in {
+    val monitor: EntitiesContainerMonitor = this.initialize()
+    EntitiesFactoryImpl.createItem(ItemPools.Default)
+    val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
+    EntitiesFactoryImpl.createItem(ItemPools.Boss)
+    val item2: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
+    EntitiesFactoryImpl.createItem(ItemPools.Keys)
     val item3: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
-    level.spawnItem(ItemPools.Keys)
+    EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops)
     val item4: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
-    level.spawnItem(ItemPools.Enemy_Drops)
-    val item5: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
-    assert(LEVEL_2_ITEMS.contains(item2.getEnumVal) && BOSS_ITEMS.contains(item3.getEnumVal)
-      && MAP_ITEMS.contains(item4.getEnumVal) && ENEMY_ITEMS.contains(item5.getEnumVal))
+    assert(DEFAULT_ITEMS.contains(item.getName) && BOSS_ITEMS.contains(item2.getName)
+      && MAP_ITEMS.contains(item3.getName) && ENEMY_ITEMS.contains(item4.getName))
   }
 
   "An Item" should "disappear when picked up" in {
-    val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
-    level.spawnItem(ItemPools.Level_1)
+    val monitor: EntitiesContainerMonitor = this.initialize()
+    EntitiesFactoryImpl.createItem(ItemPools.Default)
     for(item <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
       item.asInstanceOf[Item].collect()
 
-    EntitiesFactoryImpl.destroyBodies()
-    EntitiesFactoryImpl.applyEntityCollisionChanges()
+    /*EntitiesFactoryImpl.destroyBodies()
+    EntitiesFactoryImpl.applyEntityCollisionChanges()*/
     assert(monitor.getEntities(x => x.isInstanceOf[Item]).get.isEmpty)
   }
 
   "An Item" should "grant stats when picked up" in {
-    val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
-    level.spawnItem(ItemPools.Level_1)
-    val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
-    val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
-    val effect = item.collect()
-    val preStat: Float = hero.getStatistics(Statistic.Defence)
-    item.collisionDetected(Option.apply(hero))
-    assert(hero.getStatistics(effect._1) == preStat + effect._2)
-    assert(hero.getItemsPicked.head == item.getEnumVal)
+    val monitor: EntitiesContainerMonitor = this.initialize()
+    for (_ <- List.range(0, DEFAULT_ITEMS.length)) {
+      EntitiesFactoryImpl.createItem(ItemPools.Default)
+      val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
+      val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
+      val effect = item.collect()
+      var preStat: Float = 0
+      var incStat: Float = 0
+      if (effect._1.nonEmpty) {
+        preStat = hero.getStatistics(effect._1.get.head._1)
+        incStat = effect._1.get.head._2
+      }
+      item.collisionDetected(Option.apply(hero))
+      if (effect._1.nonEmpty)
+        assert(hero.getStatistics(effect._1.get.head._1) == preStat + incStat)
+      assert(hero.getItemsPicked.head == item.getName)
+    }
+  }
+
+  "A Potion" should "heal the damaged Hero" in {
+    val monitor: EntitiesContainerMonitor = this.initialize()
+    for (_ <- List.range(0, ENEMY_ITEMS.length)) {
+      EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops)
+      val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
+      val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
+      hero.sufferDamage(999)
+      val prevLife: Float = hero.getStatistics(Statistic.CurrentHealth)
+      item.collisionDetected(Option.apply(hero))
+      val actLife: Float = hero.getStatistics(Statistic.CurrentHealth)
+      assert(item.collect()._1.get.head._2 <= (actLife - prevLife + 1))
+    }
   }
 
   "An item pool (excluding keys and enemy drops)" should "never give the same item twice unless it has exhausted all its items" in {
-    val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+    val monitor: EntitiesContainerMonitor = this.initialize()
     var itemList1: List[Items] = List()
     var itemList2: List[Items] = List()
-    var itemList3: List[Items] = List()
-    for(_ <- List.range(0, LEVEL_1_ITEMS.length - 1))
+    for(_ <- List.range(0, DEFAULT_ITEMS.length))
     {
-      level.spawnItem(ItemPools.Level_1)
+      EntitiesFactoryImpl.createItem(ItemPools.Default)
     }
-    itemList1 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getEnumVal)
+    itemList1 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
     for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
       x.destroyEntity()
-    level.updateEntities(List.empty)
-
-    for(_ <- List.range(0, LEVEL_2_ITEMS.length))
-    {
-      level.spawnItem(ItemPools.Level_2)
-    }
-    itemList2 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getEnumVal)
-    for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
-      x.destroyEntity()
-    level.updateEntities(List.empty)
 
     for(_ <- List.range(0, BOSS_ITEMS.length))
     {
-      level.spawnItem(ItemPools.Boss)
+      EntitiesFactoryImpl.createItem(ItemPools.Boss)
     }
-    itemList3 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getEnumVal)
+    itemList2 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
     for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
       x.destroyEntity()
-    level.updateEntities(List.empty)
 
-    assert(itemList1.sorted == LEVEL_1_ITEMS.sorted && itemList2.sorted == LEVEL_2_ITEMS.sorted && itemList3.sorted == BOSS_ITEMS.sorted)
+    assert(itemList1.sorted == DEFAULT_ITEMS.sorted && itemList2.sorted == BOSS_ITEMS.sorted)
+
   }
 
-  "An exhausted item pool" should "spawn only cake" in {
-    val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
-    val level: Level = new LevelImpl(monitor)
+  "An exhausted item pool" should "spawn only wrench" in {
+    val monitor: EntitiesContainerMonitor = this.initialize()
     var itemList1: List[Items] = List()
     var itemList2: List[Items] = List()
-    var itemList3: List[Items] = List()
 
-    for(_ <- List.range(0, LEVEL_1_ITEMS.length + 1))
+    for(_ <- List.range(0, DEFAULT_ITEMS.length + 2))
     {
-      level.spawnItem(ItemPools.Level_1)
+      EntitiesFactoryImpl.createItem(ItemPools.Default)
     }
-    itemList1 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getEnumVal)
+    itemList1 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
     for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
       x.destroyEntity()
-    level.updateEntities(List.empty)
-
-    for(_ <- List.range(0, LEVEL_2_ITEMS.length + 2))
-    {
-      level.spawnItem(ItemPools.Level_2)
-    }
-    itemList2 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getEnumVal)
-    for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
-      x.destroyEntity()
-    level.updateEntities(List.empty)
 
     for(_ <- List.range(0, BOSS_ITEMS.length + 2))
     {
-      level.spawnItem(ItemPools.Boss)
+      EntitiesFactoryImpl.createItem(ItemPools.Boss)
     }
-    itemList3 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getEnumVal)
+    itemList2 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
     for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
       x.destroyEntity()
-    level.updateEntities(List.empty)
 
-    assert(itemList1.take(2).forall(x => x == Items.Cake) && itemList2.take(2).forall(x => x == Items.Cake) &&
-      itemList3.take(2).forall(x => x == Items.Cake))
+    assert(itemList1.take(2).forall(x => x == Items.Wrench) && itemList2.take(2).forall(x => x == Items.Wrench))
   }
 }

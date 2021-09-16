@@ -14,8 +14,8 @@ object State extends Enumeration {
   val Standing, Crouching, Sliding,
       Running, Jumping, Falling, Somersault,
       LadderClimbing, LadderDescending, LadderIdle,
-      Attack01, Attack02, Attack03, BowAttacking,
-      Dying, Hurt, pickingItem, Opening = Value
+      Attack01, Attack02, Attack03, BowAttacking, AirDownAttacking, AirDownAttackingEnd,
+      Dying, Hurt, pickingItem, Opening, Closed = Value
 }
 
 object EntityType extends Enumeration {
@@ -24,9 +24,9 @@ object EntityType extends Enumeration {
       Mobile, Immobile, Enemy, SpawnZone, //this values will not show any sprite
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
-      EnemySkeleton, EnemySlime, EnemyWorm, EnemyBossWizard,
-      Platform, Door, Ladder, Water, Lava,
-      AttackFireBall, AttackArrow = Value
+      EnemySkeleton, EnemySlime, EnemyWorm, EnemyBossWizard, // EnemyBossReaper, // EnemyGhost
+      Platform, PlatformSensor, Door, Ladder, Water, Lava, Chest, Portal,
+      AttackFireBall, AttackEnergyBall, AttackSmite, AttackArrow = Value
 }
 
 trait Entity {
@@ -47,7 +47,7 @@ trait Entity {
 
   def getPosition: (Float, Float)
 
-  def setSize(size: (Float, Float))
+  def setSize(size: (Float, Float)): Unit
 
   def getSize: (Float, Float)
 
@@ -113,9 +113,9 @@ abstract class EntityImpl(private val entityType: EntityType,
   override def isColliding: Boolean = this.collidingEntities > 0
 
   override def destroyEntity(): Unit = {
-    EntitiesFactoryImpl.destroyBody(this.getBody)
+    EntitiesFactoryImpl.pendingDestroyBody(this.getBody)
     this.getBody.getJointList.toArray().foreach(j => {
-      EntitiesFactoryImpl.destroyBody(j.other)
+      EntitiesFactoryImpl.pendingDestroyBody(j.other)
     })
     EntitiesFactoryImpl.removeEntity(this)
   }
@@ -124,7 +124,7 @@ abstract class EntityImpl(private val entityType: EntityType,
 
   override def getEntityBody: EntityBody = this.entityBody
 
-  override def changeCollisions(entityType: Short): Unit = EntitiesFactoryImpl.changeCollisions(this, entityType)
+  override def changeCollisions(entityType: Short): Unit = EntitiesFactoryImpl.pendingChangeCollisions(this, entityType)
 
   override def getType: EntityType = this.entityType
 }

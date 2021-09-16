@@ -4,7 +4,7 @@ import model.EntityBody
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl
-import model.movement.{DoNotMove, MovementStrategy}
+import model.movement.{DoNothingMovementStrategy, MovementStrategy}
 import model.collisions.ImplicitConversions._
 
 object Statistic extends Enumeration {
@@ -46,10 +46,10 @@ class MobileEntityImpl(private val entityType: EntityType,
 
   private var facingRight: Boolean = true
 
-  protected var movementStrategy: MovementStrategy = new DoNotMove()
+  protected var movementStrategy: MovementStrategy = new DoNothingMovementStrategy()
 
   override def update(): Unit = {
-
+    // TODO: chiedere a luca perchè non si può fare la move qui
   }
 
   override def setMovementStrategy(strategy: MovementStrategy): Unit = this.movementStrategy = strategy
@@ -104,5 +104,16 @@ class CircularMobileEntity(private val entityType: EntityType,
                            private val statistics:Map[Statistic, Float],
                            private val pivotBody: EntityBody) extends MobileEntityImpl(entityType, entityBody, size, statistics) {
 
-  EntitiesFactoryImpl.createJoint(this.pivotBody.getBody, this.entityBody.getBody)
+  EntitiesFactoryImpl.pendingJointCreation(this.pivotBody.getBody, this.entityBody.getBody)
+}
+
+class AirSwordMobileEntity(private val entityType: EntityType,
+                           private var entityBody: EntityBody,
+                           private val size: (Float, Float),
+                           private val statistics:Map[Statistic, Float] = Map()) extends MobileEntityImpl(entityType, entityBody, size, statistics) {
+
+  override def destroyEntity(): Unit = {
+    EntitiesFactoryImpl.pendingDestroyBody(this.getBody)
+    EntitiesFactoryImpl.removeEntity(this)
+  }
 }

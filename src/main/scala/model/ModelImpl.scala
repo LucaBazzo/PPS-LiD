@@ -1,49 +1,106 @@
 package model
 
-import com.badlogic.gdx.Gdx
-import controller.{GameEvent, SoundManager}
 import controller.GameEvent.GameEvent
-import model.entities.{Hero, LivingEntity}
-import model.helpers.EntitiesSetter
-import view.screens.helpers.TileMapHelper
+import controller.{GameEvent, Observer, SoundManager}
+import model.helpers._
+import utils.HeroConstants.HERO_STATISTICS_DEFAULT
+import view.screens.helpers.TileMapManager
 
 trait Model {
 
-  def update(actions: List[GameEvent])
+  def update(actions: List[GameEvent]): Unit
 
   def getCurrentLevelNumber: Int
 
   def isGameOver: Boolean
+
+  def requestStartGame(): Unit
+
+  def requestNewLevel(): Unit
+
+  def loadWorld(): Unit
+
+  def requestLevel(): Unit
+
+  def disposeLevel(): Unit
 }
 
-class ModelImpl(private val entitiesSetter: EntitiesSetter,
-                private  val rooms: Array[String]) extends Model {
-
-  private val level: Level = new LevelImpl(entitiesSetter)
+class ModelImpl(private val controller: Observer,
+                private val entitiesContainer: EntitiesContainerMonitor,
+                private val tileMapHelper: TileMapManager) extends Model {
 
   private val soundManager: SoundManager = new SoundManager
 
-  private var levelNumber: Int = 1
+  private var level: Option[Level] = Option.empty
+  private val itemPool: ItemPool = new ItemPoolImpl()
+  private var levelNumber: Int = 0
+  private var isLevelActive: Boolean = false
+  private var requestedNewLevel: Boolean = false
 
   override def update(actions: List[GameEvent]): Unit = {
-    for (action <- actions) {
-      if(action.equals(GameEvent.SetMap)) {
+    if(this.requestedNewLevel)
+      this.newLevel()
 
-        Gdx.app.postRunnable(
-          () => {
+    if(level.nonEmpty) {
+      if(actions.exists(g => g equals GameEvent.SetMap))
+        this.loadWorld()
 
-            TileMapHelper.setWorld(this.level, this.rooms)
-
-            soundManager.startMusic()
-          }
-        )
-      }
+      //TODO scegliere un altro metodo invece della filter
+      if(this.isLevelActive)
+        this.level.get.updateEntities(actions.filterNot(g => g equals GameEvent.SetMap))
     }
-
-    this.level.updateEntities(actions)
   }
 
-  override def isGameOver: Boolean = this.level.getEntity(e => e.isInstanceOf[Hero]).asInstanceOf[LivingEntity].getLife == 0
+  override def isGameOver: Boolean = {
+    if(this.entitiesContainer.getHero.nonEmpty)
+      return this.entitiesContainer.getHero.get.isDead
+    false
+  }
 
   override def getCurrentLevelNumber: Int = this.levelNumber
+
+  override def requestStartGame(): Unit = {
+    this.levelNumber = 0
+    this.entitiesContainer.resetScore()
+    this.entitiesContainer.setHeroStatistics(HERO_STATISTICS_DEFAULT)
+    this.requestNewLevel()
+  }
+
+  override def requestNewLevel(): Unit = this.requestedNewLevel = true
+
+  private def newLevel(): Unit = {
+    this.isLevelActive = false
+    this.requestedNewLevel = false
+
+    this.entitiesContainer.setEntities(List.empty)
+
+    this.disposeLevel()
+
+    this.levelNumber += 1
+    this.entitiesContainer.setLevelNumber(this.levelNumber)
+    this.level = Option.apply(new LevelImpl(this, entitiesContainer, this.itemPool))
+
+    if(this.levelNumber > 1)
+      this.loadWorld()
+  }
+
+  override def loadWorld(): Unit = {
+    tileMapHelper.setWorld()
+    this.isLevelActive = true
+    this.entitiesContainer.setLevelReady(true)
+
+    soundManager.startMusic()
+  }
+
+  override def requestLevel(): Unit = {
+    this.controller.handleEvent(GameEvent.StartGame)
+  }
+
+  override def disposeLevel(): Unit = {
+    if(level.nonEmpty) {
+      this.entitiesContainer.setLevelReady(false)
+      this.entitiesContainer.setWorld(Option.empty)
+      this.level = Option.empty
+    }
+  }
 }
