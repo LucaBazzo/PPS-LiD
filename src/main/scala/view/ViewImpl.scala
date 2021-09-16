@@ -7,7 +7,7 @@ import controller.ObserverManager
 import main.LostInDungeons
 import model.helpers.EntitiesGetter
 import utils.ApplicationConstants.{ICON_PATH, TITLE}
-import view.screens.helpers.TileMapHelper
+import view.screens.helpers.TileMapManager
 import view.screens.menu.{GUIFactory, GameScreen}
 
 import java.util.concurrent.{ExecutorService, Executors}
@@ -45,7 +45,7 @@ trait View {
  */
 class ViewImpl(private val entitiesGetter: EntitiesGetter,
                private val observerManager: ObserverManager,
-               private val tileMapHelper: TileMapHelper) extends View {
+               private val tileMapHelper: TileMapManager) extends View {
 
   private val screenSetter: LostInDungeons = new LostInDungeons(this.observerManager)
 

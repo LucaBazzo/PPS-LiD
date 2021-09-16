@@ -14,12 +14,12 @@ import model.entities._
 import model.helpers.{EntitiesGetter, EntitiesUtilities}
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
-import view.screens.helpers.TileMapHelper
+import view.screens.helpers.TileMapManager
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager,
-                 private val tileMapHelper: TileMapHelper) extends ScreenAdapter{
+                 private val tileMapHelper: TileMapManager) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   camera.translate(300f, 300f)

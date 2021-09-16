@@ -4,9 +4,11 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions.RichTuple2
 import model.collisions.{CollisionMonitor, EntityCollisionBit}
+import model.entities.State.State
 import model.entities._
-import model.helpers.EntitiesFactoryImpl
+import model.helpers.{EntitiesFactoryImpl, ItemPools}
 import model.movement.{HeroMovementStrategy, LadderClimbMovementStrategy}
+import utils.ItemConstants._
 
 /** Represent the hero interaction with a certain environment interaction. The hero will start
  *  the interaction when the command given is notified to him
@@ -46,7 +48,11 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
       this.startLadderInteraction()
     else {
       this.restoreNormalMovementStrategy()
-      this.entity.setState(State.Jumping)
+      val state: State = this.entity.getState
+      if(!state.equals(State.Jumping) && !state.equals(State.Somersault))
+        this.entity.setState(State.Falling)
+      else
+        this.entity.setState(State.Jumping)
     }
 
     this.applied = !applied
@@ -85,7 +91,7 @@ class ChestInteraction(private val hero: Hero, private val chest: ImmobileEntity
     chest.changeCollisions(EntityCollisionBit.OpenedDoor)
     val itemPos: (Float, Float) = chest.getPosition
     EntitiesFactoryImpl.addPendingFunction(() =>
-      EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops, (8,8), itemPos.MPP))
+      EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops, DEFAULT_POTION_SIZE, itemPos.MPP))
     hero.setEnvironmentInteraction(Option.empty)
   }
 }

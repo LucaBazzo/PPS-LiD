@@ -4,7 +4,7 @@ import controller.GameEvent.GameEvent
 import controller.{GameEvent, Observer}
 import model.helpers._
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
-import view.screens.helpers.TileMapHelper
+import view.screens.helpers.TileMapManager
 
 trait Model {
 
@@ -27,7 +27,7 @@ trait Model {
 
 class ModelImpl(private val controller: Observer,
                 private val entitiesContainer: EntitiesContainerMonitor,
-                private val tileMapHelper: TileMapHelper) extends Model {
+                private val tileMapHelper: TileMapManager) extends Model {
 
   private var level: Option[Level] = Option.empty
   private val itemPool: ItemPool = new ItemPoolImpl()

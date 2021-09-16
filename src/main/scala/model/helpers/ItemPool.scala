@@ -1,12 +1,16 @@
 package model.helpers
 
 import model.EntityBody
-import model.collisions.EntityCollisionBit
-import model.entities.ItemPools.ItemPools
 import model.entities.Items.Items
 import model.entities._
+import model.helpers.ItemPools.ItemPools
 
 import scala.util.Random
+
+object ItemPools extends Enumeration {
+  type ItemPools = Value
+  val Keys, Enemy_Drops, Default, Boss = Value
+}
 
 trait ItemPool {
   def getItem(entityBody: EntityBody, size: (Float, Float), PoolName: ItemPools): ItemImpl

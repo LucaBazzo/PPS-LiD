@@ -1,6 +1,6 @@
 import model.entities.Items.Items
 import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
+import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl, ItemPools}
 import model.{Level, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 

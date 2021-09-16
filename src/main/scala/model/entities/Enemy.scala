@@ -5,7 +5,7 @@ import model.collisions.ImplicitConversions._
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.Statistic.Statistic
-import model.helpers.EntitiesFactoryImpl
+import model.helpers.{EntitiesFactoryImpl, ItemPools}
 import model.{EnemyBehaviour, EntityBody, Score}
 import utils.EnemiesConstants.{ENEMY_BOSS_TYPES, ENEMY_TYPES}
 

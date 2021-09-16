@@ -6,7 +6,7 @@ import controller.GameEvent.GameEvent
 import model._
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl}
 import view._
-import view.screens.helpers.TileMapHelper
+import view.screens.helpers.TileMapManager
 
 import java.util.concurrent.{ExecutorService, Executors, ScheduledExecutorService, TimeUnit}
 
@@ -33,7 +33,7 @@ class ControllerImpl extends Controller with Observer {
   private val observerManager: ObserverManager = new ObserverManagerImpl()
   this.observerManager.addObserver(this)
 
-  private val tileMapHelper: TileMapHelper = new TileMapHelper
+  private val tileMapHelper: TileMapManager = new TileMapManager
 
   private val view: View = new ViewImpl(entitiesContainer, observerManager, tileMapHelper)
   private val model: Model = new ModelImpl(this, entitiesContainer, tileMapHelper)

@@ -4,6 +4,7 @@ import controller.GameEvent
 import model.entities.{CircularMobileEntity, Entity, Hero, ImmobileEntity, Item, _}
 import model.helpers.EntitiesSetter
 import model.{ChestInteraction, DoorInteraction, HeroInteraction, LadderInteraction, Level, PlatformInteraction}
+import utils.EnvironmentConstants._
 
 import java.util.concurrent.{ExecutorService, Executors}
 
@@ -77,13 +78,13 @@ class BossDoorCollisionStrategy(private val entitySetter: EntitiesSetter,
 class WaterCollisionStrategy() extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
     case h: Hero => println("Hero stands in water")
-      h.alterStatistics(Statistic.MovementSpeed, -0.3f)
+      h.alterStatistics(Statistic.MovementSpeed, -WATER_SPEED_ALTERATION)
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
     case h: Hero => println("Hero out of water")
-      h.alterStatistics(Statistic.MovementSpeed, +0.3f)
+      h.alterStatistics(Statistic.MovementSpeed, +WATER_SPEED_ALTERATION)
     case _ =>
   }
 }
@@ -96,11 +97,11 @@ class LavaCollisionStrategy(private val collisMonitor: CollisionMonitor) extends
       this.executorService = Executors.newSingleThreadExecutor()
       executorService.execute(() => {
         while(collisMonitor.isPlayerInsideLava) {
-          h.sufferDamage(100)
+          h.sufferDamage(LAVA_DAMAGE_PER_TICK)
           if(h.getLife <= 0)
             collisMonitor.playerOutOfLava()
           println("Taken damage from lava")
-          Thread.sleep(1000)
+          Thread.sleep(LAVA_DAMAGE_TICK_RATE)
         }
       })
     case _ =>

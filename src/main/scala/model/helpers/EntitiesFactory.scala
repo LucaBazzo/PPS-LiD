@@ -3,6 +3,8 @@ package model.helpers
 import _root_.utils.ApplicationConstants._
 import _root_.utils.EnemiesConstants._
 import _root_.utils.HeroConstants._
+import _root_.utils.ItemConstants._
+import _root_.utils.EnvironmentConstants._
 import _root_.utils.CollisionConstants._
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
@@ -13,10 +15,10 @@ import model.attack._
 import model.collisions.ImplicitConversions._
 import model.collisions.{EntityCollisionBit, _}
 import model.entities.EntityType.EntityType
-import model.entities.ItemPools.ItemPools
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, Statistic, _}
 import model.helpers.EntitiesUtilities.{isEntityOnTheLeft, isEntityOnTheRight}
+import model.helpers.ItemPools.ItemPools
 import model.movement._
 
 import scala.collection.immutable.HashMap
@@ -53,8 +55,8 @@ trait EntitiesFactory {
   def createWizardBossEnemy(position: (Float, Float)): EnemyImpl
 
   def createItem(PoolName: ItemPools,
-                 size: (Float, Float) = (10f, 10f),
-                 position: (Float, Float) = (0, 0),
+                 size: (Float, Float) = DEFAULT_ITEM_SIZE,
+                 position: (Float, Float) = DEFAULT_ITEM_POSITION,
                  collisions: Short = EntityCollisionBit.Hero): Item
 
   def createPolygonalShape(size: (Float, Float), rounder:Boolean = false): Shape
@@ -67,19 +69,16 @@ trait EntitiesFactory {
                            entityCollisionBit: Short = EntityCollisionBit.Immobile,
                            collisions: Short = 0): Entity
 
-  def createDoor(size: (Float, Float) = (10, 10),
-                 position: (Float, Float) = (0, 0),
+  def createDoor(size: (Float, Float) = DEFAULT_DOOR_SIZE,
+                 position: (Float, Float) = DEFAULT_DOOR_POSITION,
+                 isBossDoor: Boolean = false,
                  collisions: Short = 0): Entity
 
-  def createBossDoor(size: (Float, Float) = (10, 10),
-                 position: (Float, Float) = (0, 0),
-                 collisions: Short = 0): Entity
+  def createChest(size: (Float, Float) = DEFAULT_CHEST_SIZE,
+                  position: (Float, Float) = DEFAULT_CHEST_POSITION): Entity
 
-  def createChest(size: (Float, Float) = (70, 70),
-                  position: (Float, Float) = (0,0)): Entity
-
-  def createPortal(size: (Float, Float) = (10,30),
-                   position: (Float, Float) = (0,0)): Entity
+  def createPortal(size: (Float, Float) = DEFAULT_PORTAL_SIZE,
+                   position: (Float, Float) = DEFAULT_PORTAL_POSITION): Entity
 
   def createPlatform(position: (Float, Float),
                      size: (Float, Float)): Entity
@@ -244,10 +243,14 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     immobileEntity.setCollisionStrategy(DoNothingOnCollision())
     this.entitiesContainer.addEntity(immobileEntity)
 
-    createPlatformSensor(size, position, immobileEntity, sizeXOffset = -2f, sizeYOffset = -size._2, positionYOffset = size._2 + 1f, isTopSensor = true)
-    createPlatformSensor(size, position, immobileEntity, sizeXOffset = -2f, sizeYOffset = -size._2, positionYOffset = - size._2 - 5f)
-    createPlatformSensor(size, position, immobileEntity, sizeXOffset = -size._1, sizeYOffset = 1, positionXOffset = +size._1 + 2f, positionYOffset = -2)
-    createPlatformSensor(size, position, immobileEntity, sizeXOffset = -size._1, sizeYOffset = 1, positionXOffset = -size._1 - 2f, positionYOffset = -2)
+    createPlatformSensor(size, position, immobileEntity, sizeXOffset = PLATFORM_SENSOR_SIZE_X_OFFSET,
+      sizeYOffset = -size._2, positionYOffset = size._2 + UPPER_PLATFORM_SENSOR_POSITION_Y_OFFSET, isTopSensor = true)
+    createPlatformSensor(size, position, immobileEntity, sizeXOffset = PLATFORM_SENSOR_SIZE_X_OFFSET,
+      sizeYOffset = -size._2, positionYOffset = - size._2 + LOWER_PLATFORM_SENSOR_POSITION_Y_OFFSET)
+    createPlatformSensor(size, position, immobileEntity, sizeXOffset = -size._1,
+      sizeYOffset = 1, positionXOffset = +size._1 + SIDE_PLATFORM_SENSOR_POSITION_X_OFFSET, positionYOffset = SIDE_PLATFORM_SENSOR_POSITION_Y_OFFSET)
+    createPlatformSensor(size, position, immobileEntity, sizeXOffset = -size._1,
+      sizeYOffset = 1, positionXOffset = -size._1 - SIDE_PLATFORM_SENSOR_POSITION_X_OFFSET, positionYOffset = SIDE_PLATFORM_SENSOR_POSITION_X_OFFSET)
 
     immobileEntity
   }
@@ -264,10 +267,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
 
     val sensorEntity: ImmobileEntity = ImmobileEntity(EntityType.PlatformSensor, sensorBody, realSize.PPM)
 
-    sensorEntity.setCollisionStrategy(if(isTopSensor)
+    val collisionStrategy: CollisionStrategy = if(isTopSensor)
       new UpperPlatformCollisionStrategy(mainPlatform, this.collisionMonitor)
-        else
-      new LowerPlatformCollisionStrategy(mainPlatform, this.collisionMonitor))
+    else
+      new LowerPlatformCollisionStrategy(mainPlatform, this.collisionMonitor)
+
+    sensorEntity.setCollisionStrategy(collisionStrategy)
 
     this.entitiesContainer.addEntity(sensorEntity)
 
@@ -503,44 +508,29 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     (door, leftSensor, rightSensor)
   }
 
-  override def createDoor(size: (Float, Float) = (10, 10),
-                          position: (Float, Float) = (0, 0),
+  override def createDoor(size: (Float, Float),
+                          position: (Float, Float),
+                          isBossDoor: Boolean,
                           collisions: Short = 0): Entity = {
 
     val doors = createDoorWithSensors(size, position)
 
-    doors._1.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesContainer, doors._1, doors._2, doors._3))
+    val collisionStrategy: CollisionStrategy = if(isBossDoor)
+      new BossDoorCollisionStrategy(this.entitiesContainer, doors._1, doors._2, doors._3)
+    else
+      new DoorCollisionStrategy(this.entitiesContainer, doors._1, doors._2, doors._3)
 
-    doors._2.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesContainer, doors._1, doors._2, doors._3))
+    doors._1.setCollisionStrategy(collisionStrategy)
 
-    doors._3.setCollisionStrategy(new DoorCollisionStrategy(this.entitiesContainer, doors._1, doors._2, doors._3))
+    doors._2.setCollisionStrategy(collisionStrategy)
+
+    doors._3.setCollisionStrategy(collisionStrategy)
 
     this.entitiesContainer.addEntity(doors._1)
 
     this.entitiesContainer.addEntity(doors._2)
 
     this.entitiesContainer.addEntity(doors._3)
-    doors._1
-  }
-
-  override def createBossDoor(size: (Float, Float) = (10, 10),
-                          position: (Float, Float) = (0, 0),
-                          collisions: Short = 0): Entity = {
-
-    val doors = createDoorWithSensors(size, position)
-
-    doors._1.setCollisionStrategy(new BossDoorCollisionStrategy(this.entitiesContainer, doors._1, doors._2, doors._3))
-
-    doors._2.setCollisionStrategy(new BossDoorCollisionStrategy(this.entitiesContainer, doors._1, doors._2, doors._3))
-
-    doors._3.setCollisionStrategy(new BossDoorCollisionStrategy(this.entitiesContainer, doors._1, doors._2, doors._3))
-
-    this.entitiesContainer.addEntity(doors._1)
-
-    this.entitiesContainer.addEntity(doors._2)
-
-    this.entitiesContainer.addEntity(doors._3)
-
     doors._1
   }
 
