@@ -22,13 +22,13 @@ class TestItem extends AnyFlatSpec {
 
   "In a Level" should "spawn items from every pool" in {
     val monitor: EntitiesContainerMonitor = this.initialize()
-    Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor())
+    Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
-    Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor())
+    Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     val item2: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
-    Item(ItemPools.Keys, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor())
+    Item(ItemPools.Keys, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     val item3: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
-    Item(ItemPools.Enemy_Drops, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor())
+    Item(ItemPools.Enemy_Drops, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     val item4: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
     assert(DEFAULT_ITEMS.contains(item.getName) && BOSS_ITEMS.contains(item2.getName)
       && MAP_ITEMS.contains(item3.getName) && ENEMY_ITEMS.contains(item4.getName))
@@ -36,7 +36,7 @@ class TestItem extends AnyFlatSpec {
 
   "An Item" should "disappear when picked up" in {
     val monitor: EntitiesContainerMonitor = this.initialize()
-    Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor())
+    Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     for(item <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
       item.asInstanceOf[Item].collect()
 
@@ -48,7 +48,7 @@ class TestItem extends AnyFlatSpec {
   "An Item" should "grant stats when picked up" in {
     val monitor: EntitiesContainerMonitor = this.initialize()
     for (_ <- List.range(0, DEFAULT_ITEMS.length)) {
-      Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor())
+      Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
       val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
       val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
       val effect = item.collect()
@@ -68,7 +68,7 @@ class TestItem extends AnyFlatSpec {
   "A Potion" should "heal the damaged Hero" in {
     val monitor: EntitiesContainerMonitor = this.initialize()
     for (_ <- List.range(0, ENEMY_ITEMS.length)) {
-      Item(ItemPools.Enemy_Drops, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor())
+      Item(ItemPools.Enemy_Drops, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
       val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
       val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
       hero.sufferDamage(999)
@@ -85,7 +85,7 @@ class TestItem extends AnyFlatSpec {
     var itemList2: List[Items] = List()
     for(_ <- List.range(0, DEFAULT_ITEMS.length))
     {
-      Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor())
+      Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     }
     itemList1 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
     for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
@@ -93,7 +93,7 @@ class TestItem extends AnyFlatSpec {
 
     for(_ <- List.range(0, BOSS_ITEMS.length))
     {
-      Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor())
+      Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     }
     itemList2 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
     for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
@@ -110,7 +110,7 @@ class TestItem extends AnyFlatSpec {
 
     for(_ <- List.range(0, DEFAULT_ITEMS.length + 2))
     {
-      Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor())
+      Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     }
     itemList1 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
     for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
@@ -118,7 +118,7 @@ class TestItem extends AnyFlatSpec {
 
     for(_ <- List.range(0, BOSS_ITEMS.length + 2))
     {
-      Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor())
+      Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     }
     itemList2 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
     for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)

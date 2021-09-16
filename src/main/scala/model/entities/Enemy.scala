@@ -58,16 +58,16 @@ class EnemyImpl(private val entityType: EntityType,
 
     if (ENEMY_TYPES.contains(this.entityType)) {
       if(rand.nextInt(10) <= 2)
-      Item(ItemPools.Enemy_Drops, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor(),
+      Item(ItemPools.Enemy_Drops, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor,
         position=(this.getPosition._1, this.getPosition._2).MPP)
     }
 
     if (ENEMY_BOSS_TYPES.contains(this.getType)) {
       if (this.heroEntity.getItemsPicked.contains((i:Items) => i == Items.Bow)) {
-        Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor(),
+        Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor,
           position=(this.getPosition._1, this.getPosition._2).MPP)
       } else
-        Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool(), EntitiesFactoryImpl.getEntitiesContainerMonitor(),
+        Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor,
           position=(this.getPosition._1, this.getPosition._2).MPP)
     }
   }

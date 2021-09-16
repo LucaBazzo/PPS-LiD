@@ -95,11 +95,11 @@ class TileMapManager {
           case "chest" =>
             if(mapName!=null && (mapName.equalsIgnoreCase(TOP_KEY_ITEM_ROOM_NAME) || mapName.equalsIgnoreCase(BOTTOM_KEY_ITEM_ROOM_NAME)))
               if (mapName.contains(keyLocation))
-                spawnEntity(() => Item(ItemPools.Keys, EntitiesFactoryImpl.getItemPool(),
-                  EntitiesFactoryImpl.getEntitiesContainerMonitor(), size, position))
+                spawnEntity(() => Item(ItemPools.Keys, EntitiesFactoryImpl.getItemPool,
+                  EntitiesFactoryImpl.getEntitiesContainerMonitor, size, position))
               else
-                spawnEntity(() => Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool(),
-                  EntitiesFactoryImpl.getEntitiesContainerMonitor(), size, position))
+                spawnEntity(() => Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool,
+                  EntitiesFactoryImpl.getEntitiesContainerMonitor, size, position))
             else spawnEntity(() => EntitiesFactoryImpl.createChest(size, position))
           case "ladder" => spawnEntity(() => EntitiesFactoryImpl.createLadder(position, size))
           case "water" => spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position,size))
