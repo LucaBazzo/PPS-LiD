@@ -22,10 +22,6 @@ object HeroConstants {
 
   val HERO_FRICTION: Float = 1.2f
 
-  val CROUCH_OFFSET: (Float, Float) = (0f, -30f)
-  val CROUCH_END_OFFSET: (Float, Float) = (0f, 6f)
-  val SLIDE_OFFSET: (Float, Float) = (0f, -30f)
-
   val RUN_VELOCITY: Float = 60f.PPM
   val JUMP_VELOCITY: Float = 175f.PPM
   val SLIDE_VELOCITY: Float = 200f.PPM
@@ -66,6 +62,7 @@ object HeroConstants {
   val BOW_ATTACK_DURATION: Int = 175
   val BOW_ATTACK_STARTING_TIME: Int = 20
   val ARROW_SIZE: (Float, Float) = (8, 1)
+  val ARROW_VELOCITY: Float = 240
 
   val AIR_SWORD_ATTACK_SIZE: (Float, Float) = (12f, 3f)
   val AIR_SWORD_ATTACK_OFFSET: (Float, Float) = (0, -10f)

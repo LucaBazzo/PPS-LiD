@@ -3,13 +3,18 @@ package model.entities
 import model.EntityBody
 import model.attack.{AttackStrategy, DoNothingAttackStrategy}
 import model.entities.EntityType.EntityType
+import model.entities.State._
 import model.entities.Statistic.Statistic
 
 trait LivingEntity extends MobileEntity {
 
   def healLife(heal: Float)
+
   def sufferDamage(damage: Float)
-  def getLife: Float
+
+  def getLife: Float = if(this.getStatistic(Statistic.CurrentHealth).nonEmpty)
+    this.getStatistic(Statistic.CurrentHealth).get else 0
+
   def setAttackStrategy(strategy: AttackStrategy)
 }
 
@@ -25,7 +30,7 @@ class LivingEntityImpl(private val entityType: EntityType,
   protected val dyingStateDuration:Long = 1000
 
   override def update(): Unit = {
-    if (this.state == State.Dying) {
+    if (this is Dying) {
       if (dyingStateTimer == 0) {
         this.dyingStateTimer = System.currentTimeMillis()
       } else if (System.currentTimeMillis() - dyingStateTimer > dyingStateDuration) {
@@ -64,8 +69,6 @@ class LivingEntityImpl(private val entityType: EntityType,
       }
     }
   }
-
-  override def getLife: Float = this.getStatistic(Statistic.CurrentHealth).get
 
   override def setAttackStrategy(strategy: AttackStrategy): Unit = this.attackStrategy = strategy
 

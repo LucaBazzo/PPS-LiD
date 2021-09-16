@@ -1,10 +1,11 @@
 import controller.GameEvent._
 import model.LevelImpl
+import model.entities.State._
 import model.entities.Statistic._
 import model.entities._
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
-import utils.HeroConstants.JUMP_VELOCITY
+import utils.HeroConstants._
 
 class TestHero extends AnyFlatSpec{
 
@@ -130,6 +131,117 @@ class TestHero extends AnyFlatSpec{
     assert(statistics equals hero.getStatistics)
   }
 
+  "A hero" should "suffer damage when is not sliding" in {
+    initialize()
+
+    assert(hero.getStatistic(Health).nonEmpty)
+    val health: Float = hero.getStatistic(Health).get
+
+    hero.sufferDamage(health / 2)
+    assertResult(health / 2)(hero.getStatistic(CurrentHealth).get)
+    assert(hero is Hurt)
+
+    hero.setState(LadderClimbing)
+    hero.sufferDamage(health / 4)
+    assertResult(health / 4)(hero.getStatistic(CurrentHealth).get)
+    assert(hero is Hurt)
+
+    hero.setState(Sliding)
+    hero.sufferDamage(1000)
+    assertResult(health / 4)(hero.getStatistic(CurrentHealth).get)
+    assert(hero is Sliding)
+
+    hero.setState(Standing)
+    hero.sufferDamage(health)
+    assertResult(0)(hero.getStatistic(CurrentHealth).get)
+    assert(hero is Dying)
+  }
+
+  "A hero" should "perform 3 types of normal sword attacks" in {
+    initialize()
+
+    hero.setState(Sliding)
+    hero.notifyCommand(Attack)
+    assert(hero is Sliding)
+
+    hero.setState(Running)
+    hero.notifyCommand(Attack)
+    assert(hero is Attack01)
+
+    val countFirstAttack: Int =
+      (FIRST_SWORD_ATTACK_DURATION - WAIT_FOR_ANOTHER_CONSECUTIVE_ATTACK) / ATTACK_STRATEGY_TIMER_DECREMENT + 1
+
+    for(_ <- 0 to countFirstAttack)
+      hero.update()
+
+    hero.notifyCommand(Attack)
+    assert(hero is Attack02)
+
+    val countSecondAttack: Int =
+      (SECOND_SWORD_ATTACK_DURATION - WAIT_FOR_ANOTHER_CONSECUTIVE_ATTACK) / ATTACK_STRATEGY_TIMER_DECREMENT + 1
+
+    for(_ <- 0 to countSecondAttack)
+      hero.update()
+
+    hero.notifyCommand(Attack)
+    assert(hero is Attack03)
+
+    val finishThirdAttack: Int = THIRD_SWORD_ATTACK_DURATION / ATTACK_STRATEGY_TIMER_DECREMENT + 1
+
+    for(_ <- 0 to finishThirdAttack)
+      hero.update()
+
+    assert(hero is Standing)
+  }
+
+  "A hero" should "perform an air attack" in {
+    initialize()
+
+    hero.setState(Jumping)
+    hero.notifyCommand(Attack)
+    assert(hero is AirDownAttacking)
+
+    hero.update()
+
+    hero.getFeet.get.collisionDetected(Option.apply(EntitiesFactoryImpl.createImmobileEntity()))
+    hero.setVelocityY(0)
+    hero.update()
+
+    assert(hero.isTouchingGround)
+    assert(hero is AirDownAttackingEnd)
+
+    val finishAirAttack: Int = LONG_WAIT_TIME / WAIT_TIME_DECREMENT + 1
+
+    for(_ <- 0 to finishAirAttack)
+      hero.update()
+
+    assert(hero is Standing)
+  }
+
+  "A hero" should "perform a bow attack if he has a bow" in {
+    initialize()
+
+    hero.notifyCommand(BowAttack)
+    assert(hero is Standing)
+
+    hero.itemPicked(Items.Bow)
+    assert(hero.isItemPicked(Items.Bow))
+
+    val finishPick: Int = LONG_WAIT_TIME / WAIT_TIME_DECREMENT + 1
+
+    for(_ <- 0 to finishPick)
+      hero.update()
+
+    hero.notifyCommand(BowAttack)
+    assert(hero is BowAttacking)
+
+    val finishBowAttack: Int = BOW_ATTACK_DURATION / ATTACK_STRATEGY_TIMER_DECREMENT + 1
+
+    for(_ <- 0 to finishBowAttack)
+      hero.update()
+
+    assert(hero is Standing)
+  }
 
 }
 
