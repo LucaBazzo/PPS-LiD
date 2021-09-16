@@ -223,10 +223,10 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val bodyPosition = hero.getPosition - (0, hero.getSize._2)
     val feetBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Hero,
       HERO_FEET_COLLISIONS, createPolygonalShape(feetSize.PPM, rounder = true),
-      bodyPosition, gravityScale = 0, friction = 1.2f)
+      bodyPosition, gravityScale = 0, friction = 1.2f, isSensor = true)
     this.createJoint(hero.getBody, feetBody.getBody)
 
-    val heroFeet: MobileEntity = new MobileEntityImpl(EntityType.Mobile, feetBody, feetSize.PPM)
+    val heroFeet: MobileEntity = new MobileEntityImpl(EntityType.HeroFeet, feetBody, feetSize.PPM)
     heroFeet.setCollisionStrategy(DoNothingOnCollision())
 
     hero.setFeet(heroFeet)
@@ -250,7 +250,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     createPlatformSensor(size, position, immobileEntity, sizeXOffset = -size._1,
       sizeYOffset = 1, positionXOffset = +size._1 + SIDE_PLATFORM_SENSOR_POSITION_X_OFFSET, positionYOffset = SIDE_PLATFORM_SENSOR_POSITION_Y_OFFSET)
     createPlatformSensor(size, position, immobileEntity, sizeXOffset = -size._1,
-      sizeYOffset = 1, positionXOffset = -size._1 - SIDE_PLATFORM_SENSOR_POSITION_X_OFFSET, positionYOffset = SIDE_PLATFORM_SENSOR_POSITION_X_OFFSET)
+      sizeYOffset = 1, positionXOffset = -size._1 - SIDE_PLATFORM_SENSOR_POSITION_X_OFFSET, positionYOffset = SIDE_PLATFORM_SENSOR_POSITION_Y_OFFSET)
 
     immobileEntity
   }

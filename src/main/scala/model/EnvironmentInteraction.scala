@@ -50,9 +50,9 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
       this.restoreNormalMovementStrategy()
       val state: State = this.entity.getState
       if(!state.equals(State.Jumping) && !state.equals(State.Somersault))
-        this.entity.setState(State.Falling)
-      else
         this.entity.setState(State.Jumping)
+      else
+        this.entity.setState(State.Falling)
     }
 
     this.applied = !applied

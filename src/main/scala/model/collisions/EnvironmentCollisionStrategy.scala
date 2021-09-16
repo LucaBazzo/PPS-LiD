@@ -126,12 +126,14 @@ class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
   }
 
   override def release(entity: Entity): Unit = entity match {
-    case _: Hero => println("Hero leaving Platform")
+    case h: Hero => println("Hero leaving Platform")
       if(! this.monitor.isPlayerTouchingPlatformEdges) {
         platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
         println("Enabled platform collisions")
       }
       this.monitor.playerQuitPlatform()
+      if(! monitor.isPlayerOnLadder)
+        h.setEnvironmentInteraction(Option.empty)
     case _ =>
   }
 }
@@ -139,7 +141,7 @@ class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
 class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
                                      private val monitor: CollisionMonitor) extends DoNothingOnCollision {
   override def apply(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero touching lower Platform")
+    case _: Hero => println("Hero touching lower Platform")
       this.monitor.playerTouchesPlatformEdge()
       platform.changeCollisions(EntityCollisionBit.Enemy)
     case _ =>
@@ -147,13 +149,19 @@ class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
 
   override def release(entity: Entity): Unit = entity match {
     case _: Hero => println("Hero leaving Platform")
-      if(! this.monitor.isPlayerTouchingPlatformEdges) {
-        platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        println("Enabled platform collisions")
-      }
-      this.monitor.playerQuitPlatform()
-    case _ =>
+      this.platformReleaseCollision()
+    case e: MobileEntity => if(e.getType.equals(EntityType.HeroFeet)) this.platformReleaseCollision()
+
   }
+
+  private def platformReleaseCollision(): Unit = {
+    if(! this.monitor.isPlayerTouchingPlatformEdges) {
+      platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
+      println("Enabled platform collisions")
+    }
+    this.monitor.playerQuitPlatform()
+  }
+
 }
 
 class ChestCollisionStrategy(private val entitiesSetter: EntitiesSetter,
@@ -199,7 +207,8 @@ class LadderCollisionStrategy(private val monitor: CollisionMonitor) extends Col
     case h:Hero => print("Hero leaving ladder" + "\n")
       monitor.playerQuitLadder()
       h.setState(State.Jumping)
-      h.setEnvironmentInteraction(Option.empty)
+      if(! monitor.isPlayerTouchingPlatformEdges)
+        h.setEnvironmentInteraction(Option.empty)
     case _ =>
   }
 }
