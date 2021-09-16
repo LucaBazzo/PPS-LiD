@@ -8,6 +8,8 @@ import model.entities.Statistic.Statistic
 object EnemiesConstants {
 
   val ENEMIES_SPAWN_RATIO = 25 // spawn zone width / ENEMIES_SPAWN_RATIO
+  val ENEMIES_ACTIVATION_DISTANCE: Float = 300.PPM
+
 
   val ENEMY_TYPES: List[EntityType] =
     List(EntityType.EnemySkeleton, EntityType.EnemyWorm, EntityType.EnemySlime)
@@ -105,6 +107,6 @@ object EnemiesConstants {
   val WORM_SIZE: (Float, Float) = (19f, 11f)
   val WORM_SCORE: Int = 100
   val WORM_FIREBALL_ATTACK_OFFSET: (Float, Float) = (10f, 10f)
-  val WORM_FIREBALL_ATTACK_SIZE = (7f, 7f)
+  val WORM_FIREBALL_ATTACK_SIZE: (Float, Float) = (7f, 7f)
 
 }
