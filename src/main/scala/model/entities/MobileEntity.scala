@@ -121,7 +121,7 @@ object MobileEntity {
       collisions, createPolygonalShape(size.PPM), position.PPM, gravityScale = gravityScale)
 
     val mobileEntity: MobileEntity = new MobileEntityImpl(entityType, entityBody, size.PPM, stats)
-    EntitiesFactoryImpl.addEntity(mobileEntity)
+    addEntity(mobileEntity)
     mobileEntity
   }
 

@@ -9,15 +9,12 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef
 import model._
-import model.attack._
-import model.behaviour.RichPredicates._
-import model.behaviour.{EnemyBehaviours, EnemyBehavioursImpl, NotPredicate, RandomTruePredicate}
 import model.collisions.ImplicitConversions._
 import model.collisions.{EntityCollisionBit, _}
 import model.entities.EntityType.EntityType
-import model.entities.Statistic.Statistic
+import model.entities.LivingEntity.{createSkeletonEnemy, createSlimeEnemy, createWizardBossEnemy, createWormEnemy}
 import model.entities.{Entity, _}
-import model.helpers.EntitiesUtilities.{getEntitiesDistance, isEntityOnTheLeft, isEntityOnTheRight}
+import model.helpers.EntitiesUtilities.{isEntityOnTheLeft, isEntityOnTheRight}
 import model.movement._
 
 trait EntitiesFactory {
@@ -29,21 +26,6 @@ trait EntitiesFactory {
   def getItemPool: ItemPool
 
   def setLevel(level: Level, pool: ItemPool): Unit
-
-  def createEnemyEntity(position: (Float, Float),
-                        size: (Float, Float),
-                        stats: Map[Statistic, Float],
-                        statsModifiers: Map[Statistic, Float],
-                        score: Int,
-                        entityId: EntityType): EnemyImpl
-
-  def createSlimeEnemy(position: (Float, Float)): EnemyImpl
-
-  def createSkeletonEnemy(position: (Float, Float)): EnemyImpl
-
-  def createWormEnemy(position: (Float, Float)): EnemyImpl
-
-  def createWizardBossEnemy(position: (Float, Float)): EnemyImpl
 
   def createPolygonalShape(size: (Float, Float), rounder:Boolean = false): Shape
 
@@ -210,104 +192,6 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     immobileEntity
   }
 
-  override def createSkeletonEnemy(position: (Float, Float)): EnemyImpl = {
-    val enemy:EnemyImpl = createEnemyEntity(position, SKELETON_SIZE,
-      SKELETON_STATS, STATS_MODIFIER, SKELETON_SCORE, EntityType.EnemySkeleton)
-
-    val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
-    behaviours.addBehaviour((DoNothingCollisionStrategy(),
-      EnemyMovementStrategy(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero])),
-      new SkeletonAttack(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero]))))
-    enemy.setBehaviour(behaviours)
-    enemy
-  }
-
-  override def createSlimeEnemy(position: (Float, Float)): EnemyImpl = {
-    // easter egg: a slime could rarely be displayed as Pacman with a 5% chance
-    val enemyType =  if (RANDOM.nextInt(100) <= 5) EntityType.EnemyPacman else EntityType.EnemySlime
-
-    val enemy:EnemyImpl = createEnemyEntity(position,
-      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, SLIME_SCORE, enemyType)
-
-    val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
-    behaviours.addBehaviour((DoNothingCollisionStrategy(),
-      EnemyMovementStrategy(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero])),
-      new SlimeAttack(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero]))))
-    enemy.setBehaviour(behaviours)
-    enemy
-  }
-
-  override def createWormEnemy(position: (Float, Float)): EnemyImpl = {
-    val enemy:EnemyImpl = createEnemyEntity(position, WORM_SIZE,
-      WORM_STATS, STATS_MODIFIER, WORM_SCORE, EntityType.EnemyWorm)
-
-    val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
-    behaviours.addBehaviour((DoNothingCollisionStrategy(),
-      EnemyMovementStrategy(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero])),
-      new WormFireballAttack(enemy, this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero]))))
-    enemy.setBehaviour(behaviours)
-    enemy
-  }
-
-  override def createWizardBossEnemy(position: (Float, Float)): EnemyImpl = {
-    val enemy:EnemyImpl = createEnemyEntity(position, WIZARD_BOSS_SIZE, WIZARD_BOSS_STATS, STATS_MODIFIER,
-      WIZARD_BOSS_SCORE, EntityType.EnemyBossWizard)
-    val targetEntity:Entity = this.entitiesContainer.getEntity(e => e.isInstanceOf[Hero])
-
-    val behaviours:EnemyBehaviours = new EnemyBehavioursImpl()
-
-    // first behaviour - do nothing for some time
-    val b1 = behaviours.addBehaviour((DoNothingCollisionStrategy(), DoNothingMovementStrategy(), DoNothingAttackStrategy()))
-
-    // second behaviour - attack hero if near
-    val p2AttackStrategy = new WizardFirstAttack(enemy, targetEntity)
-    val b2 = behaviours.addBehaviour((DoNothingCollisionStrategy(), ChaseTarget(enemy, targetEntity), p2AttackStrategy))
-
-    // third behaviour - attack hero if near (with another attack)
-    val p3AttackStrategy = new WizardSecondAttack(enemy, targetEntity)
-    val b3 = behaviours.addBehaviour((DoNothingCollisionStrategy(), ChaseTarget(enemy, targetEntity), p3AttackStrategy))
-
-    // fourth behaviour - attack hero with ranged attacks
-    val p4AttackStrategy = new WizardEnergyBallAttack(enemy, targetEntity)
-    val b4 = behaviours.addBehaviour((DoNothingCollisionStrategy(), FaceTarget(enemy, targetEntity), p4AttackStrategy))
-
-    // add conditional transitions between behaviours
-    behaviours.addTransition(b1, b2, () => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM)
-    behaviours.addTransition(b1, b3, () => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM)
-
-    behaviours.addTransition(b2, b3, RandomTruePredicate(0.5f))
-    behaviours.addTransition(b2, b4, NotPredicate(() => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM))
-
-    behaviours.addTransition(b3, b2, RandomTruePredicate(0.5f))
-    behaviours.addTransition(b3, b4, NotPredicate(() => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM))
-
-    behaviours.addTransition(b4, b2, () => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM)
-    behaviours.addTransition(b4, b3, () => getEntitiesDistance(enemy, targetEntity) <= 100f.PPM)
-
-    enemy.setBehaviour(behaviours)
-    enemy
-  }
-
-  override def createEnemyEntity(position: (Float, Float),
-                                 size: (Float, Float),
-                                 stats: Map[Statistic, Float],
-                                 statsModifiers: Map[Statistic, Float],
-                                 score: Int,
-                                 entityId: EntityType): EnemyImpl = {
-
-    val spawnPoint = (position._1, position._2+size._2)
-    val levelBasedStats =
-      stats.map {case (key, value) => (key, value + this.entitiesContainer.getLevelNumber * statsModifiers.getOrElse(key, 0f))}
-
-    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
-      ENEMY_COLLISIONS, createPolygonalShape(size.PPM, rounder = true), spawnPoint.PPM)
-
-    val heroEntity: Hero = this.entitiesContainer.getHero.get
-
-    val enemy:EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, levelBasedStats, score, heroEntity)
-    this.entitiesContainer.addEntity(enemy)
-    enemy
-  }
 
   override def createPolygonalShape(size: (Float, Float), rounder:Boolean = false): Shape = {
     val shape: PolygonShape = new PolygonShape()
@@ -347,15 +231,15 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def spawnEnemy(size: (Float, Float) = (10, 10),
                           position: (Float, Float) = (0, 0)): Unit =  {
     RANDOM.shuffle(ENEMY_TYPES).head match {
-      case EntityType.EnemySkeleton => this.createSkeletonEnemy((position.x, position.y))
-      case EntityType.EnemyWorm => this.createWormEnemy((position.x, position.y))
-      case EntityType.EnemySlime => this.createSlimeEnemy((position.x, position.y))
+      case EntityType.EnemySkeleton => createSkeletonEnemy((position.x, position.y))
+      case EntityType.EnemyWorm => createWormEnemy((position.x, position.y))
+      case EntityType.EnemySlime => createSlimeEnemy((position.x, position.y))
     }
   }
 
   override def spawnBoss(spawnZoneSize: (Float, Float) = (10, 10),
                          spawnZonePosition: (Float, Float) = (0, 0)): Unit =  {
-    this.createWizardBossEnemy(spawnZonePosition)
+    createWizardBossEnemy(spawnZonePosition)
   }
 
   private def createDoorWithSensors(size: (Float, Float),
