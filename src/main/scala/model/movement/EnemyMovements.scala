@@ -38,9 +38,7 @@ case class MovingMovementStrategy(sourceEntity: MobileEntity,
     }
   }
 
-  override def stopMovement(): Unit = {
-    this.sourceEntity.setVelocityX(0)
-  }
+  override def stopMovement(): Unit = this.sourceEntity.setVelocityX(0)
 
   override def onBegin(): Unit = {
     this.stopMovement()

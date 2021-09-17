@@ -52,4 +52,12 @@ abstract class MovementStrategyImpl extends MovementStrategy {
 /** Movement strategy that does nothing.
  *
  */
-case class DoNothingMovementStrategy() extends MovementStrategyImpl {}
+case class DoNothingMovementStrategy() extends MovementStrategyImpl {
+  override def onBegin(): Unit = {
+    this.stopMovement()
+  }
+
+  override def stopMovement(): Unit = {
+
+  }
+}

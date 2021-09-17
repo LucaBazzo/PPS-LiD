@@ -85,12 +85,13 @@ object EnemiesConstants {
 
   val WIZARD_BOSS_SIZE: (Float, Float) = (13f, 25f)
   val WIZARD_BOSS_SCORE: Int = 1000
-  val WIZARD_BOSS_ATTACK1_SIZE: (Float, Float) = (40, 30)
-  val WIZARD_BOSS_ATTACK1_OFFSET: (Float, Float) = (25, 10)
-  val WIZARD_BOSS_ATTACK2_SIZE: (Float, Float) = (30, 40)
-  val WIZARD_BOSS_ATTACK2_OFFSET: (Float, Float) = (35, 12)
+  val WIZARD_BOSS_ATTACK1_SIZE: (Float, Float) = (40, 50)
+  val WIZARD_BOSS_ATTACK1_OFFSET: (Float, Float) = (55, 30)
+  val WIZARD_BOSS_ATTACK2_SIZE: (Float, Float) = (50, 60)
+  val WIZARD_BOSS_ATTACK2_OFFSET: (Float, Float) = (60, 25)
   val WIZARD_BOSS_ATTACK3_SIZE: (Float, Float) = (10, 10)
   val WIZARD_BOSS_ATTACK3_OFFSET: (Float, Float) = (13, 25)
+  val WIZARD_BOSS_ATTACK3_DISTANCE: Float = 100
 
   val SLIME_SIZE: (Float, Float) = (23f, 12f)
   val SLIME_SCORE: Int = 100
