@@ -1,8 +1,5 @@
 package model.behaviour
 
-import model.attack.AttackStrategy
-import model.collisions.CollisionStrategy
-import model.movement.MovementStrategy
 import utils.ApplicationConstants.RANDOM
 
 trait Behaviours {
@@ -47,9 +44,8 @@ abstract class BehavioursImpl() extends Behaviours {
   override def update: Unit = {
     if (currentBehaviour.isDefined) {
 
-      val temp = this.getCurrentTransitions
       val activeTransitions: Map[(Behaviour, Behaviour), Predicate] =
-        temp.filter(t => t._2.apply())
+        this.getCurrentTransitions.filter(t => t._2.apply())
 
       if (activeTransitions.nonEmpty) {
         val pickedTransition: ((Behaviour, Behaviour), Predicate) =
@@ -75,42 +71,6 @@ abstract class BehavioursImpl() extends Behaviours {
   def onBehaviourBegin(): Unit
 
   def onBehaviourEnd(): Unit
-}
-
-trait EnemyBehaviours extends BehavioursImpl {
-  override type Behaviour = (CollisionStrategy, MovementStrategy, AttackStrategy)
-
-  def getCollisionStrategy: CollisionStrategy
-  def getMovementStrategy: MovementStrategy
-  def getAttackStrategy: AttackStrategy
-}
-
-class EnemyBehavioursImpl extends EnemyBehaviours {
-  override def getCollisionStrategy: CollisionStrategy = this.getCurrentBehaviour._1
-
-  override def getMovementStrategy: MovementStrategy = this.getCurrentBehaviour._2
-
-  override def getAttackStrategy: AttackStrategy = this.getCurrentBehaviour._3
-
-  override def onBehaviourBegin(): Unit = { }
-
-  override def onBehaviourEnd(): Unit = { }
-}
-
-trait MovementBehaviours extends BehavioursImpl {
-  override type Behaviour = MovementStrategy
-
-  def getMovementStrategy: MovementStrategy
-}
-
-class MovementBehavioursImpl extends MovementBehaviours {
-  override type Behaviour = MovementStrategy
-
-  override def getMovementStrategy: MovementStrategy = this.getCurrentBehaviour
-
-  override def onBehaviourBegin(): Unit = this.getMovementStrategy.onBegin()
-
-  override def onBehaviourEnd(): Unit = this.getMovementStrategy.onEnd()
 }
 
 

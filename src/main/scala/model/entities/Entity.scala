@@ -116,7 +116,6 @@ abstract class EntityImpl(private val entityType: EntityType,
   }
 }
 
-// TODO: remove ImmobileEntity?
 case class ImmobileEntity(private var entityType: EntityType,
                           private var entityBody: EntityBody,
                           private val size: (Float, Float))

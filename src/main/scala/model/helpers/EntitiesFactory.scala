@@ -11,8 +11,8 @@ import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef
 import model._
 import model.collisions.ImplicitConversions._
 import model.collisions.{EntityCollisionBit, _}
+import model.entities.Enemy.{createSkeletonEnemy, createSlimeEnemy, createWizardBossEnemy, createWormEnemy}
 import model.entities.EntityType.EntityType
-import model.entities.LivingEntity.{createSkeletonEnemy, createSlimeEnemy, createWizardBossEnemy, createWormEnemy}
 import model.entities.{Entity, _}
 
 trait EntitiesFactory {
