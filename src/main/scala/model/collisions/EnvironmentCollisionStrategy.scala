@@ -272,7 +272,6 @@ case class LadderCollisionStrategy(private val monitor: CollisionMonitor) extend
   override def release(entity: Entity): Unit = entity match {
     case h:Hero => print("Hero leaving ladder" + "\n")
       monitor.playerQuitLadder()
-      h.setState(State.Jumping)
       if(! monitor.isPlayerTouchingPlatformEdges)
         h.setEnvironmentInteraction(Option.empty)
     case _ =>

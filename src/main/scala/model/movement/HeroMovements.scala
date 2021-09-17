@@ -77,7 +77,7 @@ class HeroMovements(private val entity: Hero, private var speed: Float) extends 
   private def crouch(): Unit = {
     this.stopMovement()
     entity.setLittle(true)
-    entity.changeHeroFixture(HERO_SIZE_SMALL)
+    Hero.changeHeroSize(this.entity, HERO_SIZE_SMALL)
     entity.setState(State.Crouching)
   }
 
@@ -86,7 +86,7 @@ class HeroMovements(private val entity: Hero, private var speed: Float) extends 
 
     if(entity isNot Crouching) {
       this.entity.setLittle(true)
-      this.entity.changeHeroFixture(HERO_SIZE_SMALL)
+      Hero.changeHeroSize(this.entity, HERO_SIZE_SMALL)
     }
 
     if (entity.isFacingRight) {
