@@ -61,7 +61,7 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
     case EntityType.BowItem => createItemSprite(entity, 1, 5)
     case EntityType.BFSwordItem => createItemSprite(entity, 1, 6)
     case EntityType.Door => spriteFactory.createEntitySprite(entity.getType, "assets/sprites/ironDoor.pack", "ironDoor1", DOOR_SPRITE_WIDTH, DOOR_SPRITE_HEIGHT, 1)
-    case EntityType.Chest => spriteFactory.createEntitySprite(entity.getType, "assets/sprites/chest.pack", "ChestClosed", CHEST_SPRITE_WIDTH, CHEST_SPRITE_HEIGHT, 1)
+    case EntityType.Chest => spriteFactory.createEntitySprite(entity.getType, "assets/sprites/chest.pack", "ChestClosed", CHEST_SPRITE_WIDTH, CHEST_SPRITE_HEIGHT, 0.2f)
     case EntityType.Portal => spriteFactory.createEntitySprite(entity.getType, "assets/sprites/portal.pack", "portal", PORTAL_SPRITE_WIDTH, PORTAL_SPRITE_HEIGHT, 1)
     case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile | EntityType.Ladder | EntityType.Platform => null
     case _ => null

@@ -23,7 +23,6 @@ case class ApplyDamageAndDestroyEntity(private val sourceEntity: Entity,
   override def contact(entity: Entity): Unit = {
     super.contact(entity)
     if (target(entity)) {
-      println("ENTITY " + entity + " suffer damage")
       entity.asInstanceOf[LivingEntity].sufferDamage(stats(Statistic.Strength))
     }
 
