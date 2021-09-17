@@ -14,12 +14,16 @@ import model.entities._
 import model.helpers.{EntitiesGetter, EntitiesUtilities}
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
-import view.screens.helpers.TileMapManager
+import view.screens.helpers.{SoundEvent, SoundManager, TileMapManager}
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager,
                  private val tileMapHelper: TileMapManager) extends ScreenAdapter{
+
+  private val soundManager: SoundManager = new SoundManager
+
+  private var previousStates: Map[Entity, State.Value] = Map.empty
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   camera.translate(300f, 300f)
@@ -66,6 +70,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   override def render(delta: Float): Unit = {
     if(this.entitiesGetter.isLevelReady) {
       if(this.removeLoadingScreen) {
+        this.soundManager.playSound(SoundEvent.WorldSoundtrack)
         this.hud.loadingFinished()
         this.removeLoadingScreen = false
       }
@@ -87,6 +92,14 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         val itemPicked: Option[Items] = entitiesGetter.hasHeroPickedUpItem
         if(itemPicked.nonEmpty)
           this.hud.addNewItem(itemPicked.get)
+
+        if(previousStates.contains(hero)){
+          if((!previousStates(hero).equals(State.Jumping) && hero.getState.equals(State.Jumping)) ||
+            (previousStates(hero).equals(State.Jumping) && hero.getState.equals(State.Somersault)))
+            soundManager.playSound(SoundEvent.Jump)
+
+        }
+        previousStates = previousStates + (hero -> hero.getState)
       }
 
       val message: Option[String] = entitiesGetter.getMessage
@@ -112,6 +125,25 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       if(entities.nonEmpty) {
         this.spriteViewer.loadSprites(entities.get)
         this.spriteViewer.updateSprites(delta)
+
+        entities.get.foreach(entity => {
+
+          if(previousStates.contains(entity)){
+
+            if(entity.getType.equals(EntityType.Chest)) {
+              if(previousStates(entity).equals(State.Standing) && entity.getState.equals(State.Opening))
+                soundManager.playSound(SoundEvent.Jump)
+            }
+            if(entity.getType.equals(EntityType.Door)){}
+            if(entity.getType.equals(EntityType.Enemy)){}
+            if(entity.getType.equals(EntityType.KeyItem)){}
+
+          }
+          previousStates = previousStates + (entity -> entity.getState)
+
+
+
+        })
       }
 
       this.camera.update()
@@ -154,5 +186,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.entitiesGetter.getWorld.get.dispose()
     box2DDebugRenderer.dispose()
     hud.dispose()
+  }
+
+  private def playSound(): Unit = {
+
   }
 }

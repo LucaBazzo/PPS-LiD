@@ -1,7 +1,7 @@
 package model
 
 import controller.GameEvent.GameEvent
-import controller.{GameEvent, Observer, SoundManager}
+import controller.{GameEvent, Observer}
 import model.helpers._
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 import view.screens.helpers.TileMapManager
@@ -28,8 +28,6 @@ trait Model {
 class ModelImpl(private val controller: Observer,
                 private val entitiesContainer: EntitiesContainerMonitor,
                 private val tileMapHelper: TileMapManager) extends Model {
-
-  private val soundManager: SoundManager = new SoundManager
 
   private var level: Option[Level] = Option.empty
   private val itemPool: ItemPool = new ItemPoolImpl()
@@ -88,8 +86,6 @@ class ModelImpl(private val controller: Observer,
     tileMapHelper.setWorld()
     this.isLevelActive = true
     this.entitiesContainer.setLevelReady(true)
-
-    soundManager.startMusic()
   }
 
   override def requestLevel(): Unit = {

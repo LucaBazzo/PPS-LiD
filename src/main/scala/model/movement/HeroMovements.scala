@@ -1,6 +1,6 @@
 package model.movement
 
-import controller.{GameEvent, SoundManager}
+import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.entities.{Hero, State}
 import model.entities.State._
@@ -13,8 +13,6 @@ import utils.HeroConstants._
  *  @param speed a multiplier to the running velocity of the hero
  */
 class HeroMovementStrategy(private val entity: Hero, private var speed: Float) extends MovementStrategy {
-
-  val soundManager : SoundManager = new SoundManager
 
   override def apply(command: GameEvent): Unit = {
     if(this.checkState && checkCommand(command)) {
@@ -52,7 +50,6 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
 
   private def jump(): Unit = {
     this.entity.setVelocityY(JUMP_VELOCITY)
-    soundManager.playSound("JUMP")
     if(this.entity is Jumping)
       this.entity.setState(State.Somersault)
     else
