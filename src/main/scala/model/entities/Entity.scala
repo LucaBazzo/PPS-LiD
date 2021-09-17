@@ -105,16 +105,6 @@ abstract class EntityImpl(private val entityType: EntityType,
 
   override def isColliding: Boolean = this.collidingEntities > 0
 
-  // TODO: chiedere a luca perchè questo è stato tolto
-//  override def destroyEntity(): Unit = {
-//    println("destroying entity", this)
-//    EntitiesFactoryImpl.destroyBody(this.getBody)
-//    this.getBody.getJointList.toArray().foreach(j => {
-//      EntitiesFactoryImpl.destroyBody(j.other)
-//    })
-//    EntitiesFactoryImpl.removeEntity(this)
-//  }
-
   override def getBody: Body = this.entityBody.getBody
 
   override def getEntityBody: EntityBody = this.entityBody
@@ -131,7 +121,4 @@ case class ImmobileEntity(private var entityType: EntityType,
                           private var entityBody: EntityBody,
                           private val size: (Float, Float))
   extends EntityImpl(entityType, entityBody, size) {
-
-  override def update(): Unit = {
-  }
 }

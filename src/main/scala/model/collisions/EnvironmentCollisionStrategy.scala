@@ -141,7 +141,7 @@ case class LavaCollisionStrategy(private val collisMonitor: CollisionMonitor) ex
 
   override def apply(): Unit = {
     val now:Long = System.currentTimeMillis()
-    if (collisMonitor.isPlayerInsideLava && System.currentTimeMillis() - this.timer > LAVA_DAMAGE_TICK_RATE) {
+    if (hero.isDefined && System.currentTimeMillis() - this.timer > LAVA_DAMAGE_TICK_RATE) {
       hero.get.sufferDamage(LAVA_DAMAGE_PER_TICK)
       println("Taken damage from lava")
       if(this.hero.get.getLife <= 0)
@@ -162,6 +162,7 @@ case class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
   override def contact(entity: Entity): Unit = entity match {
     case h: Hero =>
       println("Hero standing on Platform")
+      this.monitor.playerTouchesPlatformEdge()
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new PlatformInteraction(h,
         this.platform, this.monitor))))
     case _ =>
