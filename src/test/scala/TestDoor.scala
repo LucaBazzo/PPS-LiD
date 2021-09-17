@@ -18,6 +18,7 @@ class TestDoor extends AnyFlatSpec {
 
   private def initialize(): EntitiesContainerMonitor = {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
+    EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
     //TODO null temporaneo
     new LevelImpl(null, monitor, new ItemPoolImpl())
     EntitiesFactoryImpl.createDoor()

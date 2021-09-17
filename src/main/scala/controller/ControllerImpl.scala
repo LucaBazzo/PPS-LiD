@@ -4,9 +4,9 @@ import _root_.utils.ApplicationConstants.GAME_LOOP_STEP
 import com.badlogic.gdx.Gdx
 import controller.GameEvent.GameEvent
 import model._
-import model.helpers.EntitiesContainerMonitor
+import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl}
 import view._
-import view.screens.helpers.TileMapHelper
+import view.screens.helpers.TileMapManager
 
 import java.util.concurrent.{ExecutorService, Executors, ScheduledExecutorService, TimeUnit}
 
@@ -15,7 +15,13 @@ import java.util.concurrent.{ExecutorService, Executors, ScheduledExecutorServic
  * and load it, handling inputs and closing the application.
  */
 trait Controller {
-  def stopExecutorService()
+
+  /** Stop the game loop and the messages from the View to the Model.
+   */
+  def stopGameLoop()
+
+  /** Called the hero is dead and the application should set the Game Over Screen.
+   */
   def gameOver()
 }
 
@@ -27,13 +33,15 @@ class ControllerImpl extends Controller with Observer {
   private val observerManager: ObserverManager = new ObserverManagerImpl()
   this.observerManager.addObserver(this)
 
-  private val tileMapHelper: TileMapHelper = new TileMapHelper
+  private val tileMapHelper: TileMapManager = new TileMapManager
 
   private val view: View = new ViewImpl(entitiesContainer, observerManager, tileMapHelper)
   private val model: Model = new ModelImpl(this, entitiesContainer, tileMapHelper)
 
   private var executorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
   private var gameLoop: GameLoop = new GameLoopImpl(model, this)
+
+  EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
 
   override def handleEvent(event: GameEvent): Unit = event match {
     case GameEvent.StartGame => this.startGame()
@@ -47,17 +55,19 @@ class ControllerImpl extends Controller with Observer {
     val executorService: ExecutorService = Executors.newSingleThreadExecutor()
     val task: Runnable = () => {
       Thread.sleep(1500)
-      this.stopExecutorService()
+      this.stopGameLoop()
       this.view.endGame()
+      Thread.sleep(300)
+      this.model.disposeLevel()
+      this.entitiesContainer.setLevelNumber(0)
     }
     executorService.submit(task)
   }
 
-  override def stopExecutorService(): Unit = this.executorService.shutdownNow()
+  override def stopGameLoop(): Unit = this.executorService.shutdownNow()
 
   private def startGame(): Unit = {
-    if(this.entitiesContainer.getLevelNumber == 0)
-      this.view.startGame()
+    this.view.startGame()
     Gdx.app.postRunnable(() => {
       tileMapHelper.loadTiledMaps()
       this.handleEvent(GameEvent.MapLoaded)

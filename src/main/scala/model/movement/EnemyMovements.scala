@@ -8,7 +8,7 @@ import utils.EnemiesConstants.ENEMIES_ACTIVATION_DISTANCE
 
 // TODO: rifattorizzare i predicati usati spesso in delel classi Predicate
 
-abstract class BehaviourMovementStrategy extends MovementStrategy {
+abstract class BehaviourMovementStrategy extends MovementStrategyImpl {
   protected val behaviour: MovementBehaviours = new MovementBehavioursImpl()
 
   override def apply(): Unit = {
@@ -16,9 +16,7 @@ abstract class BehaviourMovementStrategy extends MovementStrategy {
     this.behaviour.getCurrentBehaviour.apply()
   }
 
-  override def stopMovement(): Unit = {
-    this.behaviour.getCurrentBehaviour.stopMovement()
-  }
+  override def stopMovement(): Unit = this.behaviour.getCurrentBehaviour.stopMovement()
 
   override def onBegin(): Unit = this.behaviour.getCurrentBehaviour.onBegin()
 
@@ -100,8 +98,8 @@ case class PatrolMovementStrategy(sourceEntity: MobileEntity) extends BehaviourM
   behaviour.addTransition(b3, b2, NotPredicate(canMoveToTheRight))
 }
 
-
-case class MovingMovementStrategy(sourceEntity: MobileEntity, right:Boolean) extends BehaviourMovementStrategy {
+case class MovingMovementStrategy(sourceEntity: MobileEntity,
+                                  right:Boolean) extends MovementStrategyImpl {
   private val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
   private val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
 
@@ -134,7 +132,7 @@ case class MovingMovementStrategy(sourceEntity: MobileEntity, right:Boolean) ext
 }
 
 case class FaceTarget(sourceEntity: MobileEntity,
-                      targetEntity: Entity) extends MovementStrategy {
+                      targetEntity: Entity) extends MovementStrategyImpl {
 
   override def apply(): Unit = {
     this.sourceEntity.setFacing(right = isEntityOnTheRight(sourceEntity, targetEntity))
@@ -148,7 +146,6 @@ case class FaceTarget(sourceEntity: MobileEntity,
 
   override def onEnd(): Unit = { }
 }
-
 
 case class ChaseTarget(sourceEntity:MobileEntity,
                        targetEntity:Entity) extends BehaviourMovementStrategy {

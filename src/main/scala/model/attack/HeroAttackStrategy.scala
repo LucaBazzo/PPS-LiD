@@ -5,7 +5,6 @@ import controller.GameEvent.GameEvent
 import model.collisions.ImplicitConversions._
 import model.entities.State._
 import model.entities._
-import model.helpers.EntitiesFactoryImpl
 import model.movement.DoNothingMovementStrategy
 import utils.HeroConstants._
 
@@ -15,7 +14,7 @@ import utils.HeroConstants._
  *  @param entity the entity that generates the attacks
  *  @param strength the damage that each attack will do
  */
-class HeroAttackStrategy(private val entity: Hero, private var strength: Float) extends AttackStrategy {
+class HeroAttackStrategy(private val entity: Hero, private var strength: Float) extends DoNothingAttackStrategy {
 
   private var attackPattern: Option[MobileEntity] = Option.empty
   private var attackTimer: Float = 0
@@ -141,8 +140,8 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
   private def setSwordPattern(rotatingBodySize: (Float, Float),
                               rotatingBodyDistance: (Float, Float),
                               angularVelocity: Float, startingAngle: Float = 0): Unit = {
-    this.attackPattern = Option.apply(EntitiesFactoryImpl.createAttackPattern(EntityType.Mobile, rotatingBodySize,
-      this.entity.getPosition, rotatingBodyDistance, angularVelocity, startingAngle, this.entity))
+    this.attackPattern = Option.apply(MobileEntity.createSwordAttackPattern(EntityType.Mobile,
+      rotatingBodySize, rotatingBodyDistance, angularVelocity, startingAngle, this.entity))
   }
 
   private def setAirAttack(): Unit = {
@@ -155,8 +154,7 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
   }
 
   private def setAirSwordPattern(bodySize: (Float, Float), bodyDistance: (Float, Float)): Unit = {
-    this.attackPattern = Option.apply(EntitiesFactoryImpl.createAirAttackPattern(EntityType.Mobile,
-      bodySize, bodyDistance, this.entity))
+    this.attackPattern = Option.apply(MobileEntity.createAirAttackPattern(bodySize, bodyDistance, this.entity))
   }
 
   private def setBowAttack(): Unit = {
@@ -167,7 +165,7 @@ class HeroAttackStrategy(private val entity: Hero, private var strength: Float) 
   }
 
   private def startBowAttack(): Unit = {
-    this.attackPattern = Option.apply(EntitiesFactoryImpl.createArrowProjectile(this.entity))
+    this.attackPattern = Option.apply(MobileEntity.createArrowProjectile(this.entity))
     this.attackPattern.get.move()
     this.attackPattern = Option.empty
     this.timeEventPresent = false

@@ -10,7 +10,6 @@ object EnemiesConstants {
   val ENEMIES_SPAWN_RATIO = 25 // spawn zone width / ENEMIES_SPAWN_RATIO
   val ENEMIES_ACTIVATION_DISTANCE: Float = 300.PPM
 
-
   val ENEMY_TYPES: List[EntityType] =
     List(EntityType.EnemySkeleton, EntityType.EnemyWorm, EntityType.EnemySlime)
 

@@ -2,18 +2,6 @@ package controller
 
 import controller.GameEvent.GameEvent
 
-/*
-sealed trait GameEvent
-case class StartGame() extends GameEvent
-case class StopGame() extends GameEvent
-case class CloseApplication() extends GameEvent
-case class MoveUp() extends GameEvent
-case class MoveDown() extends GameEvent
-case class MoveLeft() extends GameEvent
-case class MoveRight() extends GameEvent
-case class Attack() extends GameEvent
-*/
-
 object GameEvent extends Enumeration {
   type GameEvent = Value
   val StartGame, ReturnToMenu, CloseApplication, SetMap, MapLoaded,

@@ -9,7 +9,7 @@ import utils.EnemiesConstants.{SKELETON_ATTACK_OFFSET, SKELETON_ATTACK_SIZE, SLI
 
 abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
                                    protected val targetEntity: Entity)
-  extends AttackStrategy {
+  extends DoNothingAttackStrategy {
 
   protected val stats: Map[Statistic, Float] = this.sourceEntity.getStatistics
   protected val attackFrequency: Float = this.stats(Statistic.AttackFrequency)

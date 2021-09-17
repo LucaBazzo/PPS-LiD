@@ -1,7 +1,5 @@
 package model.entities
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import model.EntityBody
 import model.collisions.{CollisionStrategy, DoNothingCollisionStrategy}
@@ -25,7 +23,7 @@ object EntityType extends Enumeration {
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
       EnemySkeleton, EnemySlime, EnemyPacman, EnemyWorm, EnemyBossWizard, // EnemyGhost
-      Platform, Door, Ladder, Water, Lava, Chest, Portal,
+      Platform, PlatformSensor, Door, Ladder, Water, Lava, Chest, Portal,
       AttackFireBall, AttackEnergyBall, AttackArrow = Value
 }
 
@@ -39,13 +37,13 @@ trait Entity {
 
   def setState(state:State): Unit
 
-  def is(state: State): Boolean
+  def is(state: State): Boolean = this.getState equals state
 
-  def isNot(state: State): Boolean
+  def isNot(state: State): Boolean = !(this is state)
 
-  def setPosition(position: (Float, Float)): Unit
+  def setPosition(position: (Float, Float)): Unit = this.getEntityBody.setPosition(position)
 
-  def getPosition: (Float, Float)
+  def getPosition: (Float, Float) = (this.getBody.getPosition.x, this.getBody.getPosition.y)
 
   def setSize(size: (Float, Float)): Unit
 
@@ -57,16 +55,19 @@ trait Entity {
 
   def collisionReleased(entity: Entity): Unit
 
-  //TODO ricontrollare in futuro
   def getBody: Body
+
   def getEntityBody: EntityBody
 
-  //TODO vedere dove metterlo
-  def vectorScalar(vector: Vector2, scalar: Float = Gdx.graphics.getDeltaTime) = new Vector2(vector.x * scalar, vector.y * scalar)
+  def destroyEntity(): Unit = {
+    EntitiesFactoryImpl.pendingDestroyBody(this.getBody)
+    this.getBody.getJointList.toArray().foreach(joint => {
+      EntitiesFactoryImpl.pendingDestroyBody(joint.other)
+    })
+    EntitiesFactoryImpl.removeEntity(this)
+  }
 
-  def destroyEntity(): Unit
-
-  def changeCollisions(entityType: Short): Unit
+  def changeCollisions(entityCollisionBit: Short): Unit = EntitiesFactoryImpl.pendingChangeCollisions(this, entityCollisionBit)
 
   def isColliding: Boolean
 }
@@ -77,21 +78,13 @@ abstract class EntityImpl(private val entityType: EntityType,
                           private var entityBody: EntityBody,
                           private var size: (Float, Float)) extends Entity {
 
-  protected var state: State = State.Standing
-  protected var collisionStrategy: CollisionStrategy = new DoNothingCollisionStrategy()
+  private var state: State = State.Standing
+  private var collisionStrategy: CollisionStrategy = DoNothingCollisionStrategy()
   private var collidingEntities: Int = 0
 
   override def getState: State = this.state
 
   override def setState(state: State): Unit = this.state = state
-
-  override def is(state: State): Boolean = this.state equals state
-
-  override def isNot(state: State): Boolean = !(this is state)
-
-  override def setPosition(position: (Float, Float)): Unit = this.entityBody.setPosition(position)
-
-  override def getPosition: (Float, Float) = (this.entityBody.getBody.getPosition.x, this.entityBody.getBody.getPosition.y)
 
   override def setSize(size: (Float, Float)): Unit = this.size = size
 
@@ -112,6 +105,7 @@ abstract class EntityImpl(private val entityType: EntityType,
 
   override def isColliding: Boolean = this.collidingEntities > 0
 
+  // TODO: chiedere a luca perchè questo è stato tolto
   override def destroyEntity(): Unit = {
     println("destroying entity", this)
     EntitiesFactoryImpl.destroyBody(this.getBody)
@@ -124,8 +118,6 @@ abstract class EntityImpl(private val entityType: EntityType,
   override def getBody: Body = this.entityBody.getBody
 
   override def getEntityBody: EntityBody = this.entityBody
-
-  override def changeCollisions(entityType: Short): Unit = EntitiesFactoryImpl.changeCollisions(this, entityType)
 
   override def getType: EntityType = this.entityType
 
@@ -141,6 +133,5 @@ case class ImmobileEntity(private var entityType: EntityType,
   extends EntityImpl(entityType, entityBody, size) {
 
   override def update(): Unit = {
-    this.collisionStrategy.apply()
   }
 }

@@ -1,4 +1,4 @@
-package view.screens.game
+package view.screens.menu
 
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
@@ -14,12 +14,12 @@ import model.entities._
 import model.helpers.{EntitiesGetter, EntitiesUtilities}
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
-import view.screens.helpers.TileMapHelper
+import view.screens.helpers.TileMapManager
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager,
-                 private val tileMapHelper: TileMapHelper) extends ScreenAdapter{
+                 private val tileMapHelper: TileMapManager) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   camera.translate(300f, 300f)
@@ -39,14 +39,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
-  /*val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-  val task: Runnable = () => {
-    Thread.sleep(2000)
-    this.observerManager.notifyEvent(GameEvent.SetMap)
-  }
-  executorService.submit(task)*/
+  private var removeLoadingScreen: Boolean = true
 
-  //this.observerManager.notifyEvent(GameEvent.SetMap)
+  println("GAME SCREEN LOADED", removeLoadingScreen)
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
@@ -69,7 +64,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   }
 
   override def render(delta: Float): Unit = {
-    if(this.entitiesGetter.getWorld.nonEmpty) {
+    if(this.entitiesGetter.isLevelReady) {
+      if(this.removeLoadingScreen) {
+        this.hud.loadingFinished()
+        this.removeLoadingScreen = false
+      }
+
       this.update(delta)
 
       //clears the screen
@@ -135,6 +135,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
       batch.setProjectionMatrix(hud.getStage.getCamera.combined)
       hud.getStage.draw()
+    }
+    else {
+      hud.getStage.draw()
+
+      if(!this.removeLoadingScreen)
+        this.removeLoadingScreen = true
     }
   }
 

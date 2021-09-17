@@ -7,9 +7,9 @@ import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State._
 import model.entities.Statistic.Statistic
-import model.helpers.EntitiesFactoryImpl
-import model.{EntityBody, Score}
 import utils.ApplicationConstants.RANDOM
+import model.helpers.{EntitiesFactoryImpl, ItemPools}
+import model.{EntityBody, Score}
 import utils.EnemiesConstants.{ENEMY_BOSS_TYPES, ENEMY_TYPES}
 
 trait Enemy {
@@ -41,7 +41,6 @@ class EnemyImpl(private val entityType: EntityType,
       this.movementStrategy.apply()
       this.attackStrategy.apply()
     }
-
   }
 
   override def setBehaviour(behaviours: EnemyBehaviours): Unit = this.behaviours = Option(behaviours)
@@ -58,20 +57,17 @@ class EnemyImpl(private val entityType: EntityType,
 
     if (ENEMY_TYPES.contains(this.entityType)) {
       if(RANDOM.nextInt(10) <= 2)
-      EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
-        position=(this.getPosition._1, this.getPosition._2).MPP,
-        collisions = EntityCollisionBit.Hero)
+      Item(ItemPools.Enemy_Drops, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor,
+        position=(this.getPosition._1, this.getPosition._2).MPP)
     }
 
     if (ENEMY_BOSS_TYPES.contains(this.getType)) {
       if (this.heroEntity.getItemsPicked.contains((i:Items) => i == Items.Bow)) {
-        EntitiesFactoryImpl.createItem(ItemPools.Enemy_Drops,
-          position=(this.getPosition._1, this.getPosition._2).MPP,
-          collisions = EntityCollisionBit.Hero)
+        Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor,
+          position=(this.getPosition._1, this.getPosition._2).MPP)
       } else
-        EntitiesFactoryImpl.createItem(ItemPools.Boss,
-          position=(this.getPosition._1, this.getPosition._2).MPP,
-          collisions = EntityCollisionBit.Hero)
+        Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor,
+          position=(this.getPosition._1, this.getPosition._2).MPP)
     }
   }
 }

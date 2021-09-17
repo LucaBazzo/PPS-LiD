@@ -3,16 +3,6 @@ package model.collisions
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, LivingEntity, Statistic}
 
-//case class FeetCollisionStrategy() extends CollisionStrategyImpl {
-//  override def contact(entity: Entity): Unit = entity match {
-//    case _ => println("Foot Collision Detected with" + entity.toString)
-//  }
-//
-//  override def release(entity: Entity): Unit = entity match {
-//    case _ => println("Foot Release Detected with" + entity.toString)
-//  }
-//}
-
 case class ApplyDamage(private val target: Entity => Boolean,
                   private val stats: Map[Statistic, Float])
   extends CollisionStrategyImpl {
