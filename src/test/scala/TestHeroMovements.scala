@@ -115,6 +115,53 @@ class TestHeroMovements extends AnyFlatSpec{
     assert(hero is Falling)
   }
 
+  "A hero" should "not perform any actions when as long as he is sliding" in {
+    initialize()
 
+    val ground: Entity = EntitiesFactoryImpl.createImmobileEntity()
+
+    hero.getFeet.get.collisionDetected(ground)
+
+    hero.notifyCommand(Slide)
+    hero.update()
+    assert(hero is Sliding)
+    assertResult((SLIDE_VELOCITY, 0))(hero.getVelocity)
+
+    val countSlidingRedefinitionOfBody: Int =
+      SHORT_WAIT_TIME / WAIT_TIME_DECREMENT + 1
+
+    for(_ <- 0 to countSlidingRedefinitionOfBody)
+      hero.update()
+
+    hero.notifyCommand(Up)
+    hero.update()
+    assert(hero isNot Jumping)
+    assert(hero is Sliding)
+
+    hero.notifyCommand(MoveLeft)
+    hero.update()
+    assert(hero is Sliding)
+
+    hero.notifyCommand(Attack)
+    hero.update()
+    assert(hero is Sliding)
+
+    hero.notifyCommand(BowAttack)
+    hero.update()
+    assert(hero is Sliding)
+
+    hero.notifyCommand(Down)
+    hero.update()
+    assert(hero isNot Crouching)
+
+    hero.stopMovement()
+    hero.update()
+    assert(hero isNot Sliding)
+    assert(hero is Standing)
+
+    hero.notifyCommand(Up)
+    hero.update()
+    assert(hero is Jumping)
+  }
 }
 

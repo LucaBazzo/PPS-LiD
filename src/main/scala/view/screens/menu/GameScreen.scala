@@ -150,9 +150,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   override def dispose(): Unit = {
     orthogonalTiledMapRenderer.dispose()
-    if(this.entitiesGetter.getWorld.nonEmpty)
-      this.entitiesGetter.getWorld.get.dispose()
     box2DDebugRenderer.dispose()
     hud.dispose()
+    this.observerManager.notifyEvent(GameEvent.CloseApplication)
   }
 }
