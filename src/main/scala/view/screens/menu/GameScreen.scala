@@ -93,11 +93,25 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         if(itemPicked.nonEmpty)
           this.hud.addNewItem(itemPicked.get)
 
+        //in base al cambio di stato dell'hero riproduco il suono corretto
         if(previousStates.contains(hero)){
           if((!previousStates(hero).equals(State.Jumping) && hero.getState.equals(State.Jumping)) ||
-            (previousStates(hero).equals(State.Jumping) && hero.getState.equals(State.Somersault)))
+            (!previousStates(hero).equals(State.Somersault) && hero.getState.equals(State.Somersault)))
             soundManager.playSound(SoundEvent.Jump)
-
+          if(!previousStates(hero).equals(State.Attack01) && hero.getState.equals(State.Attack01))
+            soundManager.playSound(SoundEvent.Attack1)
+          if(!previousStates(hero).equals(State.Attack02) && hero.getState.equals(State.Attack02))
+            soundManager.playSound(SoundEvent.Attack2)
+          if(!previousStates(hero).equals(State.Attack03) && hero.getState.equals(State.Attack03))
+            soundManager.playSound(SoundEvent.Attack3)
+          if(!previousStates(hero).equals(State.BowAttacking) && hero.getState.equals(State.BowAttacking))
+            soundManager.playSound(SoundEvent.BowAttack)
+          if(!previousStates(hero).equals(State.pickingItem) && hero.getState.equals(State.pickingItem))
+            soundManager.playSound(SoundEvent.PickItem)
+          if(!previousStates(hero).equals(State.AirDownAttacking) && hero.getState.equals(State.AirDownAttacking))
+            soundManager.playSound(SoundEvent.AirDownAttack)
+          if(!previousStates(hero).equals(State.Hurt) && hero.getState.equals(State.Hurt))
+            soundManager.playSound(SoundEvent.Hurt)
         }
         previousStates = previousStates + (hero -> hero.getState)
       }
@@ -126,19 +140,31 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         this.spriteViewer.loadSprites(entities.get)
         this.spriteViewer.updateSprites(delta)
 
+        //per ogni entità controllo lo stato precedente e quello attuale per decidere quali suoni riprodurre
         entities.get.foreach(entity => {
 
           if(previousStates.contains(entity)){
 
-            if(entity.getType.equals(EntityType.Chest)) {
-              if(previousStates(entity).equals(State.Standing) && entity.getState.equals(State.Opening))
-                soundManager.playSound(SoundEvent.Jump)
-            }
-            if(entity.getType.equals(EntityType.Door)){}
-            if(entity.getType.equals(EntityType.Enemy)){}
-            if(entity.getType.equals(EntityType.KeyItem)){}
+            entity.getType match {
+              case EntityType.Chest => {
+                if(previousStates(entity).equals(State.Standing) && entity.getState.equals(State.Opening))
+                  soundManager.playSound(SoundEvent.Jump)
+              }
+              case EntityType.Door => {
+                if(previousStates(entity).equals(State.Closed) && entity.getState.equals(State.Opening))
+                  soundManager.playSound(SoundEvent.Jump)
+              }
+              case EntityType.Enemy => {
 
+                if(!previousStates(entity).equals(State.Dying) && entity.getState.equals(State.Dying)) {
+                  soundManager.playSound(SoundEvent.Dying)
+                  println("SOUND DYING")
+                }
+              }
+              case _ =>
+            }
           }
+          //memorizzo lo stato precedente dell'entità nella mappa apposita
           previousStates = previousStates + (entity -> entity.getState)
 
 
@@ -186,9 +212,5 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       this.entitiesGetter.getWorld.get.dispose()
     box2DDebugRenderer.dispose()
     hud.dispose()
-  }
-
-  private def playSound(): Unit = {
-
   }
 }

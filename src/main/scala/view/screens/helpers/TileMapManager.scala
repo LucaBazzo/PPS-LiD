@@ -93,7 +93,8 @@ class TileMapManager {
           case "door" =>
               EntitiesFactoryImpl.createDoor(size, position, mapName!=null && mapName.equalsIgnoreCase(BOSS_ROOM_MAP_NAME))
           case "chest" =>
-            if(mapName!=null && (mapName.equalsIgnoreCase(TOP_KEY_ITEM_ROOM_NAME) || mapName.equalsIgnoreCase(BOTTOM_KEY_ITEM_ROOM_NAME)))
+            //TODO rimuovere hero room dall'if
+            if(mapName!=null && (mapName.equalsIgnoreCase(TOP_KEY_ITEM_ROOM_NAME) || mapName.equalsIgnoreCase(BOTTOM_KEY_ITEM_ROOM_NAME) || mapName.equalsIgnoreCase(HERO_ROOM_MAP_NAME)))
               if (mapName.contains(keyLocation))
                 spawnEntity(() => EntitiesFactoryImpl.createItem(ItemPools.Keys, size, position))
               else

@@ -7,7 +7,8 @@ import view.screens.helpers.SoundEvent.{Jump, SoundEvent, WorldSoundtrack}
 
 object SoundEvent extends Enumeration {
   type SoundEvent = Value
-  val Jump, WorldSoundtrack = Value
+  val WorldSoundtrack, Jump, Attack1, Attack2, Attack3, BowAttack, AirDownAttack, Hurt, Dying,
+  OpeningChest, EnemyAttack, EnemyDeath, OpeningDoor, PickItem = Value
 }
 class SoundManager {
 
@@ -21,14 +22,14 @@ class SoundManager {
 
   def playSound(soundEvent: SoundEvent): Unit = {
 
-    println("playing sound: " + soundEvent)
     soundEvent match {
       case WorldSoundtrack => {
         worldSoundtrack.setLooping(true)
         worldSoundtrack.play()
       }
       case Jump => this.jumpSound.play
-      case _ => println("unsupported sound")
+      case _ => this.jumpSound.play()
+        //println("unsupported sound")
     }
   }
 }
