@@ -76,10 +76,10 @@ class ControllerImpl extends Controller with Observer {
 
   private def newLevel(): Unit = {
     if(this.entitiesContainer.getLevelNumber == 0) {
-      this.model.requestStartGame()
       this.gameLoop = new GameLoopImpl(model, this)
       this.executorService = Executors.newSingleThreadScheduledExecutor()
       this.executorService.scheduleAtFixedRate(gameLoop, 0, GAME_LOOP_STEP, TimeUnit.NANOSECONDS)
+      this.model.requestStartGame()
       this.handleEvent(GameEvent.SetMap)
     }
     else {

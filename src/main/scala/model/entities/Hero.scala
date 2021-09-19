@@ -322,7 +322,7 @@ class HeroImpl(private val entityType: EntityType,
   override def restoreNormalMovementStrategy(): Unit = {
     this.setMovementStrategy(new HeroMovements(this, this.getStatistic(MovementSpeed).get))
     this.getEntityBody.setGravityScale()
-    if((this isNot Jumping) && (this isNot Somersault))
+    if(this.checkRestore)
       this.setState(State.Falling)
     this.getBody.setAwake(true)
   }
@@ -334,6 +334,7 @@ class HeroImpl(private val entityType: EntityType,
   private def isMovingHorizontally: Boolean = this.entityBody.getBody.getLinearVelocity.x != 0 && this.entityBody.getBody.getLinearVelocity.y == 0
   private def isIdle = this.entityBody.getBody.getLinearVelocity.x == 0 && this.entityBody.getBody.getLinearVelocity.y == 0
 
+  private def checkRestore: Boolean = (this isNot Jumping) && (this isNot Somersault) && (this isNot Sliding)
   private def checkFalling: Boolean = isFalling && (this isNot Jumping) && (this isNot LadderDescending) && (this isNot LadderClimbing) && (this isNot AirDownAttacking)
   private def checkRunning: Boolean = isMovingHorizontally && ((this is Jumping) || (this is Falling))
   private def checkIdle: Boolean = {

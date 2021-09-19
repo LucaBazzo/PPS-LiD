@@ -41,8 +41,6 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private var removeLoadingScreen: Boolean = true
 
-  println("GAME SCREEN LOADED", removeLoadingScreen)
-
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
 
