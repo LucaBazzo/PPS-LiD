@@ -8,6 +8,7 @@ import model.entities.Statistic.Statistic
 object EnemiesConstants {
 
   val ENEMIES_SPAWN_RATIO = 25 // spawn zone width / ENEMIES_SPAWN_RATIO
+  val ENEMIES_ACTIVATION_DISTANCE: Float = 300.PPM
 
   val ENEMY_TYPES: List[EntityType] =
     List(EntityType.EnemySkeleton, EntityType.EnemyWorm, EntityType.EnemySlime)
@@ -75,24 +76,24 @@ object EnemiesConstants {
   )
 
   val STATS_MODIFIER: Map[Statistic, Float] = Map(
-    Statistic.Strength -> 0.5f,
+    Statistic.Strength -> 1f,
     Statistic.Health -> 5f,
     Statistic.CurrentHealth -> 5f,
     Statistic.Defence -> 1f,
-    Statistic.MaxMovementSpeed -> 10f.PPM,
-    Statistic.Acceleration -> 5f.PPM,
+    Statistic.MaxMovementSpeed -> 1f.PPM
   )
 
   val WIZARD_BOSS_SIZE: (Float, Float) = (13f, 25f)
   val WIZARD_BOSS_SCORE: Int = 1000
-  val WIZARD_BOSS_ATTACK1_SIZE: (Float, Float) = (40, 30)
-  val WIZARD_BOSS_ATTACK1_OFFSET: (Float, Float) = (25, 10)
-  val WIZARD_BOSS_ATTACK2_SIZE: (Float, Float) = (30, 40)
-  val WIZARD_BOSS_ATTACK2_OFFSET: (Float, Float) = (35, 12)
+  val WIZARD_BOSS_ATTACK1_SIZE: (Float, Float) = (40, 50)
+  val WIZARD_BOSS_ATTACK1_OFFSET: (Float, Float) = (55, 30)
+  val WIZARD_BOSS_ATTACK2_SIZE: (Float, Float) = (50, 60)
+  val WIZARD_BOSS_ATTACK2_OFFSET: (Float, Float) = (60, 25)
   val WIZARD_BOSS_ATTACK3_SIZE: (Float, Float) = (10, 10)
   val WIZARD_BOSS_ATTACK3_OFFSET: (Float, Float) = (13, 25)
+  val WIZARD_BOSS_ATTACK3_DISTANCE: Float = 100
 
-  val SLIME_SIZE: (Float, Float) = (13f, 10f)
+  val SLIME_SIZE: (Float, Float) = (23f, 12f)
   val SLIME_SCORE: Int = 100
   val SLIME_ATTACK_SIZE: (Float, Float) = (7f, 15f)
   val SLIME_ATTACK_OFFSET: (Float, Float) = (10f, 5f)
@@ -102,9 +103,9 @@ object EnemiesConstants {
   val SKELETON_ATTACK_SIZE: (Float, Float) = (23f, 23f)
   val SKELETON_ATTACK_OFFSET: (Float, Float) = (20f, 5f)
 
-  val WORM_SIZE: (Float, Float) = (19f, 11f)
+  val WORM_SIZE: (Float, Float) = (19f, 12f)
   val WORM_SCORE: Int = 100
   val WORM_FIREBALL_ATTACK_OFFSET: (Float, Float) = (10f, 10f)
-  val WORM_FIREBALL_ATTACK_SIZE = (7f, 7f)
+  val WORM_FIREBALL_ATTACK_SIZE: (Float, Float) = (7f, 7f)
 
 }

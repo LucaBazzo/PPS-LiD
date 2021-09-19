@@ -1,13 +1,18 @@
 package model.helpers
 
 import com.badlogic.gdx.physics.box2d.World
+import model.Score
 import model.entities.Items.Items
 import model.entities.Statistic.Statistic
-import model.entities.{Entity, Hero, LivingEntity}
+import model.entities.{Enemy, Entity, EntityType, Hero, Item, LivingEntity, State}
 import utils.EnemiesConstants.ENEMY_BOSS_TYPES
+import utils.HeroConstants.HERO_STATISTICS_DEFAULT
+
+import java.util.concurrent.{ExecutorService, Executors}
 
 trait EntitiesGetter {
 
+  def getEntities: List[Entity]
   def getEntities(predicate: Entity => Boolean): Option[List[Entity]]
   def getHero: Option[Hero]
   def getBoss: Option[LivingEntity]
@@ -15,8 +20,11 @@ trait EntitiesGetter {
   def getScore: Int
   def getMessage: Option[String]
   def hasHeroPickedUpItem: Option[Items]
-  def getHeroStatistics: Option[Map[Statistic, Float]]
+  def getHeroStatistics: Map[Statistic, Float]
   def getLevelNumber: Int
+  def isLevelReady: Boolean
+
+  def getEntity(predicate: Entity => Boolean): Entity
 }
 
 trait EntitiesSetter {
@@ -29,6 +37,11 @@ trait EntitiesSetter {
   def heroJustPickedUpItem(item: Items): Unit
   def setHeroStatistics(statistics: Map[Statistic, Float]): Unit
   def setLevelNumber(number: Int): Unit
+  def setLevelReady(ready: Boolean): Unit
+
+  def addEntity(entity: Entity): Unit
+  def removeEntity(entity: Entity): Unit
+
 }
 
 class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
@@ -40,8 +53,13 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
   private var levelNumber = 0
   private var score: Int = 0
 
-  private var heroStatistics: Option[Map[Statistic, Float]] = Option.empty
+  private var heroStatistics: Map[Statistic, Float] = HERO_STATISTICS_DEFAULT
 
+  private var levelReady: Boolean = false
+
+  override def getEntities: List[Entity] = this.entities
+
+  // TODO option di list ha poco senso , una lista vuota è un option.empty
   override def getEntities(predicate: Entity => Boolean): Option[List[Entity]] = synchronized {
     Option.apply(this.entities.filter(predicate))
   }
@@ -93,9 +111,9 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
     Option.empty
   }
 
-  override def getHeroStatistics: Option[Map[Statistic, Float]] = this.heroStatistics
+  override def getHeroStatistics: Map[Statistic, Float] = this.heroStatistics
 
-  override def setHeroStatistics(statistics: Map[Statistic, Float]): Unit = this.heroStatistics = Option.apply(statistics)
+  override def setHeroStatistics(statistics: Map[Statistic, Float]): Unit = this.heroStatistics = statistics
 
   override def setLevelNumber(levelNumber: Int): Unit = this.levelNumber = levelNumber
 
@@ -108,4 +126,33 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
   }
 
   override def heroJustPickedUpItem(item: Items): Unit = this.heroPickedUpAnItem = Option.apply(item)
+
+  override def isLevelReady: Boolean = this.levelReady
+
+  override def setLevelReady(ready: Boolean): Unit = this.levelReady = ready
+
+  override def addEntity(entity: Entity): Unit = this.entities = entity :: this.entities
+
+  override def removeEntity(entity: Entity): Unit = {
+    this.entities = this.entities.filterNot((e: Entity) => e.equals(entity))
+
+    // update score if the removed entity's type is Enemy or Item
+    if (entity.isInstanceOf[Enemy] || entity.isInstanceOf[Item]) {
+      this.addScore(entity.asInstanceOf[Score].getScore)
+    }
+
+    if (ENEMY_BOSS_TYPES.contains(entity.getType)) {
+      val portal: Entity = this.getEntity(x => x.getType == EntityType.Portal)
+      portal.setState(State.Opening)
+      val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+      executorService.execute(() => {
+        Thread.sleep(1000)
+        portal.setState(State.Standing)
+        println("Portal opened")
+      })
+      executorService.shutdown()
+    }
+  }
+
+  override def getEntity(predicate: Entity => Boolean): Entity = this.entities.filter(predicate).head
 }

@@ -1,4 +1,4 @@
-package view.screens.game
+package view.screens.menu
 
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
@@ -39,14 +39,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
-  /*val executorService: ExecutorService = Executors.newSingleThreadExecutor()
-  val task: Runnable = () => {
-    Thread.sleep(2000)
-    this.observerManager.notifyEvent(GameEvent.SetMap)
-  }
-  executorService.submit(task)*/
-
-  //this.observerManager.notifyEvent(GameEvent.SetMap)
+  private var removeLoadingScreen: Boolean = true
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
@@ -69,7 +62,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   }
 
   override def render(delta: Float): Unit = {
-    if(this.entitiesGetter.getWorld.nonEmpty) {
+    if(this.entitiesGetter.isLevelReady) {
+      if(this.removeLoadingScreen) {
+        this.hud.loadingFinished()
+        this.removeLoadingScreen = false
+      }
+
       this.update(delta)
 
       //clears the screen
@@ -136,6 +134,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       batch.setProjectionMatrix(hud.getStage.getCamera.combined)
       hud.getStage.draw()
     }
+    else {
+      hud.getStage.draw()
+
+      if(!this.removeLoadingScreen)
+        this.removeLoadingScreen = true
+    }
   }
 
   override def resize(width: Int, height: Int): Unit = {
@@ -144,9 +148,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   override def dispose(): Unit = {
     orthogonalTiledMapRenderer.dispose()
-    if(this.entitiesGetter.getWorld.nonEmpty)
-      this.entitiesGetter.getWorld.get.dispose()
     box2DDebugRenderer.dispose()
     hud.dispose()
+    this.observerManager.notifyEvent(GameEvent.CloseApplication)
   }
 }

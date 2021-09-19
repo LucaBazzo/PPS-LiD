@@ -1,38 +1,27 @@
 package model.movement
 
 import com.badlogic.gdx.math.Vector2
-import controller.GameEvent.GameEvent
-import model.collisions.ImplicitConversions.{RichFloat, _}
+import model.collisions.ImplicitConversions.RichFloat
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, MobileEntity, Statistic}
+import utils.HeroConstants.ARROW_VELOCITY
 
-class ArrowMovementStrategy(private val entity: MobileEntity, private var speed: Float) extends MovementStrategy {
-
-  private val arrowForce: Float = 15000f.PPM
+class ArrowMovementStrategy(private val entity: MobileEntity, private var speed: Float) extends DoNothingMovementStrategy {
 
   override def apply(): Unit = {
-    if (entity.isFacingRight) {
-      this.applyLinearImpulse(this.setSpeed(arrowForce, 0))
-    }
-    else {
-      this.applyLinearImpulse(this.setSpeed(-arrowForce, 0))
-    }
+    if (entity.isFacingRight)
+      this.entity.setVelocityX(ARROW_VELOCITY.PPM, speed)
+    else
+      this.entity.setVelocityX(-ARROW_VELOCITY.PPM, speed)
   }
 
-  override def apply(command: GameEvent): Unit = ???
-
   override def stopMovement(): Unit = this.entity.getBody.setLinearVelocity(0,0)
-
-  private def setSpeed(force: (Float, Float)): (Float, Float) = force * speed
-
-  private def applyLinearImpulse(vector: (Float, Float)): Unit =
-    entity.getBody.applyLinearImpulse(entity.vectorScalar(vector), entity.getBody.getWorldCenter, true)
 }
 
 class ProjectileTrajectory(val owner: Entity,
                            val originPoint:(Float, Float),
                            val targetPoint:(Float, Float),
-                           val stats: Map[Statistic, Float]) extends MovementStrategy {
+                           val stats: Map[Statistic, Float]) extends DoNothingMovementStrategy {
 
   owner.getBody.applyLinearImpulse(
     new Vector2(targetPoint._1, targetPoint._2).sub(new Vector2(originPoint._1, originPoint._2)).nor()
@@ -49,7 +38,7 @@ class ProjectileTrajectory(val owner: Entity,
 class WeightlessProjectileTrajectory(val owner: Entity,
                                      val originPoint:(Float, Float),
                                      val targetPoint:(Float, Float),
-                                     val stats: Map[Statistic, Float]) extends MovementStrategy {
+                                     val stats: Map[Statistic, Float]) extends DoNothingMovementStrategy {
   owner.getBody.applyLinearImpulse(
     new Vector2(targetPoint._1, targetPoint._2).sub(new Vector2(originPoint._1, originPoint._2)).nor()
     .scl(stats(Statistic.Strength)),
@@ -60,7 +49,7 @@ class WeightlessProjectileTrajectory(val owner: Entity,
   override def apply(): Unit = { }
 }
 
-class CircularMovementStrategy(private val entity: MobileEntity, private val angularVelocity: Float) extends MovementStrategy {
+class CircularMovementStrategy(private val entity: MobileEntity, private val angularVelocity: Float) extends DoNothingMovementStrategy {
 
   override def apply(): Unit = this.entity.getBody.setAngularVelocity(angularVelocity)
 
@@ -73,7 +62,7 @@ class CircularMovementStrategy(private val entity: MobileEntity, private val ang
 class HomingProjectileTrajectory(val sourceEntity: MobileEntity,
                                  val originPoint:(Float, Float),
                                  val targetPoint:(Float, Float),
-                                 val stats: Map[Statistic, Float]) extends MovementStrategy {
+                                 val stats: Map[Statistic, Float]) extends DoNothingMovementStrategy {
   sourceEntity.getBody.applyLinearImpulse(
     new Vector2(targetPoint._1, targetPoint._2).sub(new Vector2(originPoint._1, originPoint._2)).nor()
       .scl(stats(Statistic.Strength)),

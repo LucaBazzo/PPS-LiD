@@ -12,7 +12,7 @@ import utils.HeroConstants._
  *  @param entity the entity that will be moved in the world
  *  @param speed a multiplier to the running velocity of the hero
  */
-class HeroMovementStrategy(private val entity: Hero, private var speed: Float) extends MovementStrategy {
+class HeroMovements(private val entity: Hero, private var speed: Float) extends DoNothingMovementStrategy {
 
   override def apply(command: GameEvent): Unit = {
     if(this.checkState && checkCommand(command)) {
@@ -35,11 +35,8 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
 
   override def alterSpeed(alteration: Float): Unit = this.speed += alteration
 
-  override def apply(): Unit = ???
-
   private def checkCommand(command: GameEvent): Boolean = command match {
-    case GameEvent.Up => (entity isNot Falling) &&
-      (entity isNot Somersault) && (entity isNot Crouching)
+    case GameEvent.Up => (entity isNot Falling) && (entity isNot Somersault) && (entity isNot Crouching)
     case GameEvent.MoveRight | GameEvent.MoveLeft => true
     case GameEvent.Down => (entity is Running) || (entity is Standing)
     case GameEvent.DownReleased => entity is Crouching
@@ -66,8 +63,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
 
   private def move(runVelocity: Float, right: Boolean) {
     if(entity isNot Crouching) {
-      if(this.entity.isTouchingGround || (right && !this.entity.isTouchingWallOnSide(right)) ||
-        (!right && !this.entity.isTouchingWallOnSide(right))) {
+      if(canMove(right)) {
         this.entity.setVelocityX(runVelocity, this.speed)
 
         if(this.entity is Standing)
@@ -81,7 +77,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
   private def crouch(): Unit = {
     this.stopMovement()
     entity.setLittle(true)
-    entity.changeHeroFixture(HERO_SIZE_SMALL, CROUCH_OFFSET)
+    Hero.changeHeroSize(this.entity, HERO_SIZE_SMALL)
     entity.setState(State.Crouching)
   }
 
@@ -90,7 +86,7 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
 
     if(entity isNot Crouching) {
       this.entity.setLittle(true)
-      this.entity.changeHeroFixture(HERO_SIZE_SMALL, SLIDE_OFFSET)
+      Hero.changeHeroSize(this.entity, HERO_SIZE_SMALL)
     }
 
     if (entity.isFacingRight) {
@@ -110,4 +106,8 @@ class HeroMovementStrategy(private val entity: Hero, private var speed: Float) e
          | State.Attack03 | State.BowAttacking | State.Hurt | State.`pickingItem` => false
     case _ => true
   }
+
+  private def canMove(right: Boolean): Boolean =
+    this.entity.isTouchingGround || (right && !this.entity.isTouchingWallOnSide(right)) ||
+    (!right && !this.entity.isTouchingWallOnSide(right))
 }

@@ -25,13 +25,13 @@ trait WorldUtilities {
 
   def canFixturesCollide(fixture1: Fixture, fixture2: Fixture): Boolean
 
-  def isFloorPresentOnTheLeft(body: Body, size:(Float, Float), offset: Float = 5f.PPM): Boolean
+  def isFloorPresentOnTheRight(body: Body, size: (Float, Float), hOffset: Float, vOffset: Float): Boolean
 
-  def isFloorPresentOnTheRight(body: Body, size:(Float, Float), offset: Float = 5f.PPM): Boolean
+  def isFloorPresentOnTheLeft(body: Body, size: (Float, Float), hOffset: Float, vOffset: Float): Boolean
 
-  def isPathObstructedOnTheLeft(body: Body, size:(Float, Float), offset: Float = 5f.PPM): Boolean
+  def isPathObstructedOnTheLeft(body: Body, size: (Float, Float), hOffset: Float, vOffset: Float): Boolean
 
-  def isPathObstructedOnTheRight(body: Body, size:(Float, Float), offset: Float = 5f.PPM): Boolean
+  def isPathObstructedOnTheRight(body: Body, size: (Float, Float), hOffset: Float, vOffset: Float): Boolean
 
   def checkCollision(x: Float, y: Float, sourceBody: Body): Boolean = checkCollision(x, y, x, y, sourceBody)
 
@@ -66,11 +66,6 @@ object WorldUtilities extends WorldUtilities {
       output = canFixturesCollide(sourceFixture, fixture)
       !output // automatically stop consecutive queries if a match has been found
     }, x1, y1, x2, y2)
-
-    // testing utility (inefficient AF)
-    // import model.collisions.ImplicitConversions._
-    // EntitiesFactoryImpl.createImmobileEntity(size=(x2-x1, y2-y1).MPP, position=((x2+x1)/2, (y2+y1)/2).MPP)
-
     output
   }
 
@@ -110,8 +105,8 @@ object WorldUtilities extends WorldUtilities {
       // Check horizontal axis angle of source-target bodies
       if (isTargetVisible) {
         val angle = new Vector2(sourceBody.getPosition.sub(targetBody.getPosition)).angleDeg()
-//        isTargetVisible = ((angle <= maxHorizontalAngle || angle >= 360-maxHorizontalAngle)
-//          || (180-maxHorizontalAngle <= angle && 180+maxHorizontalAngle >= angle))
+        //        isTargetVisible = ((angle <= maxHorizontalAngle || angle >= 360-maxHorizontalAngle)
+        //          || (180-maxHorizontalAngle <= angle && 180+maxHorizontalAngle >= angle))
         isTargetVisible = ((angle >= 360-maxHorizontalAngle)
           || (180+maxHorizontalAngle >= angle))
         preemptiveStop = true
@@ -131,36 +126,39 @@ object WorldUtilities extends WorldUtilities {
   override def canFixturesCollide(fixture1:Fixture, fixture2:Fixture): Boolean =
     (fixture1.getFilterData.maskBits & fixture2.getFilterData.categoryBits) != 0
 
-  override def isFloorPresentOnTheLeft(body: Body, size:(Float, Float), offset:Float = 5f.PPM): Boolean = {
+  override def isFloorPresentOnTheLeft(body: Body, size:(Float, Float), hOffset:Float = 5f.PPM, vOffset:Float = 8f.PPM): Boolean = {
     val position = body.getPosition
 
     checkCollision(
-      position.x - size._1 - offset, position.y - size._2 - offset,
-      position.x - size._1, position.y - size._2,
+      position.x - size._1 - hOffset, position.y - size._2 + vOffset,
       body)
   }
 
-  override def isFloorPresentOnTheRight(body: Body, size:(Float, Float), offset:Float = 5f.PPM): Boolean = {
+  override def isFloorPresentOnTheRight(body: Body, size:(Float, Float), hOffset:Float = 5f.PPM, vOffset:Float = 8f.PPM): Boolean = {
     val position = body.getWorldCenter
+
     checkCollision(
-      position.x + size._1, position.y - size._2 - offset,
-      position.x + size._1 + offset, position.y - size._2,
+      position.x + size._1 + hOffset, position.y - size._2 + vOffset,
       body)
   }
 
-  override def isPathObstructedOnTheLeft(body: Body, size:(Float, Float), offset:Float = 5f.PPM): Boolean = {
+  override def isPathObstructedOnTheLeft(body: Body, size:(Float, Float), hOffset:Float = 1f.PPM,
+                                         vOffset:Float = 0f.PPM): Boolean = {
     val position = body.getWorldCenter
+
     checkCollision(
-      position.x - size._1 - offset, position.y - size._2/2,
-      position.x - size._1 - offset, position.y + size._2/2,
+      position.x - size._1 - hOffset, position.y - size._2 / 2 + vOffset,
+      position.x - size._1 - hOffset, position.y + size._2 / 2 + vOffset,
       body)
   }
 
-  override def isPathObstructedOnTheRight(body: Body, size:(Float, Float), offset:Float = 5f.PPM): Boolean = {
+  override def isPathObstructedOnTheRight(body: Body, size:(Float, Float), hOffset:Float = 1f.PPM,
+                                          vOffset:Float = 0f.PPM): Boolean = {
     val position = body.getWorldCenter
+
     checkCollision(
-      position.x + size._1 + offset, position.y - size._2/2,
-      position.x + size._1 + offset, position.y + size._2/2,
+      position.x + size._1 + hOffset, position.y - size._2 / 2 + vOffset,
+      position.x + size._1 + hOffset, position.y + size._2 / 2 + vOffset,
       body)
   }
 

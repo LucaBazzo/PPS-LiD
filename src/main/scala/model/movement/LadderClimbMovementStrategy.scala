@@ -12,7 +12,7 @@ import utils.HeroConstants.LADDER_CLIMB_VELOCITY
  *  @param entity the entity that will be moved in the world
  *  @param speed a multiplier to the climbing velocity of the hero
  */
-class LadderClimbMovementStrategy(private val entity: Hero, private var speed: Float) extends MovementStrategy {
+class LadderClimbMovementStrategy(private val entity: Hero, private var speed: Float) extends DoNothingMovementStrategy {
 
   override def apply(command: GameEvent): Unit = {
     if(checkState && checkCommand(command)) {
@@ -31,8 +31,6 @@ class LadderClimbMovementStrategy(private val entity: Hero, private var speed: F
   }
 
   override def alterSpeed(alteration: Float): Unit = this.speed += alteration
-
-  override def apply(): Unit = ???
 
   private def checkState: Boolean = entity.getState match {
     case State.Sliding | State.Attack01 | State.Attack02

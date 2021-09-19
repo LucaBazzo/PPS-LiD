@@ -1,9 +1,10 @@
-package view.screens.game
+package view.screens.menu
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.{SpriteBatch, TextureRegion}
 import com.badlogic.gdx.graphics.{Color, OrthographicCamera, Texture}
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.{Image, Label, Table}
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import model.entities.Items
@@ -72,11 +73,19 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
   table.row()
   table.add(bossTable)
 
+  val t = table.getBackground
+
+  // Set background
+  val backgroundTexture: Texture  = GUIFactory.createTexture("assets/backgrounds/background_loading.png")
+  table.background(new TextureRegionDrawable(new TextureRegion(backgroundTexture)))
+
   //adds the table to the stage
   stage.addActor(tableTop)
   stage.addActor(table)
   stage.addActor(itemsTable)
   stage.addActor(bossTable)
+
+  this.hideBossHealthBar()
 
   override def dispose(): Unit = stage.dispose()
 
@@ -182,6 +191,10 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
     levelText += levelNumber
 
     this.levelLabel.setText(levelText)
+  }
+
+  def loadingFinished(): Unit ={
+    table.background(t)
   }
 
   private def addItemToTable(path: String): Unit = {

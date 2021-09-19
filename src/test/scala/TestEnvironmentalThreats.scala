@@ -1,4 +1,4 @@
-import model.{Level, LevelImpl}
+import model.LevelImpl
 import model.entities.{Entity, EntityType, Hero, Statistic}
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -10,7 +10,7 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Water).get.head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).get.head.asInstanceOf[Hero]
     val prevMoveSpeed: Float = hero.getStatistic(Statistic.MovementSpeed).get
-    pool.collisionDetected(Option.apply(hero))
+    pool.collisionDetected(hero)
     assert(hero.getStatistic(Statistic.MovementSpeed).get < prevMoveSpeed )
   }
 
@@ -19,8 +19,8 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Water).get.head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).get.head.asInstanceOf[Hero]
     val prevMoveSpeed: Float = hero.getStatistic(Statistic.MovementSpeed).get
-    pool.collisionDetected(Option.apply(hero))
-    pool.collisionReleased(Option.apply(hero))
+    pool.collisionDetected(hero)
+    pool.collisionReleased(hero)
     assert(hero.getStatistic(Statistic.MovementSpeed).get == prevMoveSpeed )
   }
 
@@ -29,12 +29,14 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Lava).get.head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).get.head.asInstanceOf[Hero]
     val prevHP: Float = hero.getStatistic(Statistic.CurrentHealth).get
-    pool.collisionDetected(Option.apply(hero))
+    pool.collisionDetected(hero)
     Thread.sleep(1000)
+    pool.update()
     val midHP: Float = hero.getStatistic(Statistic.CurrentHealth).get
     assert(midHP < prevHP)
     Thread.sleep(1000)
-    pool.collisionReleased(Option.apply(hero))
+    pool.update()
+    pool.collisionReleased(hero)
     assert(hero.getStatistic(Statistic.CurrentHealth).get < midHP)
   }
 
@@ -43,21 +45,25 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Lava).get.head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).get.head.asInstanceOf[Hero]
     val prevHP: Float = hero.getStatistic(Statistic.CurrentHealth).get
-    pool.collisionDetected(Option.apply(hero))
+    pool.collisionDetected(hero)
     Thread.sleep(1500)
+    pool.update()
     val midHP: Float = hero.getStatistic(Statistic.CurrentHealth).get
     assert(midHP < prevHP)
-    pool.collisionReleased(Option.apply(hero))
+    pool.collisionReleased(hero)
     val finHP: Float = hero.getStatistic(Statistic.CurrentHealth).get
     assert(finHP <= midHP)
     Thread.sleep(1500)
+    pool.update()
     assert(hero.getStatistic(Statistic.CurrentHealth).get == finHP)
     Thread.sleep(1500)
+    pool.update()
     assert(hero.getStatistic(Statistic.CurrentHealth).get == finHP)
   }
 
   private def initialize(): EntitiesContainerMonitor = {
     val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
+    EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
     //TODO null temporaneo
     new LevelImpl(null, monitor, new ItemPoolImpl())
     EntitiesFactoryImpl.createLavaPool((10,10), (100,10))

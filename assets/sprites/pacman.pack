@@ -1,0 +1,12 @@
+
+pacman.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+pacman
+  rotate: false
+  xy: 1, 1
+  size: 112, 16
+  orig: 112, 16
+  offset: 0, 0
+  index: -1

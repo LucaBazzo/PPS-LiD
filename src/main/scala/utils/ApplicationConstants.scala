@@ -8,6 +8,8 @@ object ApplicationConstants {
 
   val TITLE = "Lost in Dungeons"
 
+  val ICON_PATH = "assets/sprites/lid_icon.png"
+
   val WIDTH_SCREEN: Int = 400
   val HEIGHT_SCREEN: Int = 208
 
@@ -30,14 +32,31 @@ object ApplicationConstants {
   val BOSS_ROOM_MAP_NAME: String = "boss-room"
   val ROOM_MAP_NAMES: Array[String] = Array("room1-final", "room2-final", "room3-final")
 
-  //Main Menu Screen Constants
+  //Menu Screens Constants
+  val MAIN_MENU_BACKGROUND_PATH: String = "assets/backgrounds/background_main_menu.png"
+  val GAME_OVER_BACKGROUND_PATH: String = "assets/backgrounds/background_game_over.png"
+  val BUTTONS_SKIN_PATH: String = "assets/buttons/buttons.pack"
+
+  val PLAY_BUTTON_STYLE_UP: String = "play_button_inactive"
+  val PLAY_BUTTON_STYLE_DOWN: String = "play_button_active"
+  val EXIT_BUTTON_STYLE_UP: String = "exit_button_inactive"
+  val EXIT_BUTTON_STYLE_DOWN: String = "exit_button_active"
+
   val DEFAULT_DISTANCE_FROM_TOP: Int = 70
+  val GAME_OVER_DISTANCE_FROM_TOP: Int = 50
   val DISTANCE_BUTTONS_DEFAULT: Int = 8
+  val DISTANCE_BUTTONS_GAME_OVER: Int = 28
   val BUTTONS_WIDTH: Int = 100
   val BUTTONS_HEIGHT: Int = 26
   val BUTTONS_FONT_SCALE: Float = 0.30f
   val DISTANCE_FROM_TD: Float = 3
   val DISTANCE_FROM_LR: Float = 25
+  val DISTANCE_FROM_LR_NO_BTN: Float = 30
+
+  val MAIN_MENU_PLAY_TEXT = "Play"
+  val MAIN_MENU_EXIT_TEXT = "Exit"
+  val GAME_OVER_MENU_YES_TEXT = "Yes"
+  val GAME_OVER_MENU_NO_TEXT = "No"
 
   //Game Screen HUD constants
   val FONT_PATH_LABEL: String = "assets/fonts/lunch_doubly_so.fnt"

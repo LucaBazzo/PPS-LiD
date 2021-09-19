@@ -8,8 +8,8 @@ import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
 import com.badlogic.gdx.math.Rectangle
 import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
-import model.entities.{EntityType, ItemPools}
-import model.helpers.EntitiesFactoryImpl
+import model.entities.{EntityType, Item}
+import model.helpers.{EntitiesFactoryImpl, ItemPools}
 
 case class TiledMapInfo(name: String, offset: (Int, Int))
 case class RichTiledMapInfo(name: String, offset: (Int, Int), tiledMap: TiledMap)
@@ -99,18 +99,16 @@ class TileMapManager extends WorldMapUtilities {
           case "ground" => spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
           case "bridge" => spawnEntity(() => EntitiesFactoryImpl.createPlatform(position, size))
           case "door" =>
-            if(richTiledMapInfo.name.equals(BOSS_ROOM_MAP_NAME))
-              EntitiesFactoryImpl.createBossDoor(size, position)
-            else
-              spawnEntity(() => EntitiesFactoryImpl.createDoor(size, position))
+            EntitiesFactoryImpl.createDoor(size, position, richTiledMapInfo.name!=null && richTiledMapInfo.name.equalsIgnoreCase(BOSS_ROOM_MAP_NAME))
           case "chest" =>
-            if(richTiledMapInfo.name.equals(TOP_KEY_ITEM_ROOM_NAME) || richTiledMapInfo.name.equals(BOTTOM_KEY_ITEM_ROOM_NAME))
-              if (richTiledMapInfo.name.toUpperCase.contains(keyLocation))
-                spawnEntity(() => EntitiesFactoryImpl.createItem(ItemPools.Keys, size, position))
+            if(richTiledMapInfo.name!=null && (richTiledMapInfo.name.equalsIgnoreCase(TOP_KEY_ITEM_ROOM_NAME) || richTiledMapInfo.name.equalsIgnoreCase(BOTTOM_KEY_ITEM_ROOM_NAME)))
+              if (richTiledMapInfo.name.contains(keyLocation))
+                spawnEntity(() => Item(ItemPools.Keys, EntitiesFactoryImpl.getItemPool,
+                  EntitiesFactoryImpl.getEntitiesContainerMonitor, size, position))
               else
-                spawnEntity(() => EntitiesFactoryImpl.createItem(ItemPools.Default, size, position))
-            else
-              spawnEntity(() => EntitiesFactoryImpl.createChest(size, position))
+                spawnEntity(() => Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool,
+                  EntitiesFactoryImpl.getEntitiesContainerMonitor, size, position))
+            else spawnEntity(() => EntitiesFactoryImpl.createChest(size, position))
           case "ladder" => spawnEntity(() => EntitiesFactoryImpl.createLadder(position, size))
           case "water" => spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position,size))
           case "lava" => spawnEntity(() => EntitiesFactoryImpl.createLavaPool(position, size))
@@ -118,7 +116,7 @@ class TileMapManager extends WorldMapUtilities {
             if(richTiledMapInfo.name.equals(BOSS_ROOM_MAP_NAME))
               spawnEntity(() => EntitiesFactoryImpl.spawnBoss(size, position))
             else
-              spawnEntity(() => EntitiesFactoryImpl.spawnEnemies(size, position))
+              spawnEntity(() => EntitiesFactoryImpl.spawnEnemy(size, position))
           case "portal" => spawnEntity(() => EntitiesFactoryImpl.createPortal(size, position))
           case _ => println("not supported layer: " + layer.getName)
         }
@@ -126,7 +124,7 @@ class TileMapManager extends WorldMapUtilities {
     })
   }
 
-  private def spawnEntity(f:() => Unit): Unit = EntitiesFactoryImpl.addPendingEntityCreation(f)
+  private def spawnEntity(f:() => Unit): Unit = EntitiesFactoryImpl.addPendingFunction(f)
 
   //in base al seed restituisce le stanze non fisse: le 6 stanze interne e il bordo interno del world
   private def getNonStaticRooms(seed: Int): List[String] = {
