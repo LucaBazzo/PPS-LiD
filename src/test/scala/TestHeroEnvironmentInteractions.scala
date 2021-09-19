@@ -61,11 +61,7 @@ class TestHeroEnvironmentInteractions extends AnyFlatSpec{
     //stop interaction
     hero.notifyCommand(interactionCommand)
     hero.update()
-    assertResult(State.Standing)(hero.getState)
-
-    hero.notifyCommand(Up)
-    hero.update()
-    assertResult(State.Jumping)(hero.getState)
+    assertResult(State.Falling)(hero.getState)
   }
 
   "A hero" should "add and remove an environment interaction" in {

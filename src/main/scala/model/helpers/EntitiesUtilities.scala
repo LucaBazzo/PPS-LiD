@@ -1,6 +1,6 @@
 package model.helpers
 
-import model.collisions.ImplicitConversions.RichFloat
+import model.collisions.ImplicitConversions.RichInt
 import model.entities.Entity
 import model.helpers.GeometricUtilities._
 import model.helpers.WorldUtilities._
@@ -21,11 +21,13 @@ trait EntitiesUtilities {
 
   def canEntitiesCollide(entity1: Entity, entity2: Entity): Boolean
 
-  def isPathObstructedOnTheLeft(entity:Entity, offset:Float = 5f.PPM): Boolean
-  def isPathObstructedOnTheRight(entity:Entity, offset:Float = 5f.PPM): Boolean
-  def isFloorPresentOnTheRight(entity:Entity, offset:Float = 5f.PPM): Boolean
-  def isFloorPresentOnTheLeft(entity:Entity, offset:Float = 5f.PPM): Boolean
+  def isPathObstructedOnTheLeft(entity: Entity, hOffset: Float, vOffset: Float): Boolean
 
+  def isPathObstructedOnTheRight(entity: Entity, hOffset: Float, vOffset: Float): Boolean
+
+  def isFloorPresentOnTheRight(entity: Entity, hOffset: Float, vOffset: Float): Boolean
+
+  def isFloorPresentOnTheLeft(entity: Entity, hOffset: Float, vOffset: Float): Boolean
 }
 
 object EntitiesUtilities extends EntitiesUtilities {
@@ -51,16 +53,15 @@ object EntitiesUtilities extends EntitiesUtilities {
   override def canEntitiesCollide(entity1:Entity, entity2:Entity): Boolean =
     canBodiesCollide(entity1.getBody, entity2.getBody)
 
-  override def isPathObstructedOnTheLeft(entity: Entity, offset: Float = 5.PPM): Boolean =
-    WorldUtilities.isPathObstructedOnTheLeft(entity.getBody, entity.getSize, offset)
+  override def isPathObstructedOnTheLeft(entity: Entity, hOffset: Float=0.PPM, vOffset: Float=0.PPM): Boolean =
+    WorldUtilities.isPathObstructedOnTheLeft(entity.getBody, entity.getSize, hOffset, vOffset)
 
-  override def isPathObstructedOnTheRight(entity: Entity, offset: Float = 5.PPM): Boolean =
-    WorldUtilities.isPathObstructedOnTheRight(entity.getBody, entity.getSize, offset)
+  override def isPathObstructedOnTheRight(entity: Entity, hOffset: Float=0.PPM, vOffset: Float=0.PPM): Boolean =
+    WorldUtilities.isPathObstructedOnTheRight(entity.getBody, entity.getSize, hOffset, vOffset)
 
-  override def isFloorPresentOnTheRight(entity: Entity, offset: Float = 5.PPM): Boolean =
-    WorldUtilities.isFloorPresentOnTheRight(entity.getBody, entity.getSize, offset)
+  override def isFloorPresentOnTheRight(entity: Entity, hOffset: Float=0.PPM, vOffset: Float=0.PPM): Boolean =
+    WorldUtilities.isFloorPresentOnTheRight(entity.getBody, entity.getSize, hOffset, vOffset)
 
-  override def isFloorPresentOnTheLeft(entity: Entity, offset: Float = 5.PPM): Boolean =
-    WorldUtilities.isFloorPresentOnTheLeft(entity.getBody, entity.getSize, offset)
-
+  override def isFloorPresentOnTheLeft(entity: Entity, hOffset: Float=0.PPM, vOffset: Float=0.PPM): Boolean =
+    WorldUtilities.isFloorPresentOnTheLeft(entity.getBody, entity.getSize, hOffset, vOffset)
 }

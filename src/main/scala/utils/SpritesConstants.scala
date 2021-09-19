@@ -14,6 +14,9 @@ object  SpritesConstants {
   val SLIME_SPRITE_WIDTH: Int = 125
   val SLIME_SPRITE_HEIGHT: Int = 125
 
+  val PACMAN_SPRITE_WIDTH: Int = 16
+  val PACMAN_SPRITE_HEIGHT: Int = 16
+
   val WORM_SPRITE_WIDTH: Int = 90
   val WORM_SPRITE_HEIGHT: Int = 90
 

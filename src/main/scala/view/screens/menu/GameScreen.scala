@@ -14,12 +14,13 @@ import model.entities._
 import model.helpers.{EntitiesGetter, EntitiesUtilities}
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
-import view.screens.helpers.{SoundEvent, SoundManager, TileMapManager}
+import view.screens.helpers.{SoundEvent, SoundManager}
+import model.world.TileMapManager
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager,
-                 private val tileMapHelper: TileMapManager) extends ScreenAdapter{
+                 private val tileMapManager: TileMapManager) extends ScreenAdapter{
 
   private val soundManager: SoundManager = new SoundManager
 
@@ -33,7 +34,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = tileMapHelper.getMapRenderer(null)
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = tileMapManager.getMapRenderer(null)
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
@@ -44,8 +45,6 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   Gdx.input.setInputProcessor(new GameInputProcessor(this.observerManager))
 
   private var removeLoadingScreen: Boolean = true
-
-  println("GAME SCREEN LOADED", removeLoadingScreen)
 
   private def update(deltaTime: Float): Unit = {
     this.handleHoldingInput()
@@ -106,12 +105,14 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
             soundManager.playSound(SoundEvent.Attack3)
           if(!previousStates(hero).equals(State.BowAttacking) && hero.getState.equals(State.BowAttacking))
             soundManager.playSound(SoundEvent.BowAttack)
-          if(!previousStates(hero).equals(State.pickingItem) && hero.getState.equals(State.pickingItem))
-            soundManager.playSound(SoundEvent.PickItem)
           if(!previousStates(hero).equals(State.AirDownAttacking) && hero.getState.equals(State.AirDownAttacking))
             soundManager.playSound(SoundEvent.AirDownAttack)
+          if(!previousStates(hero).equals(State.pickingItem) && hero.getState.equals(State.pickingItem))
+            soundManager.playSound(SoundEvent.PickItem)
           if(!previousStates(hero).equals(State.Hurt) && hero.getState.equals(State.Hurt))
             soundManager.playSound(SoundEvent.Hurt)
+          if(!previousStates(hero).equals(State.Dying) && hero.getState.equals(State.Dying))
+            soundManager.playSound(SoundEvent.Dying)
         }
         previousStates = previousStates + (hero -> hero.getState)
       }
@@ -146,21 +147,15 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
           if(previousStates.contains(entity)){
 
             entity.getType match {
-              case EntityType.Chest => {
-                if(previousStates(entity).equals(State.Standing) && entity.getState.equals(State.Opening))
-                  soundManager.playSound(SoundEvent.Jump)
-              }
-              case EntityType.Door => {
-                if(previousStates(entity).equals(State.Closed) && entity.getState.equals(State.Opening))
-                  soundManager.playSound(SoundEvent.Jump)
-              }
-              case EntityType.Enemy => {
-
-                if(!previousStates(entity).equals(State.Dying) && entity.getState.equals(State.Dying)) {
-                  soundManager.playSound(SoundEvent.Dying)
-                  println("SOUND DYING")
-                }
-              }
+              case EntityType.Chest =>
+                if(!previousStates(entity).equals(State.Opening) && entity.getState.equals(State.Opening))
+                  soundManager.playSound(SoundEvent.OpeningChest)
+              case EntityType.Door =>
+                if(!previousStates(entity).equals(State.Opening) && entity.getState.equals(State.Opening))
+                  soundManager.playSound(SoundEvent.OpeningDoor)
+              case EntityType.EnemySkeleton | EntityType.EnemySlime | EntityType.EnemyPacman | EntityType.EnemyWorm =>
+                if(!previousStates(entity).equals(State.Dying) && entity.getState.equals(State.Dying))
+                  soundManager.playSound(SoundEvent.EnemyDeath)
               case _ =>
             }
           }
@@ -174,7 +169,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
       this.camera.update()
 
-      this.tileMapHelper.renderWorld(orthogonalTiledMapRenderer)
+      this.tileMapManager.renderWorld(orthogonalTiledMapRenderer)
 
       //what will be shown by the camera
       batch.setProjectionMatrix(camera.combined)
@@ -208,9 +203,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   override def dispose(): Unit = {
     orthogonalTiledMapRenderer.dispose()
-    if(this.entitiesGetter.getWorld.nonEmpty)
-      this.entitiesGetter.getWorld.get.dispose()
     box2DDebugRenderer.dispose()
     hud.dispose()
+    this.observerManager.notifyEvent(GameEvent.CloseApplication)
   }
 }

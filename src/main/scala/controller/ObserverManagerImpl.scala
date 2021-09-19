@@ -6,8 +6,7 @@ object GameEvent extends Enumeration {
   type GameEvent = Value
   val StartGame, ReturnToMenu, CloseApplication, SetMap, MapLoaded,
       Up, UpReleased, MoveRight, MoveLeft, Slide, Down, DownReleased,
-      Interaction,
-      Attack, BowAttack = Value
+      Interaction, Attack, BowAttack = Value
 }
 
 /** Observer for controller; these methods will be notified from the view.

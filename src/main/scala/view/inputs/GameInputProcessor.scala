@@ -9,7 +9,7 @@ import controller.{GameEvent, ObserverManager}
  *
  *  @param observerManager The manager that send messages from View to Controller
  */
-class GameInputProcessor(private val observerManager: ObserverManager) extends InputProcessor{
+class GameInputProcessor(private val observerManager: ObserverManager) extends InputProcessor {
 
   override def keyDown(i: Int): Boolean = {
     i match {

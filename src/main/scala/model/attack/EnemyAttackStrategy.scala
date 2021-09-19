@@ -1,15 +1,15 @@
 package model.attack
 
+import model.entities.MobileEntity.{createEnergyBallAttack, createFireballAttack, createMeleeAttack}
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, _}
-import model.helpers.EntitiesFactoryImpl.{createEnergyBallAttack, createFireballAttack, createMeleeAttack}
 import model.helpers.EntitiesUtilities._
 import utils.EnemiesConstants
 import utils.EnemiesConstants.{SKELETON_ATTACK_OFFSET, SKELETON_ATTACK_SIZE, SLIME_ATTACK_OFFSET, SLIME_ATTACK_SIZE, WIZARD_BOSS_ATTACK1_OFFSET, WIZARD_BOSS_ATTACK1_SIZE, WIZARD_BOSS_ATTACK2_OFFSET, WIZARD_BOSS_ATTACK2_SIZE}
 
 abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
                                    protected val targetEntity: Entity)
-  extends AttackStrategy {
+  extends DoNothingAttackStrategy {
 
   protected val stats: Map[Statistic, Float] = this.sourceEntity.getStatistics
   protected val attackFrequency: Float = this.stats(Statistic.AttackFrequency)

@@ -13,8 +13,8 @@ object CollisionConstants {
   val HERO_FEET_COLLISIONS: Short = EntityCollisionBit.Immobile |
     EntityCollisionBit.Platform | EntityCollisionBit.PlatformSensor | EntityCollisionBit.Door
 
-  val ENEMY_COLLISIONS: Short = EntityCollisionBit.Immobile | EntityCollisionBit.Sword |
-    EntityCollisionBit.Arrow
+  val ENEMY_COLLISIONS: Short = EntityCollisionBit.Immobile | EntityCollisionBit.Platform  | EntityCollisionBit.Sword | EntityCollisionBit.Arrow |
+    EntityCollisionBit.Door
 
   val PLATFORM_COLLISIONS: Short = EntityCollisionBit.Hero | EntityCollisionBit.Enemy
 
@@ -44,5 +44,7 @@ object CollisionConstants {
   val ENERGY_BALL_COLLISIONS: Short = EntityCollisionBit.Hero | EntityCollisionBit.Sword
 
   val ENEMY_MELEE_ATTACK_COLLISIONS: Short = EntityCollisionBit.Hero
+
+  val ARROW_COLLISIONS: Short = EntityCollisionBit.Immobile | EntityCollisionBit.Enemy
 
 }

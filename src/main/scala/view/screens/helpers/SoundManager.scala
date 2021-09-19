@@ -1,35 +1,43 @@
 package view.screens.helpers
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.{Music, Sound}
-import utils.ApplicationConstants.{JUMP_SOUND_LOCATION, LEVEL_MUSIC_LOCATION}
-import view.screens.helpers.SoundEvent.{Jump, SoundEvent, WorldSoundtrack}
+import utils.SoundConstants.{getMusicMap, getSoundMap}
+import view.screens.helpers.SoundEvent.{AirDownAttack, Attack1, Attack2, Attack3, BowAttack, Dying, EnemyAttack, EnemyDeath, Hurt, Jump, OpeningChest, OpeningDoor, PickItem, SoundEvent, WorldSoundtrack}
 
 object SoundEvent extends Enumeration {
   type SoundEvent = Value
   val WorldSoundtrack, Jump, Attack1, Attack2, Attack3, BowAttack, AirDownAttack, Hurt, Dying,
   OpeningChest, EnemyAttack, EnemyDeath, OpeningDoor, PickItem = Value
 }
+
 class SoundManager {
 
-  private val worldSoundtrack: Music = Gdx.audio.newMusic(Gdx.files.internal(LEVEL_MUSIC_LOCATION))
-  private val jumpSound: Sound = Gdx.audio.newSound(Gdx.files.internal(JUMP_SOUND_LOCATION))
-  private val attackSound1: Sound = null
-  private val attackSound2: Sound = null
-  private val attackSound3: Sound = null
-  private val keyItemSound: Sound = null
-  private val powerupSound: Sound = null
+  private val musicMap: Map[SoundEvent, Music] = getMusicMap()
+  private val soundMap: Map[SoundEvent, Sound] = getSoundMap()
 
   def playSound(soundEvent: SoundEvent): Unit = {
 
+    println("PLAY SOUND: " + soundEvent)
+
     soundEvent match {
       case WorldSoundtrack => {
-        worldSoundtrack.setLooping(true)
-        worldSoundtrack.play()
+        musicMap(WorldSoundtrack).setLooping(true)
+        musicMap(WorldSoundtrack).play
       }
-      case Jump => this.jumpSound.play
-      case _ => this.jumpSound.play()
-        //println("unsupported sound")
+      case Jump => soundMap(Jump).play
+      case Attack1 => soundMap(Attack1).play
+      case Attack2 => soundMap(Attack2).play
+      case Attack3 => soundMap(Attack3).play
+      case BowAttack => soundMap(BowAttack).play
+      case AirDownAttack => soundMap(AirDownAttack).play
+      case Hurt => soundMap(Hurt).play
+      case Dying => soundMap(Dying).play
+      case OpeningChest => soundMap(OpeningChest).play
+      case OpeningDoor => soundMap(OpeningDoor).play
+      case PickItem => soundMap(PickItem).play
+      case EnemyAttack => soundMap(EnemyAttack).play
+      case EnemyDeath => soundMap(EnemyDeath).play
+      case _ => println("unsupported sound")
     }
   }
 }

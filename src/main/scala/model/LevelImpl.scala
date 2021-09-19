@@ -30,7 +30,7 @@ class LevelImpl(private val model: Model,
   this.entitiesContainer.setWorld(Option.apply(this.world))
   this.world.setContactListener(new CollisionManager(this.entitiesContainer))
 
-  private val hero: Hero = entitiesFactory.createHeroEntity(this.entitiesContainer.getHeroStatistics)
+  private val hero: Hero = Hero(this.entitiesContainer.getHeroStatistics)
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
 
