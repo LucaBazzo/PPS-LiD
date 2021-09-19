@@ -385,13 +385,12 @@
   <object id="121" x="184" y="8" width="8" height="24"/>
  </objectgroup>
  <objectgroup id="10" name="enemy">
-  <object id="106" x="296" y="40"/>
-  <object id="107" x="248" y="120"/>
-  <object id="108" x="192" y="192"/>
-  <object id="109" x="272" y="304"/>
-  <object id="110" x="184" y="264"/>
-  <object id="111" x="96" y="312"/>
-  <object id="112" x="88" y="224"/>
+  <object id="106" x="296" y="32"/>
+  <object id="107" x="256" y="112"/>
+  <object id="109" x="272" y="296"/>
+  <object id="110" x="192" y="256"/>
+  <object id="111" x="96" y="304"/>
+  <object id="112" x="120" y="232"/>
   <object id="113" x="176" y="112"/>
  </objectgroup>
 </map>

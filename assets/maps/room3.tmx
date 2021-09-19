@@ -405,13 +405,13 @@
  </objectgroup>
  <objectgroup id="12" name="enemy">
   <object id="75" x="112" y="304"/>
-  <object id="76" x="192" y="272"/>
+  <object id="76" x="192" y="264"/>
   <object id="77" x="88" y="248"/>
-  <object id="78" x="40" y="160"/>
+  <object id="78" x="32" y="152"/>
   <object id="79" x="112" y="24"/>
   <object id="80" x="256" y="120"/>
   <object id="81" x="280" y="168"/>
   <object id="82" x="272" y="216"/>
-  <object id="83" x="264" y="312"/>
+  <object id="83" x="264" y="304"/>
  </objectgroup>
 </map>

@@ -329,12 +329,12 @@
   <object id="113" x="112" y="249.375" width="24" height="6.625"/>
  </objectgroup>
  <objectgroup id="11" name="enemy">
-  <object id="115" x="40" y="40"/>
-  <object id="116" x="112" y="56"/>
-  <object id="118" x="224" y="304"/>
-  <object id="119" x="40" y="312"/>
-  <object id="120" x="112" y="312"/>
-  <object id="122" x="40" y="224"/>
+  <object id="115" x="48" y="32"/>
+  <object id="116" x="160" y="24"/>
+  <object id="118" x="224" y="296"/>
+  <object id="119" x="40" y="304"/>
+  <object id="120" x="112" y="304"/>
+  <object id="122" x="40" y="216"/>
   <object id="125" x="192" y="8" width="8" height="24"/>
  </objectgroup>
  <objectgroup id="7" name="bridge">
