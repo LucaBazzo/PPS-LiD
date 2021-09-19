@@ -14,6 +14,18 @@ import model.helpers.EntitiesFactoryImpl
 case class TiledMapInfo(name: String, offset: (Int, Int))
 case class RichTiledMapInfo(name: String, offset: (Int, Int), tiledMap: TiledMap)
 
+trait WorldMapUtilities {
+
+  def getMapRenderer(tiledMap: TiledMap): OrthogonalTiledMapRenderer
+
+  def updateTiledMapList(seed: Int): Unit
+
+  def renderWorld(orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer): Unit
+
+  def createWorldEntities(): Unit
+
+}
+
 class TileMapManager extends WorldMapUtilities {
 
   private val scale: Float = 1/(PIXELS_PER_METER/2)
