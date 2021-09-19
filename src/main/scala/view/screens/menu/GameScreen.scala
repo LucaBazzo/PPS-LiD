@@ -14,12 +14,12 @@ import model.entities._
 import model.helpers.{EntitiesGetter, EntitiesUtilities}
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
-import view.screens.helpers.TileMapManager
+import model.world.TileMapManager
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager,
-                 private val tileMapHelper: TileMapManager) extends ScreenAdapter{
+                 private val tileMapManager: TileMapManager) extends ScreenAdapter{
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   camera.translate(300f, 300f)
@@ -29,7 +29,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = tileMapHelper.getMapRenderer(null)
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = tileMapManager.getMapRenderer(null)
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
@@ -114,7 +114,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
       this.camera.update()
 
-      this.tileMapHelper.renderWorld(orthogonalTiledMapRenderer)
+      this.tileMapManager.renderWorld(orthogonalTiledMapRenderer)
 
       //what will be shown by the camera
       batch.setProjectionMatrix(camera.combined)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="40" height="40" tilewidth="8" tileheight="8" infinite="0" backgroundcolor="#1b2037" nextlayerid="11" nextobjectid="117">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="40" height="40" tilewidth="8" tileheight="8" infinite="0" backgroundcolor="#1b2037" nextlayerid="12" nextobjectid="122">
  <tileset firstgid="1" name="Final_tileset" tilewidth="8" tileheight="8" tilecount="676" columns="26" objectalignment="topleft">
   <image source="../textures/final-tileset.png" width="208" height="208"/>
   <tile id="135">
@@ -378,15 +378,19 @@
   <object id="89" x="248" y="41.125" width="32" height="6.875"/>
   <object id="90" x="192" y="33.125" width="24" height="6.875"/>
   <object id="91" x="40" y="225" width="40" height="7"/>
+  <object id="117" x="264" y="8" width="8" height="32"/>
+  <object id="120" x="296" y="208" width="8" height="96"/>
+ </objectgroup>
+ <objectgroup id="11" name="door">
+  <object id="121" x="184" y="8" width="8" height="24"/>
  </objectgroup>
  <objectgroup id="10" name="enemy">
-  <object id="106" x="296" y="40"/>
-  <object id="107" x="248" y="120"/>
-  <object id="108" x="192" y="192"/>
-  <object id="109" x="272" y="304"/>
-  <object id="110" x="184" y="264"/>
-  <object id="111" x="96" y="312"/>
-  <object id="112" x="88" y="224"/>
+  <object id="106" x="296" y="32"/>
+  <object id="107" x="256" y="112"/>
+  <object id="109" x="272" y="296"/>
+  <object id="110" x="192" y="256"/>
+  <object id="111" x="96" y="304"/>
+  <object id="112" x="120" y="232"/>
   <object id="113" x="176" y="112"/>
  </objectgroup>
 </map>

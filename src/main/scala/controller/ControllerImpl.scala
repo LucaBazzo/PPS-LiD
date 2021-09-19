@@ -1,12 +1,12 @@
 package controller
 
-import _root_.utils.ApplicationConstants.GAME_LOOP_STEP
+import _root_.utils.ApplicationConstants.{GAME_LOOP_STEP, RANDOM_SEED}
 import com.badlogic.gdx.Gdx
 import controller.GameEvent.GameEvent
 import model._
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl}
+import model.world.TileMapManager
 import view._
-import view.screens.helpers.TileMapManager
 
 import java.util.concurrent.{ExecutorService, Executors, ScheduledExecutorService, TimeUnit}
 
@@ -33,10 +33,10 @@ class ControllerImpl extends Controller with Observer {
   private val observerManager: ObserverManager = new ObserverManagerImpl()
   this.observerManager.addObserver(this)
 
-  private val tileMapHelper: TileMapManager = new TileMapManager
+  private val tileMapManager: TileMapManager = new TileMapManager
 
-  private val view: View = new ViewImpl(entitiesContainer, observerManager, tileMapHelper)
-  private val model: Model = new ModelImpl(this, entitiesContainer, tileMapHelper)
+  private val view: View = new ViewImpl(entitiesContainer, observerManager, tileMapManager)
+  private val model: Model = new ModelImpl(this, entitiesContainer, tileMapManager)
 
   private var executorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
   private var gameLoop: GameLoop = new GameLoopImpl(model, this)
@@ -69,7 +69,7 @@ class ControllerImpl extends Controller with Observer {
   private def startGame(): Unit = {
     this.view.startGame()
     Gdx.app.postRunnable(() => {
-      tileMapHelper.loadTiledMaps()
+      tileMapManager.updateTiledMapList(RANDOM_SEED)
       this.handleEvent(GameEvent.MapLoaded)
     })
   }
