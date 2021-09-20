@@ -147,9 +147,6 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
           if(previousStates.contains(entity)){
 
             entity.getType match {
-              case EntityType.Chest =>
-                if(!previousStates(entity).equals(State.Opening) && entity.getState.equals(State.Opening))
-                  soundManager.playSound(SoundEvent.OpeningChest)
               case EntityType.Door =>
                 if(!previousStates(entity).equals(State.Opening) && entity.getState.equals(State.Opening))
                   soundManager.playSound(SoundEvent.OpeningDoor)

@@ -2,12 +2,13 @@ package view.screens.helpers
 
 import com.badlogic.gdx.audio.{Music, Sound}
 import utils.SoundConstants.{getMusicMap, getSoundMap}
-import view.screens.helpers.SoundEvent.{AirDownAttack, Attack1, Attack2, Attack3, BowAttack, Dying, EnemyAttack, EnemyDeath, Hurt, Jump, OpeningChest, OpeningDoor, PickItem, SoundEvent, WorldSoundtrack}
+import view.screens.helpers.SoundEvent.{AirDownAttack, Attack1, Attack2, Attack3, BowAttack, Dying, EnemyAttack, EnemyDeath, Hurt, Jump, OpeningDoor, PickItem, SoundEvent, WorldSoundtrack}
 
 object SoundEvent extends Enumeration {
   type SoundEvent = Value
-  val WorldSoundtrack, Jump, Attack1, Attack2, Attack3, BowAttack, AirDownAttack, Hurt, Dying,
-  OpeningChest, EnemyAttack, EnemyDeath, OpeningDoor, PickItem = Value
+  val WorldSoundtrack, OpeningScreenSoundtrack,
+  Jump, Attack1, Attack2, Attack3, BowAttack, AirDownAttack, Hurt, Dying,
+  EnemyAttack, EnemyDeath, OpeningDoor, PickItem = Value
 }
 
 class SoundManager {
@@ -32,7 +33,6 @@ class SoundManager {
       case AirDownAttack => soundMap(AirDownAttack).play
       case Hurt => soundMap(Hurt).play
       case Dying => soundMap(Dying).play
-      case OpeningChest => soundMap(OpeningChest).play
       case OpeningDoor => soundMap(OpeningDoor).play
       case PickItem => soundMap(PickItem).play
       case EnemyAttack => soundMap(EnemyAttack).play
