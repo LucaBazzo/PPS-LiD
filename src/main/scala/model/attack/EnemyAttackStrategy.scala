@@ -93,8 +93,7 @@ class SkeletonAttack(override protected val sourceEntity: LivingEntity,
 
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack01)
-    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity,
-      size = SKELETON_ATTACK_SIZE, offset = SKELETON_ATTACK_OFFSET))
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, SKELETON_ATTACK_SIZE, SKELETON_ATTACK_OFFSET))
     this.attackInstance.get.getBody.setActive(false)
   }
 }
@@ -114,8 +113,7 @@ class SlimeAttack(override protected val sourceEntity: LivingEntity,
 
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack01)
-    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity,
-      size = SLIME_ATTACK_SIZE, offset = SLIME_ATTACK_OFFSET))
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, SLIME_ATTACK_SIZE, SLIME_ATTACK_OFFSET))
     this.attackInstance.get.getBody.setActive(false)
   }
 }
@@ -135,8 +133,7 @@ class WizardFirstAttack(override protected val sourceEntity: LivingEntity,
 
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack01)
-    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity,
-      size = WIZARD_BOSS_ATTACK1_SIZE, offset = WIZARD_BOSS_ATTACK1_OFFSET))
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, WIZARD_BOSS_ATTACK1_SIZE, WIZARD_BOSS_ATTACK1_OFFSET))
     this.attackInstance.get.getBody.setActive(false)
   }
 }
@@ -156,8 +153,7 @@ class WizardSecondAttack(override protected val sourceEntity: LivingEntity,
 
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack02)
-    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, this.targetEntity,
-      size = WIZARD_BOSS_ATTACK2_SIZE, offset = WIZARD_BOSS_ATTACK2_OFFSET))
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, WIZARD_BOSS_ATTACK2_SIZE, WIZARD_BOSS_ATTACK2_OFFSET))
     this.attackInstance.get.getBody.setActive(false)
   }
 }
