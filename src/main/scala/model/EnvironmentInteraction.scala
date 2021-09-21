@@ -1,13 +1,13 @@
 package model
 
 import controller.GameEvent
-import controller.GameEvent.GameEvent
-import model.collisions.ImplicitConversions.RichTuple2
+import controller.GameEvent.{GameEvent, Up}
 import model.collisions.CollisionMonitor
-import model.entities.State.State
+import model.collisions.ImplicitConversions.RichTuple2
+import model.entities.State._
 import model.entities._
 import model.helpers.{EntitiesFactoryImpl, ItemPools}
-import model.movement.{HeroMovements, LadderClimbMovementStrategy}
+import model.movement.LadderClimbMovementStrategy
 import utils.EnvironmentConstants.{OPEN_CHEST_COLLISION_BIT, OPEN_DOOR_COLLISION_BIT, THROUGH_PLATFORM_COLLISION_BIT}
 import utils.ItemConstants._
 
@@ -43,33 +43,30 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
   private var applied: Boolean = false
 
   override def apply(): Unit = {
-    this.entity.stopMovement()
 
     if(!applied)
       this.startLadderInteraction()
-    else {
-      this.restoreNormalMovementStrategy()
-      val state: State = this.entity.getState
-      if(!state.equals(State.Jumping) && !state.equals(State.Somersault))
-        this.entity.setState(State.Jumping)
-      else
-        this.entity.setState(State.Falling)
-    }
+    else
+      this.stopLadderInteraction()
 
     this.applied = !applied
   }
 
   private def startLadderInteraction(): Unit = {
+    this.entity.stopMovement()
     this.entity.setMovementStrategy(new LadderClimbMovementStrategy(this.entity, this.entity.getStatistic(Statistic.MovementSpeed).get))
     this.entity.setState(State.LadderIdle)
     this.entity.getEntityBody.setGravityScale(0)
   }
 
-  private def restoreNormalMovementStrategy(): Unit = {
-    this.entity.setMovementStrategy(new HeroMovements(this.entity, this.entity.getStatistic(Statistic.MovementSpeed).get))
-    this.entity.getEntityBody.setGravityScale()
-    this.entity.setState(State.Falling)
-    this.entity.getBody.setAwake(true)
+  private def stopLadderInteraction(): Unit = {
+    if(entity is LadderClimbing) {
+      this.entity.setState(Jumping)
+      this.entity.restoreNormalMovementStrategy()
+      this.entity.notifyCommand(Up)
+    }
+    else
+      this.entity.restoreNormalMovementStrategy()
   }
 }
 

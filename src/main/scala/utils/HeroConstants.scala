@@ -24,10 +24,10 @@ object HeroConstants {
 
   val RUN_VELOCITY: Float = 60f.PPM
   val JUMP_VELOCITY: Float = 175f.PPM
-  val SLIDE_VELOCITY: Float = 200f.PPM
+  val SLIDE_VELOCITY: Float = 120f.PPM
   val AIR_DOWN_ATTACK_VELOCITY: Float = 300f.PPM
 
-  val LADDER_CLIMB_VELOCITY: Float = 60f.PPM
+  val LADDER_CLIMB_VELOCITY: Float = 70f.PPM
 
   val WAIT_TIME_DECREMENT: Int = 10
   val SHORT_WAIT_TIME: Int = 150

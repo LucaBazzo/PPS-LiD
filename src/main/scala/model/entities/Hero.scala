@@ -40,13 +40,6 @@ trait Hero extends LivingEntity {
    */
   def setLittle(little: Boolean): Unit
 
-  /** Changes the hero box that will collide with another entities.
-   *
-   *  @param newSize the new size of the box
-   */
-  def changeHeroFixture(newSize: (Float, Float)): Unit =
-    EntitiesFactoryImpl.addPendingFunction(() => Hero.changeHeroSize(this, newSize))
-
   def getItemsPicked: List[Items]
   /** Called when the hero pick an important item.
    *
@@ -90,6 +83,11 @@ trait Hero extends LivingEntity {
    *  @param isAttacking true if the air attack has begun
    */
   def setAirAttacking(isAttacking: Boolean): Unit
+
+  /** Sets the normal movement strategy of the Hero.
+   *
+   */
+  def restoreNormalMovementStrategy(): Unit
 
   /** Remove one of Hero's held items
    *
@@ -244,7 +242,7 @@ class HeroImpl(private val entityType: EntityType,
         this.setState(State.Standing)
 
       if(checkNotLittle) {
-        this.changeHeroFixture(HERO_SIZE)
+        Hero.changeHeroSize(this, HERO_SIZE)
         this.setLittle(false)
       }
 
@@ -321,10 +319,11 @@ class HeroImpl(private val entityType: EntityType,
 
   override def setAirAttacking(isAttacking: Boolean): Unit = this.isAirAttacking = isAttacking
 
-  private def restoreNormalMovementStrategy(): Unit = {
+  override def restoreNormalMovementStrategy(): Unit = {
     this.setMovementStrategy(new HeroMovements(this, this.getStatistic(MovementSpeed).get))
     this.getEntityBody.setGravityScale()
-    this.setState(State.Falling)
+    if(this.checkRestore)
+      this.setState(State.Falling)
     this.getBody.setAwake(true)
   }
 
@@ -335,6 +334,7 @@ class HeroImpl(private val entityType: EntityType,
   private def isMovingHorizontally: Boolean = this.entityBody.getBody.getLinearVelocity.x != 0 && this.entityBody.getBody.getLinearVelocity.y == 0
   private def isIdle = this.entityBody.getBody.getLinearVelocity.x == 0 && this.entityBody.getBody.getLinearVelocity.y == 0
 
+  private def checkRestore: Boolean = (this isNot Jumping) && (this isNot Somersault) && (this isNot Sliding)
   private def checkFalling: Boolean = isFalling && (this isNot Jumping) && (this isNot LadderDescending) && (this isNot LadderClimbing) && (this isNot AirDownAttacking)
   private def checkRunning: Boolean = isMovingHorizontally && ((this is Jumping) || (this is Falling))
   private def checkIdle: Boolean = {
