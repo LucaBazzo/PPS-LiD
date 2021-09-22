@@ -9,7 +9,7 @@ object HeroConstants {
   val HERO_STATISTICS_DEFAULT: Map[Statistic, Float] = Map(
     Statistic.Health -> 1000,
     Statistic.CurrentHealth -> 1000,
-    Statistic.Strength -> 2000,
+    Statistic.Strength -> 50,
     Statistic.MovementSpeed -> 1,
     Statistic.Defence -> 0)
 
