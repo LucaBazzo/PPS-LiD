@@ -9,7 +9,7 @@ import utils.EnemiesConstants.{SKELETON_ATTACK_OFFSET, SKELETON_ATTACK_SIZE, SLI
 
 abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
                                    protected val targetEntity: Entity)
-  extends DoNothingAttackStrategy {
+  extends AttackStrategyImpl {
 
   protected val stats: Map[Statistic, Float] = this.sourceEntity.getStatistics
   protected val attackFrequency: Float = this.stats(Statistic.AttackFrequency)
@@ -37,7 +37,7 @@ abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
   override def isAttackFinished: Boolean =
     System.currentTimeMillis() - this.lastAttackTime > this.attackDuration
 
-  protected def canAttack: Boolean = this.isAttackFinished &&
+    protected def canAttack: Boolean = this.isAttackFinished &&
     System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
     isEntityVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
     getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
@@ -78,8 +78,8 @@ abstract class MeleeAttackStrategy(override protected val sourceEntity: LivingEn
   protected def updateAttack(attackProgress:Long, isAttackActive:Boolean): Unit
 }
 
-class SkeletonAttack(override protected val sourceEntity: LivingEntity,
-                     override protected val targetEntity: Entity)
+case class SkeletonAttack(override protected val sourceEntity: LivingEntity,
+                          override protected val targetEntity: Entity)
   extends MeleeAttackStrategy(sourceEntity, targetEntity) {
 
   override protected def updateAttack(attackProgress:Long, isAttackActive:Boolean):Unit = {
@@ -98,7 +98,7 @@ class SkeletonAttack(override protected val sourceEntity: LivingEntity,
   }
 }
 
-class SlimeAttack(override protected val sourceEntity: LivingEntity,
+case class SlimeAttack(override protected val sourceEntity: LivingEntity,
                   override protected val targetEntity: Entity)
   extends MeleeAttackStrategy(sourceEntity, targetEntity) {
 
@@ -118,7 +118,7 @@ class SlimeAttack(override protected val sourceEntity: LivingEntity,
   }
 }
 
-class WizardFirstAttack(override protected val sourceEntity: LivingEntity,
+case class WizardFirstAttack(override protected val sourceEntity: LivingEntity,
                         override protected val targetEntity: Entity)
   extends MeleeAttackStrategy(sourceEntity, targetEntity) {
 
@@ -138,7 +138,7 @@ class WizardFirstAttack(override protected val sourceEntity: LivingEntity,
   }
 }
 
-class WizardSecondAttack(override protected val sourceEntity: LivingEntity,
+case class WizardSecondAttack(override protected val sourceEntity: LivingEntity,
                          override protected val targetEntity: Entity)
   extends MeleeAttackStrategy(sourceEntity, targetEntity) {
 
@@ -158,7 +158,7 @@ class WizardSecondAttack(override protected val sourceEntity: LivingEntity,
   }
 }
 
-class WizardEnergyBallAttack(override protected val sourceEntity: LivingEntity,
+case class WizardEnergyBallAttack(override protected val sourceEntity: LivingEntity,
                              override protected val targetEntity: Entity)
   extends EnemyAttackStrategy(sourceEntity, targetEntity) {
 
@@ -177,7 +177,7 @@ class WizardEnergyBallAttack(override protected val sourceEntity: LivingEntity,
 }
 
 
-class WormFireballAttack(override protected val sourceEntity: LivingEntity,
+case class WormFireballAttack(override protected val sourceEntity: LivingEntity,
                          override protected val targetEntity: Entity)
   extends EnemyAttackStrategy(sourceEntity, targetEntity) {
 
