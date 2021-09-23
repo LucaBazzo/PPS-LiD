@@ -5,7 +5,7 @@ import model.EntityBody
 import model.collisions.{CollisionStrategy, DoNothingCollisionStrategy}
 import model.entities.EntityType.EntityType
 import model.entities.State.State
-import model.helpers.EntitiesFactoryImpl
+import model.helpers.EntitiesFactoryImpl.{pendingChangeCollisions, pendingDestroyBody, removeEntity}
 
 object State extends Enumeration {
   type State = Value
@@ -60,14 +60,15 @@ trait Entity {
   def getEntityBody: EntityBody
 
   def destroyEntity(): Unit = {
-    EntitiesFactoryImpl.pendingDestroyBody(this.getBody)
+
+    pendingDestroyBody(this.getBody)
     this.getBody.getJointList.toArray().foreach(joint => {
-      EntitiesFactoryImpl.pendingDestroyBody(joint.other)
+      pendingDestroyBody(joint.other)
     })
-    EntitiesFactoryImpl.removeEntity(this)
+    removeEntity(this)
   }
 
-  def changeCollisions(entityCollisionBit: Short): Unit = EntitiesFactoryImpl.pendingChangeCollisions(this, entityCollisionBit)
+  def changeCollisions(entityCollisionBit: Short): Unit = pendingChangeCollisions(this, entityCollisionBit)
 
   def isColliding: Boolean
 }

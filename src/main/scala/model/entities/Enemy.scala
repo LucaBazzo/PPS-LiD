@@ -13,7 +13,9 @@ import model.helpers.ItemPools
 import model.{EntityBody, Score}
 import utils.ApplicationConstants.RANDOM
 import utils.CollisionConstants.ENEMY_COLLISIONS
+import utils.EnemiesConstants
 import utils.EnemiesConstants._
+import utils.HeroConstants.SHORT_WAIT_TIME
 
 trait Enemy {
   // TODO: rifattorizzare a livello di living entity?
@@ -91,20 +93,26 @@ class EnemyImpl(private val entityType: EntityType,
           with LivingEntity with Score with Enemy {
 
   var behaviours:Option[EnemyBehaviours] = None
+  var timer: Long = 0
+
 
   override def getScore: Int = this.score
 
   override def update(): Unit = {
     super.update()
-    if (this isNot Dying) {
-      if (this.behaviours.isDefined) {
-        this.behaviours.get.update
+    if ((this isNot Dying) && (this isNot Hurt)) {
+      this.behaviours.get.update
 
-        this.movementStrategy = this.behaviours.get.getMovementStrategy
-        this.attackStrategy = this.behaviours.get.getAttackStrategy
-      }
+      this.movementStrategy = this.behaviours.get.getMovementStrategy
+      this.attackStrategy = this.behaviours.get.getAttackStrategy
+
       this.movementStrategy.apply()
       this.attackStrategy.apply()
+    }
+
+    if (this.timer != 0 && System.currentTimeMillis() - this.timer > SHORT_WAIT_TIME) {
+      this setState State.Standing
+      this.timer = 0
     }
   }
 
@@ -114,26 +122,27 @@ class EnemyImpl(private val entityType: EntityType,
     super.sufferDamage(damage)
     if (this is Dying) {
       this.behaviours.get.getAttackStrategy.stopAttack()
+    } else if (damage > 0) {
+      this.setState(State.Hurt)
+      this.timer = System.currentTimeMillis()
     }
   }
 
   override def destroyEntity(): Unit = {
     super.destroyEntity()
 
-    if (ENEMY_TYPES.contains(this.entityType)) {
-      if(RANDOM.nextInt(10) <= 2)
-      Item(ItemPools.Enemy_Drops, getItemPool, getEntitiesContainerMonitor,
-        position=(this.getPosition._1, this.getPosition._2).MPP)
-    }
+    if (ENEMY_TYPES.contains(this.entityType))
+      if(RANDOM.nextFloat() <= EnemiesConstants.ENEMIES_DROP_RATE)
+        Item(ItemPools.Enemy_Drops, getItemPool, getEntitiesContainerMonitor,
+          position=(this.getPosition._1, this.getPosition._2).MPP)
 
-    if (ENEMY_BOSS_TYPES.contains(this.getType)) {
-      if (this.heroEntity.getItemsPicked.contains((i:Items) => i == Items.Bow)) {
+    if (ENEMY_BOSS_TYPES.contains(this.getType))
+      if (this.heroEntity.getItemsPicked.contains((i:Items) => i == Items.Bow))
         Item(ItemPools.Default, getItemPool, getEntitiesContainerMonitor,
           position=(this.getPosition._1, this.getPosition._2).MPP)
-      } else
+      else
         Item(ItemPools.Boss, getItemPool, getEntitiesContainerMonitor,
           position=(this.getPosition._1, this.getPosition._2).MPP)
-    }
   }
 }
 
