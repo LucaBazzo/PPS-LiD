@@ -2,40 +2,20 @@ package model.behaviour
 
 import _root_.utils.ApplicationConstants._
 import model.attack.AttackStrategy
-import model.entities.{Entity, LivingEntity, Statistic}
-import model.helpers.EntitiesUtilities.getEntitiesDistance
+import model.entities.{Entity, LivingEntity, MobileEntity, Statistic}
+import model.helpers.EntitiesUtilities.{getEntitiesDistance, isEntityOnTheLeft, isEntityOnTheRight, isEntityVisible, isFloorPresentOnTheLeft, isFloorPresentOnTheRight, isPathObstructedOnTheLeft, isPathObstructedOnTheRight}
 
-
-
-/**
- *
- */
 trait Transition {
   def apply(): Boolean
   def reset(): Unit = { }
 }
 
-/**
- *
- */
 object RichTransitions {
-  implicit def funcToPredicate(f:() => Boolean): Transition = {
-    new Transition {
-      override def apply(): Boolean = f.apply()
-    }
-  }
+  implicit def functionToTransition(f:() => Boolean): Transition = () => f.apply()
 
-  /**
-   *
-   * @param p
-   */
   implicit class LogicalTransition(p:Transition){
-    def ||(x: Transition): Transition = new Transition {
-      override def apply(): Boolean = p.apply || x.apply
-    }
-    def &&(x: Transition): Transition = new Transition {
-      override def apply(): Boolean = p.apply && x.apply
-    }
+    def ||(x: Transition): Transition = () => p.apply || x.apply
+    def &&(x: Transition): Transition = () => p.apply && x.apply
   }
 }
 
@@ -107,6 +87,47 @@ case class RandomlyTrue(percentage: Float) extends Transition {
   }
 }
 
-case class TargetIsNear(sourceEntity:Entity, targetEntity:Entity, distance:Float) extends Transition {
-  override def apply(): Boolean = getEntitiesDistance(this.sourceEntity, this.targetEntity) <= distance
+case class TargetIsNear(sourceEntity:Entity,
+                        targetEntity:Entity,
+                        distance:Float) extends Transition {
+  override def apply(): Boolean =
+    getEntitiesDistance(this.sourceEntity, this.targetEntity) <= distance
+}
+
+case class CanMoveToTheLeft(sourceEntity:Entity) extends Transition {
+  override def apply(): Boolean =
+    !isPathObstructedOnTheLeft(sourceEntity, vOffset = 0) &&
+      isFloorPresentOnTheLeft(sourceEntity, vOffset = 0)
+}
+
+case class CanMoveToTheRight(sourceEntity:Entity) extends Transition {
+  override def apply(): Boolean =
+    !isPathObstructedOnTheRight(sourceEntity, vOffset = 0) &&
+      isFloorPresentOnTheRight(sourceEntity, vOffset = 0)
+}
+
+case class IsTargetNearby(sourceEntity:Entity,
+                          targetEntity:Entity,
+                          distance:Float) extends Transition {
+  override def apply(): Boolean =
+    getEntitiesDistance(this.sourceEntity, this.targetEntity) <= distance
+}
+case class IsTargetVisible(sourceEntity:MobileEntity,
+                           targetEntity:Entity) extends Transition {
+
+  private val visionAngle: Float = sourceEntity.getStatistic(Statistic.VisionAngle).get
+
+  override def apply(): Boolean =
+    isEntityVisible(this.sourceEntity, this.targetEntity, visionAngle)
+}
+
+case class IsPathWalkable(sourceEntity:MobileEntity,
+                          targetEntity:Entity) extends Transition {
+  override def apply(): Boolean =
+    (!isPathObstructedOnTheLeft(this.sourceEntity, vOffset = 0) &&
+    isFloorPresentOnTheLeft(this.sourceEntity, vOffset = 0) &&
+    isEntityOnTheLeft(this.sourceEntity, this.targetEntity)) ||
+    (!isPathObstructedOnTheRight(this.sourceEntity, vOffset = 0) &&
+      isFloorPresentOnTheRight(this.sourceEntity, vOffset = 0) &&
+      isEntityOnTheRight(this.sourceEntity, this.targetEntity))
 }

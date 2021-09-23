@@ -10,7 +10,7 @@ trait Behaviours {
 
   def addTransition(state:Behaviour, nextState:Behaviour, transition:Transition): Unit
 
-  def update: Unit
+  def update(): Unit
 
   def getCurrentBehaviour: Behaviour
 
@@ -35,13 +35,9 @@ abstract class BehavioursImpl() extends Behaviours {
   }
 
   override def addTransition(behaviour: Behaviour, nextBehaviour: Behaviour, transition: Transition): Unit =
-    if (!this.behaviours.contains(behaviour) || !this.behaviours.contains(nextBehaviour)) {
-      throw new IllegalArgumentException()
-    } else {
-      this.transitions += (behaviour, nextBehaviour) -> transition
-    }
+    this.transitions += (behaviour, nextBehaviour) -> transition
 
-  override def update: Unit = {
+  override def update(): Unit = {
     if (currentBehaviour.isDefined) {
 
       val activeTransitions: Map[(Behaviour, Behaviour), Transition] =
@@ -50,13 +46,13 @@ abstract class BehavioursImpl() extends Behaviours {
       if (activeTransitions.nonEmpty) {
         val pickedTransition: ((Behaviour, Behaviour), Transition) =
           activeTransitions.toList(RANDOM.nextInt(activeTransitions.size))
-        val picketBehaviour = this.behaviours.find(b => b equals pickedTransition._1._2).get
+        val pickedBehaviour = this.behaviours.find(b => b equals pickedTransition._1._2).get
 
-        // reset the current behaviour transitions to enable reuse of recurring behaviours
         this.onBehaviourEnd()
+        // reset the current behaviour transitions to enable reuse of recurring behaviours
         this.getCurrentTransitions.foreach(t => t._2.reset())
 
-        this.currentBehaviour = Option(picketBehaviour)
+        this.currentBehaviour = Option(pickedBehaviour)
         this.onBehaviourBegin()
       }
     }

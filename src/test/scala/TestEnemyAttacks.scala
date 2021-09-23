@@ -7,7 +7,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 
 class TestEnemyAttacks extends AnyFlatSpec {
 
-
   var enemy: EnemyImpl = _
   var hero: Hero = _
   var entitiesContainer: EntitiesContainerMonitor = _
@@ -53,7 +52,6 @@ class TestEnemyAttacks extends AnyFlatSpec {
     assertResult(hero.getStatistic(Statistic.Health).get)(hero.getLife + attackEntity.getStatistic(Statistic.Strength).get)
   }
 
-
   "An enemy" should "stop attacking if dying" in {
     initialize()
 
@@ -68,5 +66,4 @@ class TestEnemyAttacks extends AnyFlatSpec {
     assertResult(enemy.getState)(State.Dying)
     assertResult(attackEntities.size - 1)(getAttackEntities.size)
   }
-
 }

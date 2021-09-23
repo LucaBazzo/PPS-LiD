@@ -1,24 +1,24 @@
 package model.movement
 
-import model.behaviour.{MovementBehaviours, MovementBehavioursImpl}
+import model.behaviour.MovementBehavioursImpl
 import model.entities.{Entity, MobileEntity, State, Statistic}
 import model.helpers.EntitiesUtilities._
 
 // TODO: rifattorizzare i predicati usati spesso in delel classi Predicate
 
 abstract class BehaviourMovementStrategy extends MovementStrategyImpl {
-  protected val behaviour: MovementBehaviours = new MovementBehavioursImpl()
+  protected val behaviours: MovementBehavioursImpl = new MovementBehavioursImpl()
 
   override def apply(): Unit = {
-    this.behaviour.update
-    this.behaviour.getCurrentBehaviour.apply()
+    this.behaviours.update
+    this.behaviours.getCurrentBehaviour.apply()
   }
 
-  override def stopMovement(): Unit = this.behaviour.getCurrentBehaviour.stopMovement()
+  override def stopMovement(): Unit = this.behaviours.getCurrentBehaviour.stopMovement()
 
-  override def onBegin(): Unit = this.behaviour.getCurrentBehaviour.onBegin()
+  override def onBegin(): Unit = this.behaviours.getCurrentBehaviour.onBegin()
 
-  override def onEnd(): Unit = this.behaviour.getCurrentBehaviour.onEnd()
+  override def onEnd(): Unit = this.behaviours.getCurrentBehaviour.onEnd()
 }
 
 case class MovingMovementStrategy(sourceEntity: MobileEntity,
@@ -63,6 +63,7 @@ case class FaceTarget(sourceEntity: MobileEntity,
 
   override def onBegin(): Unit = {
     this.sourceEntity.setState(State.Standing)
+    this.sourceEntity.setVelocityX(0)
   }
 
   override def onEnd(): Unit = { }
