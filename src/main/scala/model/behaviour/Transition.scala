@@ -1,24 +1,53 @@
 package model.behaviour
 
+import _root_.utils.ApplicationConstants._
 import model.attack.AttackStrategy
-import model.entities.{LivingEntity, Statistic}
-import utils.ApplicationConstants.RANDOM
+import model.entities.{Entity, LivingEntity, Statistic}
+import model.helpers.EntitiesUtilities.getEntitiesDistance
 
-trait Predicate {
+
+
+/**
+ *
+ */
+trait Transition {
   def apply(): Boolean
-  def reset(): Unit
+  def reset(): Unit = { }
 }
 
-object RichPredicates {
-  implicit def funcToPredicate(f:() => Boolean): Predicate = {
-    new Predicate {
+/**
+ *
+ */
+object RichTransitions {
+  implicit def funcToPredicate(f:() => Boolean): Transition = {
+    new Transition {
       override def apply(): Boolean = f.apply()
-      override def reset(): Unit = {}
+    }
+  }
+
+  /**
+   *
+   * @param p
+   */
+  implicit class LogicalTransition(p:Transition){
+    def ||(x: Transition): Transition = new Transition {
+      override def apply(): Boolean = p.apply || x.apply
+    }
+    def &&(x: Transition): Transition = new Transition {
+      override def apply(): Boolean = p.apply && x.apply
     }
   }
 }
 
-case class TimePredicate(time:Long) extends Predicate {
+case class Not(predicate: Transition) extends Transition {
+  override def apply(): Boolean = {
+    !predicate.apply()
+  }
+
+  override def reset(): Unit = predicate.reset()
+}
+
+case class TimePredicate(time:Long) extends Transition {
   var startTime: Long = System.currentTimeMillis()
 
   override def apply(): Boolean = System.currentTimeMillis() - startTime >= time
@@ -26,16 +55,14 @@ case class TimePredicate(time:Long) extends Predicate {
   override def reset(): Unit = this.startTime = System.currentTimeMillis()
 }
 
-case class HealthThresholdPredicate(entity:LivingEntity, percentage:Float) extends Predicate {
+case class HealthThreshold(entity:LivingEntity, percentage:Float) extends Transition {
   val healthThreshold: Float = entity.getStatistic(Statistic.Health).get * this.percentage / 100
 
   override def apply(): Boolean = this.entity.getLife <= this.healthThreshold
-
-  override def reset(): Unit = { }
 }
 
-case class CompletedAttackPredicate(attackStrategy: AttackStrategy,
-                               numAttacks: Int = 1) extends Predicate {
+case class CompletedAttacks(attackStrategy: AttackStrategy,
+                            numAttacks: Int = 1) extends Transition {
 
   private var finishedAttacksCount: Int = 0
   private var lastAttackFinishedCheck: Boolean = this.attackStrategy.isAttackFinished
@@ -55,9 +82,9 @@ case class CompletedAttackPredicate(attackStrategy: AttackStrategy,
   }
 }
 
-case class RandomTruePredicate(percentage: Float) extends Predicate {
+case class RandomlyTrue(percentage: Float) extends Transition {
   private var lastCheckTime:Long = 0
-  private val checkPeriod: Long = 3000
+  private val checkPeriod: Long = 2000
   private var response: Boolean = false
 
   override def apply(): Boolean = {
@@ -80,27 +107,6 @@ case class RandomTruePredicate(percentage: Float) extends Predicate {
   }
 }
 
-case class NotPredicate(predicate: Predicate) extends Predicate {
-  override def apply(): Boolean = {
-    !predicate.apply()
-  }
-
-  override def reset(): Unit = predicate.reset()
-}
-
-
-abstract class CompositePredicates(val predicates: Seq[Predicate]) extends Predicate {
-  override def reset(): Unit = predicates.foreach(p => p.reset())
-}
-
-case class AnyPredicate(override val predicates: Seq[Predicate]) extends CompositePredicates(predicates) {
-  override def apply(): Boolean = {
-    predicates.map(p => p.apply()).count(e => e) != 0
-  }
-}
-
-case class AllPredicate(override val predicates: Seq[Predicate]) extends CompositePredicates(predicates) {
-  override def apply(): Boolean = {
-    predicates.map(p => p.apply()).count(e => e) == predicates.size
-  }
+case class TargetIsNear(sourceEntity:Entity, targetEntity:Entity, distance:Float) extends Transition {
+  override def apply(): Boolean = getEntitiesDistance(this.sourceEntity, this.targetEntity) <= distance
 }

@@ -7,7 +7,6 @@ import model.entities.{Hero, LivingEntity}
 import model.helpers.EntitiesUtilities.getEntitiesDistance
 import model.movement.{DoNothingMovementStrategy, FaceTarget, MovementStrategy}
 import utils.EnemiesConstants.{WIZARD_BOSS_ATTACK1_SIZE, WIZARD_BOSS_ATTACK2_SIZE, WIZARD_BOSS_ATTACK3_DISTANCE}
-import RichPredicates._
 
 trait EnemyBehaviours extends BehavioursImpl {
   override type Behaviour = (CollisionStrategy, MovementStrategy, AttackStrategy)
@@ -31,7 +30,7 @@ class EnemyBehavioursImpl extends EnemyBehaviours {
 
 case class WizardEnemyBehaviour(enemy:LivingEntity, hero:Hero) extends EnemyBehavioursImpl {
 
-  val isHeroNear: () => Boolean = () => getEntitiesDistance(enemy, hero) <= WIZARD_BOSS_ATTACK3_DISTANCE.PPM
+  val isHeroNear: Transition = () => getEntitiesDistance(enemy, hero) <= WIZARD_BOSS_ATTACK3_DISTANCE.PPM
   val ATTACK_SWITCH_PROBABILITY: Float = 0.5f
 
   // first behaviour - do nothing for some time
@@ -56,11 +55,11 @@ case class WizardEnemyBehaviour(enemy:LivingEntity, hero:Hero) extends EnemyBeha
   addTransition(b1, b2, isHeroNear)
   addTransition(b1, b3, isHeroNear)
 
-  addTransition(b2, b3, RandomTruePredicate(ATTACK_SWITCH_PROBABILITY))
-  addTransition(b2, b4, NotPredicate(isHeroNear))
+  addTransition(b2, b3, RandomlyTrue(ATTACK_SWITCH_PROBABILITY))
+  addTransition(b2, b4, Not(isHeroNear))
 
-  addTransition(b3, b2, RandomTruePredicate(ATTACK_SWITCH_PROBABILITY))
-  addTransition(b3, b4, NotPredicate(isHeroNear))
+  addTransition(b3, b2, RandomlyTrue(ATTACK_SWITCH_PROBABILITY))
+  addTransition(b3, b4, Not(isHeroNear))
 
   addTransition(b4, b2, isHeroNear)
   addTransition(b4, b3, isHeroNear)
