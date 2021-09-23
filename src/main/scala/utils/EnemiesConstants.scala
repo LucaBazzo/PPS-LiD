@@ -9,6 +9,7 @@ object EnemiesConstants {
 
   val ENEMIES_SPAWN_RATIO = 25 // spawn zone width / ENEMIES_SPAWN_RATIO
   val ENEMIES_ACTIVATION_DISTANCE: Float = 300.PPM
+  val ENEMIES_DROP_RATE = 0.2f
 
   val DYING_STATE_TIME:Long = 1000
 
@@ -19,9 +20,9 @@ object EnemiesConstants {
     List(EntityType.EnemyBossWizard) // EntityType.EnemyBossReaper
 
   val SKELETON_STATS: Map[Statistic, Float] = Map(
-    Statistic.Strength -> 100f,
-    Statistic.Health -> 11f,
-    Statistic.CurrentHealth -> 11f,
+    Statistic.Strength -> 70f,
+    Statistic.Health -> 200f,
+    Statistic.CurrentHealth -> 200f,
     Statistic.Defence -> 0f,
 
     Statistic.MaxMovementSpeed -> 40f.PPM,
@@ -29,13 +30,13 @@ object EnemiesConstants {
 
     Statistic.VisionDistance -> 40.PPM,
     Statistic.VisionAngle -> 30,
-    Statistic.AttackFrequency -> 4000,
+    Statistic.AttackFrequency -> 2500,
     Statistic.AttackDuration -> 1000)
 
   val WORM_STATS: Map[Statistic, Float] = Map(
-    Statistic.Strength -> 5f,
-    Statistic.Health -> 11f,
-    Statistic.CurrentHealth -> 11f,
+    Statistic.Strength -> 30f,
+    Statistic.Health -> 150f,
+    Statistic.CurrentHealth -> 150f,
     Statistic.Defence -> 0f,
 
     Statistic.MaxMovementSpeed -> 40f.PPM,
@@ -48,9 +49,9 @@ object EnemiesConstants {
   )
 
   val SLIME_STATS: Map[Statistic, Float] = Map(
-    Statistic.Strength -> 10f,
-    Statistic.Health -> 11f,
-    Statistic.CurrentHealth -> 11f,
+    Statistic.Strength -> 80f,
+    Statistic.Health -> 300f,
+    Statistic.CurrentHealth -> 300f,
     Statistic.Defence -> 0f,
 
     Statistic.MaxMovementSpeed -> 40f.PPM,
