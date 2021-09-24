@@ -50,10 +50,10 @@ object Item {
              size: (Float, Float) = DEFAULT_ITEM_SIZE,
              position: (Float, Float) = DEFAULT_ITEM_POSITION,
              collisions: Short = EntityCollisionBit.Hero | EntityCollisionBit.Immobile): Item = {
-    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Item,
+    val entityBody: EntityBody = defineEntityBody(BodyType.KinematicBody, EntityCollisionBit.Item,
       collisions, createPolygonalShape(size.PPM), position.PPM)
     val item: Item = itemPool.getItem(entityBody, size, PoolName)
-    item.setCollisionStrategy(new ItemCollisionStrategy(item, entitiesMonitor))
+    item.setCollisionStrategy(ItemCollisionStrategy(item, entitiesMonitor))
     entitiesMonitor.addEntity(item)
     item
   }

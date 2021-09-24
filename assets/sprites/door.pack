@@ -1,0 +1,33 @@
+
+door.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+door0
+  rotate: false
+  xy: 1, 1
+  size: 96, 80
+  orig: 96, 80
+  offset: 0, 0
+  index: -1
+door1
+  rotate: false
+  xy: 99, 1
+  size: 96, 80
+  orig: 96, 80
+  offset: 0, 0
+  index: -1
+door2
+  rotate: false
+  xy: 197, 1
+  size: 96, 80
+  orig: 96, 80
+  offset: 0, 0
+  index: -1
+door00
+  rotate: false
+  xy: 295, 14
+  size: 80, 67
+  orig: 80, 67
+  offset: 0, 0
+  index: -1

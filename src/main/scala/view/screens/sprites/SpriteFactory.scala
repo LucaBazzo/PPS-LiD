@@ -189,7 +189,7 @@ class SpriteFactoryImpl extends SpriteFactory {
   }
 
   private def defineDoorAnimation(sprite: EntitySpriteImpl): Unit = {
-    sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (0, 0), (0, 0)))
+    sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (0, 3), (0, 3)))
     sprite.addAnimation(State.Opening, this.createAnimation(sprite, 7, (0, 0), (0, 2)))
   }
 
