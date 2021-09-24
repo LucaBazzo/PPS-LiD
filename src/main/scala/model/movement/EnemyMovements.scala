@@ -2,7 +2,8 @@ package model.movement
 
 import model.behaviour.MovementBehavioursImpl
 import model.entities.{Entity, MobileEntity, State, Statistic}
-import model.helpers.EntitiesUtilities._
+import model.collisions.ImplicitConversions.entityToBody
+import model.helpers.GeometricUtilities.isBodyOnTheRight
 
 // TODO: rifattorizzare i predicati usati spesso in delel classi Predicate
 
@@ -10,7 +11,7 @@ abstract class BehaviourMovementStrategy extends MovementStrategyImpl {
   protected val behaviours: MovementBehavioursImpl = new MovementBehavioursImpl()
 
   override def apply(): Unit = {
-    this.behaviours.update
+    this.behaviours.update()
     this.behaviours.getCurrentBehaviour.apply()
   }
 
@@ -56,7 +57,7 @@ case class FaceTarget(sourceEntity: MobileEntity,
                       targetEntity: Entity) extends MovementStrategyImpl {
 
   override def apply(): Unit = {
-    this.sourceEntity.setFacing(right = isEntityOnTheRight(sourceEntity, targetEntity))
+    this.sourceEntity.setFacing(right = isBodyOnTheRight(sourceEntity, targetEntity))
   }
 
   override def stopMovement(): Unit = { }

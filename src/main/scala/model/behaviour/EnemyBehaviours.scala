@@ -4,9 +4,10 @@ import model.attack._
 import model.collisions.ImplicitConversions.RichFloat
 import model.collisions.{CollisionStrategy, DoNothingCollisionStrategy}
 import model.entities.{Hero, LivingEntity}
-import model.helpers.EntitiesUtilities.getEntitiesDistance
+import model.helpers.GeometricUtilities.getBodiesDistance
 import model.movement.{DoNothingMovementStrategy, FaceTarget, MovementStrategy}
 import utils.EnemiesConstants.{WIZARD_BOSS_ATTACK1_SIZE, WIZARD_BOSS_ATTACK2_SIZE, WIZARD_BOSS_ATTACK3_DISTANCE}
+import model.collisions.ImplicitConversions.entityToBody
 
 trait EnemyBehaviours  {
   def getCollisionStrategy: CollisionStrategy
@@ -31,7 +32,7 @@ class EnemyBehavioursImpl extends BehavioursImpl with EnemyBehaviours  {
 
 case class WizardEnemyBehaviour(enemy:LivingEntity, hero:Hero) extends EnemyBehavioursImpl {
 
-  val isHeroNear: Transition = () => getEntitiesDistance(enemy, hero) <= WIZARD_BOSS_ATTACK3_DISTANCE.PPM
+  val isHeroNear: Transition = () => getBodiesDistance(enemy, hero) <= WIZARD_BOSS_ATTACK3_DISTANCE.PPM
   val ATTACK_SWITCH_PROBABILITY: Float = 0.5f
 
   val b1: (CollisionStrategy, MovementStrategy, AttackStrategy) =

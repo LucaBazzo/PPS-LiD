@@ -8,14 +8,15 @@ import com.badlogic.gdx.physics.box2d.{Box2DDebugRenderer, World}
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model.collisions.ImplicitConversions.{RichFloat, RichInt}
+import model.collisions.ImplicitConversions.{RichFloat, RichInt, entityToBody}
 import model.entities.Items.Items
 import model.entities._
-import model.helpers.{EntitiesGetter, EntitiesUtilities}
+import model.helpers.EntitiesGetter
+import model.helpers.GeometricUtilities.getBodiesDistance
+import model.world.TileMapManager
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
 import view.screens.helpers.{SoundEvent, SoundManager}
-import model.world.TileMapManager
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
@@ -127,7 +128,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       })
       // TODO: prevenire chiamate di show e hide quando la barra della vita è già visibile o invisibile
       if (entitiesGetter.getBoss.nonEmpty &&
-        EntitiesUtilities.getEntitiesDistance(entitiesGetter.getHero.get,
+        getBodiesDistance(entitiesGetter.getHero.get,
           entitiesGetter.getBoss.get) <= HEALTH_BAR_BOSS_VISIBILITY_DISTANCE.PPM) {
         hud.showBossHealthBar()
         val boss: LivingEntity = bossEntity.get.head.asInstanceOf[LivingEntity]

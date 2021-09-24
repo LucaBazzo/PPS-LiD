@@ -2,8 +2,11 @@ package model.behaviour
 
 import _root_.utils.ApplicationConstants._
 import model.attack.AttackStrategy
+import model.collisions.ImplicitConversions.entityToBody
 import model.entities.{Entity, LivingEntity, MobileEntity, Statistic}
-import model.helpers.EntitiesUtilities.{getEntitiesDistance, isEntityOnTheLeft, isEntityOnTheRight, isEntityVisible, isFloorPresentOnTheLeft, isFloorPresentOnTheRight, isPathObstructedOnTheLeft, isPathObstructedOnTheRight}
+import model.helpers.EntitiesUtilities._
+import model.helpers.GeometricUtilities.{getBodiesDistance, isBodyOnTheLeft, isBodyOnTheRight}
+import model.helpers.WorldUtilities.isBodyVisible
 
 trait Transition {
   def apply(): Boolean
@@ -91,7 +94,7 @@ case class TargetIsNear(sourceEntity:Entity,
                         targetEntity:Entity,
                         distance:Float) extends Transition {
   override def apply(): Boolean =
-    getEntitiesDistance(this.sourceEntity, this.targetEntity) <= distance
+    getBodiesDistance(this.sourceEntity, this.targetEntity) <= distance
 }
 
 case class CanMoveToTheLeft(sourceEntity:Entity) extends Transition {
@@ -110,7 +113,7 @@ case class IsTargetNearby(sourceEntity:Entity,
                           targetEntity:Entity,
                           distance:Float) extends Transition {
   override def apply(): Boolean =
-    getEntitiesDistance(this.sourceEntity, this.targetEntity) <= distance
+    getBodiesDistance(this.sourceEntity, this.targetEntity) <= distance
 }
 case class IsTargetVisible(sourceEntity:MobileEntity,
                            targetEntity:Entity) extends Transition {
@@ -118,7 +121,7 @@ case class IsTargetVisible(sourceEntity:MobileEntity,
   private val visionAngle: Float = sourceEntity.getStatistic(Statistic.VisionAngle).get
 
   override def apply(): Boolean =
-    isEntityVisible(this.sourceEntity, this.targetEntity, visionAngle)
+    isBodyVisible(this.sourceEntity, this.targetEntity, visionAngle)
 }
 
 case class IsPathWalkable(sourceEntity:MobileEntity,
@@ -126,8 +129,8 @@ case class IsPathWalkable(sourceEntity:MobileEntity,
   override def apply(): Boolean =
     (!isPathObstructedOnTheLeft(this.sourceEntity, vOffset = 0) &&
     isFloorPresentOnTheLeft(this.sourceEntity, vOffset = 0) &&
-    isEntityOnTheLeft(this.sourceEntity, this.targetEntity)) ||
+    isBodyOnTheLeft(this.sourceEntity, this.targetEntity)) ||
     (!isPathObstructedOnTheRight(this.sourceEntity, vOffset = 0) &&
       isFloorPresentOnTheRight(this.sourceEntity, vOffset = 0) &&
-      isEntityOnTheRight(this.sourceEntity, this.targetEntity))
+      isBodyOnTheRight(this.sourceEntity, this.targetEntity))
 }

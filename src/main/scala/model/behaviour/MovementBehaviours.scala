@@ -2,8 +2,9 @@ package model.behaviour
 
 import model.behaviour.RichTransitions.LogicalTransition
 import model.entities.{Entity, MobileEntity, Statistic}
-import model.helpers.EntitiesUtilities.isEntityOnTheRight
+import model.helpers.GeometricUtilities.isBodyOnTheRight
 import model.movement._
+import model.collisions.ImplicitConversions.entityToBody
 
 trait MovementBehaviours {
   def getMovementStrategy: MovementStrategy
@@ -96,7 +97,7 @@ case class PatrolMovementStrategy(sourceEntity: MobileEntity) extends BehaviourM
 case class ChaseMovementStrategy(sourceEntity:MobileEntity,
                                  targetEntity:Entity) extends BehaviourMovementStrategy {
 
-  private val isTargetOnTheRight:Transition = () => isEntityOnTheRight(this.sourceEntity, this.targetEntity)
+  private val isTargetOnTheRight:Transition = () => isBodyOnTheRight(this.sourceEntity, this.targetEntity)
 
   private val b1: MovementStrategy = behaviours.addBehaviour(DoNothingMovementStrategy())
   private val b2: MovementStrategy = behaviours.addBehaviour(MovingMovementStrategy(sourceEntity, right=false))

@@ -18,8 +18,7 @@ import utils.EnemiesConstants._
 import utils.HeroConstants.SHORT_WAIT_TIME
 
 trait Enemy {
-  // TODO: rifattorizzare a livello di living entity?
-  def setBehaviour(enemyBehaviour: EnemyBehaviours): Unit
+  def setBehaviour(enemyBehaviour: EnemyBehavioursImpl): Unit
 }
 
 object Enemy {
@@ -92,7 +91,7 @@ class EnemyImpl(private val entityType: EntityType,
                 private val heroEntity: Hero) extends LivingEntityImpl(entityType, entityBody, size, stats)
           with LivingEntity with Score with Enemy {
 
-  var behaviours:Option[EnemyBehaviours] = None
+  var behaviours:Option[EnemyBehavioursImpl] = None
   var timer: Long = 0
 
 
@@ -116,7 +115,7 @@ class EnemyImpl(private val entityType: EntityType,
     }
   }
 
-  override def setBehaviour(behaviours: EnemyBehaviours): Unit = this.behaviours = Option(behaviours)
+  override def setBehaviour(behaviours: EnemyBehavioursImpl): Unit = this.behaviours = Option(behaviours)
 
   override def sufferDamage(damage: Float): Unit = {
     super.sufferDamage(damage)

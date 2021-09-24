@@ -93,13 +93,8 @@ class TestEnemy extends AnyFlatSpec {
     val bossEnemy: EnemyImpl = createWizardBossEnemy((0, 0))
     createPortal((0, 0)) // needed to allow portal activation on boss enemy death
 
-    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).get.size == 2)
-    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).get.isEmpty)
-
     bossEnemy.destroyEntity()
 
-    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).get.size == 1)
-    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).get.nonEmpty)
     assert(!(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).get.head.getType equals EntityType.BowItem))
   }
 }

@@ -1,11 +1,13 @@
 package model.attack
 
+import model.collisions.ImplicitConversions.entityToBody
 import model.entities.MobileEntity.{createEnergyBallAttack, createFireballAttack, createMeleeAttack}
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, _}
-import model.helpers.EntitiesUtilities._
+import model.helpers.GeometricUtilities.getBodiesDistance
+import model.helpers.WorldUtilities.isBodyVisible
 import utils.EnemiesConstants
-import utils.EnemiesConstants.{SKELETON_ATTACK_OFFSET, SKELETON_ATTACK_SIZE, SLIME_ATTACK_OFFSET, SLIME_ATTACK_SIZE, WIZARD_BOSS_ATTACK1_OFFSET, WIZARD_BOSS_ATTACK1_SIZE, WIZARD_BOSS_ATTACK2_OFFSET, WIZARD_BOSS_ATTACK2_SIZE}
+import utils.EnemiesConstants._
 
 abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
                                    protected val targetEntity: Entity)
@@ -39,8 +41,8 @@ abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
 
     protected def canAttack: Boolean = this.isAttackFinished &&
     System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
-    isEntityVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
-    getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
+    isBodyVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
+    getBodiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
 
   protected def spawnAttack(): Unit
 }
@@ -173,7 +175,7 @@ case class WizardEnergyBallAttack(override protected val sourceEntity: LivingEnt
 
   override protected def canAttack: Boolean = this.isAttackFinished &&
     System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
-    getEntitiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
+    getBodiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
 }
 
 

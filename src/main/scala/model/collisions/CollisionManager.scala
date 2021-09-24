@@ -40,13 +40,12 @@ object EntityCollisionBit {
 
 object ImplicitConversions {
 
-  implicit def intToShort(value: Int): Short = {
-    value.toShort
-  }
+  implicit def intToShort(value: Int): Short = value.toShort
 
-  implicit def tupleToVector2(tuple: (Float, Float)): Vector2 = {
+  implicit def tupleToVector2(tuple: (Float, Float)): Vector2 =
     new Vector2(tuple._1, tuple._2)
-  }
+
+  implicit def  entityToBody(entity: Entity): Body = entity.getBody
 
   implicit class RichFloat(base: Float) {
     def PPM: Float = base / PIXELS_PER_METER
@@ -76,12 +75,9 @@ object ImplicitConversions {
     def +(tuple: (Float, Float)): (Float, Float) = (base._1 + tuple._1, base._2 + tuple._2)
 
     def -(tuple: (Float, Float)): (Float, Float) = (base._1 - tuple._1, base._2 - tuple._2)
-
   }
 }
 case class CollidingEntities(firstEntity: Option[Entity], secondEntity: Option[Entity])
-
-// TODO: come gestire collissioni continue?
 
 class CollisionManager(private val entitiesGetter: EntitiesGetter) extends ContactListener {
 
@@ -103,11 +99,9 @@ class CollisionManager(private val entitiesGetter: EntitiesGetter) extends Conta
     }
   }
 
-  override def preSolve(contact: Contact, manifold: Manifold): Unit = {
-  }
+  override def preSolve(contact: Contact, manifold: Manifold): Unit = { }
 
-  override def postSolve(contact: Contact, contactImpulse: ContactImpulse): Unit = {
-  }
+  override def postSolve(contact: Contact, contactImpulse: ContactImpulse): Unit = { }
 
   private def getCollidingEntities(contact: Contact): CollidingEntities = {
     val firstBody: Body = contact.getFixtureA.getBody
@@ -123,5 +117,4 @@ class CollisionManager(private val entitiesGetter: EntitiesGetter) extends Conta
       case (_, _) => CollidingEntities(Option.apply(firstEntities.head), Option.apply(secondEntities.head))
     }
   }
-
 }

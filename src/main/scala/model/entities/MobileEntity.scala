@@ -8,10 +8,11 @@ import model.collisions.{ApplyDamage, ApplyDamageAndDestroyEntity, EntityCollisi
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl._
-import model.helpers.EntitiesUtilities.isEntityOnTheRight
+import model.helpers.GeometricUtilities.isBodyOnTheRight
 import model.movement._
 import utils.CollisionConstants._
 import utils.HeroConstants.{ARROW_SIZE, PIVOT_SIZE, SWORD_ATTACK_DENSITY}
+import model.collisions.ImplicitConversions.entityToBody
 
 /** The possible statistics that could be given to a mobile or living entity
  *
@@ -255,7 +256,7 @@ object MobileEntity {
 
   private def defineBulletAttack(attack:MobileEntity, sourceEntity:MobileEntity, targetEntity:Entity): Unit = {
     attack.getBody.setBullet(true)
-    attack.setFacing(isEntityOnTheRight(sourceEntity, targetEntity))
+    attack.setFacing(isBodyOnTheRight(sourceEntity, targetEntity))
 
     attack.setCollisionStrategy(ApplyDamageAndDestroyEntity(attack, (e:Entity) => e.isInstanceOf[Hero],
       sourceEntity.getStatistics))
