@@ -92,27 +92,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         if(itemPicked.nonEmpty)
           this.hud.addNewItem(itemPicked.get)
 
-        //in base al cambio di stato dell'hero riproduco il suono corretto
-        if(previousStates.contains(hero)){
-          if((!previousStates(hero).equals(State.Jumping) && hero.getState.equals(State.Jumping)) ||
-            (!previousStates(hero).equals(State.Somersault) && hero.getState.equals(State.Somersault)))
-            soundManager.playSound(SoundEvent.Jump)
-          if(!previousStates(hero).equals(State.Attack01) && hero.getState.equals(State.Attack01))
-            soundManager.playSound(SoundEvent.Attack1)
-          if(!previousStates(hero).equals(State.Attack02) && hero.getState.equals(State.Attack02))
-            soundManager.playSound(SoundEvent.Attack2)
-          if(!previousStates(hero).equals(State.Attack03) && hero.getState.equals(State.Attack03))
-            soundManager.playSound(SoundEvent.Attack3)
-          if(!previousStates(hero).equals(State.BowAttacking) && hero.getState.equals(State.BowAttacking))
-            soundManager.playSound(SoundEvent.BowAttack)
-          if(!previousStates(hero).equals(State.AirDownAttacking) && hero.getState.equals(State.AirDownAttacking))
-            soundManager.playSound(SoundEvent.AirDownAttack)
-          if(!previousStates(hero).equals(State.pickingItem) && hero.getState.equals(State.pickingItem))
-            soundManager.playSound(SoundEvent.PickItem)
-          if(!previousStates(hero).equals(State.Hurt) && hero.getState.equals(State.Hurt))
-            soundManager.playSound(SoundEvent.Hurt)
-          if(!previousStates(hero).equals(State.Dying) && hero.getState.equals(State.Dying))
-            soundManager.playSound(SoundEvent.Dying)
+        if(previousStates.contains(hero)) {
+          if (!previousStates(hero).equals(hero.getState))
+            soundManager.playSoundOnStateChange(hero.getType, hero.getState)
         }
         previousStates = previousStates + (hero -> hero.getState)
       }
@@ -143,24 +125,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
         //per ogni entità controllo lo stato precedente e quello attuale per decidere quali suoni riprodurre
         entities.get.foreach(entity => {
-
-          if(previousStates.contains(entity)){
-
-            entity.getType match {
-              case EntityType.Door =>
-                if(!previousStates(entity).equals(State.Opening) && entity.getState.equals(State.Opening))
-                  soundManager.playSound(SoundEvent.OpeningDoor)
-              case EntityType.EnemySkeleton | EntityType.EnemySlime | EntityType.EnemyPacman | EntityType.EnemyWorm =>
-                if(!previousStates(entity).equals(State.Dying) && entity.getState.equals(State.Dying))
-                  soundManager.playSound(SoundEvent.EnemyDeath)
-              case _ =>
-            }
-          }
-          //memorizzo lo stato precedente dell'entità nella mappa apposita
+          if(previousStates.contains(entity) && !previousStates(entity).equals(entity.getState))
+            soundManager.playSoundOnStateChange(entity.getType, entity.getState)
           previousStates = previousStates + (entity -> entity.getState)
-
-
-
         })
       }
 
