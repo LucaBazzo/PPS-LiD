@@ -55,7 +55,6 @@ class ModelImpl(private val controller: Observer,
     false
   }
 
-
   override def getCurrentLevelNumber: Int = this.levelNumber
 
   override def requestStartGame(): Unit = {

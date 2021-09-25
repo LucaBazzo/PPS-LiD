@@ -14,12 +14,17 @@ import model.entities._
 import model.helpers.{EntitiesGetter, EntitiesUtilities}
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
+import view.screens.helpers.{SoundEvent, SoundManager}
 import model.world.TileMapManager
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
                  private val observerManager: ObserverManager,
                  private val tileMapManager: TileMapManager) extends ScreenAdapter{
+
+  private val soundManager: SoundManager = new SoundManager
+
+  private var previousStates: Map[Entity, State.Value] = Map.empty
 
   private val camera: OrthographicCamera = new OrthographicCamera()
   camera.translate(300f, 300f)
@@ -64,6 +69,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   override def render(delta: Float): Unit = {
     if(this.entitiesGetter.isLevelReady) {
       if(this.removeLoadingScreen) {
+        this.soundManager.playSound(SoundEvent.WorldSoundtrack)
         this.hud.loadingFinished()
         this.removeLoadingScreen = false
       }
@@ -85,6 +91,12 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         val itemPicked: Option[Items] = entitiesGetter.hasHeroPickedUpItem
         if(itemPicked.nonEmpty)
           this.hud.addNewItem(itemPicked.get)
+
+        if(previousStates.contains(hero)) {
+          if (!previousStates(hero).equals(hero.getState))
+            soundManager.playSoundOnStateChange(hero.getType, hero.getState)
+        }
+        previousStates = previousStates + (hero -> hero.getState)
       }
 
       val message: Option[String] = entitiesGetter.getMessage
@@ -110,6 +122,13 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       if(entities.nonEmpty) {
         this.spriteViewer.loadSprites(entities.get)
         this.spriteViewer.updateSprites(delta)
+
+        //per ogni entità controllo lo stato precedente e quello attuale per decidere quali suoni riprodurre
+        entities.get.foreach(entity => {
+          if(previousStates.contains(entity) && !previousStates(entity).equals(entity.getState))
+            soundManager.playSoundOnStateChange(entity.getType, entity.getState)
+          previousStates = previousStates + (entity -> entity.getState)
+        })
       }
 
       this.camera.update()

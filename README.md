@@ -1,6 +1,6 @@
 # PPS-LiD (Lost in Dungeons)
 
-This project is aimed to develop a rogue-lite games based on the famous DeadCells
+This project is aimed to develop a rogue-lite game based on the famous DeadCells
 
 ## Build
 The system uses Sbt as build system and dependency manager.
