@@ -1,5 +1,5 @@
 import controller.GameEvent
-import model.entities.{Entity, EntityType, Hero, State}
+import model.entities.{Entity, EntityType, Hero, Ladder, State}
 import model.{Level, LevelImpl}
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -16,7 +16,7 @@ class TestLadder extends AnyFlatSpec {
 
   "The Hero" should "be able to interact with a ladder" in {
     val monitor: EntitiesContainerMonitor = this.initialize()
-    val ladder: Entity = EntitiesFactoryImpl.createLadder((10, 10), (10, 100))
+    val ladder: Entity = Ladder((10, 10), (10, 100))
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).get.head.asInstanceOf[Hero]
     ladder.collisionDetected(hero)
     hero.notifyCommand(GameEvent.Interaction)

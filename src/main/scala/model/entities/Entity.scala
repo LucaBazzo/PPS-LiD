@@ -115,9 +115,3 @@ abstract class EntityImpl(private val entityType: EntityType,
     this.collisionStrategy.apply()
   }
 }
-
-case class ImmobileEntity(private var entityType: EntityType,
-                          private var entityBody: EntityBody,
-                          private val size: (Float, Float))
-  extends EntityImpl(entityType, entityBody, size) {
-}

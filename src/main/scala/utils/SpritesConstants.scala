@@ -42,7 +42,7 @@ object  SpritesConstants {
   val CHEST_SPRITE_WIDTH: Int = 64
   val CHEST_SPRITE_HEIGHT: Int = 68
 
-  val DOOR_SPRITE_WIDTH: Int = 96
-  val DOOR_SPRITE_HEIGHT: Int = 90
+  val DOOR_SPRITE_WIDTH: Int = 82
+  val DOOR_SPRITE_HEIGHT: Int = 71
 
 }
