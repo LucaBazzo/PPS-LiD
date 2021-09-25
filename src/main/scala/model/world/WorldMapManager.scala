@@ -39,8 +39,8 @@ class TileMapManager extends WorldMapUtilities {
 
   override def updateTiledMapList(seed: Int): Unit = {
 
-    if(seed%2 == 0) keyLocation = "TOP"
-    else keyLocation = "BOTTOM"
+    if(seed%2 == 0) keyLocation = TOP_KEY_ITEM_ROOM_NAME
+    else keyLocation = BOTTOM_KEY_ITEM_ROOM_NAME
 
     //scelgo casualmente 6 stanze da mettere nel world (le stanze non devono ripetersi)
     val innerRooms: List[String] = getNonStaticRooms(seed)
@@ -102,10 +102,10 @@ class TileMapManager extends WorldMapUtilities {
             EntitiesFactoryImpl.createDoor(size, position, richTiledMapInfo.name!=null && richTiledMapInfo.name.equalsIgnoreCase(BOSS_ROOM_MAP_NAME))
           case "chest" =>
             if(richTiledMapInfo.name!=null && (richTiledMapInfo.name.equalsIgnoreCase(TOP_KEY_ITEM_ROOM_NAME) || richTiledMapInfo.name.equalsIgnoreCase(BOTTOM_KEY_ITEM_ROOM_NAME)))
-              if (richTiledMapInfo.name.contains(keyLocation))
+              if (richTiledMapInfo.name.equalsIgnoreCase(keyLocation)) {
                 spawnEntity(() => Item(ItemPools.Keys, EntitiesFactoryImpl.getItemPool,
                   EntitiesFactoryImpl.getEntitiesContainerMonitor, size, position))
-              else
+              } else
                 spawnEntity(() => Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool,
                   EntitiesFactoryImpl.getEntitiesContainerMonitor, size, position))
             else spawnEntity(() => EntitiesFactoryImpl.createChest(size, position))
