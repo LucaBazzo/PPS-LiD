@@ -197,7 +197,7 @@ object LavaPool {
 
     val immobileEntity: Entity = ImmobileEntity(EntityType.Lava, entityBody, size.PPM)
 
-    immobileEntity.setCollisionStrategy(LavaCollisionStrategy(EntitiesFactoryImpl.getCollisionMonitor))
+    immobileEntity.setCollisionStrategy(LavaCollisionStrategy())
     EntitiesFactoryImpl.getEntitiesContainerMonitor.addEntity(immobileEntity)
     immobileEntity
   }
