@@ -118,6 +118,29 @@ case class SlimeAttack(override protected val sourceEntity: LivingEntity)
   }
 }
 
+case class BatAttack(override protected val sourceEntity: LivingEntity)
+  extends MeleeAttackStrategy(sourceEntity,
+    attackSpeed = BAT_ATTACK_SPEED, attackDuration = BAT_ATTACK_DURATION,
+    visionAngle = BAT_VISION_ANGLE, visionDistance = BAT_VISION_DISTANCE) {
+
+  override protected def updateAttack(attackProgress:Long):Unit = {
+    attackProgress match {
+      case x if x >= 200 => this.attackInstance.get.getBody.setActive(true)
+      case _ => this.attackInstance.get.getBody.setActive(false)
+    }
+  }
+
+  override protected def canAttack: Boolean = this.isAttackFinished &&
+    System.currentTimeMillis() - this.lastAttackTime > this.attackSpeed &&
+    getBodiesDistance(this.sourceEntity, this.targetEntity) <= sourceEntity.getSize._1
+
+  override protected def spawnAttack(): Unit = {
+    this.sourceEntity.setState(State.Attack01)
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, BAT_ATTACK_SIZE, BAT_ATTACK_OFFSET))
+    this.attackInstance.get.getBody.setActive(false)
+  }
+}
+
 case class WizardFirstAttack(override protected val sourceEntity: LivingEntity)
   extends MeleeAttackStrategy(sourceEntity,
     attackSpeed = WIZARD_ATTACK1_SPEED, attackDuration = WIZARD_ATTACK1_DURATION,

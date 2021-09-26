@@ -1,8 +1,8 @@
 package model.behaviour
 
 import model.behaviour.RichTransitions.LogicalTransition
-import model.collisions.ImplicitConversions.entityToBody
-import model.entities.{Entity, MobileEntity}
+import model.collisions.ImplicitConversions.{entityToBody, tupleToVector2, vectorToTuple}
+import model.entities.{Entity, MobileEntity, Statistic}
 import model.helpers.GeometricUtilities.isBodyOnTheRight
 import model.movement._
 
@@ -24,9 +24,9 @@ class MovementBehavioursImpl extends BehavioursImpl with MovementBehaviours {
   }
 }
 
-case class GroundEnemyMovementStrategy(sourceEntity: MobileEntity,
-                                       targetEntity: Entity,
-                                       visionDistance: Float) extends BehaviourMovementStrategy {
+case class GroundEnemyMovementStrategy(private val sourceEntity: MobileEntity,
+                                       private val targetEntity: Entity,
+                                       private val visionDistance: Float) extends BehaviourMovementStrategy {
   private val WAIT_PROBABILITY: Float = 0.3f
 
   private val b1: MovementStrategy = behaviours.addBehaviour(PatrolMovementStrategy(sourceEntity))
@@ -60,7 +60,7 @@ case class GroundEnemyMovementStrategy(sourceEntity: MobileEntity,
     IsPathWalkable(sourceEntity, targetEntity))
 }
 
-case class PatrolMovementStrategy(sourceEntity: MobileEntity) extends BehaviourMovementStrategy {
+case class PatrolMovementStrategy(private val sourceEntity: MobileEntity) extends BehaviourMovementStrategy {
 
   private val isFacingRight: Transition = () => this.sourceEntity.isFacingRight
 
@@ -77,8 +77,8 @@ case class PatrolMovementStrategy(sourceEntity: MobileEntity) extends BehaviourM
   behaviours.addTransition(b3, b2, Not(CanMoveToTheRight(sourceEntity)))
 }
 
-case class ChaseMovementStrategy(sourceEntity:MobileEntity,
-                                 targetEntity:Entity) extends BehaviourMovementStrategy {
+case class ChaseMovementStrategy(private val sourceEntity:MobileEntity,
+                                 private val targetEntity:Entity) extends BehaviourMovementStrategy {
 
   private val isTargetOnTheRight:Transition = () => isBodyOnTheRight(this.sourceEntity, this.targetEntity)
 
@@ -94,4 +94,44 @@ case class ChaseMovementStrategy(sourceEntity:MobileEntity,
 
   behaviours.addTransition(b3, b2, Not(isTargetOnTheRight))
 }
+
+case class FlyingEnemyMovementStrategy(private val sourceEntity:MobileEntity,
+                                       private val targetEntity:Entity,
+                                       private val visionDistance: Float) extends BehaviourMovementStrategy {
+
+  private val b1: MovementStrategy = behaviours.addBehaviour(DoNothingMovementStrategy())
+  private val b2: MovementStrategy = behaviours.addBehaviour(new FlyingMovementStrategy(sourceEntity, targetEntity))
+  private val b3: MovementStrategy = behaviours.addBehaviour(FaceTarget(sourceEntity, targetEntity))
+
+  behaviours.addTransition(b1, b2, IsTargetNearby(sourceEntity, targetEntity, visionDistance))
+
+  behaviours.addTransition(b2, b1, Not(IsTargetNearby(sourceEntity, targetEntity, visionDistance)))
+  behaviours.addTransition(b2, b3, IsTargetNearby(sourceEntity, targetEntity, this.sourceEntity.getSize._1))
+
+  behaviours.addTransition(b3, b2, Not(IsTargetNearby(sourceEntity, targetEntity, this.sourceEntity.getSize._1)) &&
+    Not(IsEntityAttacking(sourceEntity)))
+}
+
+class FlyingMovementStrategy(private val sourceEntity:MobileEntity,
+                             private val targetEntity:Entity) extends MovementStrategyImpl {
+
+  this.sourceEntity.setGravityScale(0)
+
+  override def apply(): Unit = {
+    val direction =
+      this.targetEntity.getPosition
+        .sub(sourceEntity.getPosition)
+        .nor()
+        .scl(sourceEntity.getStatistic(Statistic.MovementSpeed).get)
+
+    this.sourceEntity.setFacing(direction.x > 0)
+
+    this.sourceEntity.setVelocity(direction)
+  }
+
+  override def onEnd(): Unit = {
+    this.sourceEntity.setVelocity((0, 0))
+  }
+}
+
 

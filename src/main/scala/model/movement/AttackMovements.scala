@@ -46,6 +46,14 @@ case class HomingProjectileTrajectory(private val sourceEntity: MobileEntity,
   }
 
   private def changeBulletTrajectory(): Unit = {
+
+    //    val direction =
+    //      this.targetEntity.getPosition
+    //        .sub(sourceEntity.getPosition)
+    //        .nor()
+    //        .scl(sourceEntity.getStatistic(Statistic.MovementSpeed).get)
+    //    this.sourceEntity.setVelocity(direction)
+
     this.sourceEntity.getBody.setLinearVelocity(
       new Vector2(this.targetEntity.getPosition)
         .sub(new Vector2(this.originPoint._1, this.originPoint._2))
