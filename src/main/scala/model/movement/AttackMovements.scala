@@ -38,10 +38,10 @@ class ProjectileTrajectory(val owner: Entity,
 class WeightlessProjectileTrajectory(val owner: Entity,
                                      val originPoint:(Float, Float),
                                      val targetPoint:(Float, Float),
-                                     val stats: Map[Statistic, Float]) extends DoNothingMovementStrategy {
+                                     val speed: Float) extends DoNothingMovementStrategy {
   owner.getBody.applyLinearImpulse(
     new Vector2(targetPoint._1, targetPoint._2).sub(new Vector2(originPoint._1, originPoint._2)).nor()
-    .scl(stats(Statistic.Strength)),
+    .scl(speed),
   owner.getBody.getWorldCenter, true)
 
   owner.getBody.setGravityScale(0)
@@ -62,10 +62,10 @@ class CircularMovementStrategy(private val entity: MobileEntity, private val ang
 class HomingProjectileTrajectory(val sourceEntity: MobileEntity,
                                  val originPoint:(Float, Float),
                                  val targetPoint:(Float, Float),
-                                 val stats: Map[Statistic, Float]) extends DoNothingMovementStrategy {
+                                 val speed: Float) extends DoNothingMovementStrategy {
   sourceEntity.getBody.applyLinearImpulse(
     new Vector2(targetPoint._1, targetPoint._2).sub(new Vector2(originPoint._1, originPoint._2)).nor()
-      .scl(stats(Statistic.Strength)),
+      .scl(this.speed),
     sourceEntity.getBody.getWorldCenter, true)
   sourceEntity.getBody.setGravityScale(0)
 

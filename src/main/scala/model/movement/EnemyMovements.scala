@@ -5,8 +5,6 @@ import model.entities.{Entity, MobileEntity, State, Statistic}
 import model.collisions.ImplicitConversions.entityToBody
 import model.helpers.GeometricUtilities.isBodyOnTheRight
 
-// TODO: rifattorizzare i predicati usati spesso in delel classi Predicate
-
 abstract class BehaviourMovementStrategy extends MovementStrategyImpl {
   protected val behaviours: MovementBehavioursImpl = new MovementBehavioursImpl()
 
