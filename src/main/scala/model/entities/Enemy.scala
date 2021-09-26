@@ -1,18 +1,19 @@
 package model.entities
 
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
+import model.attack._
+import model.behaviour.RichTransitions._
 import model.behaviour._
-import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
+import model.collisions.{CollisionStrategy, DoNothingCollisionStrategy}
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State._
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl._
 import model.helpers.ItemPools
+import model.movement.{FaceTarget, MovementStrategy}
 import model.{EntityBody, Score}
 import utils.ApplicationConstants.RANDOM
-import utils.CollisionConstants.ENEMY_COLLISIONS
 import utils.EnemiesConstants
 import utils.EnemiesConstants._
 import utils.HeroConstants.SHORT_WAIT_TIME
@@ -21,64 +22,107 @@ trait Enemy {
   def setBehaviour(enemyBehaviour: EnemyBehavioursImpl): Unit
 }
 
-object Enemy {
-  private val heroEntity: () => Hero =
-    () => getEntitiesContainerMonitor.getHero.getOrElse(throw new IllegalArgumentException())
-
-  private val levelNumber: () => Int =
-    () => getEntitiesContainerMonitor.getLevelNumber
-
-  private def createEnemyEntity(position: (Float, Float),
-                        size: (Float, Float),
-                        stats: Map[Statistic, Float],
-                        statsModifiers: Map[Statistic, Float],
-                        score: Int,
-                        entityId: EntityType): EnemyImpl = {
-
-    val spawnPoint = (position._1, position._2 + size._2)
-    val levelBasedStats =
-      stats.map { case (key, value) => (key, value + levelNumber() * statsModifiers.getOrElse(key, 0f)) }
-
-    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
-      ENEMY_COLLISIONS, createPolygonalShape(size.PPM, rounder = true), spawnPoint.PPM)
-
-    val enemy: EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, levelBasedStats, score, heroEntity())
-    addEntity(enemy)
-    enemy
-  }
-
-  def createSkeletonEnemy(position: (Float, Float)): EnemyImpl = {
+object SkeletonEnemy {
+  def apply(position: (Float, Float)): EnemyImpl = {
     val enemy: EnemyImpl = createEnemyEntity(position, SKELETON_SIZE,
       SKELETON_STATS, STATS_MODIFIER, ENEMY_SCORE, EntityType.EnemySkeleton)
 
-    enemy.setBehaviour(SkeletonEnemyBehaviour(enemy, heroEntity()))
+    val behaviours = new EnemyBehavioursImpl()
+    behaviours.addBehaviour((DoNothingCollisionStrategy(),
+      GroundEnemyMovementStrategy(enemy, getEntitiesContainerMonitor.getHero.get, SKELETON_VISION_DISTANCE),
+      SkeletonAttack(enemy)))
+
+    enemy.setBehaviour(behaviours)
     enemy
   }
+}
 
-  def createSlimeEnemy(position: (Float, Float)): EnemyImpl = {
+object WormEnemy {
+  def apply(position: (Float, Float)): EnemyImpl = {
+    val enemy: EnemyImpl = createEnemyEntity(position, WORM_SIZE,
+      WORM_STATS, STATS_MODIFIER, ENEMY_SCORE, EntityType.EnemyWorm)
+
+    val behaviours = new EnemyBehavioursImpl()
+    behaviours.addBehaviour((DoNothingCollisionStrategy(),
+      GroundEnemyMovementStrategy(enemy, getEntitiesContainerMonitor.getHero.get, WORM_VISION_DISTANCE),
+      WormFireballAttack(enemy)))
+
+    enemy.setBehaviour(behaviours)
+    enemy
+  }
+}
+
+object SlimeEnemy {
+  def apply(position: (Float, Float)): EnemyImpl = {
     // easter egg: a slime could rarely be displayed as Pacman with a 5% chance
-    val enemyType = if (RANDOM.nextInt(100) <= 5) EntityType.EnemyPacman else EntityType.EnemySlime
+    val enemyType = if (RANDOM.nextFloat() <= PACMAN_SPAWN_RATE) EntityType.EnemyPacman else EntityType.EnemySlime
 
     val enemy: EnemyImpl = createEnemyEntity(position,
       SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, ENEMY_SCORE, enemyType)
 
-    enemy.setBehaviour(SlimeEnemyBehaviour(enemy, heroEntity()))
+    val behaviours = new EnemyBehavioursImpl()
+    behaviours.addBehaviour((DoNothingCollisionStrategy(),
+      GroundEnemyMovementStrategy(enemy, getEntitiesContainerMonitor.getHero.get, SLIME_VISION_DISTANCE),
+      SlimeAttack(enemy)))
+
+    enemy.setBehaviour(behaviours)
     enemy
   }
+}
 
-  def createWormEnemy(position: (Float, Float)): EnemyImpl = {
-    val enemy: EnemyImpl = createEnemyEntity(position, WORM_SIZE,
-      WORM_STATS, STATS_MODIFIER, ENEMY_SCORE, EntityType.EnemyWorm)
+//object BatEnemy {
+//  def apply(position: (Float, Float)): EnemyImpl = {
+//    // easter egg: a slime could rarely be displayed as Pacman with a 5% chance
+//    val enemy: EnemyImpl = createEnemyEntity(position,
+//      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, ENEMY_SCORE, EntityType.EnemyBat)
+//
+//    val behaviours = new EnemyBehavioursImpl()
+//    behaviours.addBehaviour((DoNothingCollisionStrategy(),
+//      GroundEnemyMovementStrategy(enemy, getEntitiesContainerMonitor.getHero.get),
+//      SlimeAttack(enemy, getEntitiesContainerMonitor.getHero.get)))
+//
+//    enemy.setBehaviour(behaviours)
+//    enemy
+//  }
+//}
 
-    enemy.setBehaviour(WormEnemyBehaviour(enemy, heroEntity()))
-    enemy
-  }
+object WizardEnemy {
+  val ATTACK_SWITCH_PROBABILITY: Float = 0.5f
+  val BOSS_BATTLE_ACTIVATION_DISTANCE: Float = 150
 
-  def createWizardBossEnemy(position: (Float, Float)): EnemyImpl = {
+  def apply(position: (Float, Float)): EnemyImpl = {
     val enemy: EnemyImpl = createEnemyEntity(position, WIZARD_BOSS_SIZE, WIZARD_BOSS_STATS, STATS_MODIFIER,
       BOSS_SCORE, EntityType.EnemyBossWizard)
+    val hero = getEntitiesContainerMonitor.getHero.get
 
-    enemy.setBehaviour(WizardEnemyBehaviour(enemy, heroEntity()))
+    val behaviours = new EnemyBehavioursImpl()
+    val b1: (CollisionStrategy, MovementStrategy, AttackStrategy) = behaviours.addBehaviour(
+      (DoNothingCollisionStrategy(), FaceTarget(enemy, hero), DoNothingAttackStrategy()))
+    val b2: (CollisionStrategy, MovementStrategy, AttackStrategy) = behaviours.addBehaviour(
+      (DoNothingCollisionStrategy(), ChaseMovementStrategy(enemy, hero), DoNothingAttackStrategy()))
+    val b3: (CollisionStrategy, MovementStrategy, AttackStrategy) = behaviours.addBehaviour(
+      (DoNothingCollisionStrategy(), FaceTarget(enemy, hero), WizardFirstAttack(enemy)))
+    val b4: (CollisionStrategy, MovementStrategy, AttackStrategy) = behaviours.addBehaviour(
+      (DoNothingCollisionStrategy(), FaceTarget(enemy, hero), WizardSecondAttack(enemy)))
+    val b5: (CollisionStrategy, MovementStrategy, AttackStrategy) = behaviours.addBehaviour(
+      (DoNothingCollisionStrategy(), FaceTarget(enemy, hero), WizardEnergyBallAttack(enemy)))
+
+    behaviours.addTransition(b1, b2, IsTargetNearby(enemy, hero, BOSS_BATTLE_ACTIVATION_DISTANCE.PPM))
+    behaviours.addTransition(b2, b3, IsTargetNearby(enemy, hero, WIZARD_ATTACK1_SIZE._1.PPM))
+    behaviours.addTransition(b2, b4, IsTargetNearby(enemy, hero, WIZARD_ATTACK2_SIZE._1.PPM))
+    behaviours.addTransition(b2, b5, Not(IsTargetVisible(enemy, hero)) || Not(IsPathWalkable(enemy, hero)))
+    behaviours.addTransition(b3, b2, Not(IsEntityAttacking(enemy)) &&
+      Not(IsTargetNearby(enemy, hero, WIZARD_ATTACK1_SIZE._1.PPM)))
+    behaviours.addTransition(b3, b4, Not(IsEntityAttacking(enemy)) &&
+      RandomlyTrue(ATTACK_SWITCH_PROBABILITY))
+    behaviours.addTransition(b4, b2, Not(IsEntityAttacking(enemy)) &&
+      Not(IsTargetNearby(enemy, hero, WIZARD_ATTACK2_SIZE._1.PPM)))
+    behaviours.addTransition(b4, b3, Not(IsEntityAttacking(enemy)) &&
+      RandomlyTrue(ATTACK_SWITCH_PROBABILITY))
+    behaviours.addTransition(b5, b2, IsTargetVisible(enemy, hero) &&
+      IsPathWalkable(enemy, hero) && Not(IsEntityAttacking(enemy)))
+
+    enemy.setBehaviour(behaviours)
     enemy
   }
 }
@@ -100,7 +144,7 @@ class EnemyImpl(private val entityType: EntityType,
   override def update(): Unit = {
     super.update()
     if ((this isNot Dying) && (this isNot Hurt)) {
-      this.behaviours.get.update
+      this.behaviours.get.update()
 
       this.movementStrategy = this.behaviours.get.getMovementStrategy
       this.attackStrategy = this.behaviours.get.getAttackStrategy
@@ -121,7 +165,7 @@ class EnemyImpl(private val entityType: EntityType,
     super.sufferDamage(damage)
     if (this is Dying) {
       this.behaviours.get.getAttackStrategy.stopAttack()
-    } else if (damage > 0) {
+    } else if (damage > 0 && !List(State.Attack01, State.Attack02, State.Attack03).contains(this.getState)) {
       this.setState(State.Hurt)
       this.timer = System.currentTimeMillis()
     }

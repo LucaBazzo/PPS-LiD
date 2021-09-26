@@ -3,25 +3,23 @@ package model.entities
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.Shape
 import model.EntityBody
-import model.collisions.ImplicitConversions._
-import model.collisions.{ApplyDamage, ApplyDamageAndDestroyEntity, EntityCollisionBit}
+import model.collisions.ImplicitConversions.{entityToBody, _}
+import model.collisions.{ApplyDamage, ApplyDamageAndDestroyEntity, ApplyDamageAndKillEntity, EntityCollisionBit}
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl._
 import model.helpers.GeometricUtilities.isBodyOnTheRight
 import model.movement._
 import utils.CollisionConstants._
+import utils.EnemiesConstants.{PROJECTILE_DYING_STATE_DURATION, PROJECTILE_ENTITIES_DURATION, WIZARD_ATTACK3_PROJECTILE_SPEED, WORM_ATTACK_PROJECTILE_SPEED}
 import utils.HeroConstants.{ARROW_SIZE, PIVOT_SIZE, SWORD_ATTACK_DENSITY}
-import model.collisions.ImplicitConversions.entityToBody
-import utils.EnemiesConstants.{WIZARD_BOSS_ATTACK3_SPEED, WORM_ATTACK_SPEED}
-
 /** The possible statistics that could be given to a mobile or living entity
  *
  */
 object Statistic extends Enumeration {
   type Statistic = Value
 
-  val CurrentHealth, Health, Strength, Defence, MovementSpeed, MaxMovementSpeed, Acceleration, AttackSpeed = Value
+  val CurrentHealth, Health, Strength, Defence, MovementSpeed, AttackSpeed = Value
 
   val VisionDistance, VisionAngle, AttackFrequency, AttackDuration = Value
 }
@@ -245,12 +243,16 @@ object MobileEntity {
                                  shape: Shape,
                                  position: (Float, Float),
                                  size: (Float, Float),
-                                 stats: Map[Statistic, Float]): MobileEntity = {
+                                 stats: Map[Statistic, Float],
+                                 bullet: Boolean = false): MobileEntity = {
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, entityCollisionBit,
       collisions, shape, position, isSensor = true)
 
-    // create an entity representing the bullet
-    val attack: MobileEntity = new MobileEntityImpl(entityType, entityBody, size.PPM, stats)
+    var attack: MobileEntity = null
+    if (bullet)
+      attack = new BulletMobileEntity(entityType, entityBody, size.PPM, stats)
+    else
+      attack = new MobileEntityImpl(entityType, entityBody, size.PPM, stats)
 
     attack
   }
@@ -259,23 +261,25 @@ object MobileEntity {
     attack.getBody.setBullet(true)
     attack.setFacing(isBodyOnTheRight(sourceEntity, targetEntity))
 
-    attack.setCollisionStrategy(ApplyDamageAndDestroyEntity(attack, (e:Entity) => e.isInstanceOf[Hero],
+    attack.setCollisionStrategy(ApplyDamageAndKillEntity(attack, (e:Entity) => e.isInstanceOf[Hero],
       sourceEntity.getStatistics))
   }
 
   def createFireballAttack(sourceEntity: LivingEntity,
                            targetEntity: Entity,
+                           targetPoint: (Float, Float),
                            size: (Float, Float) = (1f, 1f),
                            offset: (Float, Float) = (0f, 0f)): MobileEntity = {
 
     val attackPosition = computeAttackPosition(sourceEntity, offset)
     val attack: MobileEntity = createAttackEntity(EntityType.AttackFireBall,
       EntityCollisionBit.EnemyAttack, FIREBALL_COLLISIONS, createCircleShape(size._1.PPM), attackPosition,
-      size, sourceEntity.getStatistics)
+      size, sourceEntity.getStatistics, bullet = true)
 
     defineBulletAttack(attack, sourceEntity, targetEntity)
+
     attack.setMovementStrategy(new WeightlessProjectileTrajectory(attack, attackPosition,
-      (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), WORM_ATTACK_SPEED))
+      targetPoint, WORM_ATTACK_PROJECTILE_SPEED))
 
     addEntity(attack)
     attack
@@ -288,11 +292,12 @@ object MobileEntity {
     val attackPosition = computeAttackPosition(sourceEntity, offset)
     val attack: MobileEntity = createAttackEntity(EntityType.AttackEnergyBall,
       EntityCollisionBit.EnemyAttack, ENERGY_BALL_COLLISIONS, createCircleShape(size._1.PPM),
-      attackPosition, size, sourceEntity.getStatistics)
+      attackPosition, size, sourceEntity.getStatistics, bullet = true)
 
     defineBulletAttack(attack, sourceEntity, targetEntity)
-    attack.setMovementStrategy(new HomingProjectileTrajectory(attack, attackPosition,
-      (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), WIZARD_BOSS_ATTACK3_SPEED))
+
+    attack.setMovementStrategy(HomingProjectileTrajectory(attack, attackPosition,
+      targetEntity, WIZARD_ATTACK3_PROJECTILE_SPEED))
 
     addEntity(attack)
     attack
@@ -380,10 +385,41 @@ class MobileEntityImpl(private val entityType: EntityType,
 class AirSwordMobileEntity(private val entityType: EntityType,
                            private var entityBody: EntityBody,
                            private val size: (Float, Float),
-                           private val stats: Map[Statistic, Float] = Map()) extends MobileEntityImpl(entityType, entityBody, size, stats) {
+                           private val stats: Map[Statistic, Float] = Map())
+  extends MobileEntityImpl(entityType, entityBody, size, stats) {
 
   override def destroyEntity(): Unit = {
     pendingDestroyBody(this.getBody)
     removeEntity(this)
+  }
+}
+
+class BulletMobileEntity(private val entityType: EntityType,
+                         private var entityBody: EntityBody,
+                         private val size: (Float, Float),
+                         private val stats: Map[Statistic, Float] = Map())
+  extends MobileEntityImpl(entityType, entityBody, size, stats) {
+
+  private var dyingStateTime: Long = 0
+  private val creationTime: Long = System.currentTimeMillis()
+
+  override def update(): Unit = {
+    super.update()
+
+    val now:Long = System.currentTimeMillis()
+    if (now - this.creationTime > PROJECTILE_ENTITIES_DURATION)
+      this.setState(State.Dying)
+
+    if (this.getState != State.Dying)
+      this.move()
+    else {
+      if (dyingStateTime == 0) {
+        this.dyingStateTime = now
+        this.movementStrategy.stopMovement()
+      }
+
+      if (dyingStateTime != 0 && now - this.dyingStateTime > PROJECTILE_DYING_STATE_DURATION)
+        this.destroyEntity()
+    }
   }
 }

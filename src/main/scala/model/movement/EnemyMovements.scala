@@ -22,19 +22,11 @@ abstract class BehaviourMovementStrategy extends MovementStrategyImpl {
 
 case class MovingMovementStrategy(sourceEntity: MobileEntity,
                                   right:Boolean) extends MovementStrategyImpl {
-  private val maxMovementSpeed: Float = sourceEntity.getStatistic(Statistic.MaxMovementSpeed).get
-  private val acceleration: Float = sourceEntity.getStatistic(Statistic.Acceleration).get
+  private val movementSpeed: Float = sourceEntity.getStatistic(Statistic.MovementSpeed).get
 
   override def apply(): Unit = {
-    if (this.right) {
-      this.sourceEntity.setVelocityX(this.sourceEntity.getVelocity._1 + this.acceleration)
-      if (this.sourceEntity.getVelocity._1 > this.maxMovementSpeed)
-        this.sourceEntity.setVelocityX(this.maxMovementSpeed)
-    } else {
-      this.sourceEntity.setVelocityX(this.sourceEntity.getVelocity._1 - this.acceleration)
-      if (this.sourceEntity.getVelocity._1 < -this.maxMovementSpeed)
-        this.sourceEntity.setVelocityX(-this.maxMovementSpeed)
-    }
+    if (this.right) this.sourceEntity.setVelocityX(this.movementSpeed)
+    else this.sourceEntity.setVelocityX( - this.movementSpeed)
   }
 
   override def stopMovement(): Unit = this.sourceEntity.setVelocityX(0)
@@ -55,13 +47,13 @@ case class FaceTarget(sourceEntity: MobileEntity,
                       targetEntity: Entity) extends MovementStrategyImpl {
 
   override def apply(): Unit = {
-    this.sourceEntity.setFacing(right = isBodyOnTheRight(sourceEntity, targetEntity))
+    if (!(List(State.Attack01, State.Attack02, State.Attack03) contains sourceEntity.getState))
+      this.sourceEntity.setFacing(right = isBodyOnTheRight(sourceEntity, targetEntity))
   }
 
   override def stopMovement(): Unit = { }
 
   override def onBegin(): Unit = {
-    this.sourceEntity.setState(State.Standing)
     this.sourceEntity.setVelocityX(0)
   }
 
