@@ -3,7 +3,7 @@ package view.screens.sprites
 import com.badlogic.gdx.graphics.g2d.Batch
 import model.entities.{Entity, EntityType}
 import utils.ApplicationConstants
-import utils.ApplicationConstants.{CHEST_PACK_LOCATION, ENERGY_BALL_PACK_LOCATION, FIREBALL_PACK_LOCATION, IRON_DOOR_PACK_LOCATION, PACMAN_PACK_LOCATION, PORTAL_PACK_LOCATION, SKELETON_PACK_LOCATION, SLIME_PACK_LOCATION, SPRITES_PACK_LOCATION, WIZARD_PACK_LOCATION, WORM_PACK_LOCATION}
+import utils.ApplicationConstants.{BAT_PACK_LOCATION, CHEST_PACK_LOCATION, ENERGY_BALL_PACK_LOCATION, FIREBALL_PACK_LOCATION, IRON_DOOR_PACK_LOCATION, PACMAN_PACK_LOCATION, PORTAL_PACK_LOCATION, SKELETON_PACK_LOCATION, SLIME_PACK_LOCATION, SPRITES_PACK_LOCATION, WIZARD_PACK_LOCATION, WORM_PACK_LOCATION}
 import utils.SpritesConstants._
 trait SpriteViewer {
 
@@ -41,10 +41,11 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
     case EntityType.EnemySkeleton => spriteFactory.createEntitySprite(entity.getType, SKELETON_PACK_LOCATION, "skeleton", SKELETON_SPRITE_WIDTH, SKELETON_SPRITE_HEIGHT, 0.9f)
     case EntityType.EnemySlime => spriteFactory.createEntitySprite(entity.getType, SLIME_PACK_LOCATION, "slime", SLIME_SPRITE_WIDTH, SLIME_SPRITE_HEIGHT, 1.9f)
     case EntityType.EnemyPacman => spriteFactory.createEntitySprite(entity.getType, PACMAN_PACK_LOCATION, "pacman", PACMAN_SPRITE_WIDTH, PACMAN_SPRITE_HEIGHT, 1.9f)
+    case EntityType.EnemyBat => spriteFactory.createEntitySprite(entity.getType, BAT_PACK_LOCATION, "bat", BAT_SPRITE_WIDTH, BAT_SPRITE_HEIGHT, 1f)
     case EntityType.EnemyWorm => spriteFactory.createEntitySprite(entity.getType, WORM_PACK_LOCATION, "worm", WORM_SPRITE_WIDTH, WORM_SPRITE_HEIGHT, 0.8f)
     case EntityType.EnemyBossWizard => spriteFactory.createEntitySprite(entity.getType, WIZARD_PACK_LOCATION, "evil_wizard", WIZARD_SPRITE_WIDTH, WIZARD_SPRITE_HEIGHT, 0.9f)
     case EntityType.AttackFireBall => spriteFactory.createEntitySprite(entity.getType, FIREBALL_PACK_LOCATION, "fireball", FIREBALL_SPRITE_WIDTH, FIREBALL_SPRITE_HEIGHT, 1.5f)
-    case EntityType.AttackEnergyBall => spriteFactory.createEntitySprite(entity.getType, ENERGY_BALL_PACK_LOCATION, "energy_ball", ENERGYBALL_SPRITE_WIDTH, ENERGYBALL_SPRITE_HEIGHT, 0.5f)
+    case EntityType.AttackEnergyBall => spriteFactory.createEntitySprite(entity.getType, ENERGY_BALL_PACK_LOCATION, "energy_ball", ENERGY_BALL_SPRITE_WIDTH, ENERGY_BALL_SPRITE_HEIGHT, 0.5f)
     case EntityType.ArmorItem => spriteFactory.createItemSprite(entity.getType, ApplicationConstants.SPRITES_PACK_LOCATION, "items", ITEM_SPRITE_WIDTH, ITEM_SPRITE_HEIGHT, 1, 0, 0)
     case EntityType.CakeItem => spriteFactory.createItemSprite(entity.getType, ApplicationConstants.SPRITES_PACK_LOCATION, "items", ITEM_SPRITE_WIDTH, ITEM_SPRITE_HEIGHT, 1, 0, 1)
     case EntityType.BootsItem => spriteFactory.createItemSprite(entity.getType, ApplicationConstants.SPRITES_PACK_LOCATION, "items", ITEM_SPRITE_WIDTH, ITEM_SPRITE_HEIGHT, 1, 0, 2)

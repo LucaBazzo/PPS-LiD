@@ -51,6 +51,7 @@ class SpriteFactoryImpl extends SpriteFactory {
       case EntityType.EnemySlime => this.defineEnemySlimeAnimation(sprite)
       case EntityType.EnemyPacman => this.defineEnemyPacmanAnimation(sprite)
       case EntityType.EnemyWorm => this.defineEnemyWormAnimation(sprite)
+      case EntityType.EnemyBat => this.defineEnemyBatAnimation(sprite)
       case EntityType.EnemyBossWizard => this.defineEnemyWizardAnimation(sprite)
       case EntityType.AttackFireBall => this.defineAttackFireballAnimation(sprite)
       case EntityType.AttackEnergyBall => this.defineAttackEnergyBallAnimation(sprite)
@@ -129,14 +130,20 @@ class SpriteFactoryImpl extends SpriteFactory {
     sprite.addAnimation(State.AirDownAttackingEnd, this.createAnimation(sprite, 7, (15, 1), (15, 3), 0.18f))
   }
 
-  // TODO: calibrare la velocita delle animaziooni di nemici
-
   private def defineEnemyWormAnimation(sprite:EntitySprite): Unit = {
     sprite.addAnimation(State.Attack01, this.createAnimation(sprite, 7, (0, 0), (2, 1)))
     sprite.addAnimation(State.Dying, this.createAnimation(sprite, 7, (2, 2), (3, 2)))
     sprite.addAnimation(State.Hurt, this.createAnimation(sprite, 7, (3, 3), (3, 5)))
     sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (3, 6), (5, 0)), loop = true)
     sprite.addAnimation(State.Running, this.createAnimation(sprite, 7, (5, 1), (6, 2)), loop = true)
+  }
+
+  private def defineEnemyBatAnimation(sprite:EntitySprite): Unit = {
+    sprite.addAnimation(State.Attack01, this.createAnimation(sprite, 7, (0, 0), (1, 0)))
+    sprite.addAnimation(State.Dying, this.createAnimation(sprite, 7, (1, 1), (1, 4)))
+    sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (1, 5), (2, 5)), loop = true)
+    sprite.addAnimation(State.Running, this.createAnimation(sprite, 7, (1, 5), (2, 5)), loop = true)
+    sprite.addAnimation(State.Hurt, this.createAnimation(sprite, 7, (2, 6), (3, 2)))
   }
 
   private def defineEnemyWizardAnimation(sprite:EntitySprite): Unit = {
