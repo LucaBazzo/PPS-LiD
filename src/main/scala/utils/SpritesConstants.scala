@@ -17,6 +17,9 @@ object  SpritesConstants {
   val PACMAN_SPRITE_WIDTH: Int = 16
   val PACMAN_SPRITE_HEIGHT: Int = 16
 
+  val BAT_SPRITE_WIDTH: Int = 150
+  val BAT_SPRITE_HEIGHT: Int = 150
+
   val WORM_SPRITE_WIDTH: Int = 90
   val WORM_SPRITE_HEIGHT: Int = 90
 
@@ -26,8 +29,8 @@ object  SpritesConstants {
   val FIREBALL_SPRITE_WIDTH: Int = 46
   val FIREBALL_SPRITE_HEIGHT: Int = 46
 
-  val ENERGYBALL_SPRITE_WIDTH: Int = 128
-  val ENERGYBALL_SPRITE_HEIGHT: Int = 128
+  val ENERGY_BALL_SPRITE_WIDTH: Int = 128
+  val ENERGY_BALL_SPRITE_HEIGHT: Int = 128
 
   val REAPER_SPRITE_WIDTH: Int = 211
   val REAPER_SPRITE_HEIGHT: Int = 130
@@ -44,5 +47,17 @@ object  SpritesConstants {
 
   val DOOR_SPRITE_WIDTH: Int = 82
   val DOOR_SPRITE_HEIGHT: Int = 71
-
+  
+  val SLIME_PACK_LOCATION = "assets/sprites/slime.pack"
+  val SPRITES_PACK_LOCATION = "assets/sprites/sprites.pack"
+  val SKELETON_PACK_LOCATION = "assets/sprites/skeleton.pack"
+  val WORM_PACK_LOCATION = "assets/sprites/worm.pack"
+  val PACMAN_PACK_LOCATION = "assets/sprites/pacman.pack"
+  val BAT_PACK_LOCATION = "assets/sprites/bat.pack"
+  val WIZARD_PACK_LOCATION = "assets/sprites/evil_wizard.pack"
+  val FIREBALL_PACK_LOCATION = "assets/sprites/fireball.pack"
+  val ENERGY_BALL_PACK_LOCATION = "assets/sprites/energy_ball.pack"
+  val IRON_DOOR_PACK_LOCATION = "assets/sprites/Door.pack"
+  val CHEST_PACK_LOCATION = "assets/sprites/chest.pack"
+  val PORTAL_PACK_LOCATION = "assets/sprites/portal.pack"
 }
