@@ -1,10 +1,10 @@
 package model.behaviour
 
 import model.behaviour.RichTransitions.LogicalTransition
-import model.entities.{Entity, MobileEntity, Statistic}
+import model.collisions.ImplicitConversions.entityToBody
+import model.entities.{Entity, MobileEntity}
 import model.helpers.GeometricUtilities.isBodyOnTheRight
 import model.movement._
-import model.collisions.ImplicitConversions.entityToBody
 
 trait MovementBehaviours {
   def getMovementStrategy: MovementStrategy
@@ -25,26 +25,25 @@ class MovementBehavioursImpl extends BehavioursImpl with MovementBehaviours {
 }
 
 case class GroundEnemyMovementStrategy(sourceEntity: MobileEntity,
-                                       targetEntity: Entity) extends BehaviourMovementStrategy {
+                                       targetEntity: Entity,
+                                       visionDistance: Float) extends BehaviourMovementStrategy {
   private val WAIT_PROBABILITY: Float = 0.3f
-
-  private val minDistance = sourceEntity.getStatistic(Statistic.VisionDistance).get
 
   private val b1: MovementStrategy = behaviours.addBehaviour(PatrolMovementStrategy(sourceEntity))
   private val b2: MovementStrategy = behaviours.addBehaviour(FaceTarget(sourceEntity, targetEntity))
   private val b3: MovementStrategy = behaviours.addBehaviour(ChaseMovementStrategy(sourceEntity, targetEntity))
   private val b4: MovementStrategy = behaviours.addBehaviour(DoNothingMovementStrategy())
 
-  behaviours.addTransition(b1, b2, IsTargetNearby(sourceEntity, targetEntity, this.minDistance) &&
+  behaviours.addTransition(b1, b2, IsTargetNearby(sourceEntity, targetEntity, this.visionDistance) &&
     IsTargetVisible(sourceEntity, targetEntity))
 
   behaviours.addTransition(b2, b1, Not(IsTargetVisible(sourceEntity, targetEntity)))
 
-  behaviours.addTransition(b2, b3, Not(IsTargetNearby(sourceEntity, targetEntity, this.minDistance)) &&
+  behaviours.addTransition(b2, b3, Not(IsTargetNearby(sourceEntity, targetEntity, this.visionDistance)) &&
     IsTargetVisible(sourceEntity, targetEntity) &&
     IsPathWalkable(sourceEntity, targetEntity))
 
-  behaviours.addTransition(b3, b2, IsTargetNearby(sourceEntity, targetEntity, this.minDistance) &&
+  behaviours.addTransition(b3, b2, IsTargetNearby(sourceEntity, targetEntity, this.visionDistance) &&
     IsTargetVisible(sourceEntity, targetEntity))
 
   behaviours.addTransition(b3, b1, Not(IsTargetVisible(sourceEntity, targetEntity)))
@@ -53,10 +52,10 @@ case class GroundEnemyMovementStrategy(sourceEntity: MobileEntity,
 
   behaviours.addTransition(b4, b1, RandomlyTrue(WAIT_PROBABILITY))
 
-  behaviours.addTransition(b4, b2, IsTargetNearby(sourceEntity, targetEntity, this.minDistance) &&
+  behaviours.addTransition(b4, b2, IsTargetNearby(sourceEntity, targetEntity, this.visionDistance) &&
     IsTargetVisible(sourceEntity, targetEntity))
 
-  behaviours.addTransition(b4, b3, Not(IsTargetNearby(sourceEntity, targetEntity, this.minDistance)) &&
+  behaviours.addTransition(b4, b3, Not(IsTargetNearby(sourceEntity, targetEntity, this.visionDistance)) &&
     IsTargetVisible(sourceEntity, targetEntity) &&
     IsPathWalkable(sourceEntity, targetEntity))
 }

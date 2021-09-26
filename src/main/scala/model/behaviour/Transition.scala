@@ -115,10 +115,8 @@ case class IsTargetNearby(sourceEntity:Entity,
 case class IsTargetVisible(sourceEntity:MobileEntity,
                            targetEntity:Entity) extends Transition {
 
-  private val visionAngle: Float = sourceEntity.getStatistic(Statistic.VisionAngle).get
-
   override def apply(): Boolean =
-    isBodyVisible(this.sourceEntity, this.targetEntity, visionAngle)
+    isBodyVisible(this.sourceEntity, this.targetEntity)
 }
 
 case class IsPathWalkable(sourceEntity:MobileEntity,
