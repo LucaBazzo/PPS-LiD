@@ -4,11 +4,11 @@ import model.attack.DoNothingAttackStrategy
 import model.behaviour.{EnemyBehavioursImpl, GroundEnemyMovementStrategy, PatrolMovementStrategy}
 import model.collisions.DoNothingCollisionStrategy
 import model.collisions.ImplicitConversions._
-import model.entities.Enemy.createSkeletonEnemy
 import model.entities._
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import model.movement.{DoNothingMovementStrategy, FaceTarget, MovementStrategy}
 import org.scalatest.flatspec.AnyFlatSpec
+import utils.EnemiesConstants.SKELETON_VISION_DISTANCE
 
 class TestEnemyMovements extends AnyFlatSpec {
   private val PLATFORM_SIZE: (Float, Float) = (100, 10)
@@ -45,7 +45,7 @@ class TestEnemyMovements extends AnyFlatSpec {
 
     this.level = new LevelImpl(null, entitiesContainer, new ItemPoolImpl())
     this.hero = entitiesContainer.getHero.get
-    this.enemy = createSkeletonEnemy(enemyPosition)
+    this.enemy = SkeletonEnemy(enemyPosition)
 
     this.floor = Platform(PLATFORM_POSITION, PLATFORM_SIZE)
     this.rightWall = EntitiesFactoryImpl.createImmobileEntity(size=WALL_SIZE, position=WALL_POSITION)
@@ -132,7 +132,7 @@ class TestEnemyMovements extends AnyFlatSpec {
     this.hero.setPosition(HERO_POSITION.PPM)
     this.enemy.setFacing(right=true)
 
-    this.setEnemyMovementStrategy(GroundEnemyMovementStrategy(this.enemy, this.hero))
+    this.setEnemyMovementStrategy(GroundEnemyMovementStrategy(this.enemy, this.hero, SKELETON_VISION_DISTANCE))
 
     this.enemy.update()
 
@@ -146,7 +146,7 @@ class TestEnemyMovements extends AnyFlatSpec {
     this.hero.setPosition(HERO_POSITION.PPM)
     this.enemy.setFacing(right=false)
 
-    this.setEnemyMovementStrategy(GroundEnemyMovementStrategy(this.enemy, this.hero))
+    this.setEnemyMovementStrategy(GroundEnemyMovementStrategy(this.enemy, this.hero, SKELETON_VISION_DISTANCE))
 
     this.enemy.update()
 
@@ -160,7 +160,7 @@ class TestEnemyMovements extends AnyFlatSpec {
     this.hero.setPosition(HERO_POSITION.PPM)
     this.enemy.setFacing(right=false)
 
-    this.setEnemyMovementStrategy(GroundEnemyMovementStrategy(this.enemy, this.hero))
+    this.setEnemyMovementStrategy(GroundEnemyMovementStrategy(this.enemy, this.hero, SKELETON_VISION_DISTANCE))
     this.enemy.getBody.setLinearVelocity(new Vector2(1, 0))
 
     this.enemy.update()
@@ -175,7 +175,7 @@ class TestEnemyMovements extends AnyFlatSpec {
     this.hero.setPosition(HERO_POSITION.PPM)
     this.enemy.setFacing(right=true)
 
-    this.setEnemyMovementStrategy(GroundEnemyMovementStrategy(this.enemy, this.hero))
+    this.setEnemyMovementStrategy(GroundEnemyMovementStrategy(this.enemy, this.hero, SKELETON_VISION_DISTANCE))
 
     // two updates required: the first one changes the movement inner policy (from "patrol" to "chase")
     // the second one executes the new movement, changing the enemy facing direction and speed

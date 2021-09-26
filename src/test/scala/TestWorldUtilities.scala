@@ -1,6 +1,5 @@
 import model.collisions.ImplicitConversions.{entityToBody, _}
-import model.entities.Enemy.{createSkeletonEnemy, createWormEnemy}
-import model.entities.{Entity, LivingEntity, Platform}
+import model.entities.{Entity, LivingEntity, Platform, SkeletonEnemy, WormEnemy}
 import model.helpers.EntitiesFactoryImpl.createImmobileEntity
 import model.helpers.GeometricUtilities.{isBodyAbove, isBodyBelow, isBodyOnTheLeft, isBodyOnTheRight}
 import model.helpers.WorldUtilities.{canBodiesCollide, isBodyVisible}
@@ -26,8 +25,8 @@ class TestWorldUtilities extends AnyFlatSpec {
   var entitiesContainer: EntitiesContainerMonitor = new EntitiesContainerMonitor
   EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
   var level: Level = new LevelImpl(null, entitiesContainer, new ItemPoolImpl())
-  var enemy1: LivingEntity = createSkeletonEnemy(SKELETON_POSITION)
-  var enemy2: LivingEntity = createWormEnemy(WORM_POSITION)
+  var enemy1: LivingEntity = SkeletonEnemy(SKELETON_POSITION)
+  var enemy2: LivingEntity = WormEnemy(WORM_POSITION)
   var hero: LivingEntity = entitiesContainer.getHero.get
   var floor: Entity = Platform(PLATFORM_POSITION, PLATFORM_SIZE)
 

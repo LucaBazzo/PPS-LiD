@@ -1,4 +1,3 @@
-import model.entities.Enemy.{createSkeletonEnemy, createWizardBossEnemy}
 import model.entities._
 import model.helpers.EntitiesFactoryImpl.{getEntitiesContainerMonitor, getItemPool}
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl, ItemPools}
@@ -16,7 +15,7 @@ class TestEnemy extends AnyFlatSpec {
     EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
 
     level = new LevelImpl(null, entitiesContainer, new ItemPoolImpl())
-    enemy = createSkeletonEnemy((0, 0))
+    enemy = SkeletonEnemy((0, 0))
   }
 
   "An enemy" should "be able to suffer damage" in {
@@ -69,7 +68,7 @@ class TestEnemy extends AnyFlatSpec {
   "An enemy boss" should "drop a bow" in {
     initialize()
 
-    val bossEnemy: EnemyImpl = createWizardBossEnemy((0, 0))
+    val bossEnemy: EnemyImpl = WizardEnemy((0, 0))
     Portal((0, 0)) // needed to allow portal activation on boss enemy death
 
     assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).get.size == 2)
@@ -90,7 +89,7 @@ class TestEnemy extends AnyFlatSpec {
       position=(0, 0))
     entitiesContainer.getEntity(e => e.isInstanceOf[Item]).asInstanceOf[Item].collect()
 
-    val bossEnemy: EnemyImpl = createWizardBossEnemy((0, 0))
+    val bossEnemy: EnemyImpl = WizardEnemy((0, 0))
     Portal((0, 0)) // needed to allow portal activation on boss enemy death
 
     bossEnemy.destroyEntity()
