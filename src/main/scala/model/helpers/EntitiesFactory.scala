@@ -68,7 +68,6 @@ trait EntitiesFactory {
 
   def pendingChangeCollisions(entity: Entity, entityType: Short): Unit
 
-  // TODO: convertire createEnemies in createSpawnZone e lasicare a levelImpl la generazione dei nemici nelle zone di spawn
   def spawnEnemy(size: (Float, Float) = (10, 10),
                  position: (Float, Float) = (0, 0)): Unit
 
@@ -362,9 +361,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   }
 
   override def applyPendingFunctions(): Unit = synchronized {
-    for(function <- this.pendingFunctions) {
-      function.apply()
-    }
+    this.pendingFunctions.foreach(f => f.apply())
     this.pendingFunctions = List.empty
   }
 

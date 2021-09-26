@@ -19,8 +19,8 @@ abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
   protected val visionAngle: Float = this.stats(Statistic.VisionAngle)
   protected val visionDistance: Float = this.stats(Statistic.VisionDistance)
 
-  protected var lastAttackTime:Long = 0
-  protected var isAttackFinishedOldCheck:Boolean = true
+  protected var lastAttackTime: Long = 0
+  protected var isAttackFinishedOldCheck: Boolean = true
 
   override def apply(): Unit = {
     if (this.canAttack) {
@@ -39,10 +39,10 @@ abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
   override def isAttackFinished: Boolean =
     System.currentTimeMillis() - this.lastAttackTime > this.attackDuration
 
-    protected def canAttack: Boolean = this.isAttackFinished &&
-    System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
-    isBodyVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
-    getBodiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
+  protected def canAttack: Boolean = this.isAttackFinished &&
+  System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
+  isBodyVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
+  getBodiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
 
   protected def spawnAttack(): Unit
 }
@@ -186,8 +186,8 @@ case class WormFireballAttack(override protected val sourceEntity: LivingEntity,
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack01)
     createFireballAttack(this.sourceEntity, this.targetEntity,
-      EnemiesConstants.WORM_FIREBALL_ATTACK_SIZE,
-      EnemiesConstants.WORM_FIREBALL_ATTACK_OFFSET)
+      EnemiesConstants.WORM_ATTACK_SIZE,
+      EnemiesConstants.WORM_ATTACK_OFFSET)
   }
 
   override def stopAttack(): Unit = { }
