@@ -24,6 +24,16 @@ object ApplicationConstants {
   val GAME_LOOP_STEP = 16666666
 
   val SPRITES_PACK_LOCATION = "assets/sprites/sprites.pack"
+  val SKELETON_PACK_LOCATION = "assets/sprites/skeleton.pack"
+  val SLIME_PACK_LOCATION = "assets/sprites/slime.pack"
+  val WORM_PACK_LOCATION = "assets/sprites/worm.pack"
+  val PACMAN_PACK_LOCATION = "assets/sprites/pacman.pack"
+  val WIZARD_PACK_LOCATION = "assets/sprites/evil_wizard.pack"
+  val FIREBALL_PACK_LOCATION = "assets/sprites/fireball.pack"
+  val ENERGY_BALL_PACK_LOCATION = "assets/sprites/energy_ball.pack"
+  val IRON_DOOR_PACK_LOCATION = "assets/sprites/ironDoor.pack"
+  val CHEST_PACK_LOCATION = "assets/sprites/chest.pack"
+  val PORTAL_PACK_LOCATION = "assets/sprites/portal.pack"
 
   val RANDOM_SEED: Int = 42
   val RANDOM: Random = new Random()
