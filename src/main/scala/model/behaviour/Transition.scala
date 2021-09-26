@@ -3,7 +3,7 @@ package model.behaviour
 import _root_.utils.ApplicationConstants._
 import model.attack.AttackStrategy
 import model.collisions.ImplicitConversions.entityToBody
-import model.entities.{Entity, LivingEntity, MobileEntity, Statistic}
+import model.entities.{Entity, LivingEntity, MobileEntity, State, Statistic}
 import model.helpers.EntitiesUtilities._
 import model.helpers.GeometricUtilities.{getBodiesDistance, isBodyOnTheLeft, isBodyOnTheRight}
 import model.helpers.WorldUtilities.isBodyVisible
@@ -90,11 +90,8 @@ case class RandomlyTrue(percentage: Float) extends Transition {
   }
 }
 
-case class TargetIsNear(sourceEntity:Entity,
-                        targetEntity:Entity,
-                        distance:Float) extends Transition {
-  override def apply(): Boolean =
-    getBodiesDistance(this.sourceEntity, this.targetEntity) <= distance
+case class IsEntityAttacking(entity: Entity) extends Transition {
+  override def apply(): Boolean = List(State.Attack01, State.Attack02, State.Attack03) contains this.entity.getState
 }
 
 case class CanMoveToTheLeft(sourceEntity:Entity) extends Transition {
