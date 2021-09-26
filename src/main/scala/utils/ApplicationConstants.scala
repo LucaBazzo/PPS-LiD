@@ -31,7 +31,7 @@ object ApplicationConstants {
   val WIZARD_PACK_LOCATION = "assets/sprites/evil_wizard.pack"
   val FIREBALL_PACK_LOCATION = "assets/sprites/fireball.pack"
   val ENERGY_BALL_PACK_LOCATION = "assets/sprites/energy_ball.pack"
-  val IRON_DOOR_PACK_LOCATION = "assets/sprites/ironDoor.pack"
+  val IRON_DOOR_PACK_LOCATION = "assets/sprites/Door.pack"
   val CHEST_PACK_LOCATION = "assets/sprites/chest.pack"
   val PORTAL_PACK_LOCATION = "assets/sprites/portal.pack"
 

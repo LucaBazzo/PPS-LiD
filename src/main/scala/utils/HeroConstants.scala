@@ -18,7 +18,9 @@ object HeroConstants {
   val FEET_SIZE: (Float, Float) = (8.0f, 0.1f)
 
   //boss room: (2658.0f,90.0f) (2258.0f,90.0f)
-  val HERO_POSITION: (Float, Float) = (30f, 45)//(30f, 45)
+  //top item room: (1250f, 900f)
+  //bottom item room: (1250f, -600)
+  val HERO_POSITION: (Float, Float) = (30f, 45)
 
   val HERO_FRICTION: Float = 1.2f
 

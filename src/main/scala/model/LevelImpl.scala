@@ -25,7 +25,8 @@ class LevelImpl(private val model: Model,
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
   entitiesFactory.setLevel(this, itemPool)
-
+  /*entitiesFactory.addPendingFunction( () => Item(ItemPools.Keys, EntitiesFactoryImpl.getItemPool,
+    EntitiesFactoryImpl.getEntitiesContainerMonitor, (10,10), (2258.0f,85.0f)))*/
   this.entitiesContainer.setEntities(List.empty)
   this.entitiesContainer.setWorld(Option.apply(this.world))
   this.world.setContactListener(new CollisionManager(this.entitiesContainer))

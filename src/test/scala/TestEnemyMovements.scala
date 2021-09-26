@@ -47,7 +47,7 @@ class TestEnemyMovements extends AnyFlatSpec {
     this.hero = entitiesContainer.getHero.get
     this.enemy = createSkeletonEnemy(enemyPosition)
 
-    this.floor = EntitiesFactoryImpl.createPlatform(PLATFORM_POSITION, PLATFORM_SIZE)
+    this.floor = Platform(PLATFORM_POSITION, PLATFORM_SIZE)
     this.rightWall = EntitiesFactoryImpl.createImmobileEntity(size=WALL_SIZE, position=WALL_POSITION)
   }
 

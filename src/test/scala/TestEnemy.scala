@@ -1,6 +1,6 @@
 import model.entities.Enemy.{createSkeletonEnemy, createWizardBossEnemy}
 import model.entities._
-import model.helpers.EntitiesFactoryImpl.{createPortal, getEntitiesContainerMonitor, getItemPool}
+import model.helpers.EntitiesFactoryImpl.{getEntitiesContainerMonitor, getItemPool}
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl, ItemPools}
 import model.{Level, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -70,7 +70,7 @@ class TestEnemy extends AnyFlatSpec {
     initialize()
 
     val bossEnemy: EnemyImpl = createWizardBossEnemy((0, 0))
-    createPortal((0, 0)) // needed to allow portal activation on boss enemy death
+    Portal((0, 0)) // needed to allow portal activation on boss enemy death
 
     assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).get.size == 2)
     assert(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).get.isEmpty)
@@ -91,7 +91,7 @@ class TestEnemy extends AnyFlatSpec {
     entitiesContainer.getEntity(e => e.isInstanceOf[Item]).asInstanceOf[Item].collect()
 
     val bossEnemy: EnemyImpl = createWizardBossEnemy((0, 0))
-    createPortal((0, 0)) // needed to allow portal activation on boss enemy death
+    Portal((0, 0)) // needed to allow portal activation on boss enemy death
 
     bossEnemy.destroyEntity()
 

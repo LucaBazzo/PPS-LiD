@@ -1,7 +1,7 @@
 import model.collisions.ImplicitConversions.{entityToBody, _}
 import model.entities.Enemy.{createSkeletonEnemy, createWormEnemy}
-import model.entities.{Entity, LivingEntity}
-import model.helpers.EntitiesFactoryImpl.{createImmobileEntity, createPlatform}
+import model.entities.{Entity, LivingEntity, Platform}
+import model.helpers.EntitiesFactoryImpl.createImmobileEntity
 import model.helpers.GeometricUtilities.{isBodyAbove, isBodyBelow, isBodyOnTheLeft, isBodyOnTheRight}
 import model.helpers.WorldUtilities.{canBodiesCollide, isBodyVisible}
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
@@ -29,10 +29,10 @@ class TestWorldUtilities extends AnyFlatSpec {
   var enemy1: LivingEntity = createSkeletonEnemy(SKELETON_POSITION)
   var enemy2: LivingEntity = createWormEnemy(WORM_POSITION)
   var hero: LivingEntity = entitiesContainer.getHero.get
-  var floor: Entity = EntitiesFactoryImpl.createPlatform(PLATFORM_POSITION, PLATFORM_SIZE)
+  var floor: Entity = Platform(PLATFORM_POSITION, PLATFORM_SIZE)
 
   "An entity" should "see another entity if not obstructed" in {
-    createPlatform(PLATFORM_POSITION, PLATFORM_SIZE)
+    Platform(PLATFORM_POSITION, PLATFORM_SIZE)
 
     enemy1.setPosition(-30.PPM, 20.PPM)
     enemy2.setPosition(+30.PPM, 20.PPM)
@@ -46,7 +46,7 @@ class TestWorldUtilities extends AnyFlatSpec {
   }
 
   "An entity" should "see another entity inside his field of view" in {
-    createPlatform(PLATFORM_POSITION, PLATFORM_SIZE)
+    Platform(PLATFORM_POSITION, PLATFORM_SIZE)
 
     enemy1.setPosition(0, 0)
     enemy2.setPosition(0, 30.PPM)
@@ -60,7 +60,7 @@ class TestWorldUtilities extends AnyFlatSpec {
   }
 
   "An entity" should "be on the left/right of another entity" in {
-    createPlatform(PLATFORM_POSITION, PLATFORM_SIZE)
+    Platform(PLATFORM_POSITION, PLATFORM_SIZE)
 
     enemy1.setPosition(0, 0)
     enemy2.setPosition(10, 0.PPM)
@@ -78,7 +78,7 @@ class TestWorldUtilities extends AnyFlatSpec {
   }
 
   "An entity" should "be above/below another entity" in {
-    createPlatform(PLATFORM_POSITION, PLATFORM_SIZE)
+    Platform(PLATFORM_POSITION, PLATFORM_SIZE)
 
     enemy1.setPosition(0, 0)
     enemy2.setPosition(0, 10.PPM)

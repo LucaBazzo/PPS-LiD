@@ -1,7 +1,7 @@
 package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.Batch
-import model.entities.{Entity, EntityType, State}
+import model.entities.{Entity, EntityType}
 import utils.ApplicationConstants
 import utils.ApplicationConstants.{CHEST_PACK_LOCATION, ENERGY_BALL_PACK_LOCATION, FIREBALL_PACK_LOCATION, IRON_DOOR_PACK_LOCATION, PACMAN_PACK_LOCATION, PORTAL_PACK_LOCATION, SKELETON_PACK_LOCATION, SLIME_PACK_LOCATION, SPRITES_PACK_LOCATION, WIZARD_PACK_LOCATION, WORM_PACK_LOCATION}
 import utils.SpritesConstants._
@@ -59,18 +59,10 @@ class SpriteViewerImpl(batch: Batch) extends SpriteViewer {
     case EntityType.SkeletonKeyItem => spriteFactory.createItemSprite(entity.getType, ApplicationConstants.SPRITES_PACK_LOCATION, "items", ITEM_SPRITE_WIDTH, ITEM_SPRITE_HEIGHT, 1, 1, 4)
     case EntityType.BowItem => spriteFactory.createItemSprite(entity.getType, ApplicationConstants.SPRITES_PACK_LOCATION, "items", ITEM_SPRITE_WIDTH, ITEM_SPRITE_HEIGHT, 1, 1, 5)
     case EntityType.BFSwordItem => spriteFactory.createItemSprite(entity.getType, ApplicationConstants.SPRITES_PACK_LOCATION, "items", ITEM_SPRITE_WIDTH, ITEM_SPRITE_HEIGHT, 1, 1, 6)
-    case EntityType.Door => spriteFactory.createEntitySprite(entity.getType, IRON_DOOR_PACK_LOCATION, "ironDoor1", DOOR_SPRITE_WIDTH, DOOR_SPRITE_HEIGHT, 1)
+    case EntityType.Door => spriteFactory.createEntitySprite(entity.getType, IRON_DOOR_PACK_LOCATION, "Door0", DOOR_SPRITE_WIDTH, DOOR_SPRITE_HEIGHT, 1)
     case EntityType.Chest => spriteFactory.createEntitySprite(entity.getType, CHEST_PACK_LOCATION, "ChestClosed", CHEST_SPRITE_WIDTH, CHEST_SPRITE_HEIGHT, 0.2f)
     case EntityType.Portal => spriteFactory.createEntitySprite(entity.getType, PORTAL_PACK_LOCATION, "portal", PORTAL_SPRITE_WIDTH, PORTAL_SPRITE_HEIGHT, 1)
     case EntityType.Enemy | EntityType.Immobile | EntityType.Mobile | EntityType.Ladder | EntityType.Platform => null
     case _ => null
-  }
-
-  // TODO : muovere anceh questo dentro allo spritefactory
-  private def createItemSprite(entity: Entity, row: Int, column: Int): EntitySprite = {
-    val sprite = spriteFactory.createEntitySprite(entity.getType, ApplicationConstants.SPRITES_PACK_LOCATION, "items", ITEM_SPRITE_WIDTH, ITEM_SPRITE_HEIGHT, 1)
-    sprite.addAnimation(State.Standing,
-      spriteFactory.createAnimation(sprite, 7, (row, column), (row, column)))
-    sprite
   }
 }
