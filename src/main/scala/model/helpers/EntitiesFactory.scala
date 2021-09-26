@@ -170,9 +170,10 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   override def spawnEnemy(size: (Float, Float) = (10, 10),
                           position: (Float, Float) = (0, 0)): Unit =  {
     RANDOM.shuffle(ENEMY_TYPES).head match {
-      case EntityType.EnemySkeleton => SkeletonEnemy((position.x, position.y))
-      case EntityType.EnemyWorm => WormEnemy((position.x, position.y))
-      case EntityType.EnemySlime => SlimeEnemy((position.x, position.y))
+      case EntityType.EnemySkeleton => SkeletonEnemy(position)
+      case EntityType.EnemyWorm => WormEnemy(position)
+      case EntityType.EnemySlime => SlimeEnemy(position)
+      case EntityType.EnemyBat => BatEnemy(position)
     }
   }
 

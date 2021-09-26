@@ -4,7 +4,7 @@ import model.attack._
 import model.behaviour.RichTransitions._
 import model.behaviour._
 import model.collisions.ImplicitConversions._
-import model.collisions.{CollisionStrategy, DoNothingCollisionStrategy}
+import model.collisions.{CollisionStrategy, DoNothingCollisionStrategy, EntityCollisionBit}
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
 import model.entities.State._
@@ -70,21 +70,21 @@ object SlimeEnemy {
   }
 }
 
-//object BatEnemy {
-//  def apply(position: (Float, Float)): EnemyImpl = {
-//    // easter egg: a slime could rarely be displayed as Pacman with a 5% chance
-//    val enemy: EnemyImpl = createEnemyEntity(position,
-//      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, ENEMY_SCORE, EntityType.EnemyBat)
-//
-//    val behaviours = new EnemyBehavioursImpl()
-//    behaviours.addBehaviour((DoNothingCollisionStrategy(),
-//      GroundEnemyMovementStrategy(enemy, getEntitiesContainerMonitor.getHero.get),
-//      SlimeAttack(enemy, getEntitiesContainerMonitor.getHero.get)))
-//
-//    enemy.setBehaviour(behaviours)
-//    enemy
-//  }
-//}
+object BatEnemy {
+  def apply(position: (Float, Float)): EnemyImpl = {
+    val enemy: EnemyImpl = createEnemyEntity(position,
+      BAT_SIZE, BAT_STATS, STATS_MODIFIER, ENEMY_SCORE, EntityType.EnemyBat,
+      collisions = EntityCollisionBit.Sword | EntityCollisionBit.Arrow)
+
+    val behaviours = new EnemyBehavioursImpl()
+    behaviours.addBehaviour((DoNothingCollisionStrategy(),
+      FlyingEnemyMovementStrategy(enemy, getEntitiesContainerMonitor.getHero.get, BAT_VISION_DISTANCE),
+      BatAttack(enemy)))
+
+    enemy.setBehaviour(behaviours)
+    enemy
+  }
+}
 
 object WizardEnemy {
   val ATTACK_SWITCH_PROBABILITY: Float = 0.5f

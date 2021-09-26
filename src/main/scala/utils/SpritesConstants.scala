@@ -47,7 +47,7 @@ object  SpritesConstants {
 
   val DOOR_SPRITE_WIDTH: Int = 82
   val DOOR_SPRITE_HEIGHT: Int = 71
-  
+
   val SLIME_PACK_LOCATION = "assets/sprites/slime.pack"
   val SPRITES_PACK_LOCATION = "assets/sprites/sprites.pack"
   val SKELETON_PACK_LOCATION = "assets/sprites/skeleton.pack"
@@ -60,4 +60,32 @@ object  SpritesConstants {
   val IRON_DOOR_PACK_LOCATION = "assets/sprites/Door.pack"
   val CHEST_PACK_LOCATION = "assets/sprites/chest.pack"
   val PORTAL_PACK_LOCATION = "assets/sprites/portal.pack"
+
+  val HERO_REGION_NAME = "hero"
+  val ARROW_REGION_NAME = "arrow"
+  val SKELETON_REGION_NAME = "skeleton"
+  val SLIME_REGION_NAME = "slime"
+  val PACMAN_REGION_NAME = "pacman"
+  val BAT_REGION_NAME = "bat"
+  val WORM_REGION_NAME = "worm"
+  val WIZARD_REGION_NAME = "evil_wizard"
+  val FIREBALL_REGION_NAME = "fireball"
+  val ENERGY_BALL_REGION_NAME = "energy_ball"
+  val ARMOR_ITEM_REGION_NAME = "items"
+  val CAKE_ITEM_REGION_NAME = "items"
+  val BOOTS_ITEM_REGION_NAME = "items"
+  val SHIELD_ITEM_REGION_NAME = "items"
+  val MAP_ITEM_REGION_NAME = "items"
+  val WRENCH_ITEM_REGION_NAME = "items"
+  val KEY_ITEM_REGION_NAME = "items"
+  val SMALL_POTION_ITEM_REGION_NAME = "items"
+  val LARGE_POTION_ITEM_REGION_NAME = "items"
+  val HUGE_POTION_ITEM_REGION_NAME = "items"
+  val SKELETON_KEY_ITEM_REGION_NAME = "items"
+  val BOW_ITEM_REGION_NAME = "items"
+  val SWORD_ITEM_REGION_NAME = "items"
+  val SPRITES_ITEM_REGION_NAME = "items"
+  val IRON_DOOR_REGION_NAME = "Door0"
+  val CHEST_REGION_NAME = "ChestClosed"
+  val PORTAL_REGION_NAME = "portal"
 }
