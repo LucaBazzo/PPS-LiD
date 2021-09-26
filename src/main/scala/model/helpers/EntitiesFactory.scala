@@ -81,7 +81,8 @@ trait EntitiesFactory {
                         stats: Map[Statistic, Float],
                         statsModifiers: Map[Statistic, Float],
                         score: Int,
-                        entityId: EntityType): EnemyImpl
+                        entityId: EntityType,
+                        collisions: Short): EnemyImpl
 }
 
 object EntitiesFactoryImpl extends EntitiesFactory {
@@ -151,13 +152,14 @@ object EntitiesFactoryImpl extends EntitiesFactory {
                                  stats: Map[Statistic, Float],
                                  statsModifiers: Map[Statistic, Float],
                                  score: Int,
-                                 entityId: EntityType): EnemyImpl = {
+                                 entityId: EntityType,
+                                 collisions: Short = ENEMY_COLLISIONS): EnemyImpl = {
     val spawnPoint = (position._1, position._2 + size._2)
     val levelBasedStats =
       stats.map { case (key, value) => (key, value + getEntitiesContainerMonitor.getLevelNumber * statsModifiers.getOrElse(key, 0f)) }
 
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
-      ENEMY_COLLISIONS, createPolygonalShape(size.PPM, rounder = true), spawnPoint.PPM)
+      collisions, createPolygonalShape(size.PPM, rounder = true), spawnPoint.PPM)
 
     val enemy: EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, levelBasedStats, score,
       getEntitiesContainerMonitor.getHero.getOrElse(throw new IllegalArgumentException()))
