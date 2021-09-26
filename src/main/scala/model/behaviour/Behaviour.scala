@@ -46,7 +46,7 @@ abstract class BehavioursImpl() extends Behaviours {
       if (activeTransitions.nonEmpty) {
         val pickedTransition: ((Behaviour, Behaviour), Transition) =
           activeTransitions.toList(RANDOM.nextInt(activeTransitions.size))
-        val pickedBehaviour = this.behaviours.find(b => b equals pickedTransition._1._2).get
+        val pickedBehaviour = this.behaviours.find(b => b == pickedTransition._1._2).get
 
         this.onBehaviourEnd()
         // reset the current behaviour transitions to enable reuse of recurring behaviours
@@ -62,7 +62,7 @@ abstract class BehavioursImpl() extends Behaviours {
     this.currentBehaviour.getOrElse(throw new IllegalArgumentException())
 
   override def getCurrentTransitions: Map[(Behaviour, Behaviour), Transition] =
-    this.transitions.filter(t => t._1._1 equals this.getCurrentBehaviour)
+    this.transitions.filter(t => t._1._1 == this.getCurrentBehaviour)
 
   def onBehaviourBegin(): Unit
 

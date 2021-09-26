@@ -1,8 +1,8 @@
 package model.movement
 
 import model.behaviour.MovementBehavioursImpl
-import model.entities.{Entity, MobileEntity, State, Statistic}
 import model.collisions.ImplicitConversions.entityToBody
+import model.entities.{Entity, MobileEntity, State, Statistic}
 import model.helpers.GeometricUtilities.isBodyOnTheRight
 
 abstract class BehaviourMovementStrategy extends MovementStrategyImpl {

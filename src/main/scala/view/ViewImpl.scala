@@ -6,8 +6,8 @@ import com.badlogic.gdx.backends.lwjgl3.{Lwjgl3Application, Lwjgl3ApplicationCon
 import controller.ObserverManager
 import main.LostInDungeons
 import model.helpers.EntitiesGetter
-import utils.ApplicationConstants.{ICON_PATH, TITLE}
 import model.world.TileMapManager
+import utils.ApplicationConstants.{ICON_PATH, TITLE}
 import view.screens.menu.{GUIFactory, GameScreen}
 
 import java.util.concurrent.{ExecutorService, Executors}

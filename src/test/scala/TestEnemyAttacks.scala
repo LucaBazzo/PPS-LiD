@@ -66,20 +66,22 @@ class TestEnemyAttacks extends AnyFlatSpec {
     assertResult(attackEntities.size - 1)(getAttackEntities.size)
   }
 
-  "An enemy" can " not change facing direction while attacking" in {
+  "An enemy" should " not change facing direction while attacking" in {
     initialize()
 
     // position the hero near the enemy (on the right)
-    hero.setPosition(enemy.getPosition._1 + 20, enemy.getPosition._2)
+    hero.setPosition(enemy.getPosition._1 + 10.PPM, enemy.getPosition._2)
     enemy.update()
 
-    assertResult(enemy.getState)(State.Attack01)
+    assertResult(State.Attack01)(enemy.getState)
     assert(enemy.isFacingRight)
 
     // position the hero on the over side. The enemy should not change facing direction while attacking
-    hero.setPosition(enemy.getPosition._1 - 20, enemy.getPosition._2)
+    hero.setPosition(enemy.getPosition._1 - 10.PPM, enemy.getPosition._2)
 
-    assertResult(enemy.getState)(State.Attack01)
+    enemy.update()
+
+    assertResult(State.Attack01)(enemy.getState)
     assert(enemy.isFacingRight)
 
   }

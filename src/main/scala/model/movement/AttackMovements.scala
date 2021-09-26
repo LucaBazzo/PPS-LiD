@@ -1,10 +1,10 @@
 package model.movement
 
 import com.badlogic.gdx.math.Vector2
+import model.collisions.ImplicitConversions.{RichFloat, tupleToVector2}
 import model.entities.{Entity, MobileEntity}
 import utils.EnemiesConstants.WIZARD_ATTACK3_HOMING_DURATION
 import utils.HeroConstants.ARROW_VELOCITY
-import model.collisions.ImplicitConversions.{RichFloat, tupleToVector2}
 
 class ArrowMovementStrategy(private val entity: MobileEntity,
                             private var speed: Float) extends DoNothingMovementStrategy {

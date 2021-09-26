@@ -1,9 +1,9 @@
 package model.collisions
 
+import model.collisions.ImplicitConversions.entityToBody
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, LivingEntity, State, Statistic}
 import model.helpers.WorldUtilities.canBodiesCollide
-import ImplicitConversions.entityToBody
 
 case class ApplyDamage(private val target: Entity => Boolean,
                        private val stats: Map[Statistic, Float])

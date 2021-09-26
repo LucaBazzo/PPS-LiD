@@ -37,7 +37,7 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
     Thread.sleep(1000)
     pool.update()
     pool.collisionReleased(hero)
-    assert(hero.getStatistic(Statistic.CurrentHealth).get < midHP)
+    assert(hero.getStatistic(Statistic.CurrentHealth).get <= midHP)
   }
 
   "The Hero" must "stop suffering damage after exiting a lava pool" in {

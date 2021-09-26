@@ -1,9 +1,9 @@
 package view.screens.helpers
 
 import com.badlogic.gdx.audio.{Music, Sound}
-import model.entities.{EntityType, State}
 import model.entities.EntityType.EntityType
 import model.entities.State.State
+import model.entities.{EntityType, State}
 import utils.SoundConstants.{getMusicMap, getSoundMap}
 import view.screens.helpers.SoundEvent.{AirDownAttack, Attack1, Attack2, Attack3, BowAttack, Dying, EnemyAttack, EnemyDeath, Hurt, Jump, OpeningDoor, PickItem, SoundEvent, WorldSoundtrack}
 

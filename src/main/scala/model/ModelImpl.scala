@@ -3,8 +3,8 @@ package model
 import controller.GameEvent.GameEvent
 import controller.{GameEvent, Observer}
 import model.helpers.{EntitiesContainerMonitor, ItemPool, ItemPoolImpl}
-import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 import model.world.TileMapManager
+import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 
 trait Model {
 

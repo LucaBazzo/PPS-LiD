@@ -5,8 +5,8 @@ import model.EntityBody
 import model.collisions.ImplicitConversions._
 import model.collisions._
 import model.entities.EntityType.EntityType
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl}
 import model.helpers.EntitiesFactoryImpl.{createPolygonalShape, defineEntityBody}
+import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl}
 import utils.CollisionConstants._
 import utils.EnvironmentConstants._
 

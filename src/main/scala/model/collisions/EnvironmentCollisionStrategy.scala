@@ -3,7 +3,7 @@ package model.collisions
 import controller.GameEvent
 import model.entities.{Entity, Hero, ImmobileEntity, Item, _}
 import model.helpers.EntitiesSetter
-import model.{ChestInteraction, DoorInteraction, HeroInteraction, LadderInteraction, Level, PlatformInteraction}
+import model._
 import utils.EnvironmentConstants._
 
 /** Represent the behaviour of Items when collide

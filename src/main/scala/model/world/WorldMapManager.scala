@@ -8,7 +8,6 @@ import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
 import com.badlogic.gdx.math.Rectangle
 import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
-import model.entities.EntityType.Hero
 import model.entities._
 import model.helpers.{EntitiesFactoryImpl, ItemPools}
 
