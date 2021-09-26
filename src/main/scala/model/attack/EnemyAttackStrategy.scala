@@ -2,22 +2,20 @@ package model.attack
 
 import model.collisions.ImplicitConversions.entityToBody
 import model.entities.MobileEntity.{createEnergyBallAttack, createFireballAttack, createMeleeAttack}
-import model.entities.Statistic.Statistic
-import model.entities.{Entity, _}
+import model.entities._
+import model.helpers.EntitiesFactoryImpl.getEntitiesContainerMonitor
 import model.helpers.GeometricUtilities.getBodiesDistance
 import model.helpers.WorldUtilities.isBodyVisible
-import utils.EnemiesConstants
 import utils.EnemiesConstants._
 
 abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
-                                   protected val targetEntity: Entity)
+                                   protected val attackSpeed: Float,
+                                   protected val attackDuration: Float,
+                                   protected val visionAngle: Float,
+                                   protected val visionDistance: Float)
   extends AttackStrategyImpl {
 
-  protected val stats: Map[Statistic, Float] = this.sourceEntity.getStatistics
-  protected val attackFrequency: Float = this.stats(Statistic.AttackFrequency)
-  protected val attackDuration: Float = this.stats(Statistic.AttackDuration)
-  protected val visionAngle: Float = this.stats(Statistic.VisionAngle)
-  protected val visionDistance: Float = this.stats(Statistic.VisionDistance)
+  protected val targetEntity:Hero = getEntitiesContainerMonitor.getHero.get
 
   protected var lastAttackTime: Long = 0
   protected var isAttackFinishedOldCheck: Boolean = true
@@ -40,16 +38,19 @@ abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
     System.currentTimeMillis() - this.lastAttackTime > this.attackDuration
 
   protected def canAttack: Boolean = this.isAttackFinished &&
-  System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
-  isBodyVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
-  getBodiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
+    System.currentTimeMillis() - this.lastAttackTime > this.attackSpeed &&
+    isBodyVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
+    getBodiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
 
   protected def spawnAttack(): Unit
 }
 
 abstract class MeleeAttackStrategy(override protected val sourceEntity: LivingEntity,
-                                   override protected val targetEntity: Entity)
-  extends EnemyAttackStrategy(sourceEntity, targetEntity) {
+                                   override protected val attackSpeed: Float,
+                                   override protected val attackDuration: Float,
+                                   override protected val visionAngle: Float,
+                                   override protected val visionDistance: Float)
+  extends EnemyAttackStrategy(sourceEntity, attackSpeed, attackDuration, visionAngle, visionDistance) {
 
   protected var attackInstance: Option[MobileEntity] = Option.empty
   protected var attackTimer: Long = 0
@@ -58,9 +59,8 @@ abstract class MeleeAttackStrategy(override protected val sourceEntity: LivingEn
     // activate the attack box to match the displayed animation
     if (!this.isAttackFinished) {
       val attackProgress: Long = System.currentTimeMillis() - this.attackTimer
-      val isAttackActive: Boolean = this.attackInstance.get.getBody.isActive
 
-      this.updateAttack(attackProgress, isAttackActive)
+      this.updateAttack(attackProgress)
     }
 
     if (this.canAttack)
@@ -77,19 +77,18 @@ abstract class MeleeAttackStrategy(override protected val sourceEntity: LivingEn
     }
   }
 
-  protected def updateAttack(attackProgress:Long, isAttackActive:Boolean): Unit
+  protected def updateAttack(attackProgress:Long): Unit
 }
 
-case class SkeletonAttack(override protected val sourceEntity: LivingEntity,
-                          override protected val targetEntity: Entity)
-  extends MeleeAttackStrategy(sourceEntity, targetEntity) {
+case class SkeletonAttack(override protected val sourceEntity: LivingEntity)
+  extends MeleeAttackStrategy(sourceEntity,
+    attackSpeed = SKELETON_ATTACK_SPEED, attackDuration = SKELETON_ATTACK_DURATION,
+    visionAngle = SKELETON_VISION_ANGLE, visionDistance = SKELETON_VISION_DISTANCE) {
 
-  override protected def updateAttack(attackProgress:Long, isAttackActive:Boolean):Unit = {
-    if (attackProgress > 600 && attackProgress < 1000 && !isAttackActive) {
-      this.attackInstance.get.getBody.setActive(true)
-    }
-    if (attackProgress <= 600 && attackProgress > 1000 && isAttackActive) {
-      this.attackInstance.get.getBody.setActive(false)
+  override protected def updateAttack(attackProgress:Long):Unit = {
+    attackProgress match {
+      case x if x >= 400 => this.attackInstance.get.getBody.setActive(true)
+      case _ => this.attackInstance.get.getBody.setActive(false)
     }
   }
 
@@ -100,16 +99,15 @@ case class SkeletonAttack(override protected val sourceEntity: LivingEntity,
   }
 }
 
-case class SlimeAttack(override protected val sourceEntity: LivingEntity,
-                  override protected val targetEntity: Entity)
-  extends MeleeAttackStrategy(sourceEntity, targetEntity) {
+case class SlimeAttack(override protected val sourceEntity: LivingEntity)
+  extends MeleeAttackStrategy(sourceEntity,
+    attackSpeed = SLIME_ATTACK_SPEED, attackDuration = SLIME_ATTACK_DURATION,
+    visionAngle = SLIME_VISION_ANGLE, visionDistance = SLIME_VISION_DISTANCE) {
 
-  override protected def updateAttack(attackProgress:Long, isAttackActive:Boolean):Unit = {
-    if (attackProgress > 600 && attackProgress < 1000 && !isAttackActive) {
-      this.attackInstance.get.getBody.setActive(true)
-    }
-    if (attackProgress <= 600 && attackProgress > 1000 && isAttackActive) {
-      this.attackInstance.get.getBody.setActive(false)
+  override protected def updateAttack(attackProgress:Long):Unit = {
+    attackProgress match {
+      case x if x >= 200 => this.attackInstance.get.getBody.setActive(true)
+      case _ => this.attackInstance.get.getBody.setActive(false)
     }
   }
 
@@ -120,75 +118,84 @@ case class SlimeAttack(override protected val sourceEntity: LivingEntity,
   }
 }
 
-case class WizardFirstAttack(override protected val sourceEntity: LivingEntity,
-                        override protected val targetEntity: Entity)
-  extends MeleeAttackStrategy(sourceEntity, targetEntity) {
+case class WizardFirstAttack(override protected val sourceEntity: LivingEntity)
+  extends MeleeAttackStrategy(sourceEntity,
+    attackSpeed = WIZARD_ATTACK1_SPEED, attackDuration = WIZARD_ATTACK1_DURATION,
+    visionAngle = WIZARD_VISION_ANGLE, visionDistance = WIZARD_VISION_DISTANCE) {
 
-  override protected def updateAttack(attackProgress:Long, isAttackActive:Boolean):Unit = {
-    if (attackProgress > 600 && attackProgress < 1000 && !isAttackActive) {
-      this.attackInstance.get.getBody.setActive(true)
-    }
-    if (attackProgress <= 600 && attackProgress > 1000 && isAttackActive) {
-      this.attackInstance.get.getBody.setActive(false)
+  override protected def updateAttack(attackProgress:Long):Unit = {
+    attackProgress match {
+      case x if x >= 400 && x <= 800 => this.attackInstance.get.getBody.setActive(true)
+      case _ => this.attackInstance.get.getBody.setActive(false)
     }
   }
 
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack01)
-    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, WIZARD_BOSS_ATTACK1_SIZE, WIZARD_BOSS_ATTACK1_OFFSET))
+    this.attackInstance = Option(
+      createMeleeAttack(this.sourceEntity, WIZARD_ATTACK1_SIZE, WIZARD_ATTACK1_OFFSET))
     this.attackInstance.get.getBody.setActive(false)
   }
 }
 
-case class WizardSecondAttack(override protected val sourceEntity: LivingEntity,
-                         override protected val targetEntity: Entity)
-  extends MeleeAttackStrategy(sourceEntity, targetEntity) {
+case class WizardSecondAttack(override protected val sourceEntity: LivingEntity)
+  extends MeleeAttackStrategy(sourceEntity,
+    attackSpeed = WIZARD_ATTACK2_SPEED, attackDuration = WIZARD_ATTACK2_DURATION,
+    visionAngle = WIZARD_VISION_ANGLE, visionDistance = WIZARD_VISION_DISTANCE) {
 
-  override protected def updateAttack(attackProgress:Long, isAttackActive:Boolean):Unit = {
-    if (attackProgress > 600 && attackProgress < 1000 && !isAttackActive) {
-      this.attackInstance.get.getBody.setActive(true)
-    }
-    if (attackProgress <= 600 && attackProgress > 1000 && isAttackActive) {
-      this.attackInstance.get.getBody.setActive(false)
+  override protected def updateAttack(attackProgress:Long):Unit = {
+    attackProgress match {
+      case x if x >= 300 && x <= 800 => this.attackInstance.get.getBody.setActive(true)
+      case _ => this.attackInstance.get.getBody.setActive(false)
     }
   }
 
   override protected def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack02)
-    this.attackInstance = Option(createMeleeAttack(this.sourceEntity, WIZARD_BOSS_ATTACK2_SIZE, WIZARD_BOSS_ATTACK2_OFFSET))
+    this.attackInstance = Option(createMeleeAttack(this.sourceEntity,
+      WIZARD_ATTACK2_SIZE, WIZARD_ATTACK2_OFFSET))
     this.attackInstance.get.getBody.setActive(false)
   }
 }
 
-case class WizardEnergyBallAttack(override protected val sourceEntity: LivingEntity,
-                             override protected val targetEntity: Entity)
-  extends EnemyAttackStrategy(sourceEntity, targetEntity) {
+case class WizardEnergyBallAttack(override protected val sourceEntity: LivingEntity)
+  extends EnemyAttackStrategy(sourceEntity,
+    attackSpeed = WIZARD_ATTACK3_SPEED, attackDuration = WIZARD_ATTACK3_DURATION,
+    visionAngle = WIZARD_VISION_ANGLE, visionDistance = WIZARD_VISION_DISTANCE) {
 
-  override protected def spawnAttack(): Unit = {
-    this.sourceEntity.setState(State.Standing)
+  override def spawnAttack(): Unit = {
+    this.sourceEntity.setState(State.Attack03)
     createEnergyBallAttack(this.sourceEntity, this.targetEntity,
-      EnemiesConstants.WIZARD_BOSS_ATTACK3_SIZE,
-      EnemiesConstants.WIZARD_BOSS_ATTACK3_OFFSET)
+      WIZARD_ATTACK3_SIZE, WIZARD_ATTACK3_OFFSET)
   }
-
-  override def stopAttack(): Unit = { }
 
   override protected def canAttack: Boolean = this.isAttackFinished &&
-    System.currentTimeMillis() - this.lastAttackTime > this.attackFrequency &&
-    getBodiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
+    System.currentTimeMillis() - this.lastAttackTime > this.attackSpeed
 }
 
+case class WormFireballAttack(override protected val sourceEntity: LivingEntity)
+  extends EnemyAttackStrategy(sourceEntity,
+    attackSpeed = WORM_ATTACK_SPEED, attackDuration = WORM_ATTACK_DURATION,
+    visionAngle = WORM_VISION_ANGLE, visionDistance = WORM_VISION_DISTANCE) {
 
-case class WormFireballAttack(override protected val sourceEntity: LivingEntity,
-                         override protected val targetEntity: Entity)
-  extends EnemyAttackStrategy(sourceEntity, targetEntity) {
+  private var attackProgress: Long = 0
+  private var targetPoint: Option[(Float, Float)] = None
 
-  override protected def spawnAttack(): Unit = {
-    this.sourceEntity.setState(State.Attack01)
-    createFireballAttack(this.sourceEntity, this.targetEntity,
-      EnemiesConstants.WORM_ATTACK_SIZE,
-      EnemiesConstants.WORM_ATTACK_OFFSET)
+  override def apply(): Unit = {
+    // delay the attack creation
+    if (this.sourceEntity.getState == State.Attack01 &&
+      this.attackProgress != 0 && System.currentTimeMillis() - this.attackProgress > WORM_ATTACK_CREATION_DELAY ) {
+      createFireballAttack(this.sourceEntity, this.targetEntity, this.targetPoint.get,
+        WORM_ATTACK_SIZE, WORM_ATTACK_OFFSET)
+      this.attackProgress = 0
+    }
+
+    super.apply()
   }
 
-  override def stopAttack(): Unit = { }
+  override def spawnAttack(): Unit = {
+    this.sourceEntity.setState(State.Attack01)
+    this.attackProgress = System.currentTimeMillis()
+    this.targetPoint = Option((targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y))
+  }
 }

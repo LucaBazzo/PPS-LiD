@@ -1,5 +1,4 @@
 import model.collisions.ImplicitConversions._
-import model.entities.Enemy.createSkeletonEnemy
 import model.entities._
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import model.{Level, LevelImpl}
@@ -19,7 +18,7 @@ class TestEnemyAttacks extends AnyFlatSpec {
     level = new LevelImpl(null, entitiesContainer, new ItemPoolImpl())
 
     val position = entitiesContainer.getHero.get.getPosition
-    enemy = createSkeletonEnemy(position.MPP)
+    enemy = SkeletonEnemy(position.MPP)
 
     hero = entitiesContainer.getHero.get
   }
@@ -65,5 +64,23 @@ class TestEnemyAttacks extends AnyFlatSpec {
     // the enemy attack entity is prematurely removed since the enemy is dying
     assertResult(enemy.getState)(State.Dying)
     assertResult(attackEntities.size - 1)(getAttackEntities.size)
+  }
+
+  "An enemy" can " not change facing direction while attacking" in {
+    initialize()
+
+    // position the hero near the enemy (on the right)
+    hero.setPosition(enemy.getPosition._1 + 20, enemy.getPosition._2)
+    enemy.update()
+
+    assertResult(enemy.getState)(State.Attack01)
+    assert(enemy.isFacingRight)
+
+    // position the hero on the over side. The enemy should not change facing direction while attacking
+    hero.setPosition(enemy.getPosition._1 - 20, enemy.getPosition._2)
+
+    assertResult(enemy.getState)(State.Attack01)
+    assert(enemy.isFacingRight)
+
   }
 }

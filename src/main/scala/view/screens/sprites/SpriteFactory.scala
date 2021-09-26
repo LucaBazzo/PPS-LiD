@@ -142,22 +142,20 @@ class SpriteFactoryImpl extends SpriteFactory {
   private def defineEnemyWizardAnimation(sprite:EntitySprite): Unit = {
     sprite.addAnimation(State.Attack01, this.createAnimation(sprite, 7, (0, 0), (1, 0)))
     sprite.addAnimation(State.Attack02, this.createAnimation(sprite, 7, (1, 1), (2, 1)))
+    sprite.addAnimation(State.Attack03, this.createAnimation(sprite, 7, (3, 2), (4, 2)), loop = true)
     sprite.addAnimation(State.Dying, this.createAnimation(sprite, 7, (2, 2), (3, 1)))
     sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (3, 2), (4, 2)), loop = true)
     sprite.addAnimation(State.Running, this.createAnimation(sprite, 7, (4, 3), (5, 3)), loop = true)
     sprite.addAnimation(State.Hurt, this.createAnimation(sprite, 7, (5, 4), (5, 6)))
   }
 
-  // TODO: provare ad inserire anche l'animazione di esplosione
   private def defineAttackFireballAnimation(sprite: EntitySprite):Unit = {
-    //    sprite.addAnimation(State.Dying,
-    //      this.createAnimation(sprite, 7, (0, 0), (0, 6)))
+    sprite.addAnimation(State.Dying, this.createAnimation(sprite, 7, (0, 0), (0, 6)))
     sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (1, 0), (1, 5)), loop = true)
   }
 
   private def defineAttackEnergyBallAnimation(sprite: EntitySprite):Unit = {
-    //    sprite.addAnimation(State.Standing,
-    //      this.createAnimation(sprite, 7, (0, 0), (0, 6)))
+    sprite.addAnimation(State.Dying, this.createAnimation(sprite, 7, (0, 0), (0, 6)))
     sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (1, 0), (2, 1)), loop = true)
   }
 
