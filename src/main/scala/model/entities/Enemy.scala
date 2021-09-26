@@ -49,7 +49,7 @@ object Enemy {
 
   def createSkeletonEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy: EnemyImpl = createEnemyEntity(position, SKELETON_SIZE,
-      SKELETON_STATS, STATS_MODIFIER, SKELETON_SCORE, EntityType.EnemySkeleton)
+      SKELETON_STATS, STATS_MODIFIER, ENEMY_SCORE, EntityType.EnemySkeleton)
 
     enemy.setBehaviour(SkeletonEnemyBehaviour(enemy, heroEntity()))
     enemy
@@ -60,7 +60,7 @@ object Enemy {
     val enemyType = if (RANDOM.nextInt(100) <= 5) EntityType.EnemyPacman else EntityType.EnemySlime
 
     val enemy: EnemyImpl = createEnemyEntity(position,
-      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, SLIME_SCORE, enemyType)
+      SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, ENEMY_SCORE, enemyType)
 
     enemy.setBehaviour(SlimeEnemyBehaviour(enemy, heroEntity()))
     enemy
@@ -68,7 +68,7 @@ object Enemy {
 
   def createWormEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy: EnemyImpl = createEnemyEntity(position, WORM_SIZE,
-      WORM_STATS, STATS_MODIFIER, WORM_SCORE, EntityType.EnemyWorm)
+      WORM_STATS, STATS_MODIFIER, ENEMY_SCORE, EntityType.EnemyWorm)
 
     enemy.setBehaviour(WormEnemyBehaviour(enemy, heroEntity()))
     enemy
@@ -76,7 +76,7 @@ object Enemy {
 
   def createWizardBossEnemy(position: (Float, Float)): EnemyImpl = {
     val enemy: EnemyImpl = createEnemyEntity(position, WIZARD_BOSS_SIZE, WIZARD_BOSS_STATS, STATS_MODIFIER,
-      WIZARD_BOSS_SCORE, EntityType.EnemyBossWizard)
+      BOSS_SCORE, EntityType.EnemyBossWizard)
 
     enemy.setBehaviour(WizardEnemyBehaviour(enemy, heroEntity()))
     enemy

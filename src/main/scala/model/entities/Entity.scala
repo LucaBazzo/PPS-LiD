@@ -73,8 +73,6 @@ trait Entity {
   def isColliding: Boolean
 }
 
-// TODO: var size serve?
-
 abstract class EntityImpl(private val entityType: EntityType,
                           private var entityBody: EntityBody,
                           private var size: (Float, Float)) extends Entity {

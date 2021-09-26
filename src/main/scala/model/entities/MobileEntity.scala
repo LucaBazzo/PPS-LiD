@@ -13,6 +13,7 @@ import model.movement._
 import utils.CollisionConstants._
 import utils.HeroConstants.{ARROW_SIZE, PIVOT_SIZE, SWORD_ATTACK_DENSITY}
 import model.collisions.ImplicitConversions.entityToBody
+import utils.EnemiesConstants.{WIZARD_BOSS_ATTACK3_SPEED, WORM_ATTACK_SPEED}
 
 /** The possible statistics that could be given to a mobile or living entity
  *
@@ -267,39 +268,31 @@ object MobileEntity {
                            size: (Float, Float) = (1f, 1f),
                            offset: (Float, Float) = (0f, 0f)): MobileEntity = {
 
+    val attackPosition = computeAttackPosition(sourceEntity, offset)
     val attack: MobileEntity = createAttackEntity(EntityType.AttackFireBall,
-      EntityCollisionBit.EnemyAttack,
-      FIREBALL_COLLISIONS,
-      createCircleShape(size._1.PPM),
-      computeAttackPosition(sourceEntity, offset),
-      size,
-      sourceEntity.getStatistics)
+      EntityCollisionBit.EnemyAttack, FIREBALL_COLLISIONS, createCircleShape(size._1.PPM), attackPosition,
+      size, sourceEntity.getStatistics)
 
     defineBulletAttack(attack, sourceEntity, targetEntity)
-
-    attack.setMovementStrategy(new WeightlessProjectileTrajectory(attack, computeAttackPosition(sourceEntity, offset),
-      (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), sourceEntity.getStatistics))
+    attack.setMovementStrategy(new WeightlessProjectileTrajectory(attack, attackPosition,
+      (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), WORM_ATTACK_SPEED))
 
     addEntity(attack)
     attack
   }
 
   def createEnergyBallAttack(sourceEntity: LivingEntity,
-                                      targetEntity: Entity,
-                                      size: (Float, Float) = (1f, 1f),
-                                      offset: (Float, Float) = (0f, 0f)): MobileEntity = {
+                             targetEntity: Entity,
+                             size: (Float, Float) = (1f, 1f),
+                             offset: (Float, Float) = (0f, 0f)): MobileEntity = {
+    val attackPosition = computeAttackPosition(sourceEntity, offset)
     val attack: MobileEntity = createAttackEntity(EntityType.AttackEnergyBall,
-      EntityCollisionBit.EnemyAttack,
-      ENERGY_BALL_COLLISIONS,
-      createCircleShape(size._1.PPM),
-      computeAttackPosition(sourceEntity, offset),
-      size,
-      sourceEntity.getStatistics)
+      EntityCollisionBit.EnemyAttack, ENERGY_BALL_COLLISIONS, createCircleShape(size._1.PPM),
+      attackPosition, size, sourceEntity.getStatistics)
 
     defineBulletAttack(attack, sourceEntity, targetEntity)
-
-    attack.setMovementStrategy(new HomingProjectileTrajectory(attack, computeAttackPosition(sourceEntity, offset),
-      (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), sourceEntity.getStatistics))
+    attack.setMovementStrategy(new HomingProjectileTrajectory(attack, attackPosition,
+      (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), WIZARD_BOSS_ATTACK3_SPEED))
 
     addEntity(attack)
     attack
@@ -309,15 +302,8 @@ object MobileEntity {
                         size: (Float, Float) = (23, 23),
                         offset: (Float, Float) = (20, 5)): MobileEntity = {
     val attack: MobileEntity = createAttackEntity(EntityType.Mobile,
-      EntityCollisionBit.EnemyAttack,
-      ENEMY_MELEE_ATTACK_COLLISIONS,
-      createPolygonalShape(size.PPM),
-      computeAttackPosition(sourceEntity, offset),
-      size,
-      sourceEntity.getStatistics)
-
-
-    println(attack.getSize)
+      EntityCollisionBit.EnemyAttack, ENEMY_MELEE_ATTACK_COLLISIONS, createPolygonalShape(size.PPM),
+      computeAttackPosition(sourceEntity, offset), size, sourceEntity.getStatistics)
 
     createJoint(createPivotPoint(sourceEntity.getPosition).getBody, attack.getBody)
 
