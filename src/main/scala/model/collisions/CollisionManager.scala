@@ -45,6 +45,9 @@ object ImplicitConversions {
   implicit def tupleToVector2(tuple: (Float, Float)): Vector2 =
     new Vector2(tuple._1, tuple._2)
 
+  implicit def vectorToTuple(vector: Vector2): (Float, Float) =
+    (vector.x, vector.y)
+
   implicit def  entityToBody(entity: Entity): Body = entity.getBody
 
   implicit class RichFloat(base: Float) {
