@@ -19,12 +19,12 @@ trait EntityBody {
   def setCollisions(entitiesTypes: Short): EntityBody
   def getEntityCollisions(): Short
   def setFixtureValues(density: Float = 0, friction: Float = 2, restitution: Float = 0, isSensor: Boolean = false): EntityBody
-  def createFixture()
+  def createFixture(): Unit
 
-  def setPosition(position: (Float, Float), angle: Float = 0)
-  def addCoordinates(x: Float, y: Float)
+  def setPosition(position: (Float, Float), angle: Float = 0): Unit
+  def addCoordinates(x: Float, y: Float): Unit
 
-  def setGravityScale(gravityScale: Float = 1.0f)
+  def setGravityScale(gravityScale: Float = 1.0f): Unit
 }
 
 class EntityBodyImpl extends EntityBody {

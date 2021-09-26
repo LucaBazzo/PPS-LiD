@@ -33,23 +33,23 @@ trait MobileEntity extends Entity {
    *
    *  @param strategy the behavior that will call with move()
    */
-  def setMovementStrategy(strategy: MovementStrategy)
+  def setMovementStrategy(strategy: MovementStrategy): Unit
 
   /** Call the current movement strategy
    *
    */
-  def move()
+  def move(): Unit
 
   /** Stop the entity movement based on what is defined in the movement strategy
    *
    */
-  def stopMovement()
+  def stopMovement(): Unit
 
   /** Changes the direction in which the entity is looking
    *
    *  @param right true for right, false for left
    */
-  def setFacing(right: Boolean)
+  def setFacing(right: Boolean): Unit
 
   /** Check the direction in which the entity is looking
    *
@@ -68,7 +68,7 @@ trait MobileEntity extends Entity {
    *  @param statistic the statistic that will be altered
    *  @param alteration the value that will be added
    */
-  def alterStatistics(statistic: Statistic, alteration: Float)
+  def alterStatistics(statistic: Statistic, alteration: Float): Unit
 
   /** Return a specific statistic value
    *
@@ -153,7 +153,7 @@ object MobileEntity {
     val circularMobileEntity =
       new MobileEntityImpl(entityType, swordBody, rotatingBodySize.PPM, sourceEntity.getStatistics)
     circularMobileEntity.setMovementStrategy(
-      new CircularMovementStrategy(circularMobileEntity, angularVelocity))
+      CircularMovementStrategy(circularMobileEntity, angularVelocity))
     circularMobileEntity.setCollisionStrategy(
       ApplyDamage((e:Entity) => e.isInstanceOf[EnemyImpl], sourceEntity.getStatistics))
 
@@ -278,7 +278,7 @@ object MobileEntity {
 
     defineBulletAttack(attack, sourceEntity, targetEntity)
 
-    attack.setMovementStrategy(new WeightlessProjectileTrajectory(attack, attackPosition,
+    attack.setMovementStrategy(WeightlessProjectileTrajectory(attack, attackPosition,
       targetPoint, WORM_ATTACK_PROJECTILE_SPEED))
 
     addEntity(attack)

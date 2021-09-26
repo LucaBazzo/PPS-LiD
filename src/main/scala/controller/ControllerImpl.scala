@@ -17,7 +17,7 @@ import java.util.concurrent.{ExecutorService, Executors, ScheduledExecutorServic
 trait Controller {
   /** Called the hero is dead and the application should set the Game Over Screen.
    */
-  def gameOver()
+  def gameOver(): Unit
 }
 
 /** This class represent the Controller of the all game.

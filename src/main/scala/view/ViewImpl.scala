@@ -19,22 +19,22 @@ trait View {
   /** Change the current screen and start the game.
    *
    */
-  def startGame()
+  def startGame(): Unit
 
   /** Set the Game Over Screen, is called when the hero is dead.
    *
    */
-  def endGame()
+  def endGame(): Unit
 
   /** Return to the Main Menu Screen.
    *
    */
-  def returnToMenu()
+  def returnToMenu(): Unit
 
   /** Close the application.
    *
    */
-  def terminate()
+  def terminate(): Unit
 }
 
 /** Handles the graphics part of the game

@@ -103,7 +103,7 @@ object EnemiesConstants {
 
   val WIZARD_BOSS_SIZE: (Float, Float) = (13f, 25f)
   val WIZARD_VISION_DISTANCE: Float = 200.PPM
-  val WIZARD_VISION_ANGLE: Float = 90
+  val WIZARD_VISION_ANGLE: Int = 90
 
   val WIZARD_ATTACK1_SIZE: (Float, Float) = (40, 50)
   val WIZARD_ATTACK1_OFFSET: (Float, Float) = (55, 30)

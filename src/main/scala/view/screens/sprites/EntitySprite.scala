@@ -7,11 +7,11 @@ import model.entities.{Entity, Hero, MobileEntity, State}
 
 trait EntitySprite extends Sprite {
 
-  def addAnimation(state: State, animation: Animation[TextureRegion], loop: Boolean = false)
+  def addAnimation(state: State, animation: Animation[TextureRegion], loop: Boolean = false): Unit
 
-  def update(dt: Float, entity: Entity)
+  def update(dt: Float, entity: Entity): Unit
 
-  def setPosition(entity: Entity)
+  def setPosition(entity: Entity): Unit
 
   def getIntWidth: Int = super.getWidth.asInstanceOf[Int]
 

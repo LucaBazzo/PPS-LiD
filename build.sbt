@@ -13,3 +13,9 @@ libraryDependencies += "junit" % "junit" % "4.12" % "test"
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
 
 parallelExecution in Test := false
+
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-feature",
+  "-language:implicitConversions"
+)

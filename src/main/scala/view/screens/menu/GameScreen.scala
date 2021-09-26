@@ -108,7 +108,6 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         case EntityType.EnemyBossWizard => true
         case _ => false
       })
-      // TODO: prevenire chiamate di show e hide quando la barra della vita è già visibile o invisibile
       if (entitiesGetter.getBoss.nonEmpty &&
         getBodiesDistance(entitiesGetter.getHero.get,
           entitiesGetter.getBoss.get) <= HEALTH_BAR_BOSS_VISIBILITY_DISTANCE.PPM) {

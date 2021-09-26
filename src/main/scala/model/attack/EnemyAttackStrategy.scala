@@ -9,9 +9,9 @@ import model.helpers.WorldUtilities.isBodyVisible
 import utils.EnemiesConstants._
 
 abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
-                                   protected val attackSpeed: Float,
-                                   protected val attackDuration: Float,
-                                   protected val visionAngle: Float,
+                                   protected val attackSpeed: Long,
+                                   protected val attackDuration: Long,
+                                   protected val visionAngle: Int,
                                    protected val visionDistance: Float)
   extends AttackStrategyImpl {
 
@@ -46,9 +46,9 @@ abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
 }
 
 abstract class MeleeAttackStrategy(override protected val sourceEntity: LivingEntity,
-                                   override protected val attackSpeed: Float,
-                                   override protected val attackDuration: Float,
-                                   override protected val visionAngle: Float,
+                                   override protected val attackSpeed: Long,
+                                   override protected val attackDuration: Long,
+                                   override protected val visionAngle: Int,
                                    override protected val visionDistance: Float)
   extends EnemyAttackStrategy(sourceEntity, attackSpeed, attackDuration, visionAngle, visionDistance) {
 

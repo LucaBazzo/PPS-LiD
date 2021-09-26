@@ -11,7 +11,7 @@ trait GameLoop extends Runnable {
    *
    *  @param action the view event
    */
-  def addAction(action: GameEvent)
+  def addAction(action: GameEvent): Unit
 }
 
 /** Game loop that runs periodically and carries events from the View to the Model.

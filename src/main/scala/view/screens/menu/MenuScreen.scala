@@ -37,8 +37,8 @@ trait MenuScreen extends Screen {
  */
 abstract class MenuScreenImpl(private val observerManager: ObserverManager,
                               private val backgroundImagePath: String,
-                              private val distanceFromTop: Int = DEFAULT_DISTANCE_FROM_TOP,
-                              private val distanceButtonDefault: Int = DISTANCE_BUTTONS_DEFAULT) extends MenuScreen {
+                              private val distanceFromTop: Float = DEFAULT_DISTANCE_FROM_TOP,
+                              private val distanceButtonDefault: Float = DISTANCE_BUTTONS_DEFAULT) extends MenuScreen {
 
   // Setting the view
   private val camera: Camera = new OrthographicCamera()
@@ -107,8 +107,8 @@ abstract class MenuScreenImpl(private val observerManager: ObserverManager,
  */
 case class MainMenuScreen(private val observerManager: ObserverManager,
                           private val backgroundImagePath: String,
-                          private val distanceFromTop: Int = DEFAULT_DISTANCE_FROM_TOP,
-                          private val distanceButtonDefault: Int = DISTANCE_BUTTONS_DEFAULT)
+                          private val distanceFromTop: Float = DEFAULT_DISTANCE_FROM_TOP,
+                          private val distanceButtonDefault: Float = DISTANCE_BUTTONS_DEFAULT)
   extends MenuScreenImpl(observerManager, backgroundImagePath, distanceFromTop, distanceButtonDefault) {
 
   override def addButton(button: TextButton): Unit = {
@@ -126,8 +126,8 @@ case class MainMenuScreen(private val observerManager: ObserverManager,
  */
 case class GameOverScreen(private val observerManager: ObserverManager,
                           private val backgroundImagePath: String,
-                          private val distanceFromTop: Int = DEFAULT_DISTANCE_FROM_TOP,
-                          private val distanceButtonDefault: Int = DISTANCE_BUTTONS_DEFAULT)
+                          private val distanceFromTop: Float = DEFAULT_DISTANCE_FROM_TOP,
+                          private val distanceButtonDefault: Float = DISTANCE_BUTTONS_DEFAULT)
   extends MenuScreenImpl(observerManager, backgroundImagePath, distanceFromTop, distanceButtonDefault) {
 
   override def addButton(button: TextButton): Unit = this.mainTable.add(button)

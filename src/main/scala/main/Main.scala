@@ -6,8 +6,6 @@ import controller.ControllerImpl
  */
 object Main {
 
-  // TODO: trasformare tutte le chiamate a metodi in EntitiesFactori in createPendingEntity(() => ...)
-
   /** The starting point of the application.
    *
    * @param args unused.

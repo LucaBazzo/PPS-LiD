@@ -34,7 +34,7 @@ object WorldUtilities {
   def checkCollision(x1: Float, y1: Float, x2: Float, y2: Float): Boolean =
     worldQuery(x1, y1, x2, y2, _ => true)
 
-  def isBodyVisible(sourceBody: Body, targetBody: Body, maxHorizontalAngle: Float = 90): Boolean = {
+  def isBodyVisible(sourceBody: Body, targetBody: Body, maxHorizontalAngle: Int = 90): Boolean = {
     // Get the list of ordered fixtures (bodies) between source and target bodies
     var fixList:Map[Fixture, Float] = Map.empty
     world.rayCast((fixture:Fixture, point:Vector2, _, _) => {
