@@ -15,7 +15,7 @@ import java.util.concurrent.{ExecutorService, Executors}
 trait EntitiesGetter {
 
   def getEntities: List[Entity]
-  def getEntities(predicate: Entity => Boolean): Option[List[Entity]]
+  def getEntities(predicate: Entity => Boolean): List[Entity]
   def getHero: Option[Hero]
   def getBoss: Option[LivingEntity]
   def getWorld: Option[World]
@@ -61,9 +61,8 @@ class EntitiesContainerMonitor extends EntitiesGetter with EntitiesSetter {
 
   override def getEntities: List[Entity] = this.entities
 
-  // TODO option di list ha poco senso , una lista vuota è un option.empty
-  override def getEntities(predicate: Entity => Boolean): Option[List[Entity]] = synchronized {
-    Option.apply(this.entities.filter(predicate))
+  override def getEntities(predicate: Entity => Boolean): List[Entity] = synchronized {
+    this.entities.filter(predicate)
   }
 
   override def getWorld: Option[World] = synchronized {

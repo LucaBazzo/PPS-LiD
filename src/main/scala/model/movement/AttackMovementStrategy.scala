@@ -1,13 +1,13 @@
 package model.movement
 
-import com.badlogic.gdx.math.Vector2
-import model.helpers.ImplicitConversions.{RichFloat, tupleToVector2}
 import model.entities.{Entity, MobileEntity}
+import model.helpers.ImplicitConversions.{RichFloat, tupleToVector2, vectorToTuple}
+import model.helpers.WorldUtilities.computeDirectionToTarget
 import utils.EnemiesConstants.WIZARD_ATTACK3_HOMING_DURATION
 import utils.HeroConstants.ARROW_VELOCITY
 
-class ArrowMovementStrategy(private val entity: MobileEntity,
-                            private var speed: Float) extends DoNothingMovementStrategy {
+case class ArrowMovementStrategy(private val entity: MobileEntity,
+                                 private var speed: Float) extends MovementStrategy {
 
   if (entity.isFacingRight)
     this.entity.setVelocityX(ARROW_VELOCITY.PPM, speed)
@@ -17,24 +17,22 @@ class ArrowMovementStrategy(private val entity: MobileEntity,
   override def stopMovement(): Unit = this.entity.getBody.setLinearVelocity(0,0)
 }
 
-case class WeightlessProjectileTrajectory(private val sourceEntity: Entity,
-                                          private val originPoint: (Float, Float),
-                                          private val targetPoint: (Float, Float),
-                                          private val speed: Float) extends MovementStrategyImpl {
+case class FireBallMovementStrategy(private val sourceEntity: Entity,
+                                    private val originPoint: (Float, Float),
+                                    private val targetPoint: (Float, Float),
+                                    private val speed: Float) extends MovementStrategy {
   this.sourceEntity.getBody.applyLinearImpulse(
-    new Vector2(this.targetPoint._1, this.targetPoint._2)
-      .sub(new Vector2(this.originPoint._1, this.originPoint._2))
-      .nor()
-      .scl(speed),
-    this.sourceEntity.getBody.getWorldCenter, true)
+    computeDirectionToTarget(this.sourceEntity.getBody.getWorldCenter, this.targetPoint,
+      speed), this.sourceEntity.getBody.getWorldCenter, true)
   this.sourceEntity.getBody.setGravityScale(0)
 
   override def stopMovement(): Unit = this.sourceEntity.getBody.setLinearVelocity(0,0)
 }
-case class HomingProjectileTrajectory(private val sourceEntity: MobileEntity,
+
+case class EnergyBallMovementStrategy(private val sourceEntity: MobileEntity,
                                       private val originPoint:(Float, Float),
                                       private val targetEntity: Entity,
-                                      private val speed: Float) extends MovementStrategyImpl {
+                                      private val speed: Float) extends MovementStrategy {
   this.changeBulletTrajectory()
   this.sourceEntity.getBody.setGravityScale(0)
 
@@ -46,26 +44,15 @@ case class HomingProjectileTrajectory(private val sourceEntity: MobileEntity,
   }
 
   private def changeBulletTrajectory(): Unit = {
-
-    //    val direction =
-    //      this.targetEntity.getPosition
-    //        .sub(sourceEntity.getPosition)
-    //        .nor()
-    //        .scl(sourceEntity.getStatistic(Statistic.MovementSpeed).get)
-    //    this.sourceEntity.setVelocity(direction)
-
     this.sourceEntity.getBody.setLinearVelocity(
-      new Vector2(this.targetEntity.getPosition)
-        .sub(new Vector2(this.originPoint._1, this.originPoint._2))
-        .nor()
-        .scl(this.speed))
+      computeDirectionToTarget(this.originPoint, this.targetEntity.getPosition, speed))
   }
 
   override def stopMovement(): Unit = this.sourceEntity.getBody.setLinearVelocity(0,0)
 }
 
 case class CircularMovementStrategy(private val entity: MobileEntity,
-                                    private val angularVelocity: Float) extends MovementStrategyImpl {
+                                    private val angularVelocity: Float) extends MovementStrategy {
 
   override def apply(): Unit = this.entity.getBody.setAngularVelocity(angularVelocity)
 

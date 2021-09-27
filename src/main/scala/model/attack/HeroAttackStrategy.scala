@@ -14,7 +14,7 @@ import utils.HeroConstants._
  *  @param entity the entity that generates the attacks
  *  @param strength the damage that each attack will do
  */
-class HeroAttackStrategy(private val entity: Hero, private var strength: Float) extends DoNothingAttackStrategy {
+case class HeroAttackStrategy(private val entity: Hero, private var strength: Float) extends AttackStrategy {
 
   private var attackPattern: Option[MobileEntity] = Option.empty
   private var attackTimer: Float = 0

@@ -24,17 +24,17 @@ class TestEnemyAttacks extends AnyFlatSpec {
   }
 
   private def getAttackEntities: List[MobileEntity] =
-    entitiesContainer.getEntities(e => e.getType.equals(EntityType.Mobile)).get.asInstanceOf[List[MobileEntity]]
+    entitiesContainer.getEntities(e => e.getType.equals(EntityType.Mobile)).asInstanceOf[List[MobileEntity]]
 
   "An enemy" should "create an attack entity" in {
     initialize()
 
-    val mobileEntitiesCount: Int = entitiesContainer.getEntities(e => e.getType.equals(EntityType.Mobile)).get.size
+    val mobileEntitiesCount: Int = entitiesContainer.getEntities(e => e.getType.equals(EntityType.Mobile)).size
 
     enemy.update()
 
     assertResult(enemy.getState)(State.Attack01)
-    assert(entitiesContainer.getEntities(e => e.getType.equals(EntityType.Mobile)).get.size == mobileEntitiesCount + 1)
+    assert(entitiesContainer.getEntities(e => e.getType.equals(EntityType.Mobile)).size == mobileEntitiesCount + 1)
   }
 
   "An enemy attack" should "be able to damage a living entity" in {

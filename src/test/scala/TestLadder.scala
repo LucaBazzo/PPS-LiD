@@ -17,7 +17,7 @@ class TestLadder extends AnyFlatSpec {
   "The Hero" should "be able to interact with a ladder" in {
     val monitor: EntitiesContainerMonitor = this.initialize()
     val ladder: Entity = Ladder((10, 10), (10, 100))
-    val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).get.head.asInstanceOf[Hero]
+    val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).head.asInstanceOf[Hero]
     ladder.collisionDetected(hero)
     hero.notifyCommand(GameEvent.Interaction)
     assert(hero.getState == State.LadderIdle)

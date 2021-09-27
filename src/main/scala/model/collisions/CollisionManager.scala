@@ -1,11 +1,9 @@
 package model.collisions
 
-import _root_.utils.ApplicationConstants.PIXELS_PER_METER
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
-import model.helpers.ImplicitConversions._
 import model.entities.Entity
 import model.helpers.EntitiesGetter
+import model.helpers.ImplicitConversions._
 
 object EntityCollisionBit {
 
@@ -38,10 +36,6 @@ object EntityCollisionBit {
   }
 }
 
-// TODO muovere in un file a parte
-
-
-
 class CollisionManager(private val entitiesGetter: EntitiesGetter) extends ContactListener {
 
   override def beginContact(contact: Contact): Unit = {
@@ -70,8 +64,8 @@ class CollisionManager(private val entitiesGetter: EntitiesGetter) extends Conta
     val firstBody: Body = contact.getFixtureA.getBody
     val secondBody: Body = contact.getFixtureB.getBody
 
-    val firstEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals firstBody).get
-    val secondEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals secondBody).get
+    val firstEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals firstBody)
+    val secondEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals secondBody)
 
     (firstEntities, secondEntities) match {
       case (List(), List()) => (Option.empty, Option.empty)

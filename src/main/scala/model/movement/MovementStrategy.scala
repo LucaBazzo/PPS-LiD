@@ -10,47 +10,32 @@ trait MovementStrategy {
   /** Apply the movement strategy
    *
    */
-  def apply()
+  def apply() = {}
 
   /** Apply the movement strategy given a specific command.
    *
    *  @param command the movement command
    */
-  def apply(command: GameEvent): Unit
+  def apply(command: GameEvent): Unit = {}
 
   /** Stop the movement
    *
    */
-  def stopMovement():Unit
+  def stopMovement():Unit = {}
 
   /** Changes the speed that will be applied to the movement.
    *
    * @param alteration the value to be added
    *
    */
-  def alterSpeed(alteration: Float): Unit
+  def alterSpeed(alteration: Float): Unit = {}
 
-  def onBegin(): Unit
+  def onBegin(): Unit = {}
 
-  def onEnd(): Unit
-}
-
-abstract class MovementStrategyImpl extends MovementStrategy {
-  override def apply(): Unit = {}
-
-  override def apply(command: GameEvent): Unit = {}
-
-  override def stopMovement(): Unit = {}
-
-  override def alterSpeed(alteration: Float): Unit = {}
-
-  override def onBegin(): Unit = {}
-
-  override def onEnd(): Unit = {}
+  def onEnd(): Unit = {}
 }
 
 /** Movement strategy that does nothing.
  *
  */
-case class DoNothingMovementStrategy() extends MovementStrategyImpl {
-}
+case class DoNothingMovementStrategy() extends MovementStrategy { }

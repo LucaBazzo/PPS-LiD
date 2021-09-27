@@ -39,7 +39,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
-  this.camera.setToOrtho(false, Gdx.graphics.getWidth / 2, Gdx.graphics.getHeight / 2)
+  this.camera.setToOrtho(false, Gdx.graphics.getWidth.toFloat / 2, Gdx.graphics.getHeight.toFloat / 2)
 
   private val spriteViewer: SpriteViewer = new SpriteViewerImpl(this.batch)
 
@@ -97,7 +97,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
           if (!previousStates(hero).equals(hero.getState))
             this.soundManager.playSoundOnStateChange(hero.getType, hero.getState)
         }
-        if(hero.isDead) this.soundManager.stopMusic
+        if(hero.isDead) this.soundManager.stopMusic()
         previousStates = previousStates + (hero -> hero.getState)
       }
 
@@ -105,7 +105,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       if(message.nonEmpty)
         this.hud.setItemText(message.get)
 
-      val bossEntity: Option[List[Entity]] = entitiesGetter.getEntities(e => e.getType match {
+      val bossEntity: List[Entity] = entitiesGetter.getEntities(e => e.getType match {
         case EntityType.EnemyBossWizard => true
         case _ => false
       })
@@ -113,7 +113,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         getBodiesDistance(entitiesGetter.getHero.get,
           entitiesGetter.getBoss.get) <= HEALTH_BAR_BOSS_VISIBILITY_DISTANCE.PPM) {
         hud.showBossHealthBar()
-        val boss: LivingEntity = bossEntity.get.head.asInstanceOf[LivingEntity]
+        val boss: LivingEntity = bossEntity.head.asInstanceOf[LivingEntity]
         this.hud.changeBossHealth(boss.getStatistics(Statistic.CurrentHealth), boss.getStatistics(Statistic.Health))
         this.soundManager.playSound(SoundEvent.BossSoundtrack)
       } else {
@@ -121,13 +121,13 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         this.soundManager.playSound(SoundEvent.WorldSoundtrack)
       }
 
-      val entities: Option[List[Entity]] = entitiesGetter.getEntities(_ => true)
+      val entities: List[Entity] = entitiesGetter.getEntities(_ => true)
       if(entities.nonEmpty) {
-        this.spriteViewer.loadSprites(entities.get)
+        this.spriteViewer.loadSprites(entities)
         this.spriteViewer.updateSprites(delta)
 
         //per ogni entità controllo lo stato precedente e quello attuale per decidere quali suoni riprodurre
-        entities.get.foreach(entity => {
+        entities.foreach(entity => {
           if(previousStates.contains(entity) && !previousStates(entity).equals(entity.getState))
             this.soundManager.playSoundOnStateChange(entity.getType, entity.getState)
           previousStates = previousStates + (entity -> entity.getState)

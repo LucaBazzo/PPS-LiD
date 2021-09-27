@@ -12,8 +12,7 @@ abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
                                    protected val attackSpeed: Long,
                                    protected val attackDuration: Long,
                                    protected val visionAngle: Int,
-                                   protected val visionDistance: Float)
-  extends AttackStrategyImpl {
+                                   protected val visionDistance: Float) extends AttackStrategy {
 
   protected val targetEntity:Hero = getEntitiesContainerMonitor.getHero.get
 
@@ -80,7 +79,7 @@ abstract class MeleeAttackStrategy(override protected val sourceEntity: LivingEn
   protected def updateAttack(attackProgress:Long): Unit
 }
 
-case class SkeletonAttack(override protected val sourceEntity: LivingEntity)
+case class SkeletonAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends MeleeAttackStrategy(sourceEntity,
     attackSpeed = SKELETON_ATTACK_SPEED, attackDuration = SKELETON_ATTACK_DURATION,
     visionAngle = SKELETON_VISION_ANGLE, visionDistance = SKELETON_VISION_DISTANCE) {
@@ -99,7 +98,7 @@ case class SkeletonAttack(override protected val sourceEntity: LivingEntity)
   }
 }
 
-case class SlimeAttack(override protected val sourceEntity: LivingEntity)
+case class SlimeAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends MeleeAttackStrategy(sourceEntity,
     attackSpeed = SLIME_ATTACK_SPEED, attackDuration = SLIME_ATTACK_DURATION,
     visionAngle = SLIME_VISION_ANGLE, visionDistance = SLIME_VISION_DISTANCE) {
@@ -118,7 +117,7 @@ case class SlimeAttack(override protected val sourceEntity: LivingEntity)
   }
 }
 
-case class BatAttack(override protected val sourceEntity: LivingEntity)
+case class BatAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends MeleeAttackStrategy(sourceEntity,
     attackSpeed = BAT_ATTACK_SPEED, attackDuration = BAT_ATTACK_DURATION,
     visionAngle = BAT_VISION_ANGLE, visionDistance = BAT_VISION_DISTANCE) {
@@ -141,7 +140,7 @@ case class BatAttack(override protected val sourceEntity: LivingEntity)
   }
 }
 
-case class WizardFirstAttack(override protected val sourceEntity: LivingEntity)
+case class WizardFirstAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends MeleeAttackStrategy(sourceEntity,
     attackSpeed = WIZARD_ATTACK1_SPEED, attackDuration = WIZARD_ATTACK1_DURATION,
     visionAngle = WIZARD_VISION_ANGLE, visionDistance = WIZARD_VISION_DISTANCE) {
@@ -161,7 +160,7 @@ case class WizardFirstAttack(override protected val sourceEntity: LivingEntity)
   }
 }
 
-case class WizardSecondAttack(override protected val sourceEntity: LivingEntity)
+case class WizardSecondAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends MeleeAttackStrategy(sourceEntity,
     attackSpeed = WIZARD_ATTACK2_SPEED, attackDuration = WIZARD_ATTACK2_DURATION,
     visionAngle = WIZARD_VISION_ANGLE, visionDistance = WIZARD_VISION_DISTANCE) {
@@ -181,7 +180,7 @@ case class WizardSecondAttack(override protected val sourceEntity: LivingEntity)
   }
 }
 
-case class WizardEnergyBallAttack(override protected val sourceEntity: LivingEntity)
+case class WizardEnergyBallAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends EnemyAttackStrategy(sourceEntity,
     attackSpeed = WIZARD_ATTACK3_SPEED, attackDuration = WIZARD_ATTACK3_DURATION,
     visionAngle = WIZARD_VISION_ANGLE, visionDistance = WIZARD_VISION_DISTANCE) {
@@ -196,7 +195,7 @@ case class WizardEnergyBallAttack(override protected val sourceEntity: LivingEnt
     System.currentTimeMillis() - this.lastAttackTime > this.attackSpeed
 }
 
-case class WormFireballAttack(override protected val sourceEntity: LivingEntity)
+case class WormFireballAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends EnemyAttackStrategy(sourceEntity,
     attackSpeed = WORM_ATTACK_SPEED, attackDuration = WORM_ATTACK_DURATION,
     visionAngle = WORM_VISION_ANGLE, visionDistance = WORM_VISION_DISTANCE) {

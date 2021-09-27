@@ -12,7 +12,7 @@ import model.entities.State._
 import model.entities.Statistic._
 import model.helpers.EntitiesFactoryImpl.{createPolygonalShape, defineEntityBody}
 import model.helpers.{EntitiesFactoryImpl, WorldUtilities}
-import model.movement.{DoNothingMovementStrategy, HeroMovements}
+import model.movement.{DoNothingMovementStrategy, HeroMovementStrategy}
 import model.{EntityBody, HeroInteraction}
 import utils.CollisionConstants.{HERO_COLLISIONS, HERO_FEET_COLLISIONS}
 import utils.HeroConstants._
@@ -124,8 +124,8 @@ object Hero {
     val hero: Hero = new HeroImpl(EntityType.Hero, createEntityBody(), HERO_SIZE.PPM, stats)
 
     hero.setCollisionStrategy(DoNothingCollisionStrategy())
-    hero.setMovementStrategy(new HeroMovements(hero, stats(Statistic.MovementSpeed)))
-    hero.setAttackStrategy(new HeroAttackStrategy(hero, stats(Statistic.Strength)))
+    hero.setMovementStrategy(HeroMovementStrategy(hero, stats(Statistic.MovementSpeed)))
+    hero.setAttackStrategy(HeroAttackStrategy(hero, stats(Statistic.Strength)))
 
     this.createHeroFeet(hero)
     EntitiesFactoryImpl.addEntity(hero)
@@ -320,7 +320,7 @@ class HeroImpl(private val entityType: EntityType,
   override def setAirAttacking(isAttacking: Boolean): Unit = this.isAirAttacking = isAttacking
 
   override def restoreNormalMovementStrategy(): Unit = {
-    this.setMovementStrategy(new HeroMovements(this, this.getStatistic(MovementSpeed).get))
+    this.setMovementStrategy(HeroMovementStrategy(this, this.getStatistic(MovementSpeed).get))
     this.getEntityBody.setGravityScale()
     if(this.checkRestore)
       this.setState(State.Falling)

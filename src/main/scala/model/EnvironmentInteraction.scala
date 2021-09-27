@@ -7,7 +7,7 @@ import model.helpers.ImplicitConversions.RichTuple2
 import model.entities.State._
 import model.entities._
 import model.helpers.{EntitiesFactoryImpl, ItemPools}
-import model.movement.LadderClimbMovementStrategy
+import model.movement.LadderMovementStrategy
 import utils.EnvironmentConstants.{OPEN_CHEST_COLLISION_BIT, OPEN_DOOR_COLLISION_BIT, THROUGH_PLATFORM_COLLISION_BIT}
 import utils.ItemConstants._
 
@@ -54,7 +54,7 @@ class LadderInteraction(entity: Hero) extends EnvironmentInteraction {
 
   private def startLadderInteraction(): Unit = {
     this.entity.stopMovement()
-    this.entity.setMovementStrategy(new LadderClimbMovementStrategy(this.entity, this.entity.getStatistic(Statistic.MovementSpeed).get))
+    this.entity.setMovementStrategy(LadderMovementStrategy(this.entity, this.entity.getStatistic(Statistic.MovementSpeed).get))
     this.entity.setState(State.LadderIdle)
     this.entity.getEntityBody.setGravityScale(0)
   }

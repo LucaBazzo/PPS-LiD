@@ -58,11 +58,11 @@ class TestEnemy extends AnyFlatSpec {
   "An enemy" should "disappear when killed" in {
     initialize()
 
-    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).get.nonEmpty)
+    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).nonEmpty)
 
     enemy.destroyEntity()
 
-    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).get.isEmpty)
+    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).isEmpty)
   }
 
   "An enemy boss" should "drop a bow" in {
@@ -71,14 +71,14 @@ class TestEnemy extends AnyFlatSpec {
     val bossEnemy: EnemyImpl = WizardEnemy((0, 0))
     Portal((0, 0)) // needed to allow portal activation on boss enemy death
 
-    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).get.size == 2)
-    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).get.isEmpty)
+    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).size == 2)
+    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).isEmpty)
 
     bossEnemy.destroyEntity()
 
-    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).get.size == 1)
-    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).get.nonEmpty)
-    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).get.head.getType equals EntityType.BowItem)
+    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Enemy]).size == 1)
+    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).nonEmpty)
+    assert(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).head.getType equals EntityType.BowItem)
   }
 
   "An enemy boss" can "drop items other than a bow" in {
@@ -94,6 +94,6 @@ class TestEnemy extends AnyFlatSpec {
 
     bossEnemy.destroyEntity()
 
-    assert(!(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).get.head.getType equals EntityType.BowItem))
+    assert(!(entitiesContainer.getEntities(x => x.isInstanceOf[Item]).head.getType equals EntityType.BowItem))
   }
 }

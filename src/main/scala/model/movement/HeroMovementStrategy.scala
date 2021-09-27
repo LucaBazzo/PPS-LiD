@@ -12,7 +12,8 @@ import utils.HeroConstants._
  *  @param entity the entity that will be moved in the world
  *  @param speed a multiplier to the running velocity of the hero
  */
-class HeroMovements(private val entity: Hero, private var speed: Float) extends DoNothingMovementStrategy {
+case class HeroMovementStrategy(private val entity: Hero,
+                                private var speed: Float) extends MovementStrategy {
 
   override def apply(command: GameEvent): Unit = {
     if(this.checkState && checkCommand(command)) {

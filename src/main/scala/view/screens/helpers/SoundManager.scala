@@ -22,20 +22,19 @@ class SoundManager {
 
   def playSound(soundEvent: SoundEvent): Unit = {
     soundEvent match {
-      case WorldSoundtrack | BossSoundtrack => {
+      case WorldSoundtrack | BossSoundtrack =>
         if(previousMusicEvent == null) {
           musicMap(soundEvent).setLooping(true)
-          musicMap(soundEvent).play
+          musicMap(soundEvent).play()
         } else if(!previousMusicEvent.equals(soundEvent)) {
-          musicMap(previousMusicEvent).pause
+          musicMap(previousMusicEvent).pause()
 
           musicMap(soundEvent).setLooping(true)
-          musicMap(soundEvent).play
+          musicMap(soundEvent).play()
 
           previousMusicEvent = soundEvent
         }
         previousMusicEvent = soundEvent
-      }
       case Jump => soundMap(Jump).play
       case Attack1 => soundMap(Attack1).play
       case Attack2 => soundMap(Attack2).play
@@ -52,11 +51,11 @@ class SoundManager {
     }
   }
 
-  def stopMusic(): Unit = musicMap(previousMusicEvent).stop
+  def stopMusic(): Unit = musicMap(previousMusicEvent).stop()
 
   def playSoundOnStateChange(entityType: EntityType, entityState: State): Unit = {
      entityType match {
-       case EntityType.Hero => {
+       case EntityType.Hero =>
          if(entityState.equals(State.Jumping) || entityState.equals(State.Somersault)) this.playSound(SoundEvent.Jump)
          else if(entityState.equals(State.Attack01)) this.playSound(SoundEvent.Attack1)
          else if(entityState.equals(State.Attack02)) this.playSound(SoundEvent.Attack2)
@@ -66,7 +65,6 @@ class SoundManager {
          else if(entityState.equals(State.pickingItem)) this.playSound(SoundEvent.PickItem)
          else if(entityState.equals(State.Hurt)) this.playSound(SoundEvent.Hurt)
          else if(entityState.equals(State.Dying)) this.playSound(SoundEvent.Dying)
-       }
        case EntityType.Door =>
          if(entityState.equals(State.Opening))
            this.playSound(SoundEvent.OpeningDoor)

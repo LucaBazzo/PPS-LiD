@@ -3,6 +3,7 @@ package model.helpers
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
 import model.entities.Entity
+import model.helpers.ImplicitConversions.{tupleToVector2, vectorToTuple}
 
 import scala.collection.immutable.ListMap
 
@@ -79,6 +80,10 @@ object WorldUtilities {
     val sideY = getEntitySideY(entity.getPosition, entity.getSize)
 
     entitiesBit.exists(entityBit => checkCollision(sideX._1, sideY._1, sideX._2, sideY._2, entityBit))
+  }
+
+  def computeDirectionToTarget(position: (Float, Float), target:(Float, Float), scale: Float): (Float, Float) = {
+    target.sub(position).nor().scl(scale)
   }
 
   private def getEntitySideX(position: (Float, Float), size: (Float, Float), rightSide: Boolean = true): (Float, Float) = {

@@ -23,13 +23,13 @@ class TestItem extends AnyFlatSpec {
   "In a Level" should "spawn items from every pool" in {
     val monitor: EntitiesContainerMonitor = this.initialize()
     Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
-    val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
+    val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).head.asInstanceOf[Item]
     Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
-    val item2: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
+    val item2: Item = monitor.getEntities(x => x.isInstanceOf[Item]).head.asInstanceOf[Item]
     Item(ItemPools.Keys, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
-    val item3: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
+    val item3: Item = monitor.getEntities(x => x.isInstanceOf[Item]).head.asInstanceOf[Item]
     Item(ItemPools.Enemy_Drops, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
-    val item4: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
+    val item4: Item = monitor.getEntities(x => x.isInstanceOf[Item]).head.asInstanceOf[Item]
     assert(DEFAULT_ITEMS.contains(item.getName) && BOSS_ITEMS.contains(item2.getName)
       && MAP_ITEMS.contains(item3.getName) && ENEMY_ITEMS.contains(item4.getName))
   }
@@ -37,20 +37,20 @@ class TestItem extends AnyFlatSpec {
   "An Item" should "disappear when picked up" in {
     val monitor: EntitiesContainerMonitor = this.initialize()
     Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
-    for(item <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
+    for(item <- monitor.getEntities(x => x.isInstanceOf[Item]))
       item.asInstanceOf[Item].collect()
 
     /*EntitiesFactoryImpl.destroyBodies()
     EntitiesFactoryImpl.applyEntityCollisionChanges()*/
-    assert(monitor.getEntities(x => x.isInstanceOf[Item]).get.isEmpty)
+    assert(monitor.getEntities(x => x.isInstanceOf[Item]).isEmpty)
   }
 
   "An Item" should "grant stats when picked up" in {
     val monitor: EntitiesContainerMonitor = this.initialize()
     for (_ <- List.range(0, DEFAULT_ITEMS.length)) {
       Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
-      val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
-      val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
+      val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).head.asInstanceOf[Item]
+      val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).head.asInstanceOf[Hero]
       val effect = item.collect()
       var preStat: Float = 0
       var incStat: Float = 0
@@ -69,8 +69,8 @@ class TestItem extends AnyFlatSpec {
     val monitor: EntitiesContainerMonitor = this.initialize()
     for (_ <- List.range(0, ENEMY_ITEMS.length)) {
       Item(ItemPools.Enemy_Drops, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
-      val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).get.head.asInstanceOf[Item]
-      val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).get.head.asInstanceOf[Hero]
+      val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).head.asInstanceOf[Item]
+      val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).head.asInstanceOf[Hero]
       hero.sufferDamage(999)
       val prevLife: Float = hero.getStatistics(Statistic.CurrentHealth)
       item.collisionDetected(hero)
@@ -87,16 +87,16 @@ class TestItem extends AnyFlatSpec {
     {
       Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     }
-    itemList1 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
-    for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
+    itemList1 = monitor.getEntities(x => x.isInstanceOf[Item]).map(x => x.asInstanceOf[Item].getName)
+    for(x <- monitor.getEntities(x => x.isInstanceOf[Item]))
       x.destroyEntity()
 
     for(_ <- List.range(0, BOSS_ITEMS.length))
     {
       Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     }
-    itemList2 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
-    for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
+    itemList2 = monitor.getEntities(x => x.isInstanceOf[Item]).map(x => x.asInstanceOf[Item].getName)
+    for(x <- monitor.getEntities(x => x.isInstanceOf[Item]))
       x.destroyEntity()
 
     assert(itemList1.sorted == DEFAULT_ITEMS.sorted && itemList2.sorted == BOSS_ITEMS.sorted)
@@ -112,16 +112,16 @@ class TestItem extends AnyFlatSpec {
     {
       Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     }
-    itemList1 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
-    for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
+    itemList1 = monitor.getEntities(x => x.isInstanceOf[Item]).map(x => x.asInstanceOf[Item].getName)
+    for(x <- monitor.getEntities(x => x.isInstanceOf[Item]))
       x.destroyEntity()
 
     for(_ <- List.range(0, BOSS_ITEMS.length + 2))
     {
       Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     }
-    itemList2 = monitor.getEntities(x => x.isInstanceOf[Item]).get.map(x => x.asInstanceOf[Item].getName)
-    for(x <- monitor.getEntities(x => x.isInstanceOf[Item]).get)
+    itemList2 = monitor.getEntities(x => x.isInstanceOf[Item]).map(x => x.asInstanceOf[Item].getName)
+    for(x <- monitor.getEntities(x => x.isInstanceOf[Item]))
       x.destroyEntity()
 
     assert(itemList1.take(2).forall(x => x == Items.Wrench) && itemList2.take(2).forall(x => x == Items.Wrench))
