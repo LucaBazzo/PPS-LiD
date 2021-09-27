@@ -19,7 +19,7 @@ import utils.EnemiesConstants._
 import utils.HeroConstants.SHORT_WAIT_TIME
 
 trait Enemy {
-  def setBehaviour(enemyBehaviour: EnemyBehavioursImpl): Unit
+  def setBehaviour(enemyBehaviour: EnemyStateManagerImpl): Unit
 }
 
 object SkeletonEnemy {
@@ -27,7 +27,7 @@ object SkeletonEnemy {
     val enemy: EnemyImpl = createEnemyEntity(position, SKELETON_SIZE,
       SKELETON_STATS, STATS_MODIFIER, ENEMY_SCORE, EntityType.EnemySkeleton)
 
-    val behaviours = new EnemyBehavioursImpl()
+    val behaviours = new EnemyStateManagerImpl()
     behaviours.addBehaviour((DoNothingCollisionStrategy(),
       GroundEnemyMovementStrategy(enemy, getEntitiesContainerMonitor.getHero.get, SKELETON_VISION_DISTANCE),
       SkeletonAttack(enemy)))
@@ -42,7 +42,7 @@ object WormEnemy {
     val enemy: EnemyImpl = createEnemyEntity(position, WORM_SIZE,
       WORM_STATS, STATS_MODIFIER, ENEMY_SCORE, EntityType.EnemyWorm)
 
-    val behaviours = new EnemyBehavioursImpl()
+    val behaviours = new EnemyStateManagerImpl()
     behaviours.addBehaviour((DoNothingCollisionStrategy(),
       GroundEnemyMovementStrategy(enemy, getEntitiesContainerMonitor.getHero.get, WORM_VISION_DISTANCE),
       WormFireballAttack(enemy)))
@@ -60,7 +60,7 @@ object SlimeEnemy {
     val enemy: EnemyImpl = createEnemyEntity(position,
       SLIME_SIZE, SLIME_STATS, STATS_MODIFIER, ENEMY_SCORE, enemyType)
 
-    val behaviours = new EnemyBehavioursImpl()
+    val behaviours = new EnemyStateManagerImpl()
     behaviours.addBehaviour((DoNothingCollisionStrategy(),
       GroundEnemyMovementStrategy(enemy, getEntitiesContainerMonitor.getHero.get, SLIME_VISION_DISTANCE),
       SlimeAttack(enemy)))
@@ -76,7 +76,7 @@ object BatEnemy {
       BAT_SIZE, BAT_STATS, STATS_MODIFIER, ENEMY_SCORE, EntityType.EnemyBat,
       collisions = EntityCollisionBit.Sword | EntityCollisionBit.Arrow)
 
-    val behaviours = new EnemyBehavioursImpl()
+    val behaviours = new EnemyStateManagerImpl()
     behaviours.addBehaviour((DoNothingCollisionStrategy(),
       FlyingEnemyMovementStrategy(enemy, getEntitiesContainerMonitor.getHero.get, BAT_VISION_DISTANCE),
       BatAttack(enemy)))
@@ -95,7 +95,7 @@ object WizardEnemy {
       BOSS_SCORE, EntityType.EnemyBossWizard)
     val hero = getEntitiesContainerMonitor.getHero.get
 
-    val behaviours = new EnemyBehavioursImpl()
+    val behaviours = new EnemyStateManagerImpl()
     val b1: (CollisionStrategy, MovementStrategy, AttackStrategy) = behaviours.addBehaviour(
       (DoNothingCollisionStrategy(), FaceTarget(enemy, hero), DoNothingAttackStrategy()))
     val b2: (CollisionStrategy, MovementStrategy, AttackStrategy) = behaviours.addBehaviour(
@@ -135,7 +135,7 @@ class EnemyImpl(private val entityType: EntityType,
                 private val heroEntity: Hero) extends LivingEntityImpl(entityType, entityBody, size, stats)
           with LivingEntity with Score with Enemy {
 
-  var behaviours:Option[EnemyBehavioursImpl] = None
+  var behaviours:Option[EnemyStateManagerImpl] = None
   var timer: Long = 0
 
 
@@ -159,7 +159,7 @@ class EnemyImpl(private val entityType: EntityType,
     }
   }
 
-  override def setBehaviour(behaviours: EnemyBehavioursImpl): Unit = this.behaviours = Option(behaviours)
+  override def setBehaviour(behaviours: EnemyStateManagerImpl): Unit = this.behaviours = Option(behaviours)
 
   override def sufferDamage(damage: Float): Unit = {
     super.sufferDamage(damage)
