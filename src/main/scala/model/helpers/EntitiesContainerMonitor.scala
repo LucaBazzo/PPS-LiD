@@ -4,7 +4,7 @@ import com.badlogic.gdx.physics.box2d.World
 import model.Score
 import model.entities.Items.Items
 import model.entities.Statistic.Statistic
-import model.entities.{Enemy, Entity, EntityType, Hero, Item, LivingEntity, State}
+import model.entities._
 import utils.EnemiesConstants.ENEMY_BOSS_TYPES
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 

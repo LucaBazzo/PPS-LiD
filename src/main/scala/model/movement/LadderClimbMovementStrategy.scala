@@ -2,8 +2,8 @@ package model.movement
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.entities.{Hero, State}
 import model.entities.State._
+import model.entities.{Hero, State}
 import utils.HeroConstants.LADDER_CLIMB_VELOCITY
 
 /** Implementation of the Hero Movement Strategy when the hero is climbing a ladder.

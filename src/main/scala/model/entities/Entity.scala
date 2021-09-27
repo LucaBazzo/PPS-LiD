@@ -5,7 +5,7 @@ import model.EntityBody
 import model.collisions.{CollisionStrategy, DoNothingCollisionStrategy}
 import model.entities.EntityType.EntityType
 import model.entities.State.State
-import model.helpers.EntitiesFactoryImpl
+import model.helpers.EntitiesFactoryImpl.{pendingChangeCollisions, pendingDestroyBody, removeEntity}
 
 object State extends Enumeration {
   type State = Value
@@ -22,7 +22,7 @@ object EntityType extends Enumeration {
       Mobile, Immobile, Enemy, SpawnZone, //this values will not show any sprite
       Arrow, ArmorItem, CakeItem, BootsItem, ShieldItem, MapItem, WrenchItem, KeyItem,
       SmallPotionItem, PotionItem, LargePotionItem, HugePotionItem, SkeletonKeyItem, BowItem, BFSwordItem,
-      EnemySkeleton, EnemySlime, EnemyPacman, EnemyWorm, EnemyBossWizard, // EnemyGhost
+      EnemySkeleton, EnemySlime, EnemyPacman, EnemyWorm, EnemyBat, EnemyBossWizard,
       Platform, PlatformSensor, Door, Ladder, Water, Lava, Chest, Portal,
       AttackFireBall, AttackEnergyBall, AttackArrow = Value
 }
@@ -60,19 +60,17 @@ trait Entity {
   def getEntityBody: EntityBody
 
   def destroyEntity(): Unit = {
-    EntitiesFactoryImpl.pendingDestroyBody(this.getBody)
+    pendingDestroyBody(this.getBody)
     this.getBody.getJointList.toArray().foreach(joint => {
-      EntitiesFactoryImpl.pendingDestroyBody(joint.other)
+      pendingDestroyBody(joint.other)
     })
-    EntitiesFactoryImpl.removeEntity(this)
+    removeEntity(this)
   }
 
-  def changeCollisions(entityCollisionBit: Short): Unit = EntitiesFactoryImpl.pendingChangeCollisions(this, entityCollisionBit)
+  def changeCollisions(entityCollisionBit: Short): Unit = pendingChangeCollisions(this, entityCollisionBit)
 
   def isColliding: Boolean
 }
-
-// TODO: var size serve?
 
 abstract class EntityImpl(private val entityType: EntityType,
                           private var entityBody: EntityBody,
@@ -114,10 +112,4 @@ abstract class EntityImpl(private val entityType: EntityType,
   override def update(): Unit = {
     this.collisionStrategy.apply()
   }
-}
-
-case class ImmobileEntity(private var entityType: EntityType,
-                          private var entityBody: EntityBody,
-                          private val size: (Float, Float))
-  extends EntityImpl(entityType, entityBody, size) {
 }

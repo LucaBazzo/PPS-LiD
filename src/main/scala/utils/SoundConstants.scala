@@ -7,6 +7,7 @@ import view.screens.helpers.SoundEvent._
 object SoundConstants {
 
   val LEVEL_MUSIC_LOCATION = "assets/audio/world-soundtrack.mp3"
+  val BOSS_MUSIC_LOCATION = "assets/audio/boss-soundtrack.mp3"
   val JUMP_SOUND_LOCATION = "assets/audio/jump.wav"
   val HERO_ATTACK_1_SOUND_LOCATION = "assets/audio/sword1.wav"
   val HERO_ATTACK_2_SOUND_LOCATION = "assets/audio/sword2.wav"
@@ -27,6 +28,7 @@ object SoundConstants {
   def getMusicMap(): Map[SoundEvent, Music] = Map(
     OpeningScreenSoundtrack -> Gdx.audio.newMusic(Gdx.files.internal(LEVEL_MUSIC_LOCATION)),
     WorldSoundtrack -> Gdx.audio.newMusic(Gdx.files.internal(LEVEL_MUSIC_LOCATION)),
+    BossSoundtrack -> Gdx.audio.newMusic(Gdx.files.internal(BOSS_MUSIC_LOCATION))
   )
 
   def getSoundMap(): Map[SoundEvent, Sound] = Map(

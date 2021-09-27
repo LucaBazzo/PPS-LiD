@@ -8,7 +8,7 @@ import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
 import com.badlogic.gdx.math.Rectangle
 import model.collisions.EntityCollisionBit
 import model.collisions.ImplicitConversions._
-import model.entities.{EntityType, Item}
+import model.entities._
 import model.helpers.{EntitiesFactoryImpl, ItemPools}
 
 case class TiledMapInfo(name: String, offset: (Int, Int))
@@ -29,7 +29,7 @@ trait WorldMapUtilities {
 class TileMapManager extends WorldMapUtilities {
 
   private val scale: Float = 1/(PIXELS_PER_METER/2)
-  private var keyLocation: String = null
+  private var keyLocation: String = _
 
   private var tiledMapList: List[RichTiledMapInfo] = List.empty
 
@@ -53,7 +53,7 @@ class TileMapManager extends WorldMapUtilities {
       TiledMapInfo(WORLD_RIGHT_BORDER_NAME, WORLD_RIGHT_BORDER_OFFSET),
       TiledMapInfo(HERO_ROOM_MAP_NAME, HERO_ROOM_OFFSET),
       TiledMapInfo(BOSS_ROOM_MAP_NAME, BOSS_ROOM_OFFSET),
-      TiledMapInfo(innerRooms(0), INNER_ROOM_MAP_OFFSET(0)),
+      TiledMapInfo(innerRooms.head, INNER_ROOM_MAP_OFFSET.head),
       TiledMapInfo(innerRooms(1), INNER_ROOM_MAP_OFFSET(1)),
       TiledMapInfo(innerRooms(2), INNER_ROOM_MAP_OFFSET(2)),
       TiledMapInfo(innerRooms(3), INNER_ROOM_MAP_OFFSET(3)),
@@ -75,7 +75,7 @@ class TileMapManager extends WorldMapUtilities {
       })
 
       orthogonalTiledMapRenderer.setMap(elem.tiledMap)
-      orthogonalTiledMapRenderer.render
+      orthogonalTiledMapRenderer.render()
     })
   }
 
@@ -97,9 +97,8 @@ class TileMapManager extends WorldMapUtilities {
 
         layer.getName match {
           case "ground" => spawnEntity(() => EntitiesFactoryImpl.createImmobileEntity(EntityType.Immobile, size, position, EntityCollisionBit.Immobile, EntityCollisionBit.Hero | EntityCollisionBit.Enemy | EntityCollisionBit.Arrow | EntityCollisionBit.EnemyAttack))
-          case "bridge" => spawnEntity(() => EntitiesFactoryImpl.createPlatform(position, size))
-          case "door" =>
-            EntitiesFactoryImpl.createDoor(size, position, richTiledMapInfo.name!=null && richTiledMapInfo.name.equalsIgnoreCase(BOSS_ROOM_MAP_NAME))
+          case "bridge" => spawnEntity(() => Platform(position, size))
+          case "door" => spawnEntity(() => Door(size, position, richTiledMapInfo.name!=null && richTiledMapInfo.name.equalsIgnoreCase(BOSS_ROOM_MAP_NAME)))
           case "chest" =>
             if(richTiledMapInfo.name!=null && (richTiledMapInfo.name.equalsIgnoreCase(TOP_KEY_ITEM_ROOM_NAME) || richTiledMapInfo.name.equalsIgnoreCase(BOTTOM_KEY_ITEM_ROOM_NAME)))
               if (richTiledMapInfo.name.equalsIgnoreCase(keyLocation)) {
@@ -108,16 +107,16 @@ class TileMapManager extends WorldMapUtilities {
               } else
                 spawnEntity(() => Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool,
                   EntitiesFactoryImpl.getEntitiesContainerMonitor, size, position))
-            else spawnEntity(() => EntitiesFactoryImpl.createChest(size, position))
-          case "ladder" => spawnEntity(() => EntitiesFactoryImpl.createLadder(position, size))
-          case "water" => spawnEntity(() => EntitiesFactoryImpl.createWaterPool(position,size))
-          case "lava" => spawnEntity(() => EntitiesFactoryImpl.createLavaPool(position, size))
+            else spawnEntity(() => Chest(size, position))
+          case "ladder" => spawnEntity(() => Ladder(position, size))
+          case "water" => spawnEntity(() => WaterPool(position,size))
+          case "lava" => spawnEntity(() => LavaPool(position, size))
           case "enemy" =>
             if(richTiledMapInfo.name.equals(BOSS_ROOM_MAP_NAME))
               spawnEntity(() => EntitiesFactoryImpl.spawnBoss(size, position))
             else
               spawnEntity(() => EntitiesFactoryImpl.spawnEnemy(size, position))
-          case "portal" => spawnEntity(() => EntitiesFactoryImpl.createPortal(size, position))
+          case "portal" => spawnEntity(() => Portal(size, position))
           case _ => println("not supported layer: " + layer.getName)
         }
       })

@@ -1,5 +1,5 @@
 import model.LevelImpl
-import model.entities.{Entity, EntityType, Hero, Statistic}
+import model.entities._
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -37,7 +37,7 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
     Thread.sleep(1000)
     pool.update()
     pool.collisionReleased(hero)
-    assert(hero.getStatistic(Statistic.CurrentHealth).get < midHP)
+    assert(hero.getStatistic(Statistic.CurrentHealth).get <= midHP)
   }
 
   "The Hero" must "stop suffering damage after exiting a lava pool" in {
@@ -66,8 +66,8 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
     EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
     //TODO null temporaneo
     new LevelImpl(null, monitor, new ItemPoolImpl())
-    EntitiesFactoryImpl.createLavaPool((10,10), (100,10))
-    EntitiesFactoryImpl.createWaterPool((10,10), (100,10))
+    LavaPool((10,10), (100,10))
+    WaterPool((10,10), (100,10))
     monitor
   }
 

@@ -114,7 +114,7 @@ class MapItem(private val entityType: EntityType, private var entityBody: Entity
 
   override def collect(): (Option[List[(Statistic, Float)]], String) = {
     this.destroyEntity()
-    (Option.apply(List[(Statistic, Float)]((Statistic.MovementSpeed, 0.1f), (Statistic.Acceleration, 0.1f))), this.getDesc)
+    (Option.apply(List[(Statistic, Float)]((Statistic.MovementSpeed, 0.1f))), this.getDesc)
   }
 }
 

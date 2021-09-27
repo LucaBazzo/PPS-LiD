@@ -5,6 +5,7 @@ import model.attack._
 import model.entities.EntityType.EntityType
 import model.entities.State._
 import model.entities.Statistic.Statistic
+import utils.EnemiesConstants.ENEMIES_DYING_STATE_DURATION
 
 trait LivingEntity extends MobileEntity {
 
@@ -27,13 +28,12 @@ class LivingEntityImpl(private val entityType: EntityType,
   protected var attackStrategy: AttackStrategy = DoNothingAttackStrategy()
 
   protected var dyingStateTimer:Long = 0
-  protected val dyingStateDuration:Long = 1000
 
   override def update(): Unit = {
     if (this is Dying) {
       if (dyingStateTimer == 0) {
         this.dyingStateTimer = System.currentTimeMillis()
-      } else if (System.currentTimeMillis() - dyingStateTimer > dyingStateDuration) {
+      } else if (System.currentTimeMillis() - dyingStateTimer > ENEMIES_DYING_STATE_DURATION) {
         this.destroyEntity()
       }
     }

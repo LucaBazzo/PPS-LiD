@@ -8,14 +8,15 @@ import com.badlogic.gdx.physics.box2d.{Box2DDebugRenderer, World}
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model.collisions.ImplicitConversions.{RichFloat, RichInt}
+import model.collisions.ImplicitConversions.{RichFloat, RichInt, entityToBody}
 import model.entities.Items.Items
 import model.entities._
-import model.helpers.{EntitiesGetter, EntitiesUtilities}
+import model.helpers.EntitiesGetter
+import model.helpers.GeometricUtilities.getBodiesDistance
+import model.world.TileMapManager
 import utils.ApplicationConstants._
 import view.inputs.GameInputProcessor
 import view.screens.helpers.{SoundEvent, SoundManager}
-import model.world.TileMapManager
 import view.screens.sprites.{SpriteViewer, SpriteViewerImpl}
 
 class GameScreen(private val entitiesGetter: EntitiesGetter,
@@ -69,8 +70,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   override def render(delta: Float): Unit = {
     if(this.entitiesGetter.isLevelReady) {
       if(this.removeLoadingScreen) {
-        this.soundManager.playSound(SoundEvent.WorldSoundtrack)
         this.hud.loadingFinished()
+        this.soundManager.playSound(SoundEvent.WorldSoundtrack)
         this.removeLoadingScreen = false
       }
 
@@ -94,8 +95,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
         if(previousStates.contains(hero)) {
           if (!previousStates(hero).equals(hero.getState))
-            soundManager.playSoundOnStateChange(hero.getType, hero.getState)
+            this.soundManager.playSoundOnStateChange(hero.getType, hero.getState)
         }
+        if(hero.isDead) this.soundManager.stopMusic
         previousStates = previousStates + (hero -> hero.getState)
       }
 
@@ -107,15 +109,16 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         case EntityType.EnemyBossWizard => true
         case _ => false
       })
-      // TODO: prevenire chiamate di show e hide quando la barra della vita è già visibile o invisibile
       if (entitiesGetter.getBoss.nonEmpty &&
-        EntitiesUtilities.getEntitiesDistance(entitiesGetter.getHero.get,
+        getBodiesDistance(entitiesGetter.getHero.get,
           entitiesGetter.getBoss.get) <= HEALTH_BAR_BOSS_VISIBILITY_DISTANCE.PPM) {
         hud.showBossHealthBar()
         val boss: LivingEntity = bossEntity.get.head.asInstanceOf[LivingEntity]
         this.hud.changeBossHealth(boss.getStatistics(Statistic.CurrentHealth), boss.getStatistics(Statistic.Health))
+        this.soundManager.playSound(SoundEvent.BossSoundtrack)
       } else {
         hud.hideBossHealthBar()
+        this.soundManager.playSound(SoundEvent.WorldSoundtrack)
       }
 
       val entities: Option[List[Entity]] = entitiesGetter.getEntities(_ => true)
@@ -126,7 +129,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         //per ogni entità controllo lo stato precedente e quello attuale per decidere quali suoni riprodurre
         entities.get.foreach(entity => {
           if(previousStates.contains(entity) && !previousStates(entity).equals(entity.getState))
-            soundManager.playSoundOnStateChange(entity.getType, entity.getState)
+            this.soundManager.playSoundOnStateChange(entity.getType, entity.getState)
           previousStates = previousStates + (entity -> entity.getState)
         })
       }
@@ -152,6 +155,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
       batch.setProjectionMatrix(hud.getStage.getCamera.combined)
       hud.getStage.draw()
+
     }
     else {
       hud.getStage.draw()

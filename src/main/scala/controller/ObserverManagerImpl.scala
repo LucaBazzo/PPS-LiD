@@ -17,15 +17,15 @@ trait Observer {
    *
    * @param event the event generated from observable
    */
-  def handleEvent(event: GameEvent)
+  def handleEvent(event: GameEvent): Unit
 
 }
 
 trait ObserverManager {
 
-  def addObserver(observer: Observer)
-  def removeObserver(observer: Observer)
-  def notifyEvent(event: GameEvent)
+  def addObserver(observer: Observer): Unit
+  def removeObserver(observer: Observer): Unit
+  def notifyEvent(event: GameEvent): Unit
 }
 
 class ObserverManagerImpl extends ObserverManager {

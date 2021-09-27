@@ -23,8 +23,6 @@ object ApplicationConstants {
 
   val GAME_LOOP_STEP = 16666666
 
-  val SPRITES_PACK_LOCATION = "assets/sprites/sprites.pack"
-
   val RANDOM_SEED: Int = 42
   val RANDOM: Random = new Random()
 
@@ -42,12 +40,12 @@ object ApplicationConstants {
   val EXIT_BUTTON_STYLE_UP: String = "exit_button_inactive"
   val EXIT_BUTTON_STYLE_DOWN: String = "exit_button_active"
 
-  val DEFAULT_DISTANCE_FROM_TOP: Int = 70
-  val GAME_OVER_DISTANCE_FROM_TOP: Int = 50
-  val DISTANCE_BUTTONS_DEFAULT: Int = 8
-  val DISTANCE_BUTTONS_GAME_OVER: Int = 28
-  val BUTTONS_WIDTH: Int = 100
-  val BUTTONS_HEIGHT: Int = 26
+  val DEFAULT_DISTANCE_FROM_TOP: Float = 70
+  val GAME_OVER_DISTANCE_FROM_TOP: Float = 50
+  val DISTANCE_BUTTONS_DEFAULT: Float = 8
+  val DISTANCE_BUTTONS_GAME_OVER: Float = 28
+  val BUTTONS_WIDTH: Float = 100
+  val BUTTONS_HEIGHT: Float = 26
   val BUTTONS_FONT_SCALE: Float = 0.30f
   val DISTANCE_FROM_TD: Float = 3
   val DISTANCE_FROM_LR: Float = 25

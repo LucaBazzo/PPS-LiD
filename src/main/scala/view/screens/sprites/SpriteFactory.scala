@@ -6,11 +6,11 @@ import model.entities.EntityType.EntityType
 import model.entities.{EntityType, State}
 
 trait SpriteFactory {
-  def createHeroSprite(spriteSheetName: String, regionName: String, spriteWidth: Float, spriteHeight: Float): EntitySprite
-
-
   def createEntitySprite(entityType: EntityType, spritePackName: String, regionName: String, spriteWidth: Float,
                          spriteHeight: Float, sizeMultiplicative: Float = 0): EntitySprite
+
+  def createItemSprite(entityType: EntityType, spritePackName: String, regionName: String, spriteWidth: Float,
+                         spriteHeight: Float, sizeMultiplicative: Float = 0, row: Int, column: Int): EntitySprite
 
   def createAnimation(sprite: EntitySprite, colNumber: Int,
                       startCell: (Int, Int), endCell: (Int, Int),
@@ -22,23 +22,7 @@ class SpriteFactoryImpl extends SpriteFactory {
   private var atlases: Map[String, TextureAtlas] = Map.empty
   private var loadedSprites: Map[EntityType, EntitySprite] = Map.empty
 
-  // TODO: unire la createHeroSprite con createEntitySprite
   // TODO: verificare se è possibile usare un pattern proxy
-
-  override def createHeroSprite(spritePackName:String, regionName: String, spriteWidth: Float, spriteHeight: Float): EntitySprite = {
-    // load the atlas (spritesheet)
-    if (!this.atlases.contains(spritePackName))
-      this.atlases += spritePackName -> new TextureAtlas(spritePackName)
-
-    val sprite = new HeroEntitySprite(regionName, spriteWidth, spriteHeight)
-    sprite.setRegion(this.atlases(spritePackName).findRegion(regionName))
-
-    sprite.setBounds(0, 0, spriteWidth, spriteHeight)
-    this.defineHeroSpriteAnimations(sprite)
-
-    this.loadedSprites += EntityType.Hero -> sprite
-    sprite
-  }
 
   override def createEntitySprite(entityType: EntityType, spritePackName:String, regionName: String, spriteWidth: Float,
                                   spriteHeight: Float, sizeMultiplicative: Float = 1): EntitySprite = {
@@ -47,28 +31,42 @@ class SpriteFactoryImpl extends SpriteFactory {
       this.atlases += spritePackName -> new TextureAtlas(spritePackName)
 
     // load the sprites and define the animations to be displayed
-    val sprite = new EntitySpriteImpl(regionName,
-      spriteWidth * sizeMultiplicative,
-      spriteHeight * sizeMultiplicative)
+    var sprite: EntitySprite = null
+    entityType match {
+      case EntityType.Hero =>
+        sprite = new HeroEntitySprite(regionName, spriteWidth, spriteHeight)
+      case _ =>
+        sprite = new EntitySpriteImpl(regionName,
+          spriteWidth * sizeMultiplicative,
+          spriteHeight * sizeMultiplicative)
+    }
     sprite.setRegion(this.atlases(spritePackName).findRegion(regionName))
     sprite.setBounds(0, 0, spriteWidth, spriteHeight)
 
     // define animations for the created sprite
     entityType match {
+      case EntityType.Hero => this.defineHeroSpriteAnimations(sprite)
       case EntityType.Arrow => this.defineAttackArrowAnimation(sprite)
       case EntityType.EnemySkeleton => this.defineEnemySkeletonAnimation(sprite)
       case EntityType.EnemySlime => this.defineEnemySlimeAnimation(sprite)
       case EntityType.EnemyPacman => this.defineEnemyPacmanAnimation(sprite)
       case EntityType.EnemyWorm => this.defineEnemyWormAnimation(sprite)
+      case EntityType.EnemyBat => this.defineEnemyBatAnimation(sprite)
       case EntityType.EnemyBossWizard => this.defineEnemyWizardAnimation(sprite)
       case EntityType.AttackFireBall => this.defineAttackFireballAnimation(sprite)
       case EntityType.AttackEnergyBall => this.defineAttackEnergyBallAnimation(sprite)
       case EntityType.Door => this.defineDoorAnimation(sprite)
       case EntityType.Chest => this.defineChestAnimation(sprite)
       case EntityType.Portal => this.definePortalAnimation(sprite)
-
-      case _ => null
+      case _ =>
     }
+    sprite
+  }
+
+  override def createItemSprite(entityType: EntityType, spritePackName: String, regionName: String, spriteWidth: Float,
+                                spriteHeight: Float, sizeMultiplicative: Float, row: Int, column: Int): EntitySprite = {
+    val sprite = this.createEntitySprite(entityType, spritePackName, regionName, spriteWidth, spriteHeight, sizeMultiplicative)
+    sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (row, column), (row, column)))
     sprite
   }
 
@@ -107,7 +105,7 @@ class SpriteFactoryImpl extends SpriteFactory {
     new Animation(frameDuration, frames)
   }
 
-  private def defineAttackArrowAnimation(sprite: EntitySpriteImpl): Unit =
+  private def defineAttackArrowAnimation(sprite: EntitySprite): Unit =
     sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (0, 0), (0, 0)))
 
   private def defineHeroSpriteAnimations(sprite: EntitySprite): Unit = {
@@ -132,8 +130,6 @@ class SpriteFactoryImpl extends SpriteFactory {
     sprite.addAnimation(State.AirDownAttackingEnd, this.createAnimation(sprite, 7, (15, 1), (15, 3), 0.18f))
   }
 
-  // TODO: calibrare la velocita delle animaziooni di nemici
-
   private def defineEnemyWormAnimation(sprite:EntitySprite): Unit = {
     sprite.addAnimation(State.Attack01, this.createAnimation(sprite, 7, (0, 0), (2, 1)))
     sprite.addAnimation(State.Dying, this.createAnimation(sprite, 7, (2, 2), (3, 2)))
@@ -142,25 +138,31 @@ class SpriteFactoryImpl extends SpriteFactory {
     sprite.addAnimation(State.Running, this.createAnimation(sprite, 7, (5, 1), (6, 2)), loop = true)
   }
 
+  private def defineEnemyBatAnimation(sprite:EntitySprite): Unit = {
+    sprite.addAnimation(State.Attack01, this.createAnimation(sprite, 7, (0, 0), (1, 0)))
+    sprite.addAnimation(State.Dying, this.createAnimation(sprite, 7, (1, 1), (1, 4)))
+    sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (1, 5), (2, 5)), loop = true)
+    sprite.addAnimation(State.Running, this.createAnimation(sprite, 7, (1, 5), (2, 5)), loop = true)
+    sprite.addAnimation(State.Hurt, this.createAnimation(sprite, 7, (2, 6), (3, 2)))
+  }
+
   private def defineEnemyWizardAnimation(sprite:EntitySprite): Unit = {
     sprite.addAnimation(State.Attack01, this.createAnimation(sprite, 7, (0, 0), (1, 0)))
     sprite.addAnimation(State.Attack02, this.createAnimation(sprite, 7, (1, 1), (2, 1)))
+    sprite.addAnimation(State.Attack03, this.createAnimation(sprite, 7, (3, 2), (4, 2)), loop = true)
     sprite.addAnimation(State.Dying, this.createAnimation(sprite, 7, (2, 2), (3, 1)))
     sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (3, 2), (4, 2)), loop = true)
     sprite.addAnimation(State.Running, this.createAnimation(sprite, 7, (4, 3), (5, 3)), loop = true)
     sprite.addAnimation(State.Hurt, this.createAnimation(sprite, 7, (5, 4), (5, 6)))
   }
 
-  // TODO: provare ad inserire anche l'animazione di esplosione
   private def defineAttackFireballAnimation(sprite: EntitySprite):Unit = {
-    //    sprite.addAnimation(State.Dying,
-    //      this.createAnimation(sprite, 7, (0, 0), (0, 6)))
+    sprite.addAnimation(State.Dying, this.createAnimation(sprite, 7, (0, 0), (0, 6)))
     sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (1, 0), (1, 5)), loop = true)
   }
 
   private def defineAttackEnergyBallAnimation(sprite: EntitySprite):Unit = {
-    //    sprite.addAnimation(State.Standing,
-    //      this.createAnimation(sprite, 7, (0, 0), (0, 6)))
+    sprite.addAnimation(State.Dying, this.createAnimation(sprite, 7, (0, 0), (0, 6)))
     sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (1, 0), (2, 1)), loop = true)
   }
 
@@ -188,17 +190,17 @@ class SpriteFactoryImpl extends SpriteFactory {
     sprite.addAnimation(State.Running, this.createAnimation(sprite, 7, (0, 0), (0, 1)), loop = true)
   }
 
-  private def defineDoorAnimation(sprite: EntitySpriteImpl): Unit = {
-    sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (0, 3), (0, 3)))
-    sprite.addAnimation(State.Opening, this.createAnimation(sprite, 7, (0, 0), (0, 2)))
+  private def defineDoorAnimation(sprite: EntitySprite): Unit = {
+    sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (0, 0), (0, 0)))
+    sprite.addAnimation(State.Opening, this.createAnimation(sprite, 7, (0, 0), (0, 3)))
   }
 
-  private def defineChestAnimation(sprite: EntitySpriteImpl): Unit = {
+  private def defineChestAnimation(sprite: EntitySprite): Unit = {
     sprite.addAnimation(State.Standing, this.createAnimation(sprite, 7, (0, 0), (0, 0)))
     sprite.addAnimation(State.Opening, this.createAnimation(sprite, 7, (0, 0), (0, 1)))
   }
 
-  private def definePortalAnimation(sprite: EntitySpriteImpl): Unit = {
+  private def definePortalAnimation(sprite: EntitySprite): Unit = {
     sprite.addAnimation(State.Standing, this.createAnimation(sprite, 8, (0, 0), (0, 7)), loop = true)
     sprite.addAnimation(State.Opening, this.createAnimation(sprite, 8, (1, 0), (1, 7)))
     sprite.addAnimation(State.Closed, this.createAnimation(sprite, 8, (1, 3), (1, 3)))

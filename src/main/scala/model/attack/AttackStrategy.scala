@@ -50,19 +50,21 @@ trait AttackStrategy {
 /** Attack strategy that does nothing.
  *
  */
-case class DoNothingAttackStrategy() extends AttackStrategy {
+abstract class AttackStrategyImpl() extends AttackStrategy {
 
   override def apply(): Unit = { }
 
-  override def apply(command: GameEvent): Unit = {}
+  override def apply(command: GameEvent): Unit = { }
 
-  override def stopAttack(): Unit = {}
+  override def stopAttack(): Unit = { }
 
   override def isAttackFinished: Boolean = true
 
-  override def alterStrength(alteration: Float): Unit = {}
+  override def alterStrength(alteration: Float): Unit = { }
 
-  override def checkTimeEvent(): Unit = {}
+  override def checkTimeEvent(): Unit = { }
 
-  override def decrementAttackTimer(): Unit = {}
+  override def decrementAttackTimer(): Unit = { }
 }
+
+case class DoNothingAttackStrategy() extends AttackStrategyImpl { }

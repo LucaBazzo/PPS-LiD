@@ -6,8 +6,8 @@ import com.badlogic.gdx.backends.lwjgl3.{Lwjgl3Application, Lwjgl3ApplicationCon
 import controller.ObserverManager
 import main.LostInDungeons
 import model.helpers.EntitiesGetter
-import utils.ApplicationConstants.{ICON_PATH, TITLE}
 import model.world.TileMapManager
+import utils.ApplicationConstants.{ICON_PATH, TITLE}
 import view.screens.menu.{GUIFactory, GameScreen}
 
 import java.util.concurrent.{ExecutorService, Executors}
@@ -19,22 +19,22 @@ trait View {
   /** Change the current screen and start the game.
    *
    */
-  def startGame()
+  def startGame(): Unit
 
   /** Set the Game Over Screen, is called when the hero is dead.
    *
    */
-  def endGame()
+  def endGame(): Unit
 
   /** Return to the Main Menu Screen.
    *
    */
-  def returnToMenu()
+  def returnToMenu(): Unit
 
   /** Close the application.
    *
    */
-  def terminate()
+  def terminate(): Unit
 }
 
 /** Handles the graphics part of the game

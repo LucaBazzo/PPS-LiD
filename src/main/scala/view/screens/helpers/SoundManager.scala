@@ -1,15 +1,15 @@
 package view.screens.helpers
 
 import com.badlogic.gdx.audio.{Music, Sound}
-import model.entities.{EntityType, State}
 import model.entities.EntityType.EntityType
 import model.entities.State.State
+import model.entities.{EntityType, State}
 import utils.SoundConstants.{getMusicMap, getSoundMap}
-import view.screens.helpers.SoundEvent.{AirDownAttack, Attack1, Attack2, Attack3, BowAttack, Dying, EnemyAttack, EnemyDeath, Hurt, Jump, OpeningDoor, PickItem, SoundEvent, WorldSoundtrack}
+import view.screens.helpers.SoundEvent.{AirDownAttack, Attack1, Attack2, Attack3, BossSoundtrack, BowAttack, Dying, EnemyAttack, EnemyDeath, Hurt, Jump, OpeningDoor, PickItem, SoundEvent, WorldSoundtrack}
 
 object SoundEvent extends Enumeration {
   type SoundEvent = Value
-  val WorldSoundtrack, OpeningScreenSoundtrack,
+  val WorldSoundtrack, OpeningScreenSoundtrack, BossSoundtrack,
   Jump, Attack1, Attack2, Attack3, BowAttack, AirDownAttack, Hurt, Dying,
   EnemyAttack, EnemyDeath, OpeningDoor, PickItem = Value
 }
@@ -18,15 +18,23 @@ class SoundManager {
 
   private val musicMap: Map[SoundEvent, Music] = getMusicMap()
   private val soundMap: Map[SoundEvent, Sound] = getSoundMap()
+  private var previousMusicEvent: SoundEvent = _
 
   def playSound(soundEvent: SoundEvent): Unit = {
-
-    println("PLAY SOUND: " + soundEvent)
-
     soundEvent match {
-      case WorldSoundtrack => {
-        musicMap(WorldSoundtrack).setLooping(true)
-        musicMap(WorldSoundtrack).play
+      case WorldSoundtrack | BossSoundtrack => {
+        if(previousMusicEvent == null) {
+          musicMap(soundEvent).setLooping(true)
+          musicMap(soundEvent).play
+        } else if(!previousMusicEvent.equals(soundEvent)) {
+          musicMap(previousMusicEvent).pause
+
+          musicMap(soundEvent).setLooping(true)
+          musicMap(soundEvent).play
+
+          previousMusicEvent = soundEvent
+        }
+        previousMusicEvent = soundEvent
       }
       case Jump => soundMap(Jump).play
       case Attack1 => soundMap(Attack1).play
@@ -43,6 +51,8 @@ class SoundManager {
       case _ => println("unsupported sound")
     }
   }
+
+  def stopMusic(): Unit = musicMap(previousMusicEvent).stop
 
   def playSoundOnStateChange(entityType: EntityType, entityState: State): Unit = {
      entityType match {

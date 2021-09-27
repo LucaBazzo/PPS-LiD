@@ -34,5 +34,4 @@ abstract class CollisionStrategyImpl() extends CollisionStrategy {
  * any particular behaviour when colliding with something
  *
  */
-case class DoNothingCollisionStrategy() extends CollisionStrategyImpl {
-}
+case class DoNothingCollisionStrategy() extends CollisionStrategyImpl { }

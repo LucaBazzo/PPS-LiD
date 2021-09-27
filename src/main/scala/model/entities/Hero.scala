@@ -4,6 +4,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.attack.{DoNothingAttackStrategy, HeroAttackStrategy}
+import model.collisions.ImplicitConversions._
 import model.collisions.{DoNothingCollisionStrategy, EntityCollisionBit}
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
@@ -14,7 +15,6 @@ import model.helpers.{EntitiesFactoryImpl, WorldUtilities}
 import model.movement.{DoNothingMovementStrategy, HeroMovements}
 import model.{EntityBody, HeroInteraction}
 import utils.CollisionConstants.{HERO_COLLISIONS, HERO_FEET_COLLISIONS}
-import model.collisions.ImplicitConversions._
 import utils.HeroConstants._
 
 /** Represents the entity that will be moved by the player, it can move or attack

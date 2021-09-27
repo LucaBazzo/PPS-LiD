@@ -1,4 +1,5 @@
 import model.LevelImpl
+import model.entities.Chest
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -28,7 +29,7 @@ class TestChest extends AnyFlatSpec {
     EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
     //TODO null temporaneo
     new LevelImpl(null, monitor, new ItemPoolImpl())
-    EntitiesFactoryImpl.createChest((10,10), (480,150))
+    Chest((10,10), (480,150))
     monitor
   }
 }

@@ -1,18 +1,16 @@
 package model.behaviour
 
-import model.behaviour.RichPredicates._
+import model.behaviour.RichTransitions.LogicalTransition
+import model.collisions.ImplicitConversions.{entityToBody, tupleToVector2, vectorToTuple}
 import model.entities.{Entity, MobileEntity, Statistic}
-import model.helpers.EntitiesUtilities._
+import model.helpers.GeometricUtilities.isBodyOnTheRight
 import model.movement._
-import utils.EnemiesConstants.ENEMIES_ACTIVATION_DISTANCE
 
-trait MovementBehaviours extends BehavioursImpl {
-  override type Behaviour = MovementStrategy
-
+trait MovementBehaviours {
   def getMovementStrategy: MovementStrategy
 }
 
-class MovementBehavioursImpl extends MovementBehaviours {
+class MovementBehavioursImpl extends BehavioursImpl with MovementBehaviours {
   override type Behaviour = MovementStrategy
 
   override def getMovementStrategy: MovementStrategy = this.getCurrentBehaviour
@@ -26,115 +24,114 @@ class MovementBehavioursImpl extends MovementBehaviours {
   }
 }
 
-// TODO implementare Disable come mixin?
-case class DisabledMovementStrategy(sourceEntity: MobileEntity,
-                                    targetEntity: Entity,
-                                    strategy: MovementStrategy) extends BehaviourMovementStrategy {
-  val b1: MovementStrategy = behaviour.addBehaviour(DoNothingMovementStrategy())
-  val b2: MovementStrategy = behaviour.addBehaviour(strategy)
+case class GroundEnemyMovementStrategy(private val sourceEntity: MobileEntity,
+                                       private val targetEntity: Entity,
+                                       private val visionDistance: Float) extends BehaviourMovementStrategy {
+  private val WAIT_PROBABILITY: Float = 0.3f
 
-  behaviour.addTransition(b1, b2,
-    () => getEntitiesDistance(this.sourceEntity, this.targetEntity) <= ENEMIES_ACTIVATION_DISTANCE)
-  behaviour.addTransition(b2, b1, NotPredicate(
-    () => getEntitiesDistance(this.sourceEntity, this.targetEntity) <= ENEMIES_ACTIVATION_DISTANCE))
+  private val b1: MovementStrategy = behaviours.addBehaviour(PatrolMovementStrategy(sourceEntity))
+  private val b2: MovementStrategy = behaviours.addBehaviour(FaceTarget(sourceEntity, targetEntity))
+  private val b3: MovementStrategy = behaviours.addBehaviour(ChaseMovementStrategy(sourceEntity, targetEntity))
+  private val b4: MovementStrategy = behaviours.addBehaviour(DoNothingMovementStrategy())
+
+  behaviours.addTransition(b1, b2, IsTargetNearby(sourceEntity, targetEntity, this.visionDistance) &&
+    IsTargetVisible(sourceEntity, targetEntity))
+
+  behaviours.addTransition(b2, b1, Not(IsTargetVisible(sourceEntity, targetEntity)))
+
+  behaviours.addTransition(b2, b3, Not(IsTargetNearby(sourceEntity, targetEntity, this.visionDistance)) &&
+    IsTargetVisible(sourceEntity, targetEntity) &&
+    IsPathWalkable(sourceEntity, targetEntity))
+
+  behaviours.addTransition(b3, b2, IsTargetNearby(sourceEntity, targetEntity, this.visionDistance) &&
+    IsTargetVisible(sourceEntity, targetEntity))
+
+  behaviours.addTransition(b3, b1, Not(IsTargetVisible(sourceEntity, targetEntity)))
+
+  behaviours.addTransition(b3, b4, Not(IsPathWalkable(sourceEntity, targetEntity)))
+
+  behaviours.addTransition(b4, b1, RandomlyTrue(WAIT_PROBABILITY))
+
+  behaviours.addTransition(b4, b2, IsTargetNearby(sourceEntity, targetEntity, this.visionDistance) &&
+    IsTargetVisible(sourceEntity, targetEntity))
+
+  behaviours.addTransition(b4, b3, Not(IsTargetNearby(sourceEntity, targetEntity, this.visionDistance)) &&
+    IsTargetVisible(sourceEntity, targetEntity) &&
+    IsPathWalkable(sourceEntity, targetEntity))
 }
 
-case class GroundEnemyMovementStrategy(sourceEntity: MobileEntity,
-                                       targetEntity: Entity) extends BehaviourMovementStrategy {
-  // TODO: magic number qui, codice duplicato
-  private val visionAngle: Float = sourceEntity.getStatistic(Statistic.VisionAngle).get
-  private val minDistance = sourceEntity.getStatistic(Statistic.VisionDistance).get
+case class PatrolMovementStrategy(private val sourceEntity: MobileEntity) extends BehaviourMovementStrategy {
 
-  private val isTargetVisible: () => Boolean =
-    () => isEntityVisible(this.sourceEntity, this.targetEntity, visionAngle)
-  private val isTargetNear: () => Boolean =
-    () => getEntitiesDistance(this.sourceEntity, this.targetEntity) <= minDistance
-  private val isPathWalkable: () => Boolean =
-    () => (!isPathObstructedOnTheLeft(sourceEntity, vOffset = 0) &&
-      isFloorPresentOnTheLeft(sourceEntity, vOffset = 0) &&
-      isEntityOnTheLeft(this.sourceEntity, this.targetEntity)) ||
-      (!isPathObstructedOnTheRight(sourceEntity, vOffset = 0) &&
-        isFloorPresentOnTheRight(sourceEntity, vOffset = 0) &&
-        isEntityOnTheRight(this.sourceEntity, this.targetEntity))
+  private val isFacingRight: Transition = () => this.sourceEntity.isFacingRight
 
-  private val b1: MovementStrategy = behaviour.addBehaviour(PatrolMovementStrategy(sourceEntity))
-  private val b2: MovementStrategy = behaviour.addBehaviour(FaceTarget(sourceEntity, targetEntity))
-  private val b3: MovementStrategy = behaviour.addBehaviour(ChaseMovementStrategy(sourceEntity, targetEntity))
-  private val b4: MovementStrategy = behaviour.addBehaviour(DoNothingMovementStrategy())
+  private val b1: MovementStrategy = behaviours.addBehaviour(DoNothingMovementStrategy())
+  private val b2: MovementStrategy = behaviours.addBehaviour(MovingMovementStrategy(sourceEntity, right=false))
+  private val b3: MovementStrategy = behaviours.addBehaviour(MovingMovementStrategy(sourceEntity, right=true))
 
-  behaviour.addTransition(b1, b2, AllPredicate(List(isTargetNear, isTargetVisible)))
-  behaviour.addTransition(b2, b1, NotPredicate(isTargetVisible))
-  behaviour.addTransition(b2, b3, AllPredicate(List(NotPredicate(isTargetNear), isTargetVisible, isPathWalkable)))
-  behaviour.addTransition(b3, b2, AllPredicate(List(isTargetNear, isTargetVisible)))
-  behaviour.addTransition(b3, b1, NotPredicate(isTargetVisible))
-  behaviour.addTransition(b3, b4, NotPredicate(isPathWalkable))
-  behaviour.addTransition(b4, b1, RandomTruePredicate(30))
-  behaviour.addTransition(b4, b2, AllPredicate(List(isTargetNear, isTargetVisible)))
-  behaviour.addTransition(b4, b3, AllPredicate(List(NotPredicate(isTargetNear), isTargetVisible, isPathWalkable)))
+  behaviours.addTransition(b1, b2, Not(isFacingRight))
+
+  behaviours.addTransition(b2, b3, Not(CanMoveToTheLeft(sourceEntity)))
+
+  behaviours.addTransition(b1, b3, isFacingRight)
+
+  behaviours.addTransition(b3, b2, Not(CanMoveToTheRight(sourceEntity)))
 }
 
-case class BossMovementStrategy(sourceEntity: MobileEntity,
-                                 targetEntity: Entity,
-                                distance: Float) extends BehaviourMovementStrategy {
+case class ChaseMovementStrategy(private val sourceEntity:MobileEntity,
+                                 private val targetEntity:Entity) extends BehaviourMovementStrategy {
 
-  private val visionAngle: Float = sourceEntity.getStatistic(Statistic.VisionAngle).get
-  private val minDistance = sourceEntity.getStatistic(Statistic.VisionDistance).get
+  private val isTargetOnTheRight:Transition = () => isBodyOnTheRight(this.sourceEntity, this.targetEntity)
 
-  private val isTargetVisible: () => Boolean =
-    () => isEntityVisible(this.sourceEntity, this.targetEntity, visionAngle)
-  private val isTargetNear: () => Boolean =
-    () => getEntitiesDistance(this.sourceEntity, this.targetEntity) <= distance
-  private val isPathWalkable: () => Boolean =
-    () => (!isPathObstructedOnTheLeft(sourceEntity, vOffset = 0) &&
-      isFloorPresentOnTheLeft(sourceEntity, vOffset = 0) &&
-      isEntityOnTheLeft(this.sourceEntity, this.targetEntity)) ||
-      (!isPathObstructedOnTheRight(sourceEntity, vOffset = 0) &&
-        isFloorPresentOnTheRight(sourceEntity, vOffset = 0) &&
-        isEntityOnTheRight(this.sourceEntity, this.targetEntity))
+  private val b1: MovementStrategy = behaviours.addBehaviour(DoNothingMovementStrategy())
+  private val b2: MovementStrategy = behaviours.addBehaviour(MovingMovementStrategy(sourceEntity, right=false))
+  private val b3: MovementStrategy = behaviours.addBehaviour(MovingMovementStrategy(sourceEntity, right=true))
 
-  private val b1: MovementStrategy = behaviour.addBehaviour(FaceTarget(sourceEntity, targetEntity))
-  private val b2: MovementStrategy = behaviour.addBehaviour(ChaseMovementStrategy(sourceEntity, targetEntity))
+  behaviours.addTransition(b1, b2, Not(isTargetOnTheRight))
 
-  behaviour.addTransition(b1, b2, AllPredicate(
-    List(NotPredicate(isTargetNear), isTargetVisible, isPathWalkable)))
-  behaviour.addTransition(b2, b1, AnyPredicate(
-    List(isTargetNear, NotPredicate(isTargetVisible), NotPredicate(isPathWalkable))))
+  behaviours.addTransition(b1, b3, isTargetOnTheRight)
+
+  behaviours.addTransition(b2, b3, isTargetOnTheRight)
+
+  behaviours.addTransition(b3, b2, Not(isTargetOnTheRight))
 }
 
-case class PatrolMovementStrategy(sourceEntity: MobileEntity) extends BehaviourMovementStrategy {
+case class FlyingEnemyMovementStrategy(private val sourceEntity:MobileEntity,
+                                       private val targetEntity:Entity,
+                                       private val visionDistance: Float) extends BehaviourMovementStrategy {
 
-  private val canMoveToTheLeft: () => Boolean =
-    () => !isPathObstructedOnTheLeft(sourceEntity, vOffset = 0) &&
-      isFloorPresentOnTheLeft(sourceEntity, vOffset = 0)
-  private val canMoveToTheRight: () => Boolean =
-    () => !isPathObstructedOnTheRight(sourceEntity, vOffset = 0) &&
-      isFloorPresentOnTheRight(sourceEntity, vOffset = 0)
+  private val b1: MovementStrategy = behaviours.addBehaviour(DoNothingMovementStrategy())
+  private val b2: MovementStrategy = behaviours.addBehaviour(new FlyingMovementStrategy(sourceEntity, targetEntity))
+  private val b3: MovementStrategy = behaviours.addBehaviour(FaceTarget(sourceEntity, targetEntity))
 
-  private val b1: MovementStrategy = behaviour.addBehaviour(DoNothingMovementStrategy())
-  private val b2: MovementStrategy = behaviour.addBehaviour(MovingMovementStrategy(sourceEntity, right=false))
-  private val b3: MovementStrategy = behaviour.addBehaviour(MovingMovementStrategy(sourceEntity, right=true))
+  behaviours.addTransition(b1, b2, IsTargetNearby(sourceEntity, targetEntity, visionDistance))
 
-  behaviour.addTransition(b1, b2, () => !this.sourceEntity.isFacingRight)
-  behaviour.addTransition(b2, b3, NotPredicate(canMoveToTheLeft))
+  behaviours.addTransition(b2, b1, Not(IsTargetNearby(sourceEntity, targetEntity, visionDistance)))
+  behaviours.addTransition(b2, b3, IsTargetNearby(sourceEntity, targetEntity, this.sourceEntity.getSize._1))
 
-  behaviour.addTransition(b1, b3, () => this.sourceEntity.isFacingRight)
-  behaviour.addTransition(b3, b2, NotPredicate(canMoveToTheRight))
+  behaviours.addTransition(b3, b2, Not(IsTargetNearby(sourceEntity, targetEntity, this.sourceEntity.getSize._1)) &&
+    Not(IsEntityAttacking(sourceEntity)))
 }
 
-case class ChaseMovementStrategy(sourceEntity:MobileEntity,
-                                 targetEntity:Entity) extends BehaviourMovementStrategy {
+class FlyingMovementStrategy(private val sourceEntity:MobileEntity,
+                             private val targetEntity:Entity) extends MovementStrategyImpl {
 
-  val b1: MovementStrategy = behaviour.addBehaviour(DoNothingMovementStrategy())
-  val b2: MovementStrategy = behaviour.addBehaviour(MovingMovementStrategy(sourceEntity, right=false))
-  val b3: MovementStrategy = behaviour.addBehaviour(MovingMovementStrategy(sourceEntity, right=true))
-
-  behaviour.addTransition(b1, b2, () => !isEntityOnTheRight(this.sourceEntity, this.targetEntity))
-  behaviour.addTransition(b1, b3, () => isEntityOnTheRight(this.sourceEntity, this.targetEntity))
-  behaviour.addTransition(b2, b3, () => isEntityOnTheRight(this.sourceEntity, this.targetEntity))
-  behaviour.addTransition(b3, b2, () => !isEntityOnTheRight(this.sourceEntity, this.targetEntity))
+  this.sourceEntity.setGravityScale(0)
 
   override def apply(): Unit = {
-    super.apply()
+    val direction =
+      this.targetEntity.getPosition
+        .sub(sourceEntity.getPosition)
+        .nor()
+        .scl(sourceEntity.getStatistic(Statistic.MovementSpeed).get)
+
+    this.sourceEntity.setFacing(direction.x > 0)
+
+    this.sourceEntity.setVelocity(direction)
+  }
+
+  override def onEnd(): Unit = {
+    this.sourceEntity.setVelocity((0, 0))
   }
 }
+
 

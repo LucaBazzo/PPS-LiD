@@ -1,25 +1,25 @@
 package model.entities
 
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
+import com.badlogic.gdx.physics.box2d.Shape
 import model.EntityBody
-import model.collisions.ImplicitConversions._
-import model.collisions.{ApplyDamage, ApplyDamageAndDestroyEntity, EntityCollisionBit}
+import model.collisions.ImplicitConversions.{entityToBody, _}
+import model.collisions.{ApplyDamage, ApplyDamageAndDestroyEntity, ApplyDamageAndKillEntity, EntityCollisionBit}
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
-import model.helpers.EntitiesFactoryImpl
 import model.helpers.EntitiesFactoryImpl._
-import model.helpers.EntitiesUtilities.{isEntityOnTheLeft, isEntityOnTheRight}
-import model.movement.{ArrowMovementStrategy, CircularMovementStrategy, DoNothingMovementStrategy, HomingProjectileTrajectory, MovementStrategy, WeightlessProjectileTrajectory}
-import utils.CollisionConstants.{ARROW_COLLISIONS, ENEMY_MELEE_ATTACK_COLLISIONS, ENERGY_BALL_COLLISIONS, FIREBALL_COLLISIONS, NO_COLLISIONS, SWORD_COLLISIONS}
+import model.helpers.GeometricUtilities.isBodyOnTheRight
+import model.movement._
+import utils.CollisionConstants._
+import utils.EnemiesConstants.{PROJECTILE_DYING_STATE_DURATION, PROJECTILE_ENTITIES_DURATION, WIZARD_ATTACK3_PROJECTILE_SPEED, WORM_ATTACK_PROJECTILE_SPEED}
 import utils.HeroConstants.{ARROW_SIZE, PIVOT_SIZE, SWORD_ATTACK_DENSITY}
-
 /** The possible statistics that could be given to a mobile or living entity
  *
  */
 object Statistic extends Enumeration {
   type Statistic = Value
 
-  val CurrentHealth, Health, Strength, Defence, MovementSpeed, MaxMovementSpeed, Acceleration, AttackSpeed = Value
+  val CurrentHealth, Health, Strength, Defence, MovementSpeed, AttackSpeed = Value
 
   val VisionDistance, VisionAngle, AttackFrequency, AttackDuration = Value
 }
@@ -33,23 +33,23 @@ trait MobileEntity extends Entity {
    *
    *  @param strategy the behavior that will call with move()
    */
-  def setMovementStrategy(strategy: MovementStrategy)
+  def setMovementStrategy(strategy: MovementStrategy): Unit
 
   /** Call the current movement strategy
    *
    */
-  def move()
+  def move(): Unit
 
   /** Stop the entity movement based on what is defined in the movement strategy
    *
    */
-  def stopMovement()
+  def stopMovement(): Unit
 
   /** Changes the direction in which the entity is looking
    *
    *  @param right true for right, false for left
    */
-  def setFacing(right: Boolean)
+  def setFacing(right: Boolean): Unit
 
   /** Check the direction in which the entity is looking
    *
@@ -68,7 +68,7 @@ trait MobileEntity extends Entity {
    *  @param statistic the statistic that will be altered
    *  @param alteration the value that will be added
    */
-  def alterStatistics(statistic: Statistic, alteration: Float)
+  def alterStatistics(statistic: Statistic, alteration: Float): Unit
 
   /** Return a specific statistic value
    *
@@ -153,7 +153,7 @@ object MobileEntity {
     val circularMobileEntity =
       new MobileEntityImpl(entityType, swordBody, rotatingBodySize.PPM, sourceEntity.getStatistics)
     circularMobileEntity.setMovementStrategy(
-      new CircularMovementStrategy(circularMobileEntity, angularVelocity))
+      CircularMovementStrategy(circularMobileEntity, angularVelocity))
     circularMobileEntity.setCollisionStrategy(
       ApplyDamage((e:Entity) => e.isInstanceOf[EnemyImpl], sourceEntity.getStatistics))
 
@@ -231,94 +231,87 @@ object MobileEntity {
       gravityScale = 0, SWORD_ATTACK_DENSITY, isSensor = true)
   }
 
-
-  def createFireballAttack(sourceEntity: LivingEntity,
-                                    targetEntity: Entity,
-                                    size: (Float, Float) = (1f, 1f),
-                                    offset: (Float, Float) = (0f, 0f)): MobileEntity = {
-
-    // compute bullet spawn point
+  private def computeAttackPosition(sourceEntity: MobileEntity, offset: (Float, Float) = (0f, 0f)): (Float, Float) = {
     val attackXOffset:Float = if (sourceEntity.isFacingRight) offset._1.PPM else -offset._1.PPM
     val attackYOffset:Float = offset._2.PPM
-    val position = (sourceEntity.getBody.getWorldCenter.x + attackXOffset,
-      sourceEntity.getBody.getWorldCenter.y + attackYOffset)
+    (sourceEntity.getBody.getWorldCenter.x + attackXOffset, sourceEntity.getBody.getWorldCenter.y + attackYOffset)
+  }
 
-    // create a body inside the game world
-    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.EnemyAttack,
-      FIREBALL_COLLISIONS, createCircleShape(size._1.PPM), position, isSensor = true)
-    entityBody.getBody.setBullet(true)
+  private def createAttackEntity(entityType:EntityType,
+                                 entityCollisionBit: Short,
+                                 collisions: Short,
+                                 shape: Shape,
+                                 position: (Float, Float),
+                                 size: (Float, Float),
+                                 stats: Map[Statistic, Float],
+                                 bullet: Boolean = false): MobileEntity = {
+    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, entityCollisionBit,
+      collisions, shape, position, isSensor = true)
 
-    // create an entity representing the bullet
-    val attack: MobileEntity = new MobileEntityImpl(EntityType.AttackFireBall, entityBody,
-      size.PPM, sourceEntity.getStatistics)
-    attack.setFacing(isEntityOnTheRight(sourceEntity, targetEntity))
+    var attack: MobileEntity = null
+    if (bullet)
+      attack = new BulletMobileEntity(entityType, entityBody, size.PPM, stats)
+    else
+      attack = new MobileEntityImpl(entityType, entityBody, size.PPM, stats)
 
-    // set entity behaviours
-    attack.setCollisionStrategy(ApplyDamageAndDestroyEntity(attack, (e:Entity) => e.isInstanceOf[Hero],
+    attack
+  }
+
+  private def defineBulletAttack(attack:MobileEntity, sourceEntity:MobileEntity, targetEntity:Entity): Unit = {
+    attack.getBody.setBullet(true)
+    attack.setFacing(isBodyOnTheRight(sourceEntity, targetEntity))
+
+    attack.setCollisionStrategy(ApplyDamageAndKillEntity(attack, (e:Entity) => e.isInstanceOf[Hero],
       sourceEntity.getStatistics))
-    attack.setMovementStrategy(new WeightlessProjectileTrajectory(attack, (position.x, position.y),
-      (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), sourceEntity.getStatistics))
+  }
+
+  def createFireballAttack(sourceEntity: LivingEntity,
+                           targetEntity: Entity,
+                           targetPoint: (Float, Float),
+                           size: (Float, Float) = (1f, 1f),
+                           offset: (Float, Float) = (0f, 0f)): MobileEntity = {
+
+    val attackPosition = computeAttackPosition(sourceEntity, offset)
+    val attack: MobileEntity = createAttackEntity(EntityType.AttackFireBall,
+      EntityCollisionBit.EnemyAttack, FIREBALL_COLLISIONS, createCircleShape(size._1.PPM), attackPosition,
+      size, sourceEntity.getStatistics, bullet = true)
+
+    defineBulletAttack(attack, sourceEntity, targetEntity)
+
+    attack.setMovementStrategy(WeightlessProjectileTrajectory(attack, attackPosition,
+      targetPoint, WORM_ATTACK_PROJECTILE_SPEED))
 
     addEntity(attack)
     attack
   }
 
   def createEnergyBallAttack(sourceEntity: LivingEntity,
-                                      targetEntity: Entity,
-                                      size: (Float, Float) = (1f, 1f),
-                                      offset: (Float, Float) = (0f, 0f)): MobileEntity = {
-    // compute bullet spawn point
-    val attackXOffset:Float = if (sourceEntity.isFacingRight) offset._1.PPM else -offset._1.PPM
-    val attackYOffset:Float = offset._2.PPM
-    val position = (sourceEntity.getBody.getWorldCenter.x+attackXOffset,
-      sourceEntity.getBody.getWorldCenter.y+attackYOffset)
+                             targetEntity: Entity,
+                             size: (Float, Float) = (1f, 1f),
+                             offset: (Float, Float) = (0f, 0f)): MobileEntity = {
+    val attackPosition = computeAttackPosition(sourceEntity, offset)
+    val attack: MobileEntity = createAttackEntity(EntityType.AttackEnergyBall,
+      EntityCollisionBit.EnemyAttack, ENERGY_BALL_COLLISIONS, createCircleShape(size._1.PPM),
+      attackPosition, size, sourceEntity.getStatistics, bullet = true)
 
-    // create a body inside the game world
-    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.EnemyAttack,
-      ENERGY_BALL_COLLISIONS, createCircleShape(size._1.PPM), (position.x, position.y), isSensor = true)
-    entityBody.getBody.setBullet(true)
+    defineBulletAttack(attack, sourceEntity, targetEntity)
 
-    // create an entity representing the bullet
-    val attack: MobileEntity = new MobileEntityImpl(EntityType.AttackEnergyBall, entityBody,
-      size.PPM, sourceEntity.getStatistics)
-    attack.setFacing(isEntityOnTheRight(sourceEntity, targetEntity))
-
-    // set entity behaviours
-    attack.setCollisionStrategy(ApplyDamageAndDestroyEntity(attack, (e:Entity) => e.isInstanceOf[Hero],
-      sourceEntity.getStatistics))
-    attack.setMovementStrategy(new HomingProjectileTrajectory(attack, (position.x, position.y),
-      (targetEntity.getBody.getWorldCenter.x, targetEntity.getBody.getWorldCenter.y), sourceEntity.getStatistics))
+    attack.setMovementStrategy(HomingProjectileTrajectory(attack, attackPosition,
+      targetEntity, WIZARD_ATTACK3_PROJECTILE_SPEED))
 
     addEntity(attack)
     attack
   }
 
-  def createMeleeAttack(sourceEntity:LivingEntity,
-                                 targetEntity:Entity,
-                                 size: (Float, Float) = (23, 23),
-                                 offset: (Float, Float) = (20, 5)): MobileEntity = {
+  def createMeleeAttack(sourceEntity: LivingEntity,
+                        size: (Float, Float) = (23, 23),
+                        offset: (Float, Float) = (20, 5)): MobileEntity = {
+    val attack: MobileEntity = createAttackEntity(EntityType.Mobile,
+      EntityCollisionBit.EnemyAttack, ENEMY_MELEE_ATTACK_COLLISIONS, createPolygonalShape(size.PPM),
+      computeAttackPosition(sourceEntity, offset), size, sourceEntity.getStatistics)
 
-    val pivotSize: (Float, Float) = (2f, 2f)
+    createJoint(createPivotPoint(sourceEntity.getPosition).getBody, attack.getBody)
 
-    // compute attack spawn point
-    val attackXOffset:Float = if (isEntityOnTheLeft(sourceEntity, targetEntity)) -offset._1.PPM else +offset._1.PPM
-    val attackYOffset:Float = offset._2.PPM
-    val position = (sourceEntity.getBody.getWorldCenter.x+attackXOffset,
-      sourceEntity.getBody.getWorldCenter.y+attackYOffset)
-
-    // create a body inside the game world
-    val pivotBody: EntityBody = defineEntityBody(BodyType.StaticBody, EntityCollisionBit.Immobile,
-      0, createPolygonalShape(pivotSize.PPM), sourceEntity.getPosition, isSensor = true)
-
-    val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.EnemyAttack,
-      ENEMY_MELEE_ATTACK_COLLISIONS, createPolygonalShape(size.PPM), position, isSensor = true)
-
-    createJoint(pivotBody.getBody, entityBody.getBody)
-
-    // create an entity representing the melee attack
-    val attack: MobileEntity = new MobileEntityImpl(EntityType.Mobile, entityBody, size.PPM, sourceEntity.getStatistics)
-
-    // set entity behaviours
     attack.setCollisionStrategy(ApplyDamage(e => e.isInstanceOf[Hero], sourceEntity.getStatistics))
 
     addEntity(attack)
@@ -344,9 +337,7 @@ class MobileEntityImpl(private val entityType: EntityType,
 
   protected var movementStrategy: MovementStrategy = DoNothingMovementStrategy()
 
-  override def update(): Unit = {
-
-  }
+  override def update(): Unit = { }
 
   override def setMovementStrategy(strategy: MovementStrategy): Unit = this.movementStrategy = strategy
 
@@ -394,10 +385,41 @@ class MobileEntityImpl(private val entityType: EntityType,
 class AirSwordMobileEntity(private val entityType: EntityType,
                            private var entityBody: EntityBody,
                            private val size: (Float, Float),
-                           private val stats: Map[Statistic, Float] = Map()) extends MobileEntityImpl(entityType, entityBody, size, stats) {
+                           private val stats: Map[Statistic, Float] = Map())
+  extends MobileEntityImpl(entityType, entityBody, size, stats) {
 
   override def destroyEntity(): Unit = {
-    EntitiesFactoryImpl.pendingDestroyBody(this.getBody)
-    EntitiesFactoryImpl.removeEntity(this)
+    pendingDestroyBody(this.getBody)
+    removeEntity(this)
+  }
+}
+
+class BulletMobileEntity(private val entityType: EntityType,
+                         private var entityBody: EntityBody,
+                         private val size: (Float, Float),
+                         private val stats: Map[Statistic, Float] = Map())
+  extends MobileEntityImpl(entityType, entityBody, size, stats) {
+
+  private var dyingStateTime: Long = 0
+  private val creationTime: Long = System.currentTimeMillis()
+
+  override def update(): Unit = {
+    super.update()
+
+    val now:Long = System.currentTimeMillis()
+    if (now - this.creationTime > PROJECTILE_ENTITIES_DURATION)
+      this.setState(State.Dying)
+
+    if (this.getState != State.Dying)
+      this.move()
+    else {
+      if (dyingStateTime == 0) {
+        this.dyingStateTime = now
+        this.movementStrategy.stopMovement()
+      }
+
+      if (dyingStateTime != 0 && now - this.dyingStateTime > PROJECTILE_DYING_STATE_DURATION)
+        this.destroyEntity()
+    }
   }
 }

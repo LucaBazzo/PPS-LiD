@@ -15,14 +15,9 @@ import java.util.concurrent.{ExecutorService, Executors, ScheduledExecutorServic
  * and load it, handling inputs and closing the application.
  */
 trait Controller {
-
-  /** Stop the game loop and the messages from the View to the Model.
-   */
-  def stopGameLoop()
-
   /** Called the hero is dead and the application should set the Game Over Screen.
    */
-  def gameOver()
+  def gameOver(): Unit
 }
 
 /** This class represent the Controller of the all game.
@@ -64,7 +59,7 @@ class ControllerImpl extends Controller with Observer {
     executorService.submit(task)
   }
 
-  override def stopGameLoop(): Unit = this.executorService.shutdownNow()
+  private def stopGameLoop(): Unit = this.executorService.shutdownNow()
 
   private def startGame(): Unit = {
     this.view.startGame()

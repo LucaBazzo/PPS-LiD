@@ -3,7 +3,7 @@ package model.collisions
 import controller.GameEvent
 import model.entities.{Entity, Hero, ImmobileEntity, Item, _}
 import model.helpers.EntitiesSetter
-import model.{ChestInteraction, DoorInteraction, HeroInteraction, LadderInteraction, Level, PlatformInteraction}
+import model._
 import utils.EnvironmentConstants._
 
 /** Represent the behaviour of Items when collide
@@ -116,26 +116,23 @@ case class WaterCollisionStrategy() extends CollisionStrategyImpl {
 
 /** Represent the behaviour of lava pool when collide, damaging the hero
  *
- * @param collisMonitor the collision monitor that tracks hero's interactions with world elements
  */
-case class LavaCollisionStrategy(private val collisMonitor: CollisionMonitor) extends CollisionStrategyImpl {
+case class LavaCollisionStrategy() extends CollisionStrategyImpl {
   private var timer:Long = 0
   private var hero:Option[Hero] = Option.empty
 
-  // TODO: collisMonitor potrebbe essere eliminato da questa classe
-
   override def contact(entity: Entity): Unit = entity match {
-    case hero: Hero =>
+    case h: Hero =>
       println("Hero stands in lava")
-      collisMonitor.playerInLava()
-      this.hero = Option(hero)
+      h.alterStatistics(Statistic.MovementSpeed, -LAVA_SPEED_ALTERATION)
+      this.hero = Option(h)
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
-    case _: Hero => println("Hero out of lava")
+    case h: Hero => println("Hero out of lava")
       this.hero = Option.empty
-      collisMonitor.playerOutOfLava()
+      h.alterStatistics(Statistic.MovementSpeed, +LAVA_SPEED_ALTERATION)
     case _ =>
   }
 
@@ -144,8 +141,8 @@ case class LavaCollisionStrategy(private val collisMonitor: CollisionMonitor) ex
     if (hero.isDefined && System.currentTimeMillis() - this.timer > LAVA_DAMAGE_TICK_RATE) {
       hero.get.sufferDamage(LAVA_DAMAGE_PER_TICK)
       println("Taken damage from lava")
-      if(this.hero.get.getLife <= 0)
-        collisMonitor.playerOutOfLava()
+      /*if(this.hero.get.getLife <= 0)
+        collisMonitor.playerOutOfLava()*/
       this.timer = now
     }
   }
