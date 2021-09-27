@@ -38,6 +38,8 @@ object EntityCollisionBit {
   }
 }
 
+// TODO muovere in un file a parte
+
 object ImplicitConversions {
 
   implicit def intToShort(value: Int): Short = value.toShort
@@ -80,25 +82,24 @@ object ImplicitConversions {
     def -(tuple: (Float, Float)): (Float, Float) = (base._1 - tuple._1, base._2 - tuple._2)
   }
 }
-case class CollidingEntities(firstEntity: Option[Entity], secondEntity: Option[Entity])
 
 class CollisionManager(private val entitiesGetter: EntitiesGetter) extends ContactListener {
 
   override def beginContact(contact: Contact): Unit = {
-    val collidingEntities: CollidingEntities = getCollidingEntities(contact)
+    val collidingEntities: (Option[Entity], Option[Entity]) = getCollidingEntities(contact)
 
-    if(collidingEntities.firstEntity.nonEmpty && collidingEntities.secondEntity.nonEmpty) {
-      collidingEntities.firstEntity.get.collisionDetected(collidingEntities.secondEntity.get)
-      collidingEntities.secondEntity.get.collisionDetected(collidingEntities.firstEntity.get)
+    if(collidingEntities._1.nonEmpty && collidingEntities._2.nonEmpty) {
+      collidingEntities._1.get.collisionDetected(collidingEntities._2.get)
+      collidingEntities._2.get.collisionDetected(collidingEntities._1.get)
     }
   }
 
   override def endContact(contact: Contact): Unit = {
-    val collidingEntities: CollidingEntities = getCollidingEntities(contact)
+    val collidingEntities: (Option[Entity], Option[Entity]) = getCollidingEntities(contact)
 
-    if(collidingEntities.firstEntity.nonEmpty && collidingEntities.secondEntity.nonEmpty) {
-      collidingEntities.firstEntity.get.collisionReleased(collidingEntities.secondEntity.get)
-      collidingEntities.secondEntity.get.collisionReleased(collidingEntities.firstEntity.get)
+    if(collidingEntities._1.nonEmpty && collidingEntities._2.nonEmpty) {
+      collidingEntities._1.get.collisionReleased(collidingEntities._2.get)
+      collidingEntities._2.get.collisionReleased(collidingEntities._1.get)
     }
   }
 
@@ -106,7 +107,7 @@ class CollisionManager(private val entitiesGetter: EntitiesGetter) extends Conta
 
   override def postSolve(contact: Contact, contactImpulse: ContactImpulse): Unit = { }
 
-  private def getCollidingEntities(contact: Contact): CollidingEntities = {
+  private def getCollidingEntities(contact: Contact): (Option[Entity], Option[Entity]) = {
     val firstBody: Body = contact.getFixtureA.getBody
     val secondBody: Body = contact.getFixtureB.getBody
 
@@ -114,10 +115,10 @@ class CollisionManager(private val entitiesGetter: EntitiesGetter) extends Conta
     val secondEntities: List[Entity] = entitiesGetter.getEntities((x: Entity) => x.getBody equals secondBody).get
 
     (firstEntities, secondEntities) match {
-      case (List(), List()) => CollidingEntities(Option.empty, Option.empty)
-      case (List(), _) => CollidingEntities(Option.empty, Option.apply(secondEntities.head))
-      case (_, List()) => CollidingEntities(Option.apply(firstEntities.head), Option.empty)
-      case (_, _) => CollidingEntities(Option.apply(firstEntities.head), Option.apply(secondEntities.head))
+      case (List(), List()) => (Option.empty, Option.empty)
+      case (List(), _) => (Option.empty, Option.apply(secondEntities.head))
+      case (_, List()) => (Option.apply(firstEntities.head), Option.empty)
+      case (_, _) => (Option.apply(firstEntities.head), Option.apply(secondEntities.head))
     }
   }
 }

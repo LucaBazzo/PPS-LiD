@@ -5,22 +5,6 @@ package model.collisions
  */
 trait CollisionMonitor {
 
-  /** Check if the Hero is inside of lava
-   *
-   * @return true if the hero is in lava
-   */
-  def isPlayerInsideLava: Boolean
-
-  /** The hero just escaped from lava
-   *
-   */
-  def playerOutOfLava(): Unit
-
-  /** The Hero fell into lava
-   *
-   */
-  def playerInLava(): Unit
-
   /** Check if the Hero is touching a ladder
    *
    * @return true if the hero is touching a ladder
@@ -58,21 +42,8 @@ trait CollisionMonitor {
  *
  */
 class CollisionMonitorImpl extends CollisionMonitor {
-  private var insideLava: Boolean = false
   private var onLadder: Boolean = false
   private var touchingPlatformEdges: Boolean = false
-
-  override def isPlayerInsideLava: Boolean = synchronized {
-    this.insideLava
-  }
-
-  override def playerOutOfLava(): Unit = synchronized {
-    this.insideLava = false
-  }
-
-  override def playerInLava(): Unit = synchronized {
-    this.insideLava = true
-  }
 
   override def isPlayerOnLadder: Boolean = synchronized {
     this.onLadder

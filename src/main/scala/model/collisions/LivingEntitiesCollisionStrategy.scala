@@ -5,9 +5,9 @@ import model.entities.Statistic.Statistic
 import model.entities.{Entity, LivingEntity, State, Statistic}
 import model.helpers.WorldUtilities.canBodiesCollide
 
-case class ApplyDamage(private val target: Entity => Boolean,
-                       private val stats: Map[Statistic, Float])
-  extends CollisionStrategyImpl {
+abstract class AbstractDamageCollisionStrategy(protected val target: Entity => Boolean,
+                                               protected val stats: Map[Statistic, Float])
+  extends CollisionStrategy {
 
   override def contact(entity: Entity): Unit = {
     if (target(entity))
@@ -15,29 +15,31 @@ case class ApplyDamage(private val target: Entity => Boolean,
   }
 }
 
-case class ApplyDamageAndDestroyEntity(private val sourceEntity: Entity,
-                                       private val target: Entity => Boolean,
-                                       private val stats: Map[Statistic, Float])
-  extends CollisionStrategyImpl() {
+case class ApplyDamageCollisionStrategy(override protected val target: Entity => Boolean,
+                                        override protected val stats: Map[Statistic, Float])
+  extends AbstractDamageCollisionStrategy(target, stats) {
+
+}
+
+case class ApplyDamageAndDestroyCollisionStrategy(protected val sourceEntity: Entity,
+                                                  override protected val target: Entity => Boolean,
+                                                  override protected val stats: Map[Statistic, Float])
+  extends AbstractDamageCollisionStrategy(target, stats) {
 
   override def contact(entity: Entity): Unit = {
-    if (target(entity))
-      entity.asInstanceOf[LivingEntity].sufferDamage(stats(Statistic.Strength))
-
+    super.contact(entity)
     if (canBodiesCollide(sourceEntity, entity))
       this.sourceEntity.destroyEntity()
   }
 }
 
-case class ApplyDamageAndKillEntity(private val sourceEntity: Entity,
-                               private val target: Entity => Boolean,
-                               private val stats: Map[Statistic, Float])
-  extends CollisionStrategyImpl() {
+case class ApplyDamageAndKillCollisionStrategy(protected val sourceEntity: Entity,
+                                               override protected val target: Entity => Boolean,
+                                               override protected val stats: Map[Statistic, Float])
+  extends AbstractDamageCollisionStrategy(target, stats) {
 
   override def contact(entity: Entity): Unit = {
-    if (target(entity))
-      entity.asInstanceOf[LivingEntity].sufferDamage(stats(Statistic.Strength))
-
+    super.contact(entity)
     this.sourceEntity.setState(State.Dying)
   }
 }
