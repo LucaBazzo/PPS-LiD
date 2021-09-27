@@ -1,4 +1,4 @@
-import model.collisions.ImplicitConversions.{entityToBody, _}
+import model.helpers.ImplicitConversions.{entityToBody, _}
 import model.entities.{Entity, LivingEntity, Platform, SkeletonEnemy, WormEnemy}
 import model.helpers.EntitiesFactoryImpl.createImmobileEntity
 import model.helpers.GeometricUtilities.{isBodyAbove, isBodyBelow, isBodyOnTheLeft, isBodyOnTheRight}

@@ -2,7 +2,7 @@ package model.entities
 
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import model.EntityBody
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 import model.collisions._
 import model.entities.EntityType.EntityType
 import model.helpers.EntitiesFactoryImpl.{createPolygonalShape, defineEntityBody}

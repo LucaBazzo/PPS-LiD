@@ -2,7 +2,7 @@ package model.attack
 
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 import model.entities.State._
 import model.entities._
 import model.movement.DoNothingMovementStrategy

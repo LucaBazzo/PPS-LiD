@@ -1,4 +1,4 @@
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 import model.entities._
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import model.{Level, LevelImpl}

@@ -1,6 +1,6 @@
 package model.attack
 
-import model.collisions.ImplicitConversions.entityToBody
+import model.helpers.ImplicitConversions.entityToBody
 import model.entities.MobileEntity.{createEnergyBallAttack, createFireballAttack, createMeleeAttack}
 import model.entities._
 import model.helpers.EntitiesFactoryImpl.getEntitiesContainerMonitor

@@ -1,6 +1,6 @@
 package utils
 
-import model.collisions.ImplicitConversions.RichFloat
+import model.helpers.ImplicitConversions.RichFloat
 import model.entities.EntityType
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.{Statistic, _}

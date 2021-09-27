@@ -5,7 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
 import model.collisions.CollisionManager
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 import model.entities._
 import model.helpers._
 

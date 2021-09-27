@@ -1,7 +1,7 @@
 package model.entities
 
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 import model.collisions.{EntityCollisionBit, ItemCollisionStrategy}
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items

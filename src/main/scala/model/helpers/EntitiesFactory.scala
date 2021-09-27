@@ -8,7 +8,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef
 import model._
-import model.collisions.ImplicitConversions._
+import ImplicitConversions._
 import model.collisions.{EntityCollisionBit, _}
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic

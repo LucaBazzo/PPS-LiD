@@ -1,6 +1,6 @@
 package utils
 
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 import model.entities.Statistic
 import model.entities.Statistic.Statistic
 

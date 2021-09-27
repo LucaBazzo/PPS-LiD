@@ -1,9 +1,9 @@
 import com.badlogic.gdx.math.Vector2
 import model.LevelImpl
 import model.attack.DoNothingAttackStrategy
-import model.behaviour.{EnemyBehavioursImpl, GroundEnemyMovementStrategy, PatrolMovementStrategy}
+import model.behaviour.{EnemyStateManagerImpl, GroundEnemyMovementStrategy, PatrolMovementStrategy}
 import model.collisions.DoNothingCollisionStrategy
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 import model.entities._
 import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
 import model.movement.{DoNothingMovementStrategy, FaceTarget, MovementStrategy}
@@ -34,7 +34,7 @@ class TestEnemyMovements extends AnyFlatSpec {
 
   private def setEnemyMovementStrategy(movementStrategy: MovementStrategy): Unit = {
     // set a custom behaviour for the skeleton type enemy (he can only move)
-    val behaviour: EnemyBehavioursImpl = new EnemyBehavioursImpl()
+    val behaviour: EnemyStateManagerImpl = new EnemyStateManagerImpl()
     behaviour.addBehaviour(DoNothingCollisionStrategy(), movementStrategy, DoNothingAttackStrategy())
     this.enemy.setBehaviour(behaviour)
   }

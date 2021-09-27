@@ -2,7 +2,7 @@ package model
 
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.{Body, BodyDef, FixtureDef, Shape}
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 import model.helpers.EntitiesFactoryImpl
 
 trait EntityBody {

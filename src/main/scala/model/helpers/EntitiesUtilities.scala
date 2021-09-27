@@ -1,6 +1,6 @@
 package model.helpers
 
-import model.collisions.ImplicitConversions.RichInt
+import ImplicitConversions.RichInt
 import model.entities.Entity
 import model.helpers.WorldUtilities.checkCollision
 

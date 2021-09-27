@@ -1,7 +1,7 @@
 package utils
 
 import model.collisions.EntityCollisionBit
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 
 object CollisionConstants {
 

@@ -2,7 +2,7 @@ package model.behaviour
 
 import _root_.utils.ApplicationConstants._
 import model.attack.AttackStrategy
-import model.collisions.ImplicitConversions.entityToBody
+import model.helpers.ImplicitConversions.entityToBody
 import model.entities._
 import model.helpers.EntitiesUtilities._
 import model.helpers.GeometricUtilities.{getBodiesDistance, isBodyOnTheLeft, isBodyOnTheRight}

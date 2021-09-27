@@ -1,23 +1,24 @@
 package model.movement
 
-import model.behaviour.MovementBehavioursImpl
-import model.collisions.ImplicitConversions.entityToBody
+import model.behaviour.MovementStateManagerImpl
+import model.helpers.ImplicitConversions.entityToBody
 import model.entities.{Entity, MobileEntity, State, Statistic}
 import model.helpers.GeometricUtilities.isBodyOnTheRight
+import model.helpers.ImplicitConversions.{tupleToVector2, vectorToTuple}
 
-abstract class BehaviourMovementStrategy extends MovementStrategyImpl {
-  protected val behaviours: MovementBehavioursImpl = new MovementBehavioursImpl()
+abstract class StatefulMovementStrategy extends MovementStrategyImpl {
+  protected val stateManager: MovementStateManagerImpl = new MovementStateManagerImpl()
 
   override def apply(): Unit = {
-    this.behaviours.update()
-    this.behaviours.getCurrentBehaviour.apply()
+    this.stateManager.update()
+    this.stateManager.getCurrentBehaviour.apply()
   }
 
-  override def stopMovement(): Unit = this.behaviours.getCurrentBehaviour.stopMovement()
+  override def stopMovement(): Unit = this.stateManager.getCurrentBehaviour.stopMovement()
 
-  override def onBegin(): Unit = this.behaviours.getCurrentBehaviour.onBegin()
+  override def onBegin(): Unit = this.stateManager.getCurrentBehaviour.onBegin()
 
-  override def onEnd(): Unit = this.behaviours.getCurrentBehaviour.onEnd()
+  override def onEnd(): Unit = this.stateManager.getCurrentBehaviour.onEnd()
 }
 
 case class MovingMovementStrategy(sourceEntity: MobileEntity,
@@ -51,12 +52,29 @@ case class FaceTarget(sourceEntity: MobileEntity,
       this.sourceEntity.setFacing(right = isBodyOnTheRight(sourceEntity, targetEntity))
   }
 
-  override def stopMovement(): Unit = { }
-
   override def onBegin(): Unit = {
     this.sourceEntity.setVelocityX(0)
   }
-
-  override def onEnd(): Unit = { }
 }
 
+class FlyingMovementStrategy(private val sourceEntity:MobileEntity,
+                             private val targetEntity:Entity) extends MovementStrategyImpl {
+
+  this.sourceEntity.setGravityScale(0)
+
+  override def apply(): Unit = {
+    val direction =
+      this.targetEntity.getPosition
+        .sub(sourceEntity.getPosition)
+        .nor()
+        .scl(sourceEntity.getStatistic(Statistic.MovementSpeed).get)
+
+    this.sourceEntity.setFacing(direction.x > 0)
+
+    this.sourceEntity.setVelocity(direction)
+  }
+
+  override def onEnd(): Unit = {
+    this.sourceEntity.setVelocity((0, 0))
+  }
+}

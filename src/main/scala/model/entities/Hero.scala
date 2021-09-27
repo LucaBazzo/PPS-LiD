@@ -4,7 +4,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.attack.{DoNothingAttackStrategy, HeroAttackStrategy}
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 import model.collisions.{DoNothingCollisionStrategy, EntityCollisionBit}
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items

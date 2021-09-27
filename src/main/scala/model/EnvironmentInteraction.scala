@@ -3,7 +3,7 @@ package model
 import controller.GameEvent
 import controller.GameEvent.{GameEvent, Up}
 import model.collisions.CollisionMonitor
-import model.collisions.ImplicitConversions.RichTuple2
+import model.helpers.ImplicitConversions.RichTuple2
 import model.entities.State._
 import model.entities._
 import model.helpers.{EntitiesFactoryImpl, ItemPools}

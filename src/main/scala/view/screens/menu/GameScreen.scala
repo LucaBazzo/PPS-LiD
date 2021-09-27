@@ -8,7 +8,7 @@ import com.badlogic.gdx.physics.box2d.{Box2DDebugRenderer, World}
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{GameEvent, ObserverManager}
-import model.collisions.ImplicitConversions.{RichFloat, RichInt, entityToBody}
+import model.helpers.ImplicitConversions.{RichFloat, RichInt, entityToBody}
 import model.entities.Items.Items
 import model.entities._
 import model.helpers.EntitiesGetter

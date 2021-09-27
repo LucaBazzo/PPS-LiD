@@ -1,7 +1,7 @@
 package view.screens.sprites
 
 import com.badlogic.gdx.graphics.g2d.{Animation, Batch, Sprite, TextureRegion}
-import model.collisions.ImplicitConversions.RichFloat
+import model.helpers.ImplicitConversions.RichFloat
 import model.entities.State.State
 import model.entities.{Entity, Hero, MobileEntity, State}
 

@@ -10,6 +10,8 @@ import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 
 import java.util.concurrent.{ExecutorService, Executors}
 
+// TODO: muvoere questo file nel controller (è il controller ad inizializzare e possedere il monitor, non il model)
+
 trait EntitiesGetter {
 
   def getEntities: List[Entity]

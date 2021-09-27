@@ -1,7 +1,7 @@
 package model.behaviour
 
 import model.behaviour.RichTransitions.LogicalTransition
-import model.collisions.ImplicitConversions.entityToBody
+import model.helpers.ImplicitConversions.entityToBody
 import model.entities.{Entity, MobileEntity}
 import model.helpers.GeometricUtilities.isBodyOnTheRight
 import model.movement._

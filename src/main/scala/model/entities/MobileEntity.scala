@@ -3,8 +3,8 @@ package model.entities
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.Shape
 import model.EntityBody
-import model.collisions.ImplicitConversions.{entityToBody, _}
-import model.collisions.{ApplyDamage, ApplyDamageAndDestroyEntity, ApplyDamageAndKillEntity, EntityCollisionBit}
+import model.helpers.ImplicitConversions.{entityToBody, _}
+import model.collisions.{ApplyDamageCollisionStrategy, ApplyDamageAndDestroyCollisionStrategy, ApplyDamageAndKillCollisionStrategy, EntityCollisionBit}
 import model.entities.EntityType.EntityType
 import model.entities.Statistic.Statistic
 import model.helpers.EntitiesFactoryImpl._
@@ -155,7 +155,7 @@ object MobileEntity {
     circularMobileEntity.setMovementStrategy(
       CircularMovementStrategy(circularMobileEntity, angularVelocity))
     circularMobileEntity.setCollisionStrategy(
-      ApplyDamage((e:Entity) => e.isInstanceOf[EnemyImpl], sourceEntity.getStatistics))
+      ApplyDamageCollisionStrategy((e:Entity) => e.isInstanceOf[EnemyImpl], sourceEntity.getStatistics))
 
     addEntity(circularMobileEntity)
     circularMobileEntity
@@ -177,7 +177,7 @@ object MobileEntity {
     val swordBody: EntityBody = createSword(size, distance, sourceEntity.getPosition, sourceEntity.getEntityBody)
 
     val airSword: MobileEntity = new AirSwordMobileEntity(EntityType.Mobile, swordBody, size.PPM)
-    airSword.setCollisionStrategy(ApplyDamage((e:Entity) => e.isInstanceOf[Enemy], sourceEntity.getStatistics))
+    airSword.setCollisionStrategy(ApplyDamageCollisionStrategy((e:Entity) => e.isInstanceOf[Enemy], sourceEntity.getStatistics))
 
     addEntity(airSword)
     airSword
@@ -194,7 +194,7 @@ object MobileEntity {
       EntityCollisionBit.Arrow, ARROW_COLLISIONS , gravityScale = 0)
     arrow.setFacing(entity.isFacingRight)
     arrow.setMovementStrategy(new ArrowMovementStrategy(arrow, entity.getStatistic(Statistic.MovementSpeed).get))
-    arrow.setCollisionStrategy(ApplyDamageAndDestroyEntity(arrow, (e:Entity) => e.isInstanceOf[EnemyImpl] , entity.getStatistics))
+    arrow.setCollisionStrategy(ApplyDamageAndDestroyCollisionStrategy(arrow, (e:Entity) => e.isInstanceOf[EnemyImpl] , entity.getStatistics))
     arrow
   }
 
@@ -261,7 +261,7 @@ object MobileEntity {
     attack.getBody.setBullet(true)
     attack.setFacing(isBodyOnTheRight(sourceEntity, targetEntity))
 
-    attack.setCollisionStrategy(ApplyDamageAndKillEntity(attack, (e:Entity) => e.isInstanceOf[Hero],
+    attack.setCollisionStrategy(ApplyDamageAndKillCollisionStrategy(attack, (e:Entity) => e.isInstanceOf[Hero],
       sourceEntity.getStatistics))
   }
 
@@ -312,7 +312,7 @@ object MobileEntity {
 
     createJoint(createPivotPoint(sourceEntity.getPosition).getBody, attack.getBody)
 
-    attack.setCollisionStrategy(ApplyDamage(e => e.isInstanceOf[Hero], sourceEntity.getStatistics))
+    attack.setCollisionStrategy(ApplyDamageCollisionStrategy(e => e.isInstanceOf[Hero], sourceEntity.getStatistics))
 
     addEntity(attack)
     attack

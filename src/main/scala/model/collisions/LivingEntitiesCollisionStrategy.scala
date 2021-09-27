@@ -1,6 +1,6 @@
 package model.collisions
 
-import model.collisions.ImplicitConversions.entityToBody
+import model.helpers.ImplicitConversions.entityToBody
 import model.entities.Statistic.Statistic
 import model.entities.{Entity, LivingEntity, State, Statistic}
 import model.helpers.WorldUtilities.canBodiesCollide

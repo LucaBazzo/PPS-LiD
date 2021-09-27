@@ -3,7 +3,7 @@ package model.entities
 import model.attack._
 import model.behaviour.RichTransitions._
 import model.behaviour._
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 import model.collisions.{CollisionStrategy, DoNothingCollisionStrategy, EntityCollisionBit}
 import model.entities.EntityType.EntityType
 import model.entities.Items.Items
