@@ -5,11 +5,11 @@ import model.entities.EntityType.EntityType
 import model.entities.State.State
 import model.entities.{EntityType, State}
 import utils.SoundConstants.{getMusicMap, getSoundMap}
-import view.screens.helpers.SoundEvent.{AirDownAttack, Attack1, Attack2, Attack3, BowAttack, Dying, EnemyAttack, EnemyDeath, Hurt, Jump, OpeningDoor, PickItem, SoundEvent, WorldSoundtrack}
+import view.screens.helpers.SoundEvent.{AirDownAttack, Attack1, Attack2, Attack3, BossSoundtrack, BowAttack, Dying, EnemyAttack, EnemyDeath, Hurt, Jump, OpeningDoor, PickItem, SoundEvent, WorldSoundtrack}
 
 object SoundEvent extends Enumeration {
   type SoundEvent = Value
-  val WorldSoundtrack, OpeningScreenSoundtrack,
+  val WorldSoundtrack, OpeningScreenSoundtrack, BossSoundtrack,
   Jump, Attack1, Attack2, Attack3, BowAttack, AirDownAttack, Hurt, Dying,
   EnemyAttack, EnemyDeath, OpeningDoor, PickItem = Value
 }
@@ -18,15 +18,17 @@ class SoundManager {
 
   private val musicMap: Map[SoundEvent, Music] = getMusicMap()
   private val soundMap: Map[SoundEvent, Sound] = getSoundMap()
+  private var currentMusicEvent: SoundEvent = _
 
   def playSound(soundEvent: SoundEvent): Unit = {
-
-    println("PLAY SOUND: " + soundEvent)
-
     soundEvent match {
-      case WorldSoundtrack => {
-        musicMap(WorldSoundtrack).setLooping(true)
-        musicMap(WorldSoundtrack).play
+      case WorldSoundtrack | BossSoundtrack => {
+        if(currentMusicEvent!=null && !currentMusicEvent.equals(soundEvent))
+          musicMap(currentMusicEvent).pause
+
+        musicMap(soundEvent).setLooping(true)
+        musicMap(soundEvent).play
+        currentMusicEvent = soundEvent
       }
       case Jump => soundMap(Jump).play
       case Attack1 => soundMap(Attack1).play

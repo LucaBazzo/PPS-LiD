@@ -70,8 +70,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   override def render(delta: Float): Unit = {
     if(this.entitiesGetter.isLevelReady) {
       if(this.removeLoadingScreen) {
-        this.soundManager.playSound(SoundEvent.WorldSoundtrack)
         this.hud.loadingFinished()
+        this.soundManager.playSound(SoundEvent.WorldSoundtrack)
         this.removeLoadingScreen = false
       }
 
@@ -95,7 +95,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
         if(previousStates.contains(hero)) {
           if (!previousStates(hero).equals(hero.getState))
-            soundManager.playSoundOnStateChange(hero.getType, hero.getState)
+            this.soundManager.playSoundOnStateChange(hero.getType, hero.getState)
         }
         previousStates = previousStates + (hero -> hero.getState)
       }
@@ -114,8 +114,10 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         hud.showBossHealthBar()
         val boss: LivingEntity = bossEntity.get.head.asInstanceOf[LivingEntity]
         this.hud.changeBossHealth(boss.getStatistics(Statistic.CurrentHealth), boss.getStatistics(Statistic.Health))
+        this.soundManager.playSound(SoundEvent.BossSoundtrack)
       } else {
         hud.hideBossHealthBar()
+        this.soundManager.playSound(SoundEvent.WorldSoundtrack)
       }
 
       val entities: Option[List[Entity]] = entitiesGetter.getEntities(_ => true)
@@ -126,7 +128,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         //per ogni entità controllo lo stato precedente e quello attuale per decidere quali suoni riprodurre
         entities.get.foreach(entity => {
           if(previousStates.contains(entity) && !previousStates(entity).equals(entity.getState))
-            soundManager.playSoundOnStateChange(entity.getType, entity.getState)
+            this.soundManager.playSoundOnStateChange(entity.getType, entity.getState)
           previousStates = previousStates + (entity -> entity.getState)
         })
       }
@@ -152,6 +154,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
       batch.setProjectionMatrix(hud.getStage.getCamera.combined)
       hud.getStage.draw()
+
     }
     else {
       hud.getStage.draw()
