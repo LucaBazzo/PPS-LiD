@@ -2,30 +2,30 @@ package model.behaviour
 
 import utils.ApplicationConstants.RANDOM
 
-trait Behaviours {
+trait StateManager {
 
-  type Behaviour
+  type State
 
-  def addBehaviour(behaviour:Behaviour): Behaviour
+  def addBehaviour(behaviour:State): State
 
-  def addTransition(state:Behaviour, nextState:Behaviour, transition:Transition): Unit
+  def addTransition(state:State, nextState:State, transition:Transition): Unit
 
   def update(): Unit
 
-  def getCurrentBehaviour: Behaviour
+  def getCurrentBehaviour: State
 
-  def getCurrentTransitions: Map[(Behaviour, Behaviour), Transition]
+  def getCurrentTransitions: Map[(State, State), Transition]
 }
 
-abstract class BehavioursImpl() extends Behaviours {
+abstract class StateManagerImpl extends StateManager {
 
-  protected var behaviours: List[Behaviour] = List.empty
+  protected var behaviours: List[State] = List.empty
 
-  protected var transitions: Map[(Behaviour, Behaviour), Transition] = Map.empty
+  protected var transitions: Map[(State, State), Transition] = Map.empty
 
-  protected var currentBehaviour:Option[Behaviour] = None
+  protected var currentBehaviour:Option[State] = None
 
-  override def addBehaviour(behaviour: Behaviour): Behaviour = {
+  override def addBehaviour(behaviour: State): State = {
     this.behaviours = behaviour :: this.behaviours
 
     // set first behaviour automatically
@@ -34,17 +34,17 @@ abstract class BehavioursImpl() extends Behaviours {
     behaviour
   }
 
-  override def addTransition(behaviour: Behaviour, nextBehaviour: Behaviour, transition: Transition): Unit =
+  override def addTransition(behaviour: State, nextBehaviour: State, transition: Transition): Unit =
     this.transitions += (behaviour, nextBehaviour) -> transition
 
   override def update(): Unit = {
     if (currentBehaviour.isDefined) {
 
-      val activeTransitions: Map[(Behaviour, Behaviour), Transition] =
+      val activeTransitions: Map[(State, State), Transition] =
         this.getCurrentTransitions.filter(t => t._2.apply())
 
       if (activeTransitions.nonEmpty) {
-        val pickedTransition: ((Behaviour, Behaviour), Transition) =
+        val pickedTransition: ((State, State), Transition) =
           activeTransitions.toList(RANDOM.nextInt(activeTransitions.size))
         val pickedBehaviour = this.behaviours.find(b => b == pickedTransition._1._2).get
 
@@ -58,10 +58,10 @@ abstract class BehavioursImpl() extends Behaviours {
     }
   }
 
-  override def getCurrentBehaviour: Behaviour =
+  override def getCurrentBehaviour: State =
     this.currentBehaviour.getOrElse(throw new IllegalArgumentException())
 
-  override def getCurrentTransitions: Map[(Behaviour, Behaviour), Transition] =
+  override def getCurrentTransitions: Map[(State, State), Transition] =
     this.transitions.filter(t => t._1._1 == this.getCurrentBehaviour)
 
   def onBehaviourBegin(): Unit

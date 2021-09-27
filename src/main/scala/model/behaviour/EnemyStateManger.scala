@@ -10,9 +10,9 @@ trait EnemyBehaviours  {
   def getAttackStrategy: AttackStrategy
 }
 
-class EnemyBehavioursImpl extends BehavioursImpl with EnemyBehaviours  {
+class EnemyStateManagerImpl extends StateManagerImpl with EnemyBehaviours  {
 
-  override type Behaviour = (CollisionStrategy, MovementStrategy, AttackStrategy)
+  override type State = (CollisionStrategy, MovementStrategy, AttackStrategy)
 
   override def getCollisionStrategy: CollisionStrategy = this.getCurrentBehaviour._1
 
