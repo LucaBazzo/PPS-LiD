@@ -97,6 +97,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
           if (!previousStates(hero).equals(hero.getState))
             this.soundManager.playSoundOnStateChange(hero.getType, hero.getState)
         }
+        if(hero.isDead) this.soundManager.stopMusic
         previousStates = previousStates + (hero -> hero.getState)
       }
 

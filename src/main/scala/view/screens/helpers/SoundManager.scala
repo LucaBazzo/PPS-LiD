@@ -18,17 +18,23 @@ class SoundManager {
 
   private val musicMap: Map[SoundEvent, Music] = getMusicMap()
   private val soundMap: Map[SoundEvent, Sound] = getSoundMap()
-  private var currentMusicEvent: SoundEvent = _
+  private var previousMusicEvent: SoundEvent = _
 
   def playSound(soundEvent: SoundEvent): Unit = {
     soundEvent match {
       case WorldSoundtrack | BossSoundtrack => {
-        if(currentMusicEvent!=null && !currentMusicEvent.equals(soundEvent))
-          musicMap(currentMusicEvent).pause
+        if(previousMusicEvent == null) {
+          musicMap(soundEvent).setLooping(true)
+          musicMap(soundEvent).play
+        } else if(!previousMusicEvent.equals(soundEvent)) {
+          musicMap(previousMusicEvent).pause
 
-        musicMap(soundEvent).setLooping(true)
-        musicMap(soundEvent).play
-        currentMusicEvent = soundEvent
+          musicMap(soundEvent).setLooping(true)
+          musicMap(soundEvent).play
+
+          previousMusicEvent = soundEvent
+        }
+        previousMusicEvent = soundEvent
       }
       case Jump => soundMap(Jump).play
       case Attack1 => soundMap(Attack1).play
@@ -45,6 +51,8 @@ class SoundManager {
       case _ => println("unsupported sound")
     }
   }
+
+  def stopMusic(): Unit = musicMap(previousMusicEvent).stop
 
   def playSoundOnStateChange(entityType: EntityType, entityState: State): Unit = {
      entityType match {
