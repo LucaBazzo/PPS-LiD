@@ -12,8 +12,10 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 libraryDependencies += "junit" % "junit" % "4.12" % "test"
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
 
+// testing execution policy
 parallelExecution in Test := false
 
+// sbt compile output options
 scalacOptions ++= Seq(
   "-deprecation",
   "-feature",
