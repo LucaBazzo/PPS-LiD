@@ -16,13 +16,9 @@ trait EntitySprite extends Sprite {
   def getIntWidth: Int = super.getWidth.asInstanceOf[Int]
 
   def getIntHeight: Int = super.getHeight.asInstanceOf[Int]
-
-//  def cloneEntitySprite(): EntitySprite
 }
 
-class EntitySpriteImpl(regionName: String,
-                       width: Float,
-                       height: Float)
+class EntitySpriteImpl(width: Float, height: Float)
   extends EntitySprite {
 
   private var animations: Map[State, Animation[TextureRegion]] = Map()
@@ -78,7 +74,7 @@ class EntitySpriteImpl(regionName: String,
 }
 
 class HeroEntitySprite(regionName: String, width: Float, height: Float)
-  extends EntitySpriteImpl(regionName, width, height) {
+  extends EntitySpriteImpl(width, height) {
 
   override def setPosition(entity: Entity): Unit = {
     if(entity.asInstanceOf[Hero].isLittle)

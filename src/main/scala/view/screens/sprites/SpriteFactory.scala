@@ -20,7 +20,6 @@ trait SpriteFactory {
 class SpriteFactoryImpl extends SpriteFactory {
 
   private var atlases: Map[String, TextureAtlas] = Map.empty
-  private var loadedSprites: Map[EntityType, EntitySprite] = Map.empty
 
   // TODO: verificare se è possibile usare un pattern proxy
 
@@ -36,9 +35,7 @@ class SpriteFactoryImpl extends SpriteFactory {
       case EntityType.Hero =>
         sprite = new HeroEntitySprite(regionName, spriteWidth, spriteHeight)
       case _ =>
-        sprite = new EntitySpriteImpl(regionName,
-          spriteWidth * sizeMultiplicative,
-          spriteHeight * sizeMultiplicative)
+        sprite = new EntitySpriteImpl(spriteWidth * sizeMultiplicative, spriteHeight * sizeMultiplicative)
     }
     sprite.setRegion(this.atlases(spritePackName).findRegion(regionName))
     sprite.setBounds(0, 0, spriteWidth, spriteHeight)
