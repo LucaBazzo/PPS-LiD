@@ -1,12 +1,13 @@
 import com.badlogic.gdx.math.Vector2
+import controller.ModelResources
 import model.LevelImpl
-import model.attack.DoNothingAttackStrategy
-import model.behaviour.{EnemyStateManager, GroundEnemyMovementStrategy, PatrolMovementStrategy, StateManagerImpl}
-import model.collisions.DoNothingCollisionStrategy
-import model.entities._
+import model.entity.attack.DoNothingAttackStrategy
+import model.entity.behaviour.{EnemyStateManager, GroundEnemyMovementStrategy, PatrolMovementStrategy, StateManagerImpl}
+import model.entity.collision.DoNothingCollisionStrategy
+import model.entity._
 import model.helpers.ImplicitConversions._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
-import model.movement.{DoNothingMovementStrategy, FaceTarget, MovementStrategy}
+import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl}
+import model.entity.movement.{DoNothingMovementStrategy, FaceTarget, MovementStrategy}
 import org.scalatest.flatspec.AnyFlatSpec
 import utils.EnemiesConstants.SKELETON_VISION_DISTANCE
 
@@ -29,18 +30,18 @@ class TestEnemyMovements extends AnyFlatSpec {
 
   private var enemy: EnemyImpl = _
   private var hero: Hero = _
-  private var entitiesContainer: EntitiesContainerMonitor = _
+  private var entitiesContainer: ModelResources = _
   private var level: LevelImpl = _
 
   private def setEnemyMovementStrategy(movementStrategy: MovementStrategy): Unit = {
     // set a custom behaviour for the skeleton type enemy (he can only move)
     val behaviour: EnemyStateManager = new StateManagerImpl() with EnemyStateManager
-    behaviour.addBehaviour(DoNothingCollisionStrategy(), movementStrategy, DoNothingAttackStrategy())
+    behaviour.addState(DoNothingCollisionStrategy(), movementStrategy, DoNothingAttackStrategy())
     this.enemy.setBehaviour(behaviour)
   }
 
   private def initialize(enemyPosition: (Float, Float)): Unit = {
-    entitiesContainer = new EntitiesContainerMonitor
+    entitiesContainer = new ModelResources
     EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
 
     this.level = new LevelImpl(null, entitiesContainer, new ItemPoolImpl())

@@ -1,8 +1,8 @@
 package model.helpers
 
 import model.EntityBody
-import model.entities.Items.Items
-import model.entities._
+import model.entity.Items.Items
+import model.entity._
 import model.helpers.ItemPools.ItemPools
 
 import scala.util.Random

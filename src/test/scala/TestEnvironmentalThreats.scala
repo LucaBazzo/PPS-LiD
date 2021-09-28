@@ -1,12 +1,13 @@
+import controller.ModelResources
 import model.LevelImpl
-import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
+import model.entity._
+import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class TestEnvironmentalThreats extends AnyFlatSpec {
 
   "The Hero" should "be slowed while inside a water pool" in {
-    val monitor: EntitiesContainerMonitor = initialize()
+    val monitor: ModelResources = initialize()
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Water).head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).head.asInstanceOf[Hero]
     val prevMoveSpeed: Float = hero.getStatistic(Statistic.MovementSpeed).get
@@ -15,7 +16,7 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
   }
 
   "The Hero" should "regain its previous movement speed after exiting a water pool" in {
-    val monitor: EntitiesContainerMonitor = initialize()
+    val monitor: ModelResources = initialize()
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Water).head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).head.asInstanceOf[Hero]
     val prevMoveSpeed: Float = hero.getStatistic(Statistic.MovementSpeed).get
@@ -25,7 +26,7 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
   }
 
   "The Hero" should "periodically suffer damage while inside a lava pool" in {
-    val monitor: EntitiesContainerMonitor = initialize()
+    val monitor: ModelResources = initialize()
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Lava).head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).head.asInstanceOf[Hero]
     val prevHP: Float = hero.getStatistic(Statistic.CurrentHealth).get
@@ -41,7 +42,7 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
   }
 
   "The Hero" must "stop suffering damage after exiting a lava pool" in {
-    val monitor: EntitiesContainerMonitor = initialize()
+    val monitor: ModelResources = initialize()
     val pool: Entity = monitor.getEntities(x => x.getType == EntityType.Lava).head
     val hero: Hero = monitor.getEntities(x => x.getType == EntityType.Hero).head.asInstanceOf[Hero]
     val prevHP: Float = hero.getStatistic(Statistic.CurrentHealth).get
@@ -61,8 +62,8 @@ class TestEnvironmentalThreats extends AnyFlatSpec {
     assert(hero.getStatistic(Statistic.CurrentHealth).get == finHP)
   }
 
-  private def initialize(): EntitiesContainerMonitor = {
-    val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
+  private def initialize(): ModelResources = {
+    val monitor: ModelResources = new ModelResources
     EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
     //TODO null temporaneo
     new LevelImpl(null, monitor, new ItemPoolImpl())

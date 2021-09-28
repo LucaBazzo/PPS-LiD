@@ -1,9 +1,10 @@
+import controller.ModelResources
 import model.helpers.ImplicitConversions.{entityToBody, _}
-import model.entities.{Entity, LivingEntity, Platform, SkeletonEnemy, WormEnemy}
+import model.entity.{Entity, LivingEntity, Platform, SkeletonEnemy, WormEnemy}
 import model.helpers.EntitiesFactoryImpl.createImmobileEntity
 import model.helpers.GeometricUtilities.{isBodyAbove, isBodyBelow, isBodyOnTheLeft, isBodyOnTheRight}
 import model.helpers.WorldUtilities.{canBodiesCollide, isBodyVisible}
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
+import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl}
 import model.{Level, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -22,7 +23,7 @@ class TestWorldUtilities extends AnyFlatSpec {
   val WORM_POSITION: (Float, Float) = (0, 0)
   val SKELETON_POSITION: (Float, Float) = (0, 50)
 
-  var entitiesContainer: EntitiesContainerMonitor = new EntitiesContainerMonitor
+  var entitiesContainer: ModelResources = new ModelResources
   EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
   var level: Level = new LevelImpl(null, entitiesContainer, new ItemPoolImpl())
   var enemy1: LivingEntity = SkeletonEnemy(SKELETON_POSITION)

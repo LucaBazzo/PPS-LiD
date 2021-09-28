@@ -6,9 +6,9 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
 import com.badlogic.gdx.math.Rectangle
-import model.collisions.EntityCollisionBit
+import model.entity.collision.EntityCollisionBit
 import model.helpers.ImplicitConversions._
-import model.entities._
+import model.entity._
 import model.helpers.{EntitiesFactoryImpl, ItemPools}
 
 case class TiledMapInfo(name: String, offset: (Int, Int))

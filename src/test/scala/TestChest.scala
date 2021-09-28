@@ -1,6 +1,7 @@
+import controller.ModelResources
 import model.LevelImpl
-import model.entities.Chest
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
+import model.entity.Chest
+import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class TestChest extends AnyFlatSpec {
@@ -24,8 +25,8 @@ class TestChest extends AnyFlatSpec {
       x.getType == EntityType.LargePotionItem || x.getType == EntityType.HugePotionItem).get.nonEmpty)
   }*/
 
-  private def initialize(): EntitiesContainerMonitor = {
-    val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
+  private def initialize(): ModelResources = {
+    val monitor: ModelResources = new ModelResources
     EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
     //TODO null temporaneo
     new LevelImpl(null, monitor, new ItemPoolImpl())

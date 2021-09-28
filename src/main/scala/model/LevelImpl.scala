@@ -4,9 +4,10 @@ import _root_.utils.ApplicationConstants._
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
-import model.collisions.CollisionManager
+import controller.ModelResources
+import model.entity.collision.CollisionManager
 import model.helpers.ImplicitConversions._
-import model.entities._
+import model.entity._
 import model.helpers._
 
 trait Level {
@@ -17,7 +18,7 @@ trait Level {
 }
 
 class LevelImpl(private val model: Model,
-                private val entitiesContainer: EntitiesContainerMonitor,
+                private val modelResources: ModelResources,
                 private val itemPool: ItemPool) extends Level {
 
   private val world: World = new World(GRAVITY_FORCE, true)
@@ -26,11 +27,11 @@ class LevelImpl(private val model: Model,
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
   entitiesFactory.setLevel(this, itemPool)
 
-  this.entitiesContainer.setEntities(List.empty)
-  this.entitiesContainer.setWorld(Option.apply(this.world))
-  this.world.setContactListener(new CollisionManager(this.entitiesContainer))
+  this.modelResources.setEntities(List.empty)
+  this.modelResources.setWorld(Option.apply(this.world))
+  this.world.setContactListener(new CollisionManager(this.modelResources))
 
-  private val hero: Hero = Hero(this.entitiesContainer.getHeroStatistics)
+  private val hero: Hero = Hero(this.modelResources.getHeroStatistics)
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
 
@@ -40,7 +41,7 @@ class LevelImpl(private val model: Model,
 
     EntitiesFactoryImpl.applyPendingFunctions()
 
-    this.entitiesContainer.getEntities.foreach((entity: Entity) => entity.update())
+    this.modelResources.getEntities.foreach((entity: Entity) => entity.update())
   }
 
   private var accumulator: Float = 0f
@@ -58,7 +59,7 @@ class LevelImpl(private val model: Model,
   }
 
   override def newLevel(): Unit = {
-    this.entitiesContainer.setHeroStatistics(this.hero.getStatistics)
+    this.modelResources.setHeroStatistics(this.hero.getStatistics)
     this.itemPool.resetBossPool()
     this.hero.loseItem(Items.Key)
     this.model.requestLevel()

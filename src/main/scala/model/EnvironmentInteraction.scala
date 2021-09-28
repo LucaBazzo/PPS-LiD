@@ -2,12 +2,12 @@ package model
 
 import controller.GameEvent
 import controller.GameEvent.{GameEvent, Up}
-import model.collisions.CollisionMonitor
+import model.entity.collision.CollisionMonitor
 import model.helpers.ImplicitConversions.RichTuple2
-import model.entities.State._
-import model.entities._
+import model.entity.State._
+import model.entity._
 import model.helpers.{EntitiesFactoryImpl, ItemPools}
-import model.movement.LadderMovementStrategy
+import model.entity.movement.LadderMovementStrategy
 import utils.EnvironmentConstants.{OPEN_CHEST_COLLISION_BIT, OPEN_DOOR_COLLISION_BIT, THROUGH_PLATFORM_COLLISION_BIT}
 import utils.ItemConstants._
 

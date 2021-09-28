@@ -4,7 +4,7 @@ import _root_.utils.ApplicationConstants.{GAME_LOOP_STEP, RANDOM_SEED}
 import com.badlogic.gdx.Gdx
 import controller.GameEvent.GameEvent
 import model._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl}
+import model.helpers.EntitiesFactoryImpl
 import model.world.TileMapManager
 import view._
 
@@ -24,7 +24,7 @@ trait Controller {
  */
 class ControllerImpl extends Controller with Observer {
 
-  private val entitiesContainer: EntitiesContainerMonitor = new EntitiesContainerMonitor()
+  private val entitiesContainer: ModelResources = new ModelResources()
   private val observerManager: ObserverManager = new ObserverManagerImpl()
   this.observerManager.addObserver(this)
 

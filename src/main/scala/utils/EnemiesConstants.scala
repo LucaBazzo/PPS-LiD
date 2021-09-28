@@ -1,9 +1,9 @@
 package utils
 
 import model.helpers.ImplicitConversions.RichFloat
-import model.entities.EntityType
-import model.entities.EntityType.EntityType
-import model.entities.Statistic.{Statistic, _}
+import model.entity.EntityType
+import model.entity.EntityType.EntityType
+import model.entity.Statistic.{Statistic, _}
 
 object EnemiesConstants {
   val ENEMIES_DROP_RATE = 0.3f

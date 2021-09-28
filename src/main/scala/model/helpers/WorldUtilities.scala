@@ -2,7 +2,7 @@ package model.helpers
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d._
-import model.entities.Entity
+import model.entity.Entity
 import model.helpers.ImplicitConversions.{tupleToVector2, vectorToTuple}
 
 import scala.collection.immutable.ListMap

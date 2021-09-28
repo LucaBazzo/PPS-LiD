@@ -9,16 +9,17 @@ import com.badlogic.gdx.physics.box2d._
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef
 import model._
 import ImplicitConversions._
-import model.collisions.{EntityCollisionBit, _}
-import model.entities.EntityType.EntityType
-import model.entities.Statistic.Statistic
-import model.entities.{Entity, _}
+import controller.ModelResources
+import model.entity.collision.{EntityCollisionBit, _}
+import model.entity.EntityType.EntityType
+import model.entity.Statistic.Statistic
+import model.entity.{Entity, _}
 
 trait EntitiesFactory {
 
-  def setEntitiesContainerMonitor(entitiesContainerMonitor: EntitiesContainerMonitor): Unit
+  def setEntitiesContainerMonitor(entitiesContainerMonitor: ModelResources): Unit
 
-  def getEntitiesContainerMonitor: EntitiesContainerMonitor
+  def getEntitiesContainerMonitor: ModelResources
 
   def getCollisionMonitor: CollisionMonitor
 
@@ -90,12 +91,12 @@ object EntitiesFactoryImpl extends EntitiesFactory {
   private var itemPool: ItemPool = _
   private val collisionMonitor: CollisionMonitor = new CollisionMonitorImpl
   private var pendingFunctions: List[() => Unit] = List.empty
-  private var entitiesContainer: EntitiesContainerMonitor = _
+  private var entitiesContainer: ModelResources = _
 
-  override def setEntitiesContainerMonitor(entitiesContainerMonitor: EntitiesContainerMonitor): Unit =
+  override def setEntitiesContainerMonitor(entitiesContainerMonitor: ModelResources): Unit =
     this.entitiesContainer = entitiesContainerMonitor
 
-  override def getEntitiesContainerMonitor: EntitiesContainerMonitor =
+  override def getEntitiesContainerMonitor: ModelResources =
     this.entitiesContainer
 
   override def getLevel: Level =

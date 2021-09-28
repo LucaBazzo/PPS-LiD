@@ -1,8 +1,9 @@
 import controller.GameEvent._
+import controller.ModelResources
 import model.LevelImpl
-import model.entities.State._
-import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
+import model.entity.State._
+import model.entity._
+import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 import utils.HeroConstants._
 
@@ -11,7 +12,7 @@ class TestHeroAttacks extends AnyFlatSpec{
   private var hero: Hero = _
 
   private def initialize(): Unit = {
-    val entitiesContainer: EntitiesContainerMonitor = new EntitiesContainerMonitor
+    val entitiesContainer: ModelResources = new ModelResources
     EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
     new LevelImpl(null, entitiesContainer, new ItemPoolImpl())
     hero = entitiesContainer.getHero.get

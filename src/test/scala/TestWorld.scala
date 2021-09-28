@@ -1,5 +1,5 @@
+import controller.ModelResources
 import model.LevelImpl
-import model.helpers.EntitiesContainerMonitor
 import org.scalatest.flatspec.AnyFlatSpec
 
 class TestWorld extends AnyFlatSpec{

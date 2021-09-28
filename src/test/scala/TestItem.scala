@@ -1,6 +1,7 @@
-import model.entities.Items.Items
-import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl, ItemPools}
+import controller.ModelResources
+import model.entity.Items.Items
+import model.entity._
+import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl, ItemPools}
 import model.{Level, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -12,8 +13,8 @@ class TestItem extends AnyFlatSpec {
   private val MAP_ITEMS: List[Items] = List(Items.Key)
   private val ENEMY_ITEMS: List[Items] = List(Items.PotionS, Items.PotionM, Items.PotionL, Items.PotionXL)
 
-  private def initialize(): EntitiesContainerMonitor = {
-    val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
+  private def initialize(): ModelResources = {
+    val monitor: ModelResources = new ModelResources
     EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
     //TODO null temporaneo
     val _: Level = new LevelImpl(null, monitor, new ItemPoolImpl())
@@ -21,7 +22,7 @@ class TestItem extends AnyFlatSpec {
   }
 
   "In a Level" should "spawn items from every pool" in {
-    val monitor: EntitiesContainerMonitor = this.initialize()
+    val monitor: ModelResources = this.initialize()
     Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).head.asInstanceOf[Item]
     Item(ItemPools.Boss, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
@@ -35,7 +36,7 @@ class TestItem extends AnyFlatSpec {
   }
 
   "An Item" should "disappear when picked up" in {
-    val monitor: EntitiesContainerMonitor = this.initialize()
+    val monitor: ModelResources = this.initialize()
     Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
     for(item <- monitor.getEntities(x => x.isInstanceOf[Item]))
       item.asInstanceOf[Item].collect()
@@ -46,7 +47,7 @@ class TestItem extends AnyFlatSpec {
   }
 
   "An Item" should "grant stats when picked up" in {
-    val monitor: EntitiesContainerMonitor = this.initialize()
+    val monitor: ModelResources = this.initialize()
     for (_ <- List.range(0, DEFAULT_ITEMS.length)) {
       Item(ItemPools.Default, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
       val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).head.asInstanceOf[Item]
@@ -66,7 +67,7 @@ class TestItem extends AnyFlatSpec {
   }
 
   "A Potion" should "heal the damaged Hero" in {
-    val monitor: EntitiesContainerMonitor = this.initialize()
+    val monitor: ModelResources = this.initialize()
     for (_ <- List.range(0, ENEMY_ITEMS.length)) {
       Item(ItemPools.Enemy_Drops, EntitiesFactoryImpl.getItemPool, EntitiesFactoryImpl.getEntitiesContainerMonitor)
       val item: Item = monitor.getEntities(x => x.isInstanceOf[Item]).head.asInstanceOf[Item]
@@ -80,7 +81,7 @@ class TestItem extends AnyFlatSpec {
   }
 
   "An item pool (excluding keys and enemy drops)" should "never give the same item twice unless it has exhausted all its items" in {
-    val monitor: EntitiesContainerMonitor = this.initialize()
+    val monitor: ModelResources = this.initialize()
     var itemList1: List[Items] = List()
     var itemList2: List[Items] = List()
     for(_ <- List.range(0, DEFAULT_ITEMS.length))
@@ -104,7 +105,7 @@ class TestItem extends AnyFlatSpec {
   }
 
   "An exhausted item pool" should "spawn only wrench" in {
-    val monitor: EntitiesContainerMonitor = this.initialize()
+    val monitor: ModelResources = this.initialize()
     var itemList1: List[Items] = List()
     var itemList2: List[Items] = List()
 

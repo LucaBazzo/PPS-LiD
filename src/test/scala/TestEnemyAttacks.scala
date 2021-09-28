@@ -1,6 +1,7 @@
+import controller.ModelResources
 import model.helpers.ImplicitConversions._
-import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
+import model.entity._
+import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl}
 import model.{Level, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -8,11 +9,11 @@ class TestEnemyAttacks extends AnyFlatSpec {
 
   var enemy: EnemyImpl = _
   var hero: Hero = _
-  var entitiesContainer: EntitiesContainerMonitor = _
+  var entitiesContainer: ModelResources = _
   var level: Level = _
 
   private def initialize(): Unit = {
-    entitiesContainer = new EntitiesContainerMonitor
+    entitiesContainer = new ModelResources
     EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
 
     level = new LevelImpl(null, entitiesContainer, new ItemPoolImpl())

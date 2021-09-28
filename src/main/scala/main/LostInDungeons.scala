@@ -2,7 +2,7 @@ package main
 
 import com.badlogic.gdx.Game
 import controller.{GameEvent, ObserverManager}
-import view.screens.menu.GUIFactory
+import view.screen.GUIFactory
 
 /** The class that represents the whole game, start the application from the menu.
  *

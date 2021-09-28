@@ -1,7 +1,7 @@
 package model.helpers
 
 import ImplicitConversions.RichInt
-import model.entities.Entity
+import model.entity.Entity
 import model.helpers.WorldUtilities.checkCollision
 
 object EntitiesUtilities {

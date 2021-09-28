@@ -1,6 +1,6 @@
 package utils
 
-import model.collisions.EntityCollisionBit
+import model.entity.collision.EntityCollisionBit
 
 object EnvironmentConstants {
 

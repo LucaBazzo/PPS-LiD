@@ -1,8 +1,8 @@
 package model
 
 import controller.GameEvent.GameEvent
-import controller.{GameEvent, Observer}
-import model.helpers.{EntitiesContainerMonitor, ItemPool, ItemPoolImpl}
+import controller.{GameEvent, ModelResources, Observer}
+import model.helpers.{ItemPool, ItemPoolImpl}
 import model.world.TileMapManager
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 
@@ -10,15 +10,11 @@ trait Model {
 
   def update(actions: List[GameEvent]): Unit
 
-  def getCurrentLevelNumber: Int
-
   def isGameOver: Boolean
 
   def requestStartGame(): Unit
 
   def requestNewLevel(): Unit
-
-  def loadWorld(): Unit
 
   def requestLevel(): Unit
 
@@ -26,7 +22,7 @@ trait Model {
 }
 
 class ModelImpl(private val controller: Observer,
-                private val entitiesContainer: EntitiesContainerMonitor,
+                private val entitiesContainer: ModelResources,
                 private val tileMapManager: TileMapManager) extends Model {
 
   private var level: Option[Level] = Option.empty
@@ -43,7 +39,6 @@ class ModelImpl(private val controller: Observer,
       if(actions.exists(g => g equals GameEvent.SetMap))
         this.loadWorld()
 
-      //TODO scegliere un altro metodo invece della filter
       if(this.isLevelActive)
         this.level.get.updateEntities(actions.filterNot(g => g equals GameEvent.SetMap))
     }
@@ -54,8 +49,6 @@ class ModelImpl(private val controller: Observer,
       return this.entitiesContainer.getHero.get.isDead
     false
   }
-
-  override def getCurrentLevelNumber: Int = this.levelNumber
 
   override def requestStartGame(): Unit = {
     this.levelNumber = 0
@@ -82,12 +75,6 @@ class ModelImpl(private val controller: Observer,
       this.loadWorld()
   }
 
-  override def loadWorld(): Unit = {
-    tileMapManager.createWorldEntities()
-    this.isLevelActive = true
-    this.entitiesContainer.setLevelReady(true)
-  }
-
   override def requestLevel(): Unit = {
     this.controller.handleEvent(GameEvent.StartGame)
   }
@@ -98,5 +85,11 @@ class ModelImpl(private val controller: Observer,
       this.entitiesContainer.setWorld(Option.empty)
       this.level = Option.empty
     }
+  }
+
+  private def loadWorld(): Unit = {
+    tileMapManager.createWorldEntities()
+    this.isLevelActive = true
+    this.entitiesContainer.setLevelReady(true)
   }
 }

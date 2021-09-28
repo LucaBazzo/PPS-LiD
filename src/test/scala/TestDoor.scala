@@ -1,13 +1,13 @@
-import controller.GameEvent
+import controller.{GameEvent, ModelResources}
 import model.LevelImpl
-import model.collisions.EntityCollisionBit
-import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
+import model.entity.collision.EntityCollisionBit
+import model.entity._
+import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class TestDoor extends AnyFlatSpec {
   "A door" should "open when the hero interact with it" in {
-    val monitor: EntitiesContainerMonitor = this.initialize()
+    val monitor: ModelResources = this.initialize()
     val door: ImmobileEntity = monitor.getEntities(x => x.isInstanceOf[ImmobileEntity] && x.getEntityBody.getEntityCollisionBit() == EntityCollisionBit.Door).head.asInstanceOf[ImmobileEntity]
     val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).head.asInstanceOf[Hero]
     door.collisionDetected(hero)
@@ -16,8 +16,8 @@ class TestDoor extends AnyFlatSpec {
   }
 
 
-  private def initialize(): EntitiesContainerMonitor = {
-    val monitor: EntitiesContainerMonitor = new EntitiesContainerMonitor
+  private def initialize(): ModelResources = {
+    val monitor: ModelResources = new ModelResources
     EntitiesFactoryImpl.setEntitiesContainerMonitor(monitor)
     //TODO null temporaneo
     new LevelImpl(null, monitor, new ItemPoolImpl())

@@ -2,7 +2,7 @@ package model.helpers
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
-import model.entities.Entity
+import model.entity.Entity
 import utils.ApplicationConstants.PIXELS_PER_METER
 
 object ImplicitConversions {

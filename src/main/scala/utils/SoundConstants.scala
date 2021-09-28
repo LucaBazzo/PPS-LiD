@@ -2,7 +2,7 @@ package utils
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.{Music, Sound}
-import view.screens.helpers.SoundEvent._
+import view.sound.SoundEvent._
 
 object SoundConstants {
 

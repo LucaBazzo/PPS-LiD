@@ -1,8 +1,8 @@
 package utils
 
 import model.helpers.ImplicitConversions._
-import model.entities.Statistic
-import model.entities.Statistic.Statistic
+import model.entity.Statistic
+import model.entity.Statistic.Statistic
 
 object HeroConstants {
 

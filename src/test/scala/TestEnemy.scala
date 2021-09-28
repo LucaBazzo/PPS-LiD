@@ -1,17 +1,18 @@
-import model.entities._
+import controller.ModelResources
+import model.entity._
 import model.helpers.EntitiesFactoryImpl.{getEntitiesContainerMonitor, getItemPool}
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl, ItemPools}
+import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl, ItemPools}
 import model.{Level, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class TestEnemy extends AnyFlatSpec {
 
   var enemy: LivingEntity = _
-  var entitiesContainer: EntitiesContainerMonitor = _
+  var entitiesContainer: ModelResources = _
   var level: Level = _
 
   private def initialize(): Unit = {
-    entitiesContainer = new EntitiesContainerMonitor
+    entitiesContainer = new ModelResources
     EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
 
     level = new LevelImpl(null, entitiesContainer, new ItemPoolImpl())
