@@ -10,7 +10,7 @@ import utils.Scala2P._
 
 /** Implementation of the normal Hero Movement Strategy
  *
- *  @constructor the main hero movemnt strategy
+ *  @constructor the main hero movement strategy
  *  @param entity the entity that will be moved in the world
  *  @param speed a multiplier to the running velocity of the hero
  */
@@ -19,9 +19,9 @@ case class HeroMovementStrategy(private val entity: Hero,
 
   private val engine: Term => Iterable[SolveInfo] = mkPrologEngine("""
     checkUp(X):-(X \= state(falling)),(X \= state(somersault)),(X \= state(crouching)).
-    checkDown(X):-(X = state(standing)), !.
-    checkDown(X):-(X = state(running)).
-    checkDownRelease(X):-(X = state(crouching)).
+    checkDown(state(standing)).
+    checkDown(state(running)).
+    checkDownRelease(state(crouching)).
     checkLeftAndRight(_):-true.
     checkSlide(X):-(X \= state(jumping)),(X \= state(falling)),(X \= state(somersault)).
 
@@ -54,16 +54,6 @@ case class HeroMovementStrategy(private val entity: Hero,
   }
 
   override def alterSpeed(alteration: Float): Unit = this.speed += alteration
-
-  /*private def checkCommand(command: GameEvent): Boolean = command match {
-    case GameEvent.Up => (entity isNot Falling) && (entity isNot Somersault) && (entity isNot Crouching)
-    case GameEvent.MoveRight | GameEvent.MoveLeft => true
-    case GameEvent.Down => (entity is Running) || (entity is Standing)
-    case GameEvent.DownReleased => entity is Crouching
-    case GameEvent.Slide => (entity isNot Jumping) && (entity isNot Falling) && (entity isNot Somersault)
-    case GameEvent.UpReleased => false
-    case _ => throw new UnsupportedOperationException
-  }*/
 
   private def checkCommand(command: GameEvent): Boolean = {
     val goal: String = "checkCommand(command(" + command.toString.toLowerCase() + "), " +
@@ -130,7 +120,7 @@ case class HeroMovementStrategy(private val entity: Hero,
 
   private def checkState: Boolean = entity.getState match {
     case State.Sliding | State.Attack01 | State.Attack02
-         | State.Attack03 | State.BowAttacking | State.Hurt | State.`pickingItem` => false
+         | State.Attack03 | State.BowAttacking | State.Hurt | State.PickingItem => false
     case _ => true
   }
 

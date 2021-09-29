@@ -13,7 +13,7 @@ object State extends Enumeration {
       Running, Jumping, Falling, Somersault,
       LadderClimbing, LadderDescending, LadderIdle,
       Attack01, Attack02, Attack03, BowAttacking, AirDownAttacking, AirDownAttackingEnd,
-      Dying, Hurt, pickingItem, Opening, Closed = Value
+      Dying, Hurt, PickingItem, Opening, Closed = Value
 }
 
 object EntityType extends Enumeration {
