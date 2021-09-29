@@ -1,7 +1,6 @@
 package model.entity
 
 import model.entity.EntityType.EntityType
-import model.entity.Items.Items
 import model.entity.State._
 import model.entity.Statistic.Statistic
 import model.entity.attack._
@@ -197,7 +196,7 @@ class EnemyImpl(private val entityType: EntityType,
           position=(this.getPosition._1, this.getPosition._2).MPP)
 
     if (BOSS_TYPES.contains(this.getType))
-      if (this.heroEntity.getItemsPicked.contains((i:Items) => i == Items.Bow))
+      if (this.heroEntity.isItemPicked(Items.Bow))
         Item(ItemPools.Default, getItemPool, getEntitiesContainerMonitor,
           position=(this.getPosition._1, this.getPosition._2).MPP)
       else

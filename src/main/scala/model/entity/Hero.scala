@@ -40,14 +40,13 @@ trait Hero extends LivingEntity {
    */
   def setLittle(little: Boolean): Unit
 
-  def getItemsPicked: List[Items]
   /** Called when the hero pick an important item.
    *
    *  @param itemType the type of the item picked
    */
   def itemPicked(itemType: Items): Unit
 
-  /** Check if the items specified was already picked by the hero.
+  /** Check if the item specified was already picked by the hero.
    *
    *  @return true if the item type is present
    */
@@ -211,13 +210,12 @@ class HeroImpl(private val entityType: EntityType,
     }
   }
 
-  //TODO da decidere
-  def move(command: GameEvent): Unit = {
+  private def move(command: GameEvent): Unit = {
     if(this.movementStrategy != null)
       this.movementStrategy.apply(command)
   }
 
-  def attack(command: GameEvent): Unit = {
+  private def attack(command: GameEvent): Unit = {
     if(this.attackStrategy != null)
       this.attackStrategy.apply(command)
   }
@@ -274,8 +272,6 @@ class HeroImpl(private val entityType: EntityType,
     this.setState(State.PickingItem)
     this.itemsPicked = itemType :: this.itemsPicked
   }
-
-  override def getItemsPicked: List[Items] = this.itemsPicked
 
   override def isItemPicked(item: Items): Boolean = this.itemsPicked.contains(item)
 

@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g2d.{SpriteBatch, TextureRegion}
 import com.badlogic.gdx.graphics.{Color, OrthographicCamera, Texture}
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.{Image, Label, Table}
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.badlogic.gdx.scenes.scene2d.utils.{Drawable, TextureRegionDrawable}
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import model.entity.Items
@@ -73,10 +73,10 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
   table.row()
   table.add(bossTable)
 
-  val t = table.getBackground
+  val t: Drawable = table.getBackground
 
   // Set background
-  val backgroundTexture: Texture  = GUIFactory.createTexture("assets/backgrounds/background_loading.png")
+  val backgroundTexture: Texture  = GUIFactory.createTexture(LOADING_SCREEN_PATH)
   table.background(new TextureRegionDrawable(new TextureRegion(backgroundTexture)))
 
   //adds the table to the stage
@@ -193,8 +193,12 @@ class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable 
     this.levelLabel.setText(levelText)
   }
 
-  def loadingFinished(): Unit ={
-    table.background(t)
+  def loadingFinished(): Unit = {
+    val executorService: ExecutorService = Executors.newSingleThreadExecutor()
+    executorService.submit(() => {
+      Thread.sleep(500)
+      table.background(t)
+    })
   }
 
   private def addItemToTable(path: String): Unit = {
