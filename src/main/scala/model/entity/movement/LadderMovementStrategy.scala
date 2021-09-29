@@ -1,10 +1,11 @@
 package model.entity.movement
 
+import alice.tuprolog.{SolveInfo, Term}
 import controller.GameEvent
 import controller.GameEvent.GameEvent
-import model.entity.State._
 import model.entity.{Hero, State}
 import utils.HeroConstants.LADDER_CLIMB_VELOCITY
+import utils.Scala2P._
 
 /** Implementation of the Hero Movement Strategy when the hero is climbing a ladder.
  *
@@ -14,6 +15,18 @@ import utils.HeroConstants.LADDER_CLIMB_VELOCITY
  */
 case class LadderMovementStrategy(private val entity: Hero,
                                   private var speed: Float) extends MovementStrategy {
+
+  private val engine: Term => Iterable[SolveInfo] = mkPrologEngine("""
+    checkUpAndDown(_).
+    checkUpReleased(state(ladderclimbing)).
+    checkDownReleased(state(ladderdescending)).
+
+    checkCommand(C, S) :-
+      (C=command(up) -> call(checkUpAndDown(_)));
+      (C=command(down) -> call(checkUpAndDown(_)));
+      (C=command(upreleased) -> call(checkUpReleased(S)));
+      (C=command(downreleased) -> call(checkDownReleased(S))).
+  """)
 
   override def apply(command: GameEvent): Unit = {
     if(checkState && checkCommand(command)) {
@@ -39,12 +52,11 @@ case class LadderMovementStrategy(private val entity: Hero,
     case _ => true
   }
 
-  private def checkCommand(command: GameEvent): Boolean = command match {
-    case GameEvent.Up | GameEvent.Down => true
-    case GameEvent.UpReleased => this.entity is LadderClimbing
-    case GameEvent.DownReleased => this.entity is LadderDescending
-    case GameEvent.Slide | GameEvent.MoveLeft | GameEvent.MoveRight => false
-    case _ => throw new UnsupportedOperationException
+  private def checkCommand(command: GameEvent): Boolean = {
+    val goal: String = "checkCommand(command(" + command.toString.toLowerCase() + "), " +
+      "state(" + entity.getState.toString.toLowerCase() + "))"
+
+    solveWithSuccess(engine, goal)
   }
 
   private def climb(): Unit = {
