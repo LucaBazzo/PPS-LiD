@@ -57,6 +57,7 @@ object ApplicationConstants {
   val GAME_OVER_MENU_NO_TEXT = "No"
 
   //Game Screen HUD constants
+  val LOADING_SCREEN_PATH: String = "assets/backgrounds/background_loading.png"
   val FONT_PATH_LABEL: String = "assets/fonts/lunch_doubly_so.fnt"
 
   val HEALTH_BAR_PATH: String = "assets/textures/health_bar.png"

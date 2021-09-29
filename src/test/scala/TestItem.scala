@@ -62,7 +62,7 @@ class TestItem extends AnyFlatSpec {
       item.collisionDetected(hero)
       if (effect._1.nonEmpty)
         assert(hero.getStatistics(effect._1.get.head._1) == preStat + incStat)
-      assert(hero.getItemsPicked.head == item.getName)
+      assert(hero.isItemPicked(item.getName))
     }
   }
 

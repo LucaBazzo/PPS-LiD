@@ -12,6 +12,8 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 libraryDependencies += "junit" % "junit" % "4.12" % "test"
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
 
+libraryDependencies += "it.unibo.alice.tuprolog" % "tuprolog" % "3.3.0"
+
 // testing execution policy
 parallelExecution in Test := false
 

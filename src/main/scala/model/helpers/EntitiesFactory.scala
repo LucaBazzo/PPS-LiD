@@ -113,17 +113,14 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     this.itemPool = pool
   }
 
-  override def createPolygonalShape(size: (Float, Float), rounder:Boolean = false): Shape = {
+  override def createPolygonalShape(size: (Float, Float), rounder: Boolean = false): Shape = {
     val shape: PolygonShape = new PolygonShape()
     if (!rounder) shape.setAsBox(size._1, size._2)
-    else {
-      shape.set(Array[Vector2](new Vector2(size._1, size._2),
-        new Vector2(size._1, -size._2+1f.PPM),
-        new Vector2(size._1-1f.PPM, -size._2),
-        new Vector2(-size._1+1f.PPM, -size._2),
-        new Vector2(-size._1, -size._2+1f.PPM),
-        new Vector2(-size._1, size._2)))
-    }
+    else
+      shape.set(Array[Vector2](
+        (size._1, size._2), (size._1, -size._2+1f.PPM),
+        (size._1-1f.PPM, -size._2), (-size._1+1f.PPM, -size._2),
+        (-size._1, -size._2+1f.PPM), (-size._1, size._2)))
     shape
   }
 

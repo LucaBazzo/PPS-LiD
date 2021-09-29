@@ -180,7 +180,7 @@ class EnemyImpl(private val entityType: EntityType,
           position=(this.getPosition._1, this.getPosition._2).MPP)
 
     if (ENEMY_BOSS_TYPES.contains(this.getType))
-      if (this.heroEntity.getItemsPicked.contains((i:Items) => i == Items.Bow))
+      if (this.heroEntity.isItemPicked(Items.Bow))
         Item(ItemPools.Default, getItemPool, getEntitiesContainerMonitor,
           position=(this.getPosition._1, this.getPosition._2).MPP)
       else
