@@ -233,11 +233,11 @@ trait Entity {
   }
 }
 
-/**
+/** Implementation of the Entity trait.
  *
- * @param entityType
- * @param entityBody
- * @param size
+ * @param entityType the type associated with the entity.
+ * @param entityBody the libgdx world body
+ * @param size the dimensions of the body
  */
 abstract class EntityImpl(private val entityType: EntityType,
                           private var entityBody: EntityBody,

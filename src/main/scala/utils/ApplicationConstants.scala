@@ -10,8 +10,8 @@ object ApplicationConstants {
 
   val ICON_PATH = "assets/sprites/lid_icon.png"
 
-  val WIDTH_SCREEN: Int = 400
-  val HEIGHT_SCREEN: Int = 208
+  val WIDTH_SCREEN: Float = 400
+  val HEIGHT_SCREEN: Float = 208
 
   val PIXELS_PER_METER: Float = 50
 

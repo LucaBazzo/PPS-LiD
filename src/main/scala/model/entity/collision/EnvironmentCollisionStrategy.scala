@@ -50,7 +50,7 @@ case class DoorCollisionStrategy(private val entitySetter: EntitiesSetter,
       this.entitySetter.addMessage("Press Space to open the door")
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new DoorInteraction(h, this.door,
         doorSensorLeft, doorSensorRight))))
-    case m: MobileEntity if m.getEntityBody.getEntityCollisionBit() == EntityCollisionBit.Sword =>
+    case m: MobileEntity if m.getEntityBody.getEntityCollisionBit == EntityCollisionBit.Sword =>
       println("Hero destroyed door")
       this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
       this.doorSensorLeft.changeCollisions(EntityCollisionBit.OpenedDoor)

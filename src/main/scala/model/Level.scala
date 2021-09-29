@@ -25,7 +25,6 @@ class LevelImpl(private val model: Model,
                 private val itemPool: ItemPool) extends Level {
 
   private val world: World = new World(GRAVITY_FORCE, true)
-  WorldUtilities.setWorld(world)
 
   private val entitiesFactory: EntitiesFactory = EntitiesFactoryImpl
   entitiesFactory.setLevel(this, itemPool)

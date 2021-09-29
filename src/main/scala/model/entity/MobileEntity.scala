@@ -194,7 +194,8 @@ object MobileEntity {
     circularMobileEntity.setMovementStrategy(
       CircularMovementStrategy(circularMobileEntity, angularVelocity))
     circularMobileEntity.setCollisionStrategy(
-      AttackCollisionStrategy((e:Entity) => e.isInstanceOf[EnemyImpl], sourceEntity.getStatistics))
+      AttackCollisionStrategy((e:Entity) => e.isInstanceOf[EnemyImpl],
+        sourceEntity.getStatistic(Statistic.Strength).get))
 
     addEntity(circularMobileEntity)
     circularMobileEntity
@@ -216,7 +217,8 @@ object MobileEntity {
     val swordBody: EntityBody = createSword(size, distance, sourceEntity.getPosition, sourceEntity.getEntityBody)
 
     val airSword: MobileEntity = new AirSwordMobileEntity(EntityType.Mobile, swordBody, size.PPM)
-    airSword.setCollisionStrategy(AttackCollisionStrategy((e:Entity) => e.isInstanceOf[Enemy], sourceEntity.getStatistics))
+    airSword.setCollisionStrategy(AttackCollisionStrategy((e:Entity) => e.isInstanceOf[Enemy],
+      sourceEntity.getStatistic(Statistic.Strength).get))
 
     addEntity(airSword)
     airSword
@@ -233,7 +235,8 @@ object MobileEntity {
       EntityCollisionBit.Arrow, ARROW_COLLISIONS , gravityScale = 0)
     arrow.setFacing(entity.isFacingRight)
     arrow.setMovementStrategy(ArrowMovementStrategy(arrow, entity.getStatistic(Statistic.MovementSpeed).get))
-    arrow.setCollisionStrategy(ArrowCollisionStrategy(arrow, (e:Entity) => e.isInstanceOf[EnemyImpl] , entity.getStatistics))
+    arrow.setCollisionStrategy(ArrowCollisionStrategy(arrow, (e:Entity) => e.isInstanceOf[EnemyImpl] ,
+      entity.getStatistic(Statistic.Strength).get))
     arrow
   }
 
@@ -301,7 +304,7 @@ object MobileEntity {
     attack.setFacing(isBodyOnTheRight(sourceEntity, targetEntity))
 
     attack.setCollisionStrategy(BulletCollisionStrategy(attack, (e:Entity) => e.isInstanceOf[Hero],
-      sourceEntity.getStatistics))
+      sourceEntity.getStatistic(Statistic.Strength).get))
   }
 
   def createFireballAttack(sourceEntity: LivingEntity,
@@ -351,7 +354,8 @@ object MobileEntity {
 
     createJoint(createPivotPoint(sourceEntity.getPosition).getBody, attack.getBody)
 
-    attack.setCollisionStrategy(AttackCollisionStrategy(e => e.isInstanceOf[Hero], sourceEntity.getStatistics))
+    attack.setCollisionStrategy(AttackCollisionStrategy(e => e.isInstanceOf[Hero],
+      sourceEntity.getStatistic(Statistic.Strength).get))
 
     addEntity(attack)
     attack

@@ -8,7 +8,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 class TestDoor extends AnyFlatSpec {
   "A door" should "open when the hero interact with it" in {
     val monitor: ModelResources = this.initialize()
-    val door: ImmobileEntity = monitor.getEntities(x => x.isInstanceOf[ImmobileEntity] && x.getEntityBody.getEntityCollisionBit() == EntityCollisionBit.Door).head.asInstanceOf[ImmobileEntity]
+    val door: ImmobileEntity = monitor.getEntities(x => x.isInstanceOf[ImmobileEntity] && x.getEntityBody.getEntityCollisionBit == EntityCollisionBit.Door).head.asInstanceOf[ImmobileEntity]
     val hero: Hero = monitor.getEntities(x => x.isInstanceOf[Hero]).head.asInstanceOf[Hero]
     door.collisionDetected(hero)
     hero.notifyCommand(GameEvent.Interaction)

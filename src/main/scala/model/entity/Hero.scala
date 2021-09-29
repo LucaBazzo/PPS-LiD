@@ -11,11 +11,12 @@ import model.entity.Items.Items
 import model.entity.State._
 import model.entity.Statistic._
 import model.helpers.EntitiesFactoryImpl.{createPolygonalShape, defineEntityBody}
-import model.helpers.{EntitiesFactoryImpl, WorldUtilities}
+import model.helpers.EntitiesFactoryImpl
 import model.entity.movement.{DoNothingMovementStrategy, HeroMovementStrategy}
 import model.{EntityBody, HeroInteraction}
 import utils.CollisionConstants.{HERO_COLLISIONS, HERO_FEET_COLLISIONS}
 import utils.HeroConstants._
+import model.helpers.ImplicitConversions.RichWorld
 
 /** Represents the entity that will be moved by the player, it can move or attack
  *  based on the command received, change its size and interact with the environment.
@@ -106,8 +107,9 @@ trait Hero extends LivingEntity {
    *  @return true if it touching a wall
    */
   def isTouchingWallOnSide(rightSide: Boolean = true): Boolean = {
-    WorldUtilities.checkSideCollision(rightSide, this,
-      EntityCollisionBit.Immobile, EntityCollisionBit.Door)
+
+    EntitiesFactoryImpl.getEntitiesContainerMonitor.getWorld.get
+      .checkSideCollision(rightSide, this, EntityCollisionBit.Immobile, EntityCollisionBit.Door)
   }
 
   /** Check if the hero health is below 0

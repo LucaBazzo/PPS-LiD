@@ -58,7 +58,7 @@ class TestHero extends AnyFlatSpec{
 
   "A hero" should "have statistics that can be altered" in {
     initialize()
-    var statistics: Map[Statistic, Float] = hero.getStatistics
+    val statistics: Map[Statistic, Float] = hero.getStatistics
 
     assert(hero.getStatistics.nonEmpty)
 

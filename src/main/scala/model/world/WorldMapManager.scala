@@ -11,8 +11,8 @@ import model.helpers.ImplicitConversions._
 import model.entity._
 import model.helpers.{EntitiesFactoryImpl, ItemPools}
 
-case class TiledMapInfo(name: String, offset: (Int, Int))
-case class RichTiledMapInfo(name: String, offset: (Int, Int), tiledMap: TiledMap)
+case class TiledMapInfo(name: String, offset: (Float, Float))
+case class RichTiledMapInfo(name: String, offset: (Float, Float), tiledMap: TiledMap)
 
 trait WorldMapUtilities {
 

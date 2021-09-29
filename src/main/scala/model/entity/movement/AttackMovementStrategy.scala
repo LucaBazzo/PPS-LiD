@@ -1,8 +1,9 @@
 package model.entity.movement
 
+import com.badlogic.gdx.physics.box2d.World
 import model.entity.{Entity, MobileEntity}
-import model.helpers.ImplicitConversions.{RichFloat, tupleToVector2, vectorToTuple}
-import model.helpers.WorldUtilities.computeDirectionToTarget
+import model.helpers.EntitiesFactoryImpl
+import model.helpers.ImplicitConversions.{RichFloat, RichWorld, tupleToVector2, vectorToTuple}
 import utils.EnemiesConstants.WIZARD_ATTACK3_HOMING_DURATION
 import utils.HeroConstants.ARROW_VELOCITY
 
@@ -21,8 +22,9 @@ case class FireBallMovementStrategy(private val sourceEntity: Entity,
                                     private val originPoint: (Float, Float),
                                     private val targetPoint: (Float, Float),
                                     private val speed: Float) extends MovementStrategy {
+  val world: World = EntitiesFactoryImpl.getEntitiesContainerMonitor.getWorld.get
   this.sourceEntity.getBody.applyLinearImpulse(
-    computeDirectionToTarget(this.sourceEntity.getBody.getWorldCenter, this.targetPoint,
+    world.computeDirectionToTarget(this.sourceEntity.getBody.getWorldCenter, this.targetPoint,
       speed), this.sourceEntity.getBody.getWorldCenter, true)
   this.sourceEntity.getBody.setGravityScale(0)
 
@@ -33,6 +35,8 @@ case class EnergyBallMovementStrategy(private val sourceEntity: MobileEntity,
                                       private val originPoint:(Float, Float),
                                       private val targetEntity: Entity,
                                       private val speed: Float) extends MovementStrategy {
+
+  val world: World = EntitiesFactoryImpl.getEntitiesContainerMonitor.getWorld.get
   this.changeBulletTrajectory()
   this.sourceEntity.getBody.setGravityScale(0)
 
@@ -45,7 +49,7 @@ case class EnergyBallMovementStrategy(private val sourceEntity: MobileEntity,
 
   private def changeBulletTrajectory(): Unit = {
     this.sourceEntity.getBody.setLinearVelocity(
-      computeDirectionToTarget(this.originPoint, this.targetEntity.getPosition, speed))
+      world.computeDirectionToTarget(this.originPoint, this.targetEntity.getPosition, speed))
   }
 
   override def stopMovement(): Unit = this.sourceEntity.getBody.setLinearVelocity(0,0)

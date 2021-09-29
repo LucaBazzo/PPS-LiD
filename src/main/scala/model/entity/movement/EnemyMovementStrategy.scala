@@ -1,11 +1,21 @@
 package model.entity.movement
 
+import com.badlogic.gdx.physics.box2d.World
 import model.entity.behaviour.{MovementStateManager, StateManagerImpl}
 import model.entity.{Entity, MobileEntity, State, Statistic}
+import model.helpers.EntitiesFactoryImpl
 import model.helpers.GeometricUtilities.isBodyOnTheRight
 import model.helpers.ImplicitConversions.{entityToBody, tupleToVector2}
-import model.helpers.WorldUtilities.computeDirectionToTarget
+import model.helpers.ImplicitConversions.RichWorld
 
+/** Particular take of a MovementStrategy. This abstract class mixes the
+ * functionality provided by the MovementStrategy interface with a StateManager
+ * to define complex and deep movement strategies derived from other simpler
+ * strategies.
+ *
+ * A stateful movement strategy may define inner MovementStateManager objects
+ * which recursively may use more simple movement strategies.
+ */
 abstract class StatefulMovementStrategy extends MovementStrategy {
   protected val stateManager: MovementStateManager = new StateManagerImpl() with MovementStateManager
 
@@ -60,10 +70,12 @@ case class FaceTarget(private val sourceEntity: MobileEntity,
 case class FlyingMovementStrategy(private val sourceEntity:MobileEntity,
                                   private val targetEntity:Entity) extends MovementStrategy {
 
+  val world: World = EntitiesFactoryImpl.getEntitiesContainerMonitor.getWorld.get
+
   this.sourceEntity.setGravityScale(0)
 
   override def apply(): Unit = {
-    val direction = computeDirectionToTarget(this.sourceEntity.getPosition, this.targetEntity.getPosition,
+    val direction = world.computeDirectionToTarget(this.sourceEntity.getPosition, this.targetEntity.getPosition,
       sourceEntity.getStatistic(Statistic.MovementSpeed).get)
 
     this.sourceEntity.setFacing(direction.x > 0)

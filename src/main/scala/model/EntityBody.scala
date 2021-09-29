@@ -17,10 +17,10 @@ trait EntityBody {
                  angle: Float = 0, gravityScale: Float = 1.0f): EntityBody
 
   def setEntityCollisionBit(entityCollisionBit: Short): EntityBody
-  def getEntityCollisionBit(): Short
+  def getEntityCollisionBit: Short
   def setShape(shape: Shape): EntityBody
   def setCollisions(entitiesTypes: Short): EntityBody
-  def getEntityCollisions(): Short
+  def getEntityCollisions: Short
   def setFixtureValues(density: Float = 0, friction: Float = 2, restitution: Float = 0, isSensor: Boolean = false): EntityBody
   def createFixture(): Unit
 
@@ -43,9 +43,9 @@ class EntityBodyImpl extends EntityBody {
     this
   }
 
-  override def getEntityCollisionBit(): Short = this.fixtureDef.filter.categoryBits
+  override def getEntityCollisionBit: Short = this.fixtureDef.filter.categoryBits
 
-  override def getEntityCollisions(): Short = this.fixtureDef.filter.maskBits
+  override def getEntityCollisions: Short = this.fixtureDef.filter.maskBits
 
   override def setCollisions(entitiesTypes: Short): EntityBody = {
     this.fixtureDef.filter.maskBits = entitiesTypes

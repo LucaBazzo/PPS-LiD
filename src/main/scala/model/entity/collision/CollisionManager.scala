@@ -4,6 +4,14 @@ import com.badlogic.gdx.physics.box2d._
 import controller.EntitiesGetter
 import model.entity.Entity
 
+/** Implementation of the ContactListener libgdx functionality. Here contact
+ * events are received and propagated to both the entities which are touching
+ * each other.
+ *
+ * @see [[com.badlogic.gdx.physics.box2d.ContactListener]]
+ *
+ * @param entitiesGetter
+ */
 class CollisionManager(private val entitiesGetter: EntitiesGetter) extends ContactListener {
 
   override def beginContact(contact: Contact): Unit = {

@@ -10,22 +10,25 @@ import model.entity.collision.{CollisionStrategy, DoNothingCollisionStrategy, En
 import model.entity.movement.{FaceTarget, MovementStrategy}
 import model.helpers.EntitiesFactoryImpl._
 import model.helpers.ImplicitConversions._
-import model.helpers.ItemPools
+import model.helpers.{EntitiesFactoryImpl, ItemPools}
 import model.{EntityBody, Score}
 import utils.ApplicationConstants.RANDOM
 import utils.EnemiesConstants
 import utils.EnemiesConstants._
 import utils.HeroConstants.SHORT_WAIT_TIME
 
-/**
- *
+/** An enemy entity is cenceptually derived from a LivingEntity.
+ * An enemy defines a more refined state management construct to handle both
+ * complex behaviours and agile implementation and testing.
  */
 trait Enemy {
-  /**
+  /** Defines the EnemyStateManager which contains the logic behind the
+   * management of an enemy state (a triple of collision, movement and attack
+   * strategy).
    *
-   * @param enemyBehaviour
+   * @param stateManager StateManager instance
    */
-  def setBehaviour(enemyBehaviour: EnemyStateManager): Unit
+  def setBehaviour(stateManager: EnemyStateManager): Unit
 }
 
 object SkeletonEnemy {
@@ -140,20 +143,17 @@ object WizardEnemy {
  * @param size the size of the entity
  * @param stats the statistics of this entity
  *
- * @param score
- * @param heroEntity
+ * @param score the score received when the enemy entity dies
  */
 class EnemyImpl(private val entityType: EntityType,
                 private var entityBody: EntityBody,
                 private val size: (Float, Float),
                 private val stats: Map[Statistic, Float],
-                private val score: Int = 100,
-                private val heroEntity: Hero) extends LivingEntityImpl(entityType, entityBody, size, stats)
+                private val score: Int = 100) extends LivingEntityImpl(entityType, entityBody, size, stats)
           with LivingEntity with Score with Enemy {
 
   var behaviours:Option[EnemyStateManager] = None
   var timer: Long = 0
-
 
   override def getScore: Int = this.score
 
@@ -175,7 +175,7 @@ class EnemyImpl(private val entityType: EntityType,
     }
   }
 
-  override def setBehaviour(behaviours: EnemyStateManager): Unit = this.behaviours = Option(behaviours)
+  override def setBehaviour(stateManager: EnemyStateManager): Unit = this.behaviours = Option(stateManager)
 
   override def sufferDamage(damage: Float): Unit = {
     super.sufferDamage(damage)
@@ -195,13 +195,15 @@ class EnemyImpl(private val entityType: EntityType,
         Item(ItemPools.Enemy_Drops, getItemPool, getEntitiesContainerMonitor,
           position=(this.getPosition._1, this.getPosition._2).MPP)
 
-    if (BOSS_TYPES.contains(this.getType))
-      if (this.heroEntity.isItemPicked(Items.Bow))
+    if (BOSS_TYPES.contains(this.getType)) {
+      val hero:Hero = EntitiesFactoryImpl.getEntitiesContainerMonitor.getHero.get
+      if (hero.isItemPicked(Items.Bow))
         Item(ItemPools.Default, getItemPool, getEntitiesContainerMonitor,
           position=(this.getPosition._1, this.getPosition._2).MPP)
       else
         Item(ItemPools.Boss, getItemPool, getEntitiesContainerMonitor,
           position=(this.getPosition._1, this.getPosition._2).MPP)
+    }
   }
 }
 
