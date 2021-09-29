@@ -17,7 +17,7 @@ object EnemiesConstants {
   val ENEMIES_DYING_STATE_DURATION:Long = 1000
 
   val ENEMY_TYPES: List[EntityType] = List(EntityType.EnemySkeleton, EntityType.EnemyWorm, EntityType.EnemySlime, EntityType.EnemyBat)
-  val ENEMY_BOSS_TYPES: List[EntityType] = List(EntityType.EnemyBossWizard)
+  val BOSS_TYPES: List[EntityType] = List(EntityType.EnemyBossWizard)
 
   val SKELETON_STATS: Map[Statistic, Float] = Map(
     Strength -> 60f,

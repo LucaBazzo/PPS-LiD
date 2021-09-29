@@ -71,12 +71,6 @@ class TestHero extends AnyFlatSpec{
 
     assertResult(statistics(Health) + 100)(hero.getStatistic(Health).get)
     assertResult(statistics(Strength) - 50)(hero.getStatistic(Strength).get)
-
-    assertResult(Option.empty)(hero.getStatistic(VisionAngle))
-
-    statistics = hero.getStatistics
-    hero.alterStatistics(Statistic.VisionAngle, 100)
-    assert(statistics equals hero.getStatistics)
   }
 
   "A hero" should "suffer damage when is not sliding" in {

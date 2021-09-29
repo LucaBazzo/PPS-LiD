@@ -140,8 +140,6 @@ case class LavaCollisionStrategy() extends CollisionStrategy {
     if (hero.isDefined && System.currentTimeMillis() - this.timer > LAVA_DAMAGE_TICK_RATE) {
       hero.get.sufferDamage(LAVA_DAMAGE_PER_TICK)
       println("Taken damage from lava")
-      /*if(this.hero.get.getLife <= 0)
-        collisMonitor.playerOutOfLava()*/
       this.timer = now
     }
   }

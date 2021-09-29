@@ -5,41 +5,255 @@ import model.Score
 import model.entity.Items.Items
 import model.entity.Statistic.Statistic
 import model.entity._
-import utils.EnemiesConstants.ENEMY_BOSS_TYPES
+import utils.EnemiesConstants.BOSS_TYPES
 import utils.HeroConstants.HERO_STATISTICS_DEFAULT
 
 import java.util.concurrent.{ExecutorService, Executors}
 
+/** This trait represents all the data accessible from the view package. If
+ * combine with the trait EntitiesSetter, the derived class could be used to
+ * hold the game state for both the view (by providing only getter
+ * functionalities) and the model.
+ *
+ * @see [[controller.EntitiesSetter]]
+ */
 trait EntitiesGetter {
 
-  def getEntities: List[Entity]
+  /** Retrieve specific game entities. Each entity contains the
+   * LibGDX body (which defines where it is located and what the entity is
+   * represented by), the entity type, the current state and the behaviour
+   * adopted when colliding with other entities.
+   *
+   * @see [[model.entity.Entity]]
+   *
+   * @param predicate the predicate used to filter out unwanted entities
+   * @return a list of game entities
+   */
   def getEntities(predicate: Entity => Boolean): List[Entity]
-  def getHero: Option[Hero]
-  def getBoss: Option[LivingEntity]
-  def getWorld: Option[World]
-  def getScore: Int
-  def getMessage: Option[String]
-  def hasHeroPickedUpItem: Option[Items]
+
+  /** Retrieve real time hero statistics. Those statistics defines how
+   * "strong" the hero is. Generally higher values implies an easier
+   * adventure.
+   *
+   * @see [[model.entity.Statistic]]
+   *
+   * @return a map of statistics with matching values
+   */
   def getHeroStatistics: Map[Statistic, Float]
+
+  /** Retrieve the LibGDX world instance. The World object contains useful
+   * functionalities for geometric bodies exploration and gameplay
+   * configuration.
+   *
+   * @see [[com.badlogic.gdx.physics.box2d.World]]
+   *
+   * @return a LibGDX world instance
+   */
+  def getWorld: Option[World]
+
+  /** Retrieve the game real time score. The score is influenced by killed
+   * enemies and picked up items.
+   *
+   * @return an integer positive value
+   */
+  def getScore: Int
+
+  /** Retrieve gameplay messages to be shown when the hero entity interacts
+   * with the map environment (picking up items or checking a door).
+   *
+   * @return an optional string
+   */
+  def getMessage: Option[String]
+
+  /** Holds the latest item picked by the hero. The optional Item contains
+   * the specific strategy to apply to the hero statistics. After a non empty
+   * call of this method, the reference to the latest picked item is re-setted.
+   *
+   * @see [[model.entity.Items]]
+   *
+   * @return an optional Item object
+   */
+  def hasHeroPickedUpItem: Option[Items]
+
+  /** Retrieve the current level number. The level number increases as the hero
+   * advances in the exploration of the game by entering a portal to the next
+   * level.
+   *
+   * @return a positive integer number
+   */
   def getLevelNumber: Int
+
+  /** Flag representing the state of the level creation. During this state the
+   * game world is being initialized and no entities can be safely interacted
+   * with.
+   *
+   * @return a boolean value. If true, the game is ready to be displayed.
+   */
   def isLevelReady: Boolean
 
-  def getEntity(predicate: Entity => Boolean): Entity
+  /** Access and retrieve all game entities. Each entity contains the
+   * LibGDX body (which defines where it is located and what the entity is
+   * represented by), the entity type, the current state and the behaviour
+   * adopted when colliding with other entities.
+   *
+   * @see [[controller.EntitiesGetter#getEntities(scala.Function1) ]]
+   * @see [[model.entity.Entity]]
+   *
+   * @return a list of game entities
+   */
+  def getEntities(): List[Entity] = getEntities(_ => true)
+
+  /** Retrieve the first entity found in the level that matches a given
+   * predicate. This entity contains the LibGDX body (which defines where it is
+   * located and what the entity is represented by), the entity type, the
+   * current state and the behaviour adopted when colliding with other entities.
+   *
+   * This functionality is a shorthand of another functionality provided by
+   * this trait.
+   *
+   * @see [[controller.EntitiesGetter#getEntities(scala.Function1) ]]
+   * @see [[model.entity.Entity]]
+   *
+   * @param predicate the predicate used to filter out unwanted entities
+   * @return an optional Entity if found
+   */
+  def getEntity(predicate: Entity => Boolean): Option[Entity] = (getEntities(predicate) match {
+    case e if e.nonEmpty => Option(e.head)
+    case _ => None
+  })
+
+  /** Retrieve the Hero entity. The Hero is a particular kind of entity able
+   * to move, attack, pick up items, interact with the game world and suffer
+   * damage. This entity is governed directly by the player by executing
+   * provided commands.
+   *
+   * This functionality is a shorthand of another functionality provided by
+   * this trait.
+   *
+   * @see [[controller.EntitiesGetter#getEntities(scala.Function1) ]]
+   * @see [[model.entity.Hero]]
+   *
+   * @return an optional Hero entity if found
+   */
+  def getHero: Option[Hero] = (getEntity(e => e.getType equals EntityType.Hero) match {
+    case e if e.nonEmpty => Option(e.get.asInstanceOf[Hero])
+    case _ => None
+  })
+
+  /** Retrieve a boss type enemy. This enemy is a particular kind of entity
+   * able to move, attack and suffer damage. This entity is directly governed
+   * by the game itself and it's sole purpose is to attack and kill the hero.
+   *
+   * This functionality is a shorthand of another functionality provided by
+   * this trait.
+   *
+   * @see [[model.entity.LivingEntity]]
+   *
+   * @return an optional LivingEntity entity if found
+   */
+  def getBoss: Option[LivingEntity] = (getEntity(e => BOSS_TYPES contains e.getType) match {
+    case e if e.nonEmpty => Option(e.get.asInstanceOf[LivingEntity])
+    case _ => None
+  })
 }
 
 trait EntitiesSetter {
-
+  /** Set the current level entities. Each entity contains the
+   * LibGDX body (which defines where it is located and what the entity is
+   * represented by), the entity type, the current state and the behaviour
+   * adopted when colliding with other entities.
+   *
+   * This functionality is also useful whenever the level must be re-setted, by
+   * providing an empty list.
+   +
+   * @see [[model.entity.Entity]]
+   *
+   * @param entities a list of game entities.
+   */
   def setEntities(entities: List[Entity]): Unit
+
+  /** Provide the LibGDX world instance. The World object contains useful
+   * functionalities for geometric bodies exploration and gameplay
+   * configuration.
+   *
+   * This functionality is also useful whenever the level must be re-setted, by
+   * providing an empty list.
+   *
+   * @param world a com.badlogic.gdx.physics.box2d.World instance
+   */
   def setWorld(world: Option[World]): Unit
+
+  /** Reset the game score, bringing it to 0. This method should be called when
+   * a new game has to be started and a previous one is terminated.
+   */
   def resetScore(): Unit
+
+  /** Increase the game score when the hero slays an enemy or when he picks up
+   * an item.
+   *
+   * @param score an integer positive value
+   */
   def addScore(score: Int): Unit
-  def addMessage(mess: String): Unit
+
+  /** Set a new message to be displayed. This message is defined when the hero
+   * interacts with items or the environment.
+   *
+   * @param message a string
+   */
+  def addMessage(message: String): Unit
+
+  /** Set the latest item picked by the hero. It contains the specific strategy
+   * to apply to the hero statistics.
+   *
+   * @see [[model.entity.Items]]
+   *
+   * @param item an optional Item object
+   */
   def heroJustPickedUpItem(item: Items): Unit
+
+  /** Set real time hero statistics. Those statistics defines how "strong" the
+   * hero is. Generally higher values implies an easier adventure.
+   *
+   * @see [[model.entity.Statistic]]
+   *
+   * @param statistics a map of statistics with matching values
+   */
   def setHeroStatistics(statistics: Map[Statistic, Float]): Unit
+
+  /** Set the current level number. The level number increases as the hero
+   * advances in the exploration of the game by entering a portal to the next
+   * level.
+   *
+   * @param number a positive integer number
+   */
   def setLevelNumber(number: Int): Unit
+
+  /** Flag representing the state of the level creation. During this state the
+   * game world is being initialized and no entities can be safely interacted
+   * with.
+   *
+   * @param ready a boolean value. If true, the game is ready to be displayed.
+   */
   def setLevelReady(ready: Boolean): Unit
 
+  /** Add a newly created entity to the entities pool. After this method
+   * execution, the entity will be updated. This method should be
+   * called only when an entity (and it's Body) is created.
+   *
+   * @see [[model.entity.Entity]]
+   *
+   * @param entity the entity to be added
+   */
   def addEntity(entity: Entity): Unit
+
+  /** Remove an entity from the entities pool. After this method
+   * execution, the entity will not be updated anymore. This method should be
+   * called only when an entity (and it's Body) must be destroyed.
+   *
+   * @see [[model.entity.Entity]]
+
+   * @param entity the entity to be added
+   */
   def removeEntity(entity: Entity): Unit
 }
 
@@ -55,8 +269,6 @@ class ModelResources extends EntitiesGetter with EntitiesSetter {
   private var heroStatistics: Map[Statistic, Float] = HERO_STATISTICS_DEFAULT
 
   private var levelReady: Boolean = false
-
-  override def getEntities: List[Entity] = this.entities
 
   override def getEntities(predicate: Entity => Boolean): List[Entity] = synchronized {
     this.entities.filter(predicate)
@@ -95,19 +307,7 @@ class ModelResources extends EntitiesGetter with EntitiesSetter {
     res
   }
 
-  override def addMessage(mess: String): Unit = this.messages = mess :: this.messages
-
-  override def getHero: Option[Hero] = {
-    if(this.entities.exists(e => e.isInstanceOf[Hero]))
-      return Option.apply(this.entities.filter(e => e.isInstanceOf[Hero]).head.asInstanceOf[Hero])
-    Option.empty
-  }
-
-  override def getBoss: Option[LivingEntity] = {
-    if(this.entities.exists(e => ENEMY_BOSS_TYPES.contains(e.getType)))
-      return Option.apply(this.entities.filter(e => ENEMY_BOSS_TYPES.contains(e.getType)).head.asInstanceOf[LivingEntity])
-    Option.empty
-  }
+  override def addMessage(message: String): Unit = this.messages = message :: this.messages
 
   override def getHeroStatistics: Map[Statistic, Float] = this.heroStatistics
 
@@ -139,8 +339,8 @@ class ModelResources extends EntitiesGetter with EntitiesSetter {
       this.addScore(entity.asInstanceOf[Score].getScore)
     }
 
-    if (ENEMY_BOSS_TYPES.contains(entity.getType)) {
-      val portal: Entity = this.getEntity(x => x.getType == EntityType.Portal)
+    if (BOSS_TYPES.contains(entity.getType)) {
+      val portal: Entity = this.getEntity(x => x.getType == EntityType.Portal).get
       portal.setState(State.Opening)
       val executorService: ExecutorService = Executors.newSingleThreadExecutor()
       executorService.execute(() => {
@@ -151,6 +351,4 @@ class ModelResources extends EntitiesGetter with EntitiesSetter {
       executorService.shutdown()
     }
   }
-
-  override def getEntity(predicate: Entity => Boolean): Entity = this.entities.filter(predicate).head
 }

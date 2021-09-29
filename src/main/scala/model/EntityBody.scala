@@ -5,6 +5,9 @@ import com.badlogic.gdx.physics.box2d.{Body, BodyDef, FixtureDef, Shape}
 import model.helpers.ImplicitConversions._
 import model.helpers.EntitiesFactoryImpl
 
+/**
+ *
+ */
 trait EntityBody {
 
   def getBody: Body

@@ -120,7 +120,7 @@ class SpriteFactoryImpl extends SpriteFactory {
     sprite.addAnimation(State.LadderClimbing, this.createAnimation(sprite, 7, (11, 4), (12, 0)), loop = true)
     sprite.addAnimation(State.LadderDescending, this.createAnimation(sprite, 7, (11, 4), (12, 0), reverse = true), loop = true)
     sprite.addAnimation(State.LadderIdle, this.createAnimation(sprite, 7, (11, 6), (11, 6)))
-    sprite.addAnimation(State.pickingItem, this.createAnimation(sprite, 7, (13, 2), (13, 4), 0.15f))
+    sprite.addAnimation(State.PickingItem, this.createAnimation(sprite, 7, (13, 2), (13, 4), 0.15f))
     sprite.addAnimation(State.Hurt, this.createAnimation(sprite, 7, (8, 3), (8, 5)))
     sprite.addAnimation(State.Dying, this.createAnimation(sprite, 7, (8, 6), (9, 5), 0.18f))
     sprite.addAnimation(State.AirDownAttacking, this.createAnimation(sprite, 7, (14, 4), (15, 0)))

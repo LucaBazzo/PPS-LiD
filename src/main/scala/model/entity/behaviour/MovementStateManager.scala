@@ -6,6 +6,10 @@ import model.entity.{Entity, MobileEntity}
 import model.helpers.GeometricUtilities.isBodyOnTheRight
 import model.entity.movement._
 
+/** Particular take of a MovementStrategy. This trait mixes the functionality
+ * provided by the MovementStrategy interface with a StateManager to define
+ * complex and deep movement strategies derived from other simplier strategies.
+ */
 trait MovementStateManager extends StateManagerImpl {
   override type State = MovementStrategy
 

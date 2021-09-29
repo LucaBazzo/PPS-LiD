@@ -11,7 +11,7 @@ abstract class StatefulMovementStrategy extends MovementStrategy {
 
   override def apply(): Unit = {
     this.stateManager.update()
-    this.stateManager.getCurrentState.apply()
+    this.stateManager.getMovementStrategy.apply()
   }
 
   override def stopMovement(): Unit = this.stateManager.getCurrentState.stopMovement()

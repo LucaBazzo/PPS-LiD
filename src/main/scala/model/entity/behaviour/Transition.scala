@@ -8,12 +8,32 @@ import model.helpers.EntitiesUtilities._
 import model.helpers.GeometricUtilities.{getBodiesDistance, isBodyOnTheLeft, isBodyOnTheRight}
 import model.helpers.WorldUtilities.isBodyVisible
 
+/** This trait define a common interface for the implementation of state
+ * manager transitions. A transition resembles the Predicate construct.
+ *
+ * A transition object can be checked and if active must define a state
+ * change in the StateManager.
+ *
+ * @see [[model.entity.behaviour.StateManager]]
+ */
 trait Transition {
   def apply(): Boolean
   def reset(): Unit = { }
 }
 
+/**
+ * Pimping of the interface Transition to enable more interesting uses of
+ * the implementation.
+ */
 object RichTransitions {
+  /** A transition may be effectively defined without an inner state and
+   * solely characterized by a completely static behaviour. It should be
+   * allowed to initialize implicitely a transition only by defining it's
+   * apply method.
+   *
+   * @param f the functional predicate "wrapped" be the Transition interface
+   * @return a Transition object wrapping the provided function
+   */
   implicit def functionToTransition(f:() => Boolean): Transition = () => f.apply()
 
   implicit class LogicalTransition(p:Transition){
@@ -22,12 +42,17 @@ object RichTransitions {
   }
 }
 
-case class Not(predicate: Transition) extends Transition {
+/** Particular case of composition of a Transition. The opposite of a
+ * transition can be easily defined with a Transition receive another one.
+ *
+ * @param transition the Transition t o negate
+ */
+case class Not(transition: Transition) extends Transition {
   override def apply(): Boolean = {
-    !predicate.apply()
+    !transition.apply()
   }
 
-  override def reset(): Unit = predicate.reset()
+  override def reset(): Unit = transition.reset()
 }
 
 case class TimePredicate(time:Long) extends Transition {

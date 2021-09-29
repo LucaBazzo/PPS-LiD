@@ -104,7 +104,7 @@ case class HeroMovementStrategy(private val entity: Hero,
 
   private def checkState: Boolean = entity.getState match {
     case State.Sliding | State.Attack01 | State.Attack02
-         | State.Attack03 | State.BowAttacking | State.Hurt | State.`pickingItem` => false
+         | State.Attack03 | State.BowAttacking | State.Hurt | State.PickingItem => false
     case _ => true
   }
 

@@ -88,7 +88,7 @@ class TestEnemy extends AnyFlatSpec {
     // give a bow item to the hero
     Item(ItemPools.Boss, getItemPool, getEntitiesContainerMonitor,
       position=(0, 0))
-    entitiesContainer.getEntity(e => e.isInstanceOf[Item]).asInstanceOf[Item].collect()
+    entitiesContainer.getEntity(e => e.isInstanceOf[Item]).get.asInstanceOf[Item].collect()
 
     val bossEnemy: EnemyImpl = WizardEnemy((0, 0))
     Portal((0, 0)) // needed to allow portal activation on boss enemy death

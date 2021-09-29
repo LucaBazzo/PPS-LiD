@@ -13,97 +13,136 @@ import model.entity.movement._
 import utils.CollisionConstants._
 import utils.EnemiesConstants.{PROJECTILE_DYING_STATE_DURATION, PROJECTILE_ENTITIES_DURATION, WIZARD_ATTACK3_PROJECTILE_SPEED, WORM_ATTACK_PROJECTILE_SPEED}
 import utils.HeroConstants.{ARROW_SIZE, PIVOT_SIZE, SWORD_ATTACK_DENSITY}
-/** The possible statistics that could be given to a mobile or living entity
+
+/** The possible statistics that could be given to a mobile or living entity.
+ * Those statistics may be used indiscriminately by attack or movement
+ * strategies. For instance the VisionDistance value could be used by an enemy
+ * entity both to define movement or attack strategies (move towards or attack
+ * hero if in near enough)
  *
+ * @see [[model.entity.MobileEntity]]
+ * @see [[model.entity.LivingEntity]]
  */
 object Statistic extends Enumeration {
   type Statistic = Value
 
   val CurrentHealth, Health, Strength, Defence, MovementSpeed, AttackSpeed = Value
 
-  val VisionDistance, VisionAngle, AttackFrequency, AttackDuration = Value
+  val VisionDistance, AttackFrequency, AttackDuration = Value
 }
 
-/** An Entity that can move based on a Movement Strategy
+/** An Entity that can move. The movement behaviour is extracted and managed by
+ * a MovementStrategy class object.
  *
+ * A movement strategy may be derived by simpler movements and may consider the
+ * entity state to personalize it's behaviour.
+ *
+ * @see [[model.entity.movement.MovementStrategy]]
  */
 trait MobileEntity extends Entity {
 
-  /** Define the entity movement
+  /** Define the entity movement strategy. A movement strategy may be derived
+   * by simpler movements and may consider the entity state to personalize it's
+   * behaviour.
    *
-   *  @param strategy the behavior that will call with move()
+   * @see [[model.entity.movement.MovementStrategy]]
+   *
+   * @param strategy the behavior that will call with move()
    */
   def setMovementStrategy(strategy: MovementStrategy): Unit
 
-  /** Call the current movement strategy
-   *
+  /** Execute the entity movement behaviour.
    */
   def move(): Unit
 
-  /** Stop the entity movement based on what is defined in the movement strategy
-   *
+  /** Stop the entity movement based on what is defined in the movement
+   * strategy. A movement interruption may imply different things based
+   * on different movement policies.
    */
   def stopMovement(): Unit
 
-  /** Changes the direction in which the entity is looking
+  /** Changes the direction in which the entity is looking. The direction faced
+   * by an entity may involve different strategies. For instance, an enemy
+   * entity may not be able to see the hero approaching from its back.
    *
-   *  @param right true for right, false for left
+   * @param right true if the entity is facing to the right false otherwise.
    */
   def setFacing(right: Boolean): Unit
 
-  /** Check the direction in which the entity is looking
+  /** Check the direction in which the entity is looking. The direction faced
+   * by an entity may involve different strategies. For instance, an enemy
+   * entity may not be able to see the hero approaching from its back.
    *
-   *  @return true if is facing to the right
+   * @return true if the entity is facing to the right false otherwise.
    */
   def isFacingRight: Boolean
 
-  /** Return the statistics of the Entity
+  /** Return the statistics of the Entity. Mobile and living entities define
+   * a set of statistics.
    *
-   *  @return a map with the statistic and it's value
+   * @return a map of Statistic and value pairs
    */
   def getStatistics: Map[Statistic, Float]
 
-  /** Modifies a statistic based on the alteration value
+  /** Modifies a statistic based on the alteration value. The alteration is not
+   * the new value but the modifier to sum to the entity statistic. This method
+   * is used both to manage the hero statistics (modified when he picks up an
+   * item) and the enemies statistics (which increase proportionally to the
+   * nmber of level explored.
    *
-   *  @param statistic the statistic that will be altered
-   *  @param alteration the value that will be added
+   * @see [[model.entity.Statistic]]
+   *
+   * @param statistic the statistic that will be altered
+   * @param alteration the value that will be added
    */
   def alterStatistics(statistic: Statistic, alteration: Float): Unit
 
-  /** Return a specific statistic value
+  /** Return a specific statistic value if present. A mobile entity may define
+   * a subset of statistics available
    *
-   *  @param statistic the statistic required
-   *  @return a float if the statistic is present, Option.empty otherwise
+   * @see [[model.entity.Statistic]]
+   *
+   * @param statistic the statistic required
+   * @return a float if the statistic is present, Option.empty otherwise
    */
   def getStatistic(statistic: Statistic): Option[Float]
 
-  /** Change the current velocity on x and y of this Entity
+  /** Change the current velocity on x and y of this Entity. An entity velocity
+   * is defined by a force vector (a tuple of float value).
    *
-   *  @param velocity the new velocity
-   *  @param speed a multiplier to the velocity
+   * @see [[com.badlogic.gdx.physics.box2d.Body]]
+   *
+   * @param velocity the new velocity
+   * @param speed a multiplier to the velocity
    */
   def setVelocity(velocity: (Float, Float), speed: Float = 1): Unit =
     this.getBody.setLinearVelocity(velocity * speed)
 
-  /** Changes the current velocity on x and maintains the current y velocity
+  /** Changes the current velocity on x and maintains the current y velocity. 
+   * An entity velocity is defined by a force vector (a tuple of float value).
    *
-   *  @param velocity the new x velocity
-   *  @param speed a multiplier to the velocity
+   * @see [[com.badlogic.gdx.physics.box2d.Body]]
+   *      
+   * @param velocity the new x velocity
+   * @param speed a multiplier to the velocity
    */
   def setVelocityX(velocity: Float, speed: Float = 1): Unit =
     this.getBody.setLinearVelocity(velocity * speed, this.getBody.getLinearVelocity.y)
 
-  /** Changes the current velocity on y and maintains the current x velocity
+  /** Changes the current velocity on y and maintains the current x velocity.
+   * An entity velocity is defined by a force vector (a tuple of float value).
    *
-   *  @param velocity the new y velocity
-   *  @param speed a multiplier to the velocity
+   * @see [[com.badlogic.gdx.physics.box2d.Body]]
+   * @param velocity the new y velocity
+   * @param speed a multiplier to the velocity
    */
   def setVelocityY(velocity: Float, speed: Float = 1): Unit =
     this.getBody.setLinearVelocity(this.getBody.getLinearVelocity.x, velocity * speed)
 
-  /** Get the current velocity on x and y
+  /** Get the current velocity on x and y. An entity velocity is defined by a
+   * force vector (a tuple of float value).
    *
-   *  @return the velocity of this Entity
+   * @return the velocity of this Entity
    */
   def getVelocity: (Float, Float) = (this.getBody.getLinearVelocity.x, this.getBody.getLinearVelocity.y)
 }
@@ -129,14 +168,14 @@ object MobileEntity {
   /** Create a Sword Attack Pattern with a pivot point and a rotating body that can collide
    *  with another entity
    *
-   *  @param entityType the texture that will be attached to this Entity by the View
-   *  @param rotatingBodySize the size of the sword
-   *  @param rotatingBodyDistance the distance between the sword and the center of the source entity
-   *  @param angularVelocity how fast will rotate around the pivot point
-   *  @param startingAngle how is inclined the sword
-   *  @param sourceEntity the entity that has generated this attack
+   * @param entityType the texture that will be attached to this Entity by the View
+   * @param rotatingBodySize the size of the sword
+   * @param rotatingBodyDistance the distance between the sword and the center of the source entity
+   * @param angularVelocity how fast will rotate around the pivot point
+   * @param startingAngle how is inclined the sword
+   * @param sourceEntity the entity that has generated this attack
    *
-   *  @return a Mobile Entity representing the sword
+   * @return a Mobile Entity representing the sword
    */
   def createSwordAttackPattern(entityType: EntityType = EntityType.Mobile,
                                rotatingBodySize: (Float, Float),
@@ -164,11 +203,11 @@ object MobileEntity {
   /** Create a Sword Attack Pattern on the Air with a pivot point and a rotating body that can collide
    *  with another entity
    *
-   *  @param size the size of the sword
-   *  @param distance the distance between the sword and the center of the source entity
-   *  @param sourceEntity the entity that has generated this attack
+   * @param size the size of the sword
+   * @param distance the distance between the sword and the center of the source entity
+   * @param sourceEntity the entity that has generated this attack
    *
-   *  @return a Mobile Entity representing the sword
+   * @return a Mobile Entity representing the sword
    */
   def createAirAttackPattern(size: (Float, Float),
                              distance: (Float, Float),
@@ -185,9 +224,9 @@ object MobileEntity {
 
   /** Create an Arrow Projectile with a linear velocity that can collide with other entities
    *
-   *  @param entity the entity that has generated this attack
+   * @param entity the entity that has generated this attack
    *
-   *  @return a Mobile Entity representing the arrow
+   * @return a Mobile Entity representing the arrow
    */
   def createArrowProjectile(entity: LivingEntity): MobileEntity = {
     val arrow: MobileEntity = MobileEntity(EntityType.Arrow, ARROW_SIZE, newArrowPosition(entity),
@@ -319,19 +358,22 @@ object MobileEntity {
   }
 }
 
-/** Represents a entity that can move based on a movement strategy and can collide with other entities
+/** Implementation of interface MobileEntity mixed in with EntityImpl.
+ * Represents a entity that can move based on a movement strategy and can
+ * collide with other entities.
  *
- *  @param entityType the texture that will be attached to this Entity by the View
- *  @param entityBody the body of this entity that is affected by physics and collisions
- *  @param size the size of the entity
- *  @param stats the statistics of this entity
+ * @param entityType the texture that will be attached to this Entity by the View
+ * @param entityBody the body of this entity that is affected by physics and collisions
+ * @param size the size of the entity
+ * @param stats the statistics of this entity
  *
- *  @return a Mobile Entity representing the sword
+ * @return a Mobile Entity representing the sword
  */
 class MobileEntityImpl(private val entityType: EntityType,
                        private var entityBody: EntityBody,
                        private val size: (Float, Float),
-                       private var stats: Map[Statistic, Float] = Map()) extends EntityImpl(entityType, entityBody, size) with MobileEntity {
+                       private var stats: Map[Statistic, Float] = Map())
+  extends EntityImpl(entityType, entityBody, size) with MobileEntity {
 
   private var facingRight: Boolean = true
 
@@ -375,12 +417,12 @@ class MobileEntityImpl(private val entityType: EntityType,
 
 /** Represents a sword in the air that is able to move
  *
- *  @param entityType the texture that will be attached to this Entity by the View
- *  @param entityBody the body of this entity that is affected by physics and collisions
- *  @param size the size of the entity
- *  @param stats the statistics of this entity
+ * @param entityType the texture that will be attached to this Entity by the View
+ * @param entityBody the body of this entity that is affected by physics and collisions
+ * @param size the size of the entity
+ * @param stats the statistics of this entity
  *
- *  @return a Mobile Entity representing the sword
+ * @return a Mobile Entity representing the sword
  */
 class AirSwordMobileEntity(private val entityType: EntityType,
                            private var entityBody: EntityBody,
@@ -394,6 +436,14 @@ class AirSwordMobileEntity(private val entityType: EntityType,
   }
 }
 
+/**
+ *
+ * @param entityType the texture that will be attached to this Entity by the View
+ * @param entityBody the body of this entity that is affected by physics and collisions
+ * @param size the size of the entity
+ * @param stats the statistics of this entity
+ *
+ */
 class BulletMobileEntity(private val entityType: EntityType,
                          private var entityBody: EntityBody,
                          private val size: (Float, Float),

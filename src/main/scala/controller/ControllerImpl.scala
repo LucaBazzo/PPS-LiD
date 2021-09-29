@@ -15,12 +15,20 @@ import java.util.concurrent.{ExecutorService, Executors, ScheduledExecutorServic
  * and load it, handling inputs and closing the application.
  */
 trait Controller {
-  /** Called the hero is dead and the application should set the Game Over Screen.
+  /** Called whenever the hero dies. The application should communicate this
+   * "event" to the view which in turn changes the displayed screen.
    */
   def gameOver(): Unit
 }
 
-/** This class represent the Controller of the all game.
+/** Real controller implementation. It initialized both the model and the view
+ * and handles events from both of them.
+ *
+ * It is mixed with an Observer interface to enables a communication channel
+ * with the application view.
+ *
+ * @see [[controller.Controller]]
+ * @see [[controller.Observer]]
  */
 class ControllerImpl extends Controller with Observer {
 
@@ -42,7 +50,6 @@ class ControllerImpl extends Controller with Observer {
     case GameEvent.StartGame => this.startGame()
     case GameEvent.CloseApplication => this.terminateApplication()
     case GameEvent.ReturnToMenu => this.view.returnToMenu()
-    case GameEvent.MapLoaded => this.newLevel()
     case _ => this.gameLoop.addAction(event)
   }
 
@@ -65,7 +72,7 @@ class ControllerImpl extends Controller with Observer {
     this.view.startGame()
     Gdx.app.postRunnable(() => {
       tileMapManager.updateTiledMapList(RANDOM_SEED)
-      this.handleEvent(GameEvent.MapLoaded)
+      this.newLevel()
     })
   }
 

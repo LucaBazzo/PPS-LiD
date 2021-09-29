@@ -8,10 +8,26 @@ import model.helpers.GeometricUtilities.getBodiesDistance
 import model.helpers.WorldUtilities.isBodyVisible
 import utils.EnemiesConstants._
 
+/** Implementation of the trait AttackStrategy oriented to enemies attacks.
+ *
+ * An attack entity is a particular configuration of a MobileEntity, coupled
+ * with an appropriate entity type, collision strategy and movement strategy.
+ *
+ * @see [[model.entity.attack.AttackStrategy]]
+ * @see [[model.entity.MobileEntity]]
+ * @see [[model.entity.EntityType]]
+ *
+ * @param sourceEntity the Entity which holds the instance of this abstract
+ *                     class
+ * @param attackSpeed defined the interval at which an attack can be spawned
+ * @param attackDuration defined the duration, in milliseconds, of the spawned
+ *                       attack entity
+ * @param visionDistance the maximum distance at which an enemy can detect the
+ *                       hero entity
+ */
 abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
                                    protected val attackSpeed: Long,
                                    protected val attackDuration: Long,
-                                   protected val visionAngle: Int,
                                    protected val visionDistance: Float) extends AttackStrategy {
 
   protected val targetEntity:Hero = getEntitiesContainerMonitor.getHero.get
@@ -38,18 +54,30 @@ abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
 
   protected def canAttack: Boolean = this.isAttackFinished &&
     System.currentTimeMillis() - this.lastAttackTime > this.attackSpeed &&
-    isBodyVisible(this.sourceEntity, this.targetEntity, this.visionAngle) &&
+    isBodyVisible(this.sourceEntity, this.targetEntity) &&
     getBodiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
 
   protected def spawnAttack(): Unit
 }
 
+/**
+ * A subset of the possible attacks creatable by an enemy entity. Melee attacks
+ * are characterized by an attack zone near the enemy entity with no particular
+ * movement strategy.
+ *
+ * @param sourceEntity the Entity which holds the instance of this abstract
+ *                     class
+ * @param attackSpeed defined the interval at which an attack can be spawned
+ * @param attackDuration defined the duration, in milliseconds, of the spawned
+ *                       attack entity
+ * @param visionDistance the maximum distance at which an enemy can detect the
+ *                       hero entity
+ */
 abstract class MeleeAttackStrategy(override protected val sourceEntity: LivingEntity,
                                    override protected val attackSpeed: Long,
                                    override protected val attackDuration: Long,
-                                   override protected val visionAngle: Int,
                                    override protected val visionDistance: Float)
-  extends EnemyAttackStrategy(sourceEntity, attackSpeed, attackDuration, visionAngle, visionDistance) {
+  extends EnemyAttackStrategy(sourceEntity, attackSpeed, attackDuration, visionDistance) {
 
   protected var attackInstance: Option[MobileEntity] = Option.empty
   protected var attackTimer: Long = 0
@@ -80,9 +108,8 @@ abstract class MeleeAttackStrategy(override protected val sourceEntity: LivingEn
 }
 
 case class SkeletonAttackStrategy(override protected val sourceEntity: LivingEntity)
-  extends MeleeAttackStrategy(sourceEntity,
-    attackSpeed = SKELETON_ATTACK_SPEED, attackDuration = SKELETON_ATTACK_DURATION,
-    visionAngle = SKELETON_VISION_ANGLE, visionDistance = SKELETON_VISION_DISTANCE) {
+  extends MeleeAttackStrategy(sourceEntity,  attackSpeed = SKELETON_ATTACK_SPEED,
+    attackDuration = SKELETON_ATTACK_DURATION, visionDistance = SKELETON_VISION_DISTANCE) {
 
   override protected def updateAttack(attackProgress:Long):Unit = {
     attackProgress match {
@@ -99,9 +126,8 @@ case class SkeletonAttackStrategy(override protected val sourceEntity: LivingEnt
 }
 
 case class SlimeAttackStrategy(override protected val sourceEntity: LivingEntity)
-  extends MeleeAttackStrategy(sourceEntity,
-    attackSpeed = SLIME_ATTACK_SPEED, attackDuration = SLIME_ATTACK_DURATION,
-    visionAngle = SLIME_VISION_ANGLE, visionDistance = SLIME_VISION_DISTANCE) {
+  extends MeleeAttackStrategy(sourceEntity, attackSpeed = SLIME_ATTACK_SPEED,
+    attackDuration = SLIME_ATTACK_DURATION, visionDistance = SLIME_VISION_DISTANCE) {
 
   override protected def updateAttack(attackProgress:Long):Unit = {
     attackProgress match {
@@ -118,9 +144,8 @@ case class SlimeAttackStrategy(override protected val sourceEntity: LivingEntity
 }
 
 case class BatAttackStrategy(override protected val sourceEntity: LivingEntity)
-  extends MeleeAttackStrategy(sourceEntity,
-    attackSpeed = BAT_ATTACK_SPEED, attackDuration = BAT_ATTACK_DURATION,
-    visionAngle = BAT_VISION_ANGLE, visionDistance = BAT_VISION_DISTANCE) {
+  extends MeleeAttackStrategy(sourceEntity, attackSpeed = BAT_ATTACK_SPEED,
+    attackDuration = BAT_ATTACK_DURATION, visionDistance = BAT_VISION_DISTANCE) {
 
   override protected def updateAttack(attackProgress:Long):Unit = {
     attackProgress match {
@@ -141,9 +166,8 @@ case class BatAttackStrategy(override protected val sourceEntity: LivingEntity)
 }
 
 case class WizardFirstAttackStrategy(override protected val sourceEntity: LivingEntity)
-  extends MeleeAttackStrategy(sourceEntity,
-    attackSpeed = WIZARD_ATTACK1_SPEED, attackDuration = WIZARD_ATTACK1_DURATION,
-    visionAngle = WIZARD_VISION_ANGLE, visionDistance = WIZARD_VISION_DISTANCE) {
+  extends MeleeAttackStrategy(sourceEntity, attackSpeed = WIZARD_ATTACK1_SPEED,
+    attackDuration = WIZARD_ATTACK1_DURATION, visionDistance = WIZARD_VISION_DISTANCE) {
 
   override protected def updateAttack(attackProgress:Long):Unit = {
     attackProgress match {
@@ -161,9 +185,8 @@ case class WizardFirstAttackStrategy(override protected val sourceEntity: Living
 }
 
 case class WizardSecondAttackStrategy(override protected val sourceEntity: LivingEntity)
-  extends MeleeAttackStrategy(sourceEntity,
-    attackSpeed = WIZARD_ATTACK2_SPEED, attackDuration = WIZARD_ATTACK2_DURATION,
-    visionAngle = WIZARD_VISION_ANGLE, visionDistance = WIZARD_VISION_DISTANCE) {
+  extends MeleeAttackStrategy(sourceEntity, attackSpeed = WIZARD_ATTACK2_SPEED,
+    attackDuration = WIZARD_ATTACK2_DURATION, visionDistance = WIZARD_VISION_DISTANCE) {
 
   override protected def updateAttack(attackProgress:Long):Unit = {
     attackProgress match {
@@ -181,9 +204,8 @@ case class WizardSecondAttackStrategy(override protected val sourceEntity: Livin
 }
 
 case class WizardEnergyBallAttackStrategy(override protected val sourceEntity: LivingEntity)
-  extends EnemyAttackStrategy(sourceEntity,
-    attackSpeed = WIZARD_ATTACK3_SPEED, attackDuration = WIZARD_ATTACK3_DURATION,
-    visionAngle = WIZARD_VISION_ANGLE, visionDistance = WIZARD_VISION_DISTANCE) {
+  extends EnemyAttackStrategy(sourceEntity, attackSpeed = WIZARD_ATTACK3_SPEED,
+    attackDuration = WIZARD_ATTACK3_DURATION, visionDistance = WIZARD_VISION_DISTANCE) {
 
   override def spawnAttack(): Unit = {
     this.sourceEntity.setState(State.Attack03)
@@ -196,9 +218,8 @@ case class WizardEnergyBallAttackStrategy(override protected val sourceEntity: L
 }
 
 case class WormFireballAttackStrategy(override protected val sourceEntity: LivingEntity)
-  extends EnemyAttackStrategy(sourceEntity,
-    attackSpeed = WORM_ATTACK_SPEED, attackDuration = WORM_ATTACK_DURATION,
-    visionAngle = WORM_VISION_ANGLE, visionDistance = WORM_VISION_DISTANCE) {
+  extends EnemyAttackStrategy(sourceEntity, attackSpeed = WORM_ATTACK_SPEED,
+    attackDuration = WORM_ATTACK_DURATION, visionDistance = WORM_VISION_DISTANCE) {
 
   private var attackProgress: Long = 0
   private var targetPoint: Option[(Float, Float)] = None

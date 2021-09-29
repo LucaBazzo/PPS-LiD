@@ -2,19 +2,47 @@ package model.entity.behaviour
 
 import utils.ApplicationConstants.RANDOM
 
+/** This trait defines a standardized interface for the management of
+ * simple states owned by an entity. This interface finds application
+ * in the management of enemies behaviours and movement behaviours
+ * respectively.
+ *
+ * This is an elaboration of the State programming pattern.
+ */
 trait StateManager {
 
+  /** Type representing a generic state. At this level is not important
+   * to know what a concrete state is.
+   */
   type State
 
+  /** Adds and returns a new state to the pool or managed states. It is
+   * important to make this new state reachable by providing transitions which
+   * includes it.
+   *
+   * @param state the new State to be added
+   * @return the state itself. This is a shorthand for a simplified used of
+   *         this structure
+   */
   def addState(state:State): State
 
+  /** Adds a new transition linking a state to another. This transition is
+   * similar to a predicate which can be tested repeatedly. As soon the
+   * transition is active (the test has success) the StateManager current state
+   * can be modified
+   *
+   * @param state the current state of the state machine
+   * @param nextState the next state of the state machine
+   * @param transition the transition which decides when the state must be
+   *                   changed
+   */
   def addTransition(state:State, nextState:State, transition:Transition): Unit
 
+  /** Check the available transitions starting from the current state and find
+   * out if a new state can be reached. If reachable, the current state is
+   * updated.
+   */
   def update(): Unit
-
-  def getCurrentState: State
-
-  def getCurrentTransitions: Map[(State, State), Transition]
 }
 
 abstract class StateManagerImpl extends StateManager {
@@ -58,10 +86,10 @@ abstract class StateManagerImpl extends StateManager {
     }
   }
 
-  override def getCurrentState: State =
+  def getCurrentState: State =
     this.currentState.getOrElse(throw new IllegalArgumentException())
 
-  override def getCurrentTransitions: Map[(State, State), Transition] =
+  def getCurrentTransitions: Map[(State, State), Transition] =
     this.transitions.filter(t => t._1._1 == this.getCurrentState)
 
   def onStateBegin(): Unit

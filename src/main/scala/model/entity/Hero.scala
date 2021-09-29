@@ -271,7 +271,7 @@ class HeroImpl(private val entityType: EntityType,
   override def itemPicked(itemType: Items): Unit = {
     this.stopHero(LONG_WAIT_TIME)
     this.stopMovement()
-    this.setState(State.pickingItem)
+    this.setState(State.PickingItem)
     this.itemsPicked = itemType :: this.itemsPicked
   }
 

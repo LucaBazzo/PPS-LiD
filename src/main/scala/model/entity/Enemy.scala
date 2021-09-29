@@ -1,24 +1,31 @@
 package model.entity
 
-import model.entity.attack._
-import model.entity.behaviour.RichTransitions._
-import model.entity.behaviour._
-import model.helpers.ImplicitConversions._
-import model.entity.collision.{CollisionStrategy, DoNothingCollisionStrategy, EntityCollisionBit}
 import model.entity.EntityType.EntityType
 import model.entity.Items.Items
 import model.entity.State._
 import model.entity.Statistic.Statistic
-import model.helpers.EntitiesFactoryImpl._
-import model.helpers.ItemPools
+import model.entity.attack._
+import model.entity.behaviour.RichTransitions._
+import model.entity.behaviour._
+import model.entity.collision.{CollisionStrategy, DoNothingCollisionStrategy, EntityCollisionBit}
 import model.entity.movement.{FaceTarget, MovementStrategy}
+import model.helpers.EntitiesFactoryImpl._
+import model.helpers.ImplicitConversions._
+import model.helpers.ItemPools
 import model.{EntityBody, Score}
 import utils.ApplicationConstants.RANDOM
 import utils.EnemiesConstants
 import utils.EnemiesConstants._
 import utils.HeroConstants.SHORT_WAIT_TIME
 
+/**
+ *
+ */
 trait Enemy {
+  /**
+   *
+   * @param enemyBehaviour
+   */
   def setBehaviour(enemyBehaviour: EnemyStateManager): Unit
 }
 
@@ -127,6 +134,16 @@ object WizardEnemy {
   }
 }
 
+/**
+ *
+ * @param entityType the texture that will be attached to this Entity by the View
+ * @param entityBody the body of this entity that is affected by physics and collisions
+ * @param size the size of the entity
+ * @param stats the statistics of this entity
+ *
+ * @param score
+ * @param heroEntity
+ */
 class EnemyImpl(private val entityType: EntityType,
                 private var entityBody: EntityBody,
                 private val size: (Float, Float),
@@ -179,7 +196,7 @@ class EnemyImpl(private val entityType: EntityType,
         Item(ItemPools.Enemy_Drops, getItemPool, getEntitiesContainerMonitor,
           position=(this.getPosition._1, this.getPosition._2).MPP)
 
-    if (ENEMY_BOSS_TYPES.contains(this.getType))
+    if (BOSS_TYPES.contains(this.getType))
       if (this.heroEntity.getItemsPicked.contains((i:Items) => i == Items.Bow))
         Item(ItemPools.Default, getItemPool, getEntitiesContainerMonitor,
           position=(this.getPosition._1, this.getPosition._2).MPP)

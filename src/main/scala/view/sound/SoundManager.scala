@@ -62,7 +62,7 @@ class SoundManager {
          else if(entityState.equals(State.Attack03)) this.playSound(SoundEvent.Attack3)
          else if(entityState.equals(State.BowAttacking)) this.playSound(SoundEvent.BowAttack)
          else if(entityState.equals(State.AirDownAttacking)) this.playSound(SoundEvent.AirDownAttack)
-         else if(entityState.equals(State.pickingItem)) this.playSound(SoundEvent.PickItem)
+         else if(entityState.equals(State.PickingItem)) this.playSound(SoundEvent.PickItem)
          else if(entityState.equals(State.Hurt)) this.playSound(SoundEvent.Hurt)
          else if(entityState.equals(State.Dying)) this.playSound(SoundEvent.Dying)
        case EntityType.Door =>

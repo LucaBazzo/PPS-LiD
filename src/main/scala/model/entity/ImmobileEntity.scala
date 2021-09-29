@@ -11,6 +11,24 @@ import model.helpers.EntitiesFactoryImpl
 import utils.CollisionConstants._
 import utils.EnvironmentConstants._
 
+/** Extension of Entity trait. This class defined a concrete implementation of the
+ * abstract class EntityImpl.
+ *
+ * This class does not define new functionalities.
+ *
+ * @see [[model.entity.EntityType]]
+ * @see [[model.EntityBody]]
+ * @see [[com.badlogic.gdx.physics.box2d.Shape]]
+ *
+ * @param entityType the type of the new entity.
+ *
+ * @param entityBody the entity body to be added in the game world.
+ *
+ * @param size the size of the newly created body. The provided values meaning
+ *             may vary depending the shape of the entity. For rectangular
+ *             shaped entities, the size represents the new width and height
+ *             while for spherical entities it defined the ellipsis axes.
+ */
 case class ImmobileEntity(private var entityType: EntityType,
                           private var entityBody: EntityBody,
                           private val size: (Float, Float))
