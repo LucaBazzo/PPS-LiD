@@ -52,7 +52,7 @@ $ java -jar target/scala-2.13/pps-lid-assembly-1.0.jar
 
 ## Authors
 
-Luca Bazzocchi - luca.bazzocchi2@unibo.it
-Giacomo Casadei - giacomo.casadei12@unibo.it
-Fabio Muratori - fabio.muratori2@unibo.it
-Luca Bracchi - luca.bracchi3@unibo.it
+- Luca Bazzocchi - luca.bazzocchi2@unibo.it
+- Giacomo Casadei - giacomo.casadei12@unibo.it
+- Fabio Muratori - fabio.muratori2@unibo.it
+- Luca Bracchi - luca.bracchi3@unibo.it
