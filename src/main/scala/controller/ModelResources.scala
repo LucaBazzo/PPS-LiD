@@ -101,7 +101,9 @@ trait EntitiesGetter {
    *
    * @return a list of game entities
    */
-  def getEntities: List[Entity] = getEntities(_ => true)
+  def getAllEntities: List[Entity] = synchronized {
+    getEntities(_ => true)
+  }
 
   /** Retrieve the first entity found in the level that matches a given
    * predicate. This entity contains the LibGDX body (which defines where it is
@@ -368,7 +370,6 @@ class ModelResources extends EntitiesGetter with EntitiesSetter {
       executorService.execute(() => {
         Thread.sleep(1000)
         portal.setState(State.Standing)
-        println("Portal opened")
       })
       executorService.shutdown()
     }

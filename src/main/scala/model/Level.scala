@@ -43,7 +43,7 @@ class LevelImpl(private val model: Model,
     this.worldStep()
 
     EntitiesFactoryImpl.applyPendingFunctions()
-    this.modelResources.getEntities.foreach((entity: Entity) => entity.update())
+    this.modelResources.getAllEntities.foreach((entity: Entity) => entity.update())
   }
 
   private var accumulator: Float = 0f

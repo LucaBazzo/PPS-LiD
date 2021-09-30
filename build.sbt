@@ -1,6 +1,6 @@
 name := "pps-lid"
 
-version := "0.1"
+version := "1.0"
 
 scalaVersion := "2.13.6"
 
@@ -16,6 +16,14 @@ libraryDependencies += "it.unibo.alice.tuprolog" % "tuprolog" % "3.3.0"
 
 // testing execution policy
 parallelExecution in Test := false
+
+Compile / mainClass := Some("main.Main")
+assembly / mainClass := Some("main.Main")
+
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
 
 // sbt compile output options
 scalacOptions ++= Seq(
