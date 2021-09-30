@@ -65,15 +65,15 @@ trait EntitiesGetter {
    */
   def getMessage: Option[String]
 
-  /** Holds the latest item picked by the hero. The optional Item contains
+  /** Holds the latest items picked by the hero. Each Item contains
    * the specific strategy to apply to the hero statistics. After a non empty
-   * call of this method, the reference to the latest picked item is re-setted.
+   * call of this method, the reference to the latest picked items is re-setted.
    *
    * @see [[model.entity.Items]]
    *
-   * @return an optional Item object
+   * @return a List of Item object
    */
-  def hasHeroPickedUpItem: Option[Items]
+  def hasHeroPickedUpItem: List[Items]
 
   /** Retrieve the current level number. The level number increases as the hero
    * advances in the exploration of the game by entering a portal to the next
@@ -278,7 +278,7 @@ class ModelResources extends EntitiesGetter with EntitiesSetter {
   private var world: Option[World] = Option.empty
   private var messages: List[String] = List.empty
   private var entities: List[Entity] = List.empty
-  private var heroPickedUpAnItem: Option[Items] = Option.empty
+  private var heroPickedUpAnItem: List[Items] = List.empty
   private var itemsPicked: List[Items] = List.empty
   private var levelNumber = 0
   private var score: Int = 0
@@ -334,15 +334,15 @@ class ModelResources extends EntitiesGetter with EntitiesSetter {
 
   override def getLevelNumber: Int = this.levelNumber
 
-  override def hasHeroPickedUpItem: Option[Items] = {
+  override def hasHeroPickedUpItem: List[Items] = {
     val res = this.heroPickedUpAnItem
-    this.heroPickedUpAnItem = Option.empty
+    this.heroPickedUpAnItem = List.empty
     res
   }
 
   override def heroJustPickedUpItem(item: Items): Unit = {
     this.itemsPicked = item :: this.itemsPicked
-    this.heroPickedUpAnItem = Option.apply(item)
+    this.heroPickedUpAnItem = item :: this.heroPickedUpAnItem
   }
 
   override def heroLoseItem(item: Items): Unit = this.itemsPicked = this.itemsPicked.filter(it => it != item)
