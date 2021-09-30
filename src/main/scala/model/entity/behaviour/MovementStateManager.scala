@@ -21,6 +21,13 @@ trait MovementStateManager extends StateManagerImpl {
   def getMovementStrategy: MovementStrategy = this.getCurrentState
 }
 
+/** Foot enemies movement strategy. It incapsulate both aspects of platrol, face and chase
+ * of a specific target entity.
+ *
+ * @param sourceEntity the owner of this strategy
+ * @param targetEntity the target entity
+ * @param visionDistance the maximum horizontal vision distance of the sourceEntity
+ */
 case class GroundEnemyMovementStrategy(private val sourceEntity: MobileEntity,
                                        private val targetEntity: Entity,
                                        private val visionDistance: Float) extends StatefulMovementStrategy {
@@ -57,6 +64,11 @@ case class GroundEnemyMovementStrategy(private val sourceEntity: MobileEntity,
     IsPathWalkable(this.sourceEntity, this.targetEntity))
 }
 
+/** Subset of the GrondMovementStrategy behaviour. An entity move horizontally
+ * above a platform whithout falling out.
+ *
+ * @param sourceEntity the owner of this strategy
+ */
 case class PatrolMovementStrategy(private val sourceEntity: MobileEntity) extends StatefulMovementStrategy {
 
   private val isFacingRight: Transition = () => this.sourceEntity.isFacingRight
@@ -74,6 +86,12 @@ case class PatrolMovementStrategy(private val sourceEntity: MobileEntity) extend
   stateManager.addTransition(b3, b2, Not(CanMoveToTheRight(this.sourceEntity)))
 }
 
+/** Subset of the GrondMovementStrategy behaviour. An entity should chase
+ * the target entity if near enought.
+ *
+ * @param sourceEntity the owner of this strategy
+ * @param targetEntity the target entity
+ */
 case class ChaseMovementStrategy(private val sourceEntity:MobileEntity,
                                  private val targetEntity:Entity) extends StatefulMovementStrategy {
 
@@ -92,6 +110,13 @@ case class ChaseMovementStrategy(private val sourceEntity:MobileEntity,
   stateManager.addTransition(b3, b2, Not(isTargetOnTheRight))
 }
 
+/** Movement strategy of flying enemies. If the target is near enougth it should be
+ * chased and if too far nothing can be done.
+ *
+ * @param sourceEntity the owner of this strategy
+ * @param targetEntity the target entity to chase
+ * @param visionDistance the maximum distance at which a target entity can be seen
+ */
 case class FlyingEnemyMovementStrategy(private val sourceEntity:MobileEntity,
                                        private val targetEntity:Entity,
                                        private val visionDistance: Float) extends StatefulMovementStrategy {

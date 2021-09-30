@@ -109,13 +109,21 @@ abstract class MeleeAttackStrategy(override protected val sourceEntity: LivingEn
   protected def updateAttack(attackProgress:Long): Unit
 }
 
+/** A skeleton attack strategy. It consists on a melee sword attack. The target
+ * must be near to be in range for an attack.
+ *
+ * @param sourceEntity the Entity which holds the instance of this abstract
+ *                     class
+ */
 case class SkeletonAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends MeleeAttackStrategy(sourceEntity,  attackSpeed = SKELETON_ATTACK_SPEED,
     attackDuration = SKELETON_ATTACK_DURATION, visionDistance = SKELETON_VISION_DISTANCE) {
 
+  private val ATTACK_ACTIVATION_DELAY: Int = 200
+
   override protected def updateAttack(attackProgress:Long):Unit = {
     attackProgress match {
-      case x if x >= 400 => this.attackInstance.get.getBody.setActive(true)
+      case x if x >= ATTACK_ACTIVATION_DELAY => this.attackInstance.get.getBody.setActive(true)
       case _ => this.attackInstance.get.getBody.setActive(false)
     }
   }
@@ -127,13 +135,21 @@ case class SkeletonAttackStrategy(override protected val sourceEntity: LivingEnt
   }
 }
 
+/** A slime attack strategy. It consists on a melee body attack. The target
+ * must be near to be in range for an attack.
+ *
+ * @param sourceEntity the Entity which holds the instance of this abstract
+ *                     class
+ */
 case class SlimeAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends MeleeAttackStrategy(sourceEntity, attackSpeed = SLIME_ATTACK_SPEED,
     attackDuration = SLIME_ATTACK_DURATION, visionDistance = SLIME_VISION_DISTANCE) {
 
+  private val ATTACK_ACTIVATION_DELAY: Int = 200
+
   override protected def updateAttack(attackProgress:Long):Unit = {
     attackProgress match {
-      case x if x >= 200 => this.attackInstance.get.getBody.setActive(true)
+      case x if x >= ATTACK_ACTIVATION_DELAY => this.attackInstance.get.getBody.setActive(true)
       case _ => this.attackInstance.get.getBody.setActive(false)
     }
   }
@@ -145,13 +161,21 @@ case class SlimeAttackStrategy(override protected val sourceEntity: LivingEntity
   }
 }
 
+/** A bat attack strategy. It consists on a melee body attack. The target
+ * must be near to be in range for an attack.
+ *
+ * @param sourceEntity the Entity which holds the instance of this abstract
+ *                     class
+ */
 case class BatAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends MeleeAttackStrategy(sourceEntity, attackSpeed = BAT_ATTACK_SPEED,
     attackDuration = BAT_ATTACK_DURATION, visionDistance = BAT_VISION_DISTANCE) {
 
+  private val ATTACK_ACTIVATION_DELAY: Int = 200
+
   override protected def updateAttack(attackProgress:Long):Unit = {
     attackProgress match {
-      case x if x >= 200 => this.attackInstance.get.getBody.setActive(true)
+      case x if x >= ATTACK_ACTIVATION_DELAY => this.attackInstance.get.getBody.setActive(true)
       case _ => this.attackInstance.get.getBody.setActive(false)
     }
   }
@@ -167,13 +191,22 @@ case class BatAttackStrategy(override protected val sourceEntity: LivingEntity)
   }
 }
 
+/** A wizard attack strategy. It consists on a melee sword attack. The target
+ * must be near to be in range for an attack.
+ *
+ * @param sourceEntity the Entity which holds the instance of this abstract
+ *                     class
+ */
 case class WizardFirstAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends MeleeAttackStrategy(sourceEntity, attackSpeed = WIZARD_ATTACK1_SPEED,
     attackDuration = WIZARD_ATTACK1_DURATION, visionDistance = WIZARD_VISION_DISTANCE) {
 
+  private val ATTACK_ACTIVATION_DELAY: Int = 400
+  private val ATTACK_DURATION: Int = 800
+
   override protected def updateAttack(attackProgress:Long):Unit = {
     attackProgress match {
-      case x if x >= 400 && x <= 800 => this.attackInstance.get.getBody.setActive(true)
+      case x if x >= ATTACK_ACTIVATION_DELAY && x <= ATTACK_DURATION => this.attackInstance.get.getBody.setActive(true)
       case _ => this.attackInstance.get.getBody.setActive(false)
     }
   }
@@ -186,13 +219,22 @@ case class WizardFirstAttackStrategy(override protected val sourceEntity: Living
   }
 }
 
+/** A wizard second attack strategy. It consists on a melee sword attack. The target
+ * must be near to be in range for an attack.
+ *
+ * @param sourceEntity the Entity which holds the instance of this abstract
+ *                     class
+ */
 case class WizardSecondAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends MeleeAttackStrategy(sourceEntity, attackSpeed = WIZARD_ATTACK2_SPEED,
     attackDuration = WIZARD_ATTACK2_DURATION, visionDistance = WIZARD_VISION_DISTANCE) {
 
+  private val ATTACK_ACTIVATION_DELAY: Int = 300
+  private val ATTACK_DURATION: Int = 800
+
   override protected def updateAttack(attackProgress:Long):Unit = {
     attackProgress match {
-      case x if x >= 300 && x <= 800 => this.attackInstance.get.getBody.setActive(true)
+      case x if x >= ATTACK_ACTIVATION_DELAY && x <= ATTACK_DURATION => this.attackInstance.get.getBody.setActive(true)
       case _ => this.attackInstance.get.getBody.setActive(false)
     }
   }
@@ -205,6 +247,12 @@ case class WizardSecondAttackStrategy(override protected val sourceEntity: Livin
   }
 }
 
+/** A wizard ranged attack strategy. It consists on an hooming projectile
+ * attack. The target can be far or behind walls and floors to be in range for an attack.
+ *
+ * @param sourceEntity the Entity which holds the instance of this abstract
+ *                     class
+ */
 case class WizardEnergyBallAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends EnemyAttackStrategy(sourceEntity, attackSpeed = WIZARD_ATTACK3_SPEED,
     attackDuration = WIZARD_ATTACK3_DURATION, visionDistance = WIZARD_VISION_DISTANCE) {
@@ -219,6 +267,13 @@ case class WizardEnergyBallAttackStrategy(override protected val sourceEntity: L
     System.currentTimeMillis() - this.lastAttackTime > this.attackSpeed
 }
 
+/** A worm ranged attack strategy. It consists on an linear projectile
+ * attack. The target must be visible and not too far to be in range
+ * for an attack.
+ *
+ * @param sourceEntity the Entity which holds the instance of this abstract
+ *                     class
+ */
 case class WormFireballAttackStrategy(override protected val sourceEntity: LivingEntity)
   extends EnemyAttackStrategy(sourceEntity, attackSpeed = WORM_ATTACK_SPEED,
     attackDuration = WORM_ATTACK_DURATION, visionDistance = WORM_VISION_DISTANCE) {

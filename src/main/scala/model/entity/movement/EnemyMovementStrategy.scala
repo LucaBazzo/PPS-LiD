@@ -31,8 +31,13 @@ abstract class StatefulMovementStrategy extends MovementStrategy {
   override def onEnd(): Unit = this.stateManager.getCurrentState.onEnd()
 }
 
+/** The movement strategy adopted by walking basic enemies.
+ *
+ * @param sourceEntity the owner of this strategy
+ * @param right specify if the entity should move to the left or the right
+ */
 case class WalkingMovementStrategy(private val sourceEntity: MobileEntity,
-                                   private val right:Boolean) extends MovementStrategy {
+                                   private val right: Boolean) extends MovementStrategy {
   private val movementSpeed: Float = sourceEntity.getStatistic(Statistic.MovementSpeed).get
 
   override def apply(): Unit = {
@@ -54,6 +59,12 @@ case class WalkingMovementStrategy(private val sourceEntity: MobileEntity,
   }
 }
 
+/** Face the target entity and dont move. Useful if combined with an attack
+ * strategy.
+ *
+ * @param sourceEntity the owner of this strategy
+ * @param targetEntity the target entity, usually the hero
+ */
 case class FaceTarget(private val sourceEntity: MobileEntity,
                       private val targetEntity: Entity) extends MovementStrategy {
 
@@ -67,6 +78,12 @@ case class FaceTarget(private val sourceEntity: MobileEntity,
   }
 }
 
+/** Movement strategy adopted by flying enemies. They can ignore obstacles and
+ * move directly towards the target entity, if near enught
+ *
+ * @param sourceEntity the owner of this strategy
+ * @param targetEntity the target entity, usually the hero
+ */
 case class FlyingMovementStrategy(private val sourceEntity:MobileEntity,
                                   private val targetEntity:Entity) extends MovementStrategy {
 
