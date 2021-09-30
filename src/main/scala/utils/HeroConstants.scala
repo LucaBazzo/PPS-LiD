@@ -1,5 +1,6 @@
 package utils
 
+import model.entity.Items.Items
 import model.helpers.ImplicitConversions._
 import model.entity.Statistic
 import model.entity.Statistic.Statistic
@@ -12,6 +13,8 @@ object HeroConstants {
     Statistic.Strength -> 50,
     Statistic.MovementSpeed -> 1,
     Statistic.Defence -> 0)
+
+  val HERO_STARTING_ITEMS: List[Items] = List.empty
 
   val HERO_SIZE: (Float, Float) = (8.5f, 14.9f)
   val HERO_SIZE_SMALL: (Float, Float) = (8.5f, 6f)

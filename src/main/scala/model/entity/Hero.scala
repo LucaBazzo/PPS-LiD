@@ -1,7 +1,7 @@
 package model.entity
 
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
-import controller.GameEvent
+import controller.{GameEvent, ModelResources}
 import controller.GameEvent.GameEvent
 import model.entity.attack.{DoNothingAttackStrategy, HeroAttackStrategy}
 import model.helpers.ImplicitConversions._
@@ -119,12 +119,19 @@ trait Hero extends LivingEntity {
 
 object Hero {
 
-  def apply(stats: Map[Statistic, Float] = HERO_STATISTICS_DEFAULT): Hero = {
+  def apply(stats: Map[Statistic, Float] = HERO_STATISTICS_DEFAULT,
+            items: List[Items] = HERO_STARTING_ITEMS): Hero = {
     val hero: Hero = new HeroImpl(EntityType.Hero, createEntityBody(), HERO_SIZE.PPM, stats)
-
+    val monitor: ModelResources = EntitiesFactoryImpl.getEntitiesContainerMonitor
     hero.setCollisionStrategy(DoNothingCollisionStrategy())
     hero.setMovementStrategy(HeroMovementStrategy(hero, stats(Statistic.MovementSpeed)))
     hero.setAttackStrategy(HeroAttackStrategy(hero, stats(Statistic.Strength)))
+
+    if(items.nonEmpty)
+      items.foreach(item => {
+        hero.itemPicked(item)
+        monitor.heroJustPickedUpItem(item)
+      })
 
     this.createHeroFeet(hero)
     EntitiesFactoryImpl.addEntity(hero)
@@ -277,6 +284,7 @@ class HeroImpl(private val entityType: EntityType,
 
   override def loseItem(item: Items): Unit = {
     this.itemsPicked = this.itemsPicked.filter(x => x != item)
+    EntitiesFactoryImpl.getEntitiesContainerMonitor.heroLoseItem(item)
   }
 
   override def setEnvironmentInteraction(interaction: Option[HeroInteraction]): Unit = {

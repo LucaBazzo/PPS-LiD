@@ -34,7 +34,7 @@ class LevelImpl(private val model: Model,
   this.modelResources.setWorld(Option.apply(this.world))
   this.world.setContactListener(new CollisionManager(this.modelResources))
 
-  private val hero: Hero = Hero(this.modelResources.getHeroStatistics)
+  private val hero: Hero = Hero(this.modelResources.getHeroStatistics, this.modelResources.getItemsPicked)
 
   override def updateEntities(actions: List[GameEvent]): Unit = {
 
@@ -43,7 +43,7 @@ class LevelImpl(private val model: Model,
     this.worldStep()
 
     EntitiesFactoryImpl.applyPendingFunctions()
-    this.modelResources.getEntities().foreach((entity: Entity) => entity.update())
+    this.modelResources.getEntities.foreach((entity: Entity) => entity.update())
   }
 
   private var accumulator: Float = 0f
@@ -62,7 +62,7 @@ class LevelImpl(private val model: Model,
 
   override def newLevel(): Unit = {
     this.modelResources.setHeroStatistics(this.hero.getStatistics)
-    this.itemPool.resetBossPool()
+    //this.itemPool.resetBossPool()
     this.hero.loseItem(Items.Key)
     this.model.requestLevel()
   }

@@ -101,7 +101,7 @@ trait EntitiesGetter {
    *
    * @return a list of game entities
    */
-  def getEntities(): List[Entity] = getEntities(_ => true)
+  def getEntities: List[Entity] = getEntities(_ => true)
 
   /** Retrieve the first entity found in the level that matches a given
    * predicate. This entity contains the LibGDX body (which defines where it is
@@ -117,10 +117,10 @@ trait EntitiesGetter {
    * @param predicate the predicate used to filter out unwanted entities
    * @return an optional Entity if found
    */
-  def getEntity(predicate: Entity => Boolean): Option[Entity] = (getEntities(predicate) match {
+  def getEntity(predicate: Entity => Boolean): Option[Entity] = getEntities(predicate) match {
     case e if e.nonEmpty => Option(e.head)
     case _ => None
-  })
+  }
 
   /** Retrieve the Hero entity. The Hero is a particular kind of entity able
    * to move, attack, pick up items, interact with the game world and suffer
@@ -135,10 +135,10 @@ trait EntitiesGetter {
    *
    * @return an optional Hero entity if found
    */
-  def getHero: Option[Hero] = (getEntity(e => e.getType equals EntityType.Hero) match {
+  def getHero: Option[Hero] = getEntity(e => e.getType equals EntityType.Hero) match {
     case e if e.nonEmpty => Option(e.get.asInstanceOf[Hero])
     case _ => None
-  })
+  }
 
   /** Retrieve a boss type enemy. This enemy is a particular kind of entity
    * able to move, attack and suffer damage. This entity is directly governed
@@ -151,10 +151,16 @@ trait EntitiesGetter {
    *
    * @return an optional LivingEntity entity if found
    */
-  def getBoss: Option[LivingEntity] = (getEntity(e => BOSS_TYPES contains e.getType) match {
+  def getBoss: Option[LivingEntity] = getEntity(e => BOSS_TYPES contains e.getType) match {
     case e if e.nonEmpty => Option(e.get.asInstanceOf[LivingEntity])
     case _ => None
-  })
+  }
+
+  /** Retrieve the complete list of items collected by the hero in this run
+   *
+   * @return the list of items owned by the hero
+   */
+  def getItemsPicked: List[Items]
 }
 
 trait EntitiesSetter {
@@ -211,6 +217,14 @@ trait EntitiesSetter {
    */
   def heroJustPickedUpItem(item: Items): Unit
 
+  /** Remove a specific item from the hero
+   *
+   * @see [[model.entity.Items]]
+   *
+   * @param item the item to be removed
+   */
+  def heroLoseItem(item: Items): Unit
+
   /** Set real time hero statistics. Those statistics defines how "strong" the
    * hero is. Generally higher values implies an easier adventure.
    *
@@ -263,6 +277,7 @@ class ModelResources extends EntitiesGetter with EntitiesSetter {
   private var messages: List[String] = List.empty
   private var entities: List[Entity] = List.empty
   private var heroPickedUpAnItem: Option[Items] = Option.empty
+  private var itemsPicked: List[Items] = List.empty
   private var levelNumber = 0
   private var score: Int = 0
 
@@ -323,7 +338,14 @@ class ModelResources extends EntitiesGetter with EntitiesSetter {
     res
   }
 
-  override def heroJustPickedUpItem(item: Items): Unit = this.heroPickedUpAnItem = Option.apply(item)
+  override def heroJustPickedUpItem(item: Items): Unit = {
+    this.itemsPicked = item :: this.itemsPicked
+    this.heroPickedUpAnItem = Option.apply(item)
+  }
+
+  override def heroLoseItem(item: Items): Unit = this.itemsPicked = this.itemsPicked.filter(it => it != item)
+
+  override def getItemsPicked: List[Items] = this.itemsPicked
 
   override def isLevelReady: Boolean = this.levelReady
 
