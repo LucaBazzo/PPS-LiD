@@ -17,7 +17,7 @@ import utils.HeroConstants._
 case class HeroAttackStrategy(private val entity: Hero, private var strength: Float) extends AttackStrategy {
 
   private var attackPattern: Option[MobileEntity] = Option.empty
-  private var attackTimer: Float = 0
+  private var attackTimer: Int = 0
   private var timeEventPresent: Boolean = false
 
   override def apply(command: GameEvent): Unit = {
@@ -53,7 +53,7 @@ case class HeroAttackStrategy(private val entity: Hero, private var strength: Fl
 
   override def alterStrength(alteration: Float): Unit = this.strength += alteration
 
-  private def restartTimer(value: Float): Unit = this.attackTimer = value
+  private def restartTimer(value: Int): Unit = this.attackTimer = value
 
   private def checkCommand(command: GameEvent): Boolean = {
     command match {

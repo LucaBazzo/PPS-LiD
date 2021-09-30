@@ -55,6 +55,7 @@ object ImplicitConversions {
   implicit class RichWorld(world:World) {
 
     val DEFAULT_VISION_ANGLE: Int = 90
+    val MATH_PI = 180
 
     private def worldQuery(x1: Float, y1: Float, x2: Float, y2: Float, f: Fixture => Boolean): Boolean = {
       var output: Boolean = false
@@ -97,8 +98,8 @@ object ImplicitConversions {
         if (isTargetVisible) {
           val angle =
             new Vector2(sourceBody.getPosition.sub(targetBody.getPosition)).angleDeg()
-          isTargetVisible = ((angle >= Math.PI.toRadians * 2 - maxHorizontalAngle)
-            || (Math.PI.toRadians + maxHorizontalAngle >= angle))
+          isTargetVisible = ((angle >= MATH_PI * 2 - maxHorizontalAngle)
+            || (MATH_PI + maxHorizontalAngle >= angle))
           preemptiveStop = true
         }
 

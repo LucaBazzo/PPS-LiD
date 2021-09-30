@@ -47,7 +47,7 @@ class TestWorldUtilities extends AnyFlatSpec {
 
     enemy1.setPosition(0, 0)
     enemy2.setPosition(0, 30.PPM)
-    assert(!entitiesContainer.getWorld.get.isBodyVisible(enemy1, enemy2))
+    assert(entitiesContainer.getWorld.get.isBodyVisible(enemy1, enemy2))
 
 
     enemy1.setPosition(0, 0)
