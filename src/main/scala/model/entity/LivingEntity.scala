@@ -19,14 +19,14 @@ trait LivingEntity extends MobileEntity {
    *
    * @param heal the amount of life to be healed
    */
-  def healLife(heal: Float)
+  def healLife(heal: Float): Unit
 
   /** Apply a damage to the living entity. The damage is applyed to
    * the life statistic.
    *
    * @param damage the amount of life to subtract
    */
-  def sufferDamage(damage: Float)
+  def sufferDamage(damage: Float): Unit
 
   /** Returns the current amount of life of an entity. A living entity is
    * considered dead when it's life is 0
@@ -42,7 +42,7 @@ trait LivingEntity extends MobileEntity {
    *
    * @param strategy the new attack strategy to apply
    */
-  def setAttackStrategy(strategy: AttackStrategy)
+  def setAttackStrategy(strategy: AttackStrategy): Unit
 }
 
 /** Implementation of the LivingEntity interface. This class is defined by

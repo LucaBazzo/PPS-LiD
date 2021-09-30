@@ -39,8 +39,8 @@ object RichTransitions {
   implicit def functionToTransition(f:() => Boolean): Transition = () => f.apply()
 
   implicit class LogicalTransition(p:Transition){
-    def ||(x: Transition): Transition = () => p.apply || x.apply
-    def &&(x: Transition): Transition = () => p.apply && x.apply
+    def ||(x: Transition): Transition = () => p.apply() || x.apply()
+    def &&(x: Transition): Transition = () => p.apply() && x.apply()
   }
 }
 
