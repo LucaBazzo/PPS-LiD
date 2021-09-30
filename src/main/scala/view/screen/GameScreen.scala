@@ -4,7 +4,6 @@ import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.g2d._
 import com.badlogic.gdx.graphics.{GL20, OrthographicCamera}
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
-import com.badlogic.gdx.physics.box2d.{Box2DDebugRenderer, World}
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{EntitiesGetter, GameEvent, ObserverManager}
@@ -30,7 +29,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
   camera.translate(300f, 300f)
   private val batch: SpriteBatch = new SpriteBatch()
 
-  private val box2DDebugRenderer: Box2DDebugRenderer = new Box2DDebugRenderer()
+//  private val box2DDebugRenderer: Box2DDebugRenderer = new Box2DDebugRenderer()
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
@@ -147,10 +146,10 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
       batch.end()
 
       //for debug purpose
-      val world: Option[World] = this.entitiesGetter.getWorld
-      if(world.nonEmpty) {
-        box2DDebugRenderer.render(world.get, camera.combined)
-      }
+//      val world: Option[World] = this.entitiesGetter.getWorld
+//      if(world.nonEmpty) {
+//        box2DDebugRenderer.render(world.get, camera.combined)
+//      }
 
       batch.setProjectionMatrix(hud.getStage.getCamera.combined)
       hud.getStage.draw()
@@ -170,7 +169,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   override def dispose(): Unit = {
     orthogonalTiledMapRenderer.dispose()
-    box2DDebugRenderer.dispose()
+//    box2DDebugRenderer.dispose()
     hud.dispose()
     this.observerManager.notifyEvent(GameEvent.CloseApplication)
   }
