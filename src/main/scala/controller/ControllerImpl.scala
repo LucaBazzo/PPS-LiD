@@ -1,6 +1,6 @@
 package controller
 
-import _root_.utils.ApplicationConstants.{GAME_LOOP_STEP, NEXT_RANDOM_SEED, RANDOM, RANDOM_SEED}
+import _root_.utils.ApplicationConstants.{GAME_LOOP_STEP, NEXT_RANDOM_SEED, RANDOM}
 import com.badlogic.gdx.Gdx
 import controller.GameEvent.GameEvent
 import model._
