@@ -162,20 +162,23 @@ class TileMapManager extends WorldMapUtilities {
    */
   private def getNonStaticRooms(seed: Int): List[String] = {
     var rooms: List[String] = List()
+    //use abs val of the seed cause with negative seed it can obtain negative index
+    val absSeed: Int = seed.abs
 
-    var index = seed % INNER_ROOM_MAP_NAMES.length
+    var index = absSeed % INNER_ROOM_MAP_NAMES.length
+    println(index)
     //il secondo index serve per non rimanere nel loop per sempre
     var supportIndex : Integer = 0
 
     while(rooms.length < 6){
       if(!rooms.contains(INNER_ROOM_MAP_NAMES(index))) rooms = rooms :+ INNER_ROOM_MAP_NAMES(index)
       //aggiorno l'index per la prossima iterazione e il supportIndex per evitare scenari ciclici infiniti
-      index = (seed+supportIndex) % INNER_ROOM_MAP_NAMES.length
+      index = (absSeed+supportIndex) % INNER_ROOM_MAP_NAMES.length
       supportIndex = supportIndex+1
     }
 
     //genero un inner-border in base al seed
-    index = seed % INNER_BORDER_NAMES.length
+    index = absSeed % INNER_BORDER_NAMES.length
     rooms = rooms :+ INNER_BORDER_NAMES(index)
 
     rooms
