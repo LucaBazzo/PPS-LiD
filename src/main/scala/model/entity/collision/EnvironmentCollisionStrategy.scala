@@ -15,9 +15,7 @@ case class ItemCollisionStrategy(private val item: Item,
   override def contact(entity: Entity): Unit = {
     entity match {
       case h:Hero =>
-        println("Hero picked up item")
         val effect = item.collect()
-        println(effect._2 + "\n +" + item.getScore + " points")
         h.itemPicked(item.getName)
         entitiesMonitor.addMessage(effect._2)
         entitiesMonitor.heroJustPickedUpItem(item.getName)
@@ -29,7 +27,7 @@ case class ItemCollisionStrategy(private val item: Item,
               h.alterStatistics(stat._1, stat._2)
           }
         }
-      case _ => println("____")
+      case _ =>
     }
   }
 }
@@ -50,8 +48,7 @@ case class DoorCollisionStrategy(private val entitySetter: EntitiesSetter,
       this.entitySetter.addMessage("Press Space to open the door")
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new DoorInteraction(h, this.door,
         doorSensorLeft, doorSensorRight))))
-    case m: MobileEntity if m.getEntityBody.getEntityCollisionBit() == EntityCollisionBit.Sword =>
-      println("Hero destroyed door")
+    case m: MobileEntity if m.getEntityBody.getEntityCollisionBit == EntityCollisionBit.Sword =>
       this.door.changeCollisions(EntityCollisionBit.OpenedDoor)
       this.doorSensorLeft.changeCollisions(EntityCollisionBit.OpenedDoor)
       this.doorSensorRight.changeCollisions(EntityCollisionBit.OpenedDoor)
@@ -101,13 +98,13 @@ case class BossDoorCollisionStrategy(private val entitySetter: EntitiesSetter,
  */
 case class WaterCollisionStrategy() extends CollisionStrategy {
   override def contact(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero stands in water")
+    case h: Hero =>
       h.alterStatistics(Statistic.MovementSpeed, -WATER_SPEED_ALTERATION)
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero out of water")
+    case h: Hero =>
       h.alterStatistics(Statistic.MovementSpeed, +WATER_SPEED_ALTERATION)
     case _ =>
   }
@@ -122,14 +119,13 @@ case class LavaCollisionStrategy() extends CollisionStrategy {
 
   override def contact(entity: Entity): Unit = entity match {
     case h: Hero =>
-      println("Hero stands in lava")
       h.alterStatistics(Statistic.MovementSpeed, -LAVA_SPEED_ALTERATION)
       this.hero = Option(h)
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
-    case h: Hero => println("Hero out of lava")
+    case h: Hero =>
       this.hero = Option.empty
       h.alterStatistics(Statistic.MovementSpeed, +LAVA_SPEED_ALTERATION)
     case _ =>
@@ -139,7 +135,6 @@ case class LavaCollisionStrategy() extends CollisionStrategy {
     val now:Long = System.currentTimeMillis()
     if (hero.isDefined && System.currentTimeMillis() - this.timer > LAVA_DAMAGE_TICK_RATE) {
       hero.get.sufferDamage(LAVA_DAMAGE_PER_TICK)
-      println("Taken damage from lava")
       this.timer = now
     }
   }
@@ -155,7 +150,6 @@ case class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
 
   override def contact(entity: Entity): Unit = entity match {
     case h: Hero =>
-      println("Hero standing on Platform")
       this.monitor.playerTouchesPlatformEdge()
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new PlatformInteraction(h,
         this.platform, this.monitor))))
@@ -164,10 +158,8 @@ case class UpperPlatformCollisionStrategy(private val platform: ImmobileEntity,
 
   override def release(entity: Entity): Unit = entity match {
     case _: Hero =>
-      println("Hero leaving Platform")
       if(!this.monitor.isPlayerTouchingPlatformEdges) {
         platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-        println("Enabled platform collisions")
       }
       this.monitor.playerQuitPlatform()
     case _ =>
@@ -183,8 +175,7 @@ case class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
                                           private val monitor: CollisionMonitor) extends CollisionStrategy {
 
   override def contact(entity: Entity): Unit = entity match {
-    case _: Hero => 
-      println("Hero touching lower Platform")
+    case _: Hero =>
       this.monitor.playerTouchesPlatformEdge()
       platform.changeCollisions(EntityCollisionBit.Enemy)
     case _ =>
@@ -192,7 +183,6 @@ case class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
 
   override def release(entity: Entity): Unit = entity match {
     case hero: Hero =>
-      println("Hero leaving Platform")
       this.platformReleaseCollision(hero)
     case _ =>
 
@@ -201,7 +191,6 @@ case class LowerPlatformCollisionStrategy(private val platform: ImmobileEntity,
   private def platformReleaseCollision(hero: Entity): Unit = {
     if(! this.monitor.isPlayerTouchingPlatformEdges && hero.getState == State.Falling) {
       platform.changeCollisions((EntityCollisionBit.Enemy | EntityCollisionBit.Hero).toShort)
-      println("Enabled platform collisions")
     }
     this.monitor.playerQuitPlatform()
   }
@@ -216,7 +205,6 @@ case class ChestCollisionStrategy(private val entitiesSetter: EntitiesSetter,
                              private val chest: ImmobileEntity) extends CollisionStrategy {
   override def contact(entity: Entity): Unit = entity match {
     case h: Hero =>
-      println("Hero touches chest")
       this.entitiesSetter.addMessage("Press Space to open the chest")
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new ChestInteraction(h,chest))))
     case _ =>
@@ -224,7 +212,6 @@ case class ChestCollisionStrategy(private val entitiesSetter: EntitiesSetter,
 
   override def release(entity: Entity): Unit = entity match {
     case h:Hero =>
-      println("Hero not touching chest anymore")
       h.setEnvironmentInteraction(Option.empty)
     case _ =>
   }
@@ -238,14 +225,14 @@ case class ChestCollisionStrategy(private val entitiesSetter: EntitiesSetter,
 case class PortalCollisionStrategy(private val portal: ImmobileEntity,
                                    private val level: Level) extends CollisionStrategy {
   override def contact(entity: Entity): Unit = entity match {
-    case _: Hero => println("Hero touches portal")
+    case _: Hero =>
       if(this.portal.getState == State.Standing)
         this.level.newLevel()
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
-    case h:Hero => print("Hero not touching portal anymore" + "\n")
+    case h:Hero =>
       h.setEnvironmentInteraction(Option.empty)
     case _ =>
   }
@@ -257,14 +244,14 @@ case class PortalCollisionStrategy(private val portal: ImmobileEntity,
  */
 case class LadderCollisionStrategy(private val monitor: CollisionMonitor) extends CollisionStrategy {
   override def contact(entity: Entity): Unit = entity match {
-    case h: Hero => print("Hero touches ladder" + "\n")
+    case h: Hero =>
       monitor.playerOnLadder()
       h.setEnvironmentInteraction(Option.apply(HeroInteraction(GameEvent.Interaction, new LadderInteraction(h))))
     case _ =>
   }
 
   override def release(entity: Entity): Unit = entity match {
-    case h:Hero => print("Hero leaving ladder" + "\n")
+    case h:Hero =>
       monitor.playerQuitLadder()
       if(! monitor.isPlayerTouchingPlatformEdges)
         h.setEnvironmentInteraction(Option.empty)

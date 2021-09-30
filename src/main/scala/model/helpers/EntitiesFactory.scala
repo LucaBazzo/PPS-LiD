@@ -15,6 +15,8 @@ import model.entity.EntityType.EntityType
 import model.entity.Statistic.Statistic
 import model.entity.{Entity, _}
 
+/** Helper functionality trait. Here are handled entities creation and deletion.
+ */
 trait EntitiesFactory {
 
   def setEntitiesContainerMonitor(entitiesContainerMonitor: ModelResources): Unit
@@ -86,6 +88,9 @@ trait EntitiesFactory {
                         collisions: Short): EnemyImpl
 }
 
+/** Singleton implementation of the EntitiesFactory trait.
+ *
+ */
 object EntitiesFactoryImpl extends EntitiesFactory {
   private var level: Level = _
   private var itemPool: ItemPool = _
@@ -118,9 +123,9 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     if (!rounder) shape.setAsBox(size._1, size._2)
     else
       shape.set(Array[Vector2](
-        (size._1, size._2), (size._1, -size._2+1f.PPM),
-        (size._1-1f.PPM, -size._2), (-size._1+1f.PPM, -size._2),
-        (-size._1, -size._2+1f.PPM), (-size._1, size._2)))
+        (size._1, size._2), (size._1, -size._2 + 1f.PPM),
+        (size._1 - 1f.PPM, -size._2), (-size._1 + 1f.PPM, -size._2),
+        (-size._1, -size._2 + 1f.PPM), (-size._1, size._2)))
     shape
   }
 
@@ -159,8 +164,7 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, EntityCollisionBit.Enemy,
       collisions, createPolygonalShape(size.PPM, rounder = true), spawnPoint.PPM)
 
-    val enemy: EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, levelBasedStats, score,
-      getEntitiesContainerMonitor.getHero.getOrElse(throw new IllegalArgumentException()))
+    val enemy: EnemyImpl = new EnemyImpl(entityId, entityBody, size.PPM, levelBasedStats, score)
     addEntity(enemy)
     enemy
   }

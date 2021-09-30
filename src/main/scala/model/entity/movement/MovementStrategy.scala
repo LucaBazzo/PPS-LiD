@@ -10,7 +10,7 @@ trait MovementStrategy {
   /** Apply the movement strategy
    *
    */
-  def apply() = {}
+  def apply(): Unit = {}
 
   /** Apply the movement strategy given a specific command.
    *

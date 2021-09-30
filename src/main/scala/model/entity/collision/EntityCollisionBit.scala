@@ -2,6 +2,10 @@ package model.entity.collision
 
 import model.helpers.ImplicitConversions.intToShort
 
+
+/** Utility object containing the definition of each entity's libgdx body
+ * category bit (a one hot encoded numeric value).
+ */
 object EntityCollisionBit {
 
   private var currentBitValue: Short = 1

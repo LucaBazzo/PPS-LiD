@@ -1,9 +1,8 @@
 import controller.ModelResources
-import model.helpers.ImplicitConversions.{entityToBody, _}
-import model.entity.{Entity, LivingEntity, Platform, SkeletonEnemy, WormEnemy}
+import model.entity._
 import model.helpers.EntitiesFactoryImpl.createImmobileEntity
 import model.helpers.GeometricUtilities.{isBodyAbove, isBodyBelow, isBodyOnTheLeft, isBodyOnTheRight}
-import model.helpers.WorldUtilities.{canBodiesCollide, isBodyVisible}
+import model.helpers.ImplicitConversions.{RichInt, RichWorld, entityToBody}
 import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl}
 import model.{Level, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -12,8 +11,6 @@ class TestWorldUtilities extends AnyFlatSpec {
 
   val VISION_DISTANCE_NEAR: Float = 10.PPM
   val VISION_DISTANCE_FAR: Float = 10.PPM
-  val VISION_ANGLE_NARROW: Int = 10
-  val VISION_ANGLE_WIDE: Int = 90
   val PLATFORM_SIZE: (Float, Float) = (100, 10)
   val PLATFORM_POSITION: (Float, Float) = (0, 0)
 
@@ -37,12 +34,12 @@ class TestWorldUtilities extends AnyFlatSpec {
     enemy1.setPosition(-30.PPM, 20.PPM)
     enemy2.setPosition(+30.PPM, 20.PPM)
 
-    assert(isBodyVisible(enemy1, enemy2))
+    assert(entitiesContainer.getWorld.get.isBodyVisible(enemy1, enemy2))
 
     // create wall between the two entities
     createImmobileEntity(position=WALL_POSITION, size=WALL_SIZE)
 
-    assert(!isBodyVisible(enemy1, enemy2))
+    assert(!entitiesContainer.getWorld.get.isBodyVisible(enemy1, enemy2))
   }
 
   "An entity" should "see another entity inside his field of view" in {
@@ -50,12 +47,12 @@ class TestWorldUtilities extends AnyFlatSpec {
 
     enemy1.setPosition(0, 0)
     enemy2.setPosition(0, 30.PPM)
-    assert(!isBodyVisible(enemy1, enemy2, VISION_ANGLE_NARROW))
+    assert(!entitiesContainer.getWorld.get.isBodyVisible(enemy1, enemy2))
 
 
     enemy1.setPosition(0, 0)
     enemy2.setPosition(30.PPM, 0.PPM)
-    assert(isBodyVisible(enemy1, enemy2, VISION_ANGLE_WIDE))
+    assert(entitiesContainer.getWorld.get.isBodyVisible(enemy1, enemy2))
 
   }
 
@@ -97,10 +94,10 @@ class TestWorldUtilities extends AnyFlatSpec {
 
   "An entity" should "collide with another entity" in {
     // living entities bodies should not collide (they can overlap)
-    assert(!canBodiesCollide(enemy1, enemy2))
-    assert(!canBodiesCollide(enemy1, hero))
+    assert(!entitiesContainer.getWorld.get.canBodiesCollide(enemy1, enemy2))
+    assert(!entitiesContainer.getWorld.get.canBodiesCollide(enemy1, hero))
 
-    assert(canBodiesCollide(floor, enemy2))
-    assert(canBodiesCollide(floor, hero))
+    assert(entitiesContainer.getWorld.get.canBodiesCollide(floor, enemy2))
+    assert(entitiesContainer.getWorld.get.canBodiesCollide(floor, hero))
   }
 }

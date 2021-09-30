@@ -71,7 +71,7 @@ class TestHeroAttacks extends AnyFlatSpec{
     assert(hero.isTouchingGround)
     assert(hero is AirDownAttackingEnd)
 
-    val finishAirAttack: Int = LONG_WAIT_TIME / WAIT_TIME_DECREMENT + 1
+    val finishAirAttack: Int = (LONG_WAIT_TIME / WAIT_TIME_DECREMENT + 1).toInt
 
     for(_ <- 0 to finishAirAttack)
       hero.update()
@@ -88,7 +88,7 @@ class TestHeroAttacks extends AnyFlatSpec{
     hero.itemPicked(Items.Bow)
     assert(hero.isItemPicked(Items.Bow))
 
-    val finishPick: Int = LONG_WAIT_TIME / WAIT_TIME_DECREMENT + 1
+    val finishPick: Int = (LONG_WAIT_TIME / WAIT_TIME_DECREMENT + 1).toInt
 
     for(_ <- 0 to finishPick)
       hero.update()

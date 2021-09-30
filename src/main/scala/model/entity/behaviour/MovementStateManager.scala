@@ -6,9 +6,11 @@ import model.entity.{Entity, MobileEntity}
 import model.helpers.GeometricUtilities.isBodyOnTheRight
 import model.entity.movement._
 
-/** Particular take of a MovementStrategy. This trait mixes the functionality
- * provided by the MovementStrategy interface with a StateManager to define
- * complex and deep movement strategies derived from other simplier strategies.
+/** Implementation of the StateManagerImpl abstract class. Here the State type
+ * is defined as a single movement strategy.
+ *
+ * This trait may be mixed with StateManagerImpl to define a concrete
+ * implementation.
  */
 trait MovementStateManager extends StateManagerImpl {
   override type State = MovementStrategy
@@ -16,7 +18,6 @@ trait MovementStateManager extends StateManagerImpl {
   override def onStateBegin(): Unit = this.getMovementStrategy.onBegin()
 
   override def onStateEnd(): Unit = this.getMovementStrategy.onEnd()
-  
   def getMovementStrategy: MovementStrategy = this.getCurrentState
 }
 

@@ -1,11 +1,12 @@
 package model.entity.attack
 
-import model.helpers.ImplicitConversions.entityToBody
+import com.badlogic.gdx.physics.box2d.World
+import model.helpers.ImplicitConversions.{entityToBody, RichWorld}
 import model.entity.MobileEntity.{createEnergyBallAttack, createFireballAttack, createMeleeAttack}
 import model.entity._
+import model.helpers.EntitiesFactoryImpl
 import model.helpers.EntitiesFactoryImpl.getEntitiesContainerMonitor
 import model.helpers.GeometricUtilities.getBodiesDistance
-import model.helpers.WorldUtilities.isBodyVisible
 import utils.EnemiesConstants._
 
 /** Implementation of the trait AttackStrategy oriented to enemies attacks.
@@ -30,6 +31,7 @@ abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
                                    protected val attackDuration: Long,
                                    protected val visionDistance: Float) extends AttackStrategy {
 
+  protected val world: World = EntitiesFactoryImpl.getEntitiesContainerMonitor.getWorld.get
   protected val targetEntity:Hero = getEntitiesContainerMonitor.getHero.get
 
   protected var lastAttackTime: Long = 0
@@ -54,7 +56,7 @@ abstract class EnemyAttackStrategy(protected val sourceEntity: LivingEntity,
 
   protected def canAttack: Boolean = this.isAttackFinished &&
     System.currentTimeMillis() - this.lastAttackTime > this.attackSpeed &&
-    isBodyVisible(this.sourceEntity, this.targetEntity) &&
+    world.isBodyVisible(this.sourceEntity, this.targetEntity) &&
     getBodiesDistance(this.sourceEntity, this.targetEntity) <= this.visionDistance
 
   protected def spawnAttack(): Unit

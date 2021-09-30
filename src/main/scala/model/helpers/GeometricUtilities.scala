@@ -3,6 +3,9 @@ package model.helpers
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 
+/** Static class containing useful mathematical definitions and functionalities.
+ *
+ */
 object GeometricUtilities {
 
   def getPointsDistance(p1: Vector2, p2: Vector2): Float = p1.dst(p2)
@@ -26,14 +29,4 @@ object GeometricUtilities {
   def isBodyOnTheRight(body:Body, targetBody:Body): Boolean = isTargetPointOnTheRight(body.getWorldCenter, targetBody.getWorldCenter)
 
   def getBodiesDistance(body:Body, targetBody:Body): Float = getPointsDistance(body.getWorldCenter, targetBody.getWorldCenter)
-
-  def isBodyMovingToTheLeft(body:Body): Boolean = body.getLinearVelocity.x < 0
-
-  def isBodyMovingToTheRight(body:Body): Boolean = body.getLinearVelocity.x > 0
-
-  def isBodyMovingHorizontally(body:Body): Boolean = body.getLinearVelocity.x == 0
-
-  def isBodyMovingVertically(body:Body): Boolean = body.getLinearVelocity.y == 0
-
-  def isBodyMoving(body:Body): Boolean = body.getLinearVelocity.len() == 0
 }

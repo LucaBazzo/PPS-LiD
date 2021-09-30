@@ -1,12 +1,14 @@
 package model.entity.behaviour
 
 import _root_.utils.ApplicationConstants._
+import com.badlogic.gdx.physics.box2d.World
 import model.entity.attack.AttackStrategy
 import model.helpers.ImplicitConversions.entityToBody
 import model.entity._
+import model.helpers.EntitiesFactoryImpl
 import model.helpers.EntitiesUtilities._
 import model.helpers.GeometricUtilities.{getBodiesDistance, isBodyOnTheLeft, isBodyOnTheRight}
-import model.helpers.WorldUtilities.isBodyVisible
+import model.helpers.ImplicitConversions.RichWorld
 
 /** This trait define a common interface for the implementation of state
  * manager transitions. A transition resembles the Predicate construct.
@@ -28,7 +30,7 @@ trait Transition {
 object RichTransitions {
   /** A transition may be effectively defined without an inner state and
    * solely characterized by a completely static behaviour. It should be
-   * allowed to initialize implicitely a transition only by defining it's
+   * allowed to initialize implicitly a transition only by defining it's
    * apply method.
    *
    * @param f the functional predicate "wrapped" be the Transition interface
@@ -48,9 +50,7 @@ object RichTransitions {
  * @param transition the Transition t o negate
  */
 case class Not(transition: Transition) extends Transition {
-  override def apply(): Boolean = {
-    !transition.apply()
-  }
+  override def apply(): Boolean = !transition.apply()
 
   override def reset(): Unit = transition.reset()
 }
@@ -139,9 +139,9 @@ case class IsTargetNearby(sourceEntity:Entity,
 }
 case class IsTargetVisible(sourceEntity:MobileEntity,
                            targetEntity:Entity) extends Transition {
-
+  val world: World = EntitiesFactoryImpl.getEntitiesContainerMonitor.getWorld.get
   override def apply(): Boolean =
-    isBodyVisible(this.sourceEntity, this.targetEntity)
+    world.isBodyVisible(this.sourceEntity, this.targetEntity)
 }
 
 case class IsPathWalkable(sourceEntity:MobileEntity,

@@ -47,11 +47,12 @@ class ModelImpl(private val controller: Observer,
     }
   }
 
-  override def isGameOver: Boolean = {
-    if(this.entitiesContainer.getHero.nonEmpty)
-      return this.entitiesContainer.getHero.get.isDead
-    false
-  }
+  override def isGameOver: Boolean =
+    if (this.entitiesContainer.getHero.nonEmpty) {
+      this.entitiesContainer.getHero.get.isDead
+    } else {
+      false
+    }
 
   override def requestStartGame(): Unit = {
     this.levelNumber = 0

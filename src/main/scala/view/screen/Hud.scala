@@ -13,7 +13,7 @@ import utils.ApplicationConstants._
 
 import java.util.concurrent.{ExecutorService, Executors}
 
-class Hud(width: Int, height: Int, spriteBatch: SpriteBatch) extends Disposable {
+class Hud(width: Float, height: Float, spriteBatch: SpriteBatch) extends Disposable {
 
   private val viewPort: Viewport = new FitViewport(width, height, new OrthographicCamera())
   private val stage: Stage = new Stage(viewPort, spriteBatch)

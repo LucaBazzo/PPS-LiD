@@ -1,6 +1,6 @@
 package controller
 
-import _root_.utils.ApplicationConstants.{GAME_LOOP_STEP, RANDOM_SEED}
+import _root_.utils.ApplicationConstants.{GAME_LOOP_STEP, NEXT_RANDOM_SEED, RANDOM}
 import com.badlogic.gdx.Gdx
 import controller.GameEvent.GameEvent
 import model._
@@ -70,8 +70,13 @@ class ControllerImpl extends Controller with Observer {
 
   private def startGame(): Unit = {
     this.view.startGame()
+
+    // reset the random generator
+    RANDOM.setSeed(NEXT_RANDOM_SEED)
+    NEXT_RANDOM_SEED = Math.abs(RANDOM.nextInt())
+
     Gdx.app.postRunnable(() => {
-      tileMapManager.updateTiledMapList(RANDOM_SEED)
+      tileMapManager.updateTiledMapList()
       this.newLevel()
     })
   }

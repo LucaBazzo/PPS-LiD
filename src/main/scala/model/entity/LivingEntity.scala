@@ -7,38 +7,47 @@ import model.entity.State._
 import model.entity.Statistic.Statistic
 import utils.EnemiesConstants.ENEMIES_DYING_STATE_DURATION
 
-/**
+/** A mobile entity that can attack and die. The attack behaviour is extracted
+ * and managed by a AttackStrategy class object.
  *
+ * @see [[model.entity.movement.MovementStrategy]]
  */
 trait LivingEntity extends MobileEntity {
 
-  /**
+  /** Cure the life of the living entity. The life is maintained by a
+   * corresponding statistic.
    *
-   * @param heal
+   * @param heal the amount of life to be healed
    */
   def healLife(heal: Float)
 
-  /**
+  /** Apply a damage to the living entity. The damage is applyed to
+   * the life statistic.
    *
-   * @param damage
+   * @param damage the amount of life to subtract
    */
   def sufferDamage(damage: Float)
 
-  /**
+  /** Returns the current amount of life of an entity. A living entity is
+   * considered dead when it's life is 0
    *
-   * @return
+   * @return a float value
    */
   def getLife: Float = if(this.getStatistic(Statistic.CurrentHealth).nonEmpty)
     this.getStatistic(Statistic.CurrentHealth).get else 0
 
-  /**
+  /** Defines the new attack strategy to use.
    *
-   * @param strategy
+   * @see [[model.entity.attack.AttackStrategy]]
+   *
+   * @param strategy the new attack strategy to apply
    */
   def setAttackStrategy(strategy: AttackStrategy)
 }
 
-/**
+/** Implementation of the LivingEntity interface. This class is defined by
+ * mixing in the MobileEntity implementation with the LivingEntity required
+ * behaviours.
  *
  * @param entityType the texture that will be attached to this Entity by the View
  * @param entityBody the body of this entity that is affected by physics and collisions

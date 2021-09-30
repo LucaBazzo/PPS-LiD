@@ -11,36 +11,46 @@ import controller.{GameEvent, ObserverManager}
  */
 class GameInputProcessor(private val observerManager: ObserverManager) extends InputProcessor {
 
-  override def keyDown(i: Int): Boolean = {
-    i match {
-      case Keys.ESCAPE => this.observerManager.notifyEvent(GameEvent.CloseApplication)
-      case Keys.W | Keys.UP => this.observerManager.notifyEvent(GameEvent.Up)
+  override def keyDown(i: Int): Boolean = i match {
+      case Keys.ESCAPE =>
+        this.observerManager.notifyEvent(GameEvent.CloseApplication)
+        true
+      case Keys.W | Keys.UP =>
+        this.observerManager.notifyEvent(GameEvent.Up)
+        true
       case Keys.E => this.observerManager.notifyEvent(GameEvent.Slide)
-      case Keys.S | Keys.DOWN => this.observerManager.notifyEvent(GameEvent.Down)
-      case Keys.SPACE | Keys.ENTER => this.observerManager.notifyEvent(GameEvent.Interaction)
-      case _ => return false
+        true
+      case Keys.S | Keys.DOWN =>
+        this.observerManager.notifyEvent(GameEvent.Down)
+        true
+      case Keys.SPACE | Keys.ENTER =>
+        this.observerManager.notifyEvent(GameEvent.Interaction)
+        true
+      case _ => false
     }
-    true
-  }
 
-  override def keyUp(i: Int): Boolean = {
-    i match {
-      case Keys.S | Keys.DOWN => this.observerManager.notifyEvent(GameEvent.DownReleased)
-      case Keys.W | Keys.UP => this.observerManager.notifyEvent(GameEvent.UpReleased)
-      case _ => return false
-    }
-    true
+
+  override def keyUp(i: Int): Boolean = i match {
+      case Keys.S | Keys.DOWN =>
+        this.observerManager.notifyEvent(GameEvent.DownReleased)
+        true
+      case Keys.W | Keys.UP =>
+        this.observerManager.notifyEvent(GameEvent.UpReleased)
+        true
+      case _ => false
   }
 
   override def keyTyped(c: Char): Boolean = {false}
 
-  override def touchDown(x: Int, y: Int, pointer: Int, button: Int): Boolean = {
-    button match {
-      case Buttons.LEFT => this.observerManager.notifyEvent(GameEvent.Attack)
-      case Buttons.RIGHT => this.observerManager.notifyEvent(GameEvent.BowAttack)
-      case _ => return false
-    }
-    true
+  override def touchDown(x: Int, y: Int, pointer: Int, button: Int): Boolean = button match {
+      case Buttons.LEFT =>
+        this.observerManager.notifyEvent(GameEvent.Attack)
+        true
+      case Buttons.RIGHT =>
+        this.observerManager.notifyEvent(GameEvent.BowAttack)
+        true
+      case _ =>
+        false
   }
 
   // This and the methods below are not implemented because they are not useful as input for the game
