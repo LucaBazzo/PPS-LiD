@@ -55,15 +55,12 @@ case class HeroAttackStrategy(private val entity: Hero, private var strength: Fl
 
   private def restartTimer(value: Int): Unit = this.attackTimer = value
 
-  private def checkCommand(command: GameEvent): Boolean = {
-    command match {
-      case GameEvent.Attack => return (entity is Running) || (entity is Standing) ||
-        (entity is Attack01) || (entity is Attack02) || isInAir
-      case GameEvent.BowAttack => return isBowPicked &&
-        ((entity is Running) || (entity is Standing))
-      case _ => throw new UnsupportedOperationException
-    }
-    false
+  private def checkCommand(command: GameEvent): Boolean = command match {
+    case GameEvent.Attack => (entity is Running) || (entity is Standing) ||
+      (entity is Attack01) || (entity is Attack02) || isInAir
+    case GameEvent.BowAttack => isBowPicked &&
+      ((entity is Running) || (entity is Standing))
+    case _ => false
   }
 
   private def setSwordAttack(): Unit = {

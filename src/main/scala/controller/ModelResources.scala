@@ -275,6 +275,8 @@ trait EntitiesSetter {
 
 class ModelResources extends EntitiesGetter with EntitiesSetter {
 
+  private val PORTAL_OPENING_DURATION:Int = 1000
+
   private var world: Option[World] = Option.empty
   private var messages: List[String] = List.empty
   private var entities: List[Entity] = List.empty
@@ -368,7 +370,7 @@ class ModelResources extends EntitiesGetter with EntitiesSetter {
       portal.setState(State.Opening)
       val executorService: ExecutorService = Executors.newSingleThreadExecutor()
       executorService.execute(() => {
-        Thread.sleep(1000)
+        Thread.sleep(PORTAL_OPENING_DURATION)
         portal.setState(State.Standing)
       })
       executorService.shutdown()

@@ -5,7 +5,7 @@ import controller.GameEvent
 import controller.GameEvent.GameEvent
 import model.entity.{Hero, State}
 import utils.HeroConstants.LADDER_CLIMB_VELOCITY
-import utils.Scala2P._
+import utils.Scala2Prolog._
 
 /** Implementation of the Hero Movement Strategy when the hero is climbing a ladder.
  *

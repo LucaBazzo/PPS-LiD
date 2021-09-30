@@ -15,6 +15,10 @@ import java.util.concurrent.{ExecutorService, Executors}
 
 class Hud(width: Float, height: Float, spriteBatch: SpriteBatch) extends Disposable {
 
+  private val TRANSITION_WAIT_TIME: Int = 500
+  private val TENTH_LEVEL_NUMBER: Int = 10
+  private val ITEM_TEXT_DURATION: Int = 2500
+
   private val viewPort: Viewport = new FitViewport(width, height, new OrthographicCamera())
   private val stage: Stage = new Stage(viewPort, spriteBatch)
 
@@ -139,7 +143,7 @@ class Hud(width: Float, height: Float, spriteBatch: SpriteBatch) extends Disposa
 
     val task: Runnable = () => {
       itemsTextLabel.setText(text)
-      Thread.sleep(2500)
+      Thread.sleep(ITEM_TEXT_DURATION)
       itemsTextLabel.setText("")
     }
 
@@ -187,7 +191,7 @@ class Hud(width: Float, height: Float, spriteBatch: SpriteBatch) extends Disposa
 
   def setLevelNumber(levelNumber: Int): Unit = {
     var levelText = "LEVEL "
-    if(levelNumber < 10) levelText += "0"
+    if(levelNumber < TENTH_LEVEL_NUMBER) levelText += "0"
     levelText += levelNumber
 
     this.levelLabel.setText(levelText)
@@ -196,7 +200,7 @@ class Hud(width: Float, height: Float, spriteBatch: SpriteBatch) extends Disposa
   def loadingFinished(): Unit = {
     val executorService: ExecutorService = Executors.newSingleThreadExecutor()
     executorService.submit(() => {
-      Thread.sleep(500)
+      Thread.sleep(TRANSITION_WAIT_TIME)
       table.background(t)
     })
   }

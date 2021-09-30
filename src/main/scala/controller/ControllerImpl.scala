@@ -31,6 +31,8 @@ trait Controller {
  * @see [[controller.Observer]]
  */
 class ControllerImpl extends Controller with Observer {
+  private val HERO_DEATH_DURATION: Int = 1500
+  private val VIEW_RENDER_DELAY: Int = 300
 
   private val entitiesContainer: ModelResources = new ModelResources()
   private val observerManager: ObserverManager = new ObserverManagerImpl()
@@ -56,10 +58,10 @@ class ControllerImpl extends Controller with Observer {
   override def gameOver(): Unit = {
     val executorService: ExecutorService = Executors.newSingleThreadExecutor()
     val task: Runnable = () => {
-      Thread.sleep(1500)
+      Thread.sleep(HERO_DEATH_DURATION)
       this.stopGameLoop()
       this.view.endGame()
-      Thread.sleep(300)
+      Thread.sleep(VIEW_RENDER_DELAY)
       this.model.disposeLevel()
       this.entitiesContainer.setLevelNumber(0)
     }

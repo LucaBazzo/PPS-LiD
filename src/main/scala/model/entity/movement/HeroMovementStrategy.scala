@@ -6,7 +6,7 @@ import controller.GameEvent.GameEvent
 import model.entity.State._
 import model.entity.{Hero, State}
 import utils.HeroConstants._
-import utils.Scala2P._
+import utils.Scala2Prolog._
 
 /** Implementation of the normal Hero Movement Strategy
  *
