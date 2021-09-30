@@ -275,7 +275,7 @@ trait EntitiesSetter {
 
 class ModelResources extends EntitiesGetter with EntitiesSetter {
 
-  private val PORTAL_OPENING_DURATION:Int = 1000
+  private val PORTAL_OPENING_DURATION: Int = 1000
 
   private var world: Option[World] = Option.empty
   private var messages: List[String] = List.empty
