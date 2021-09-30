@@ -2,8 +2,6 @@ package utils
 
 object MapConstants {
 
-  val ROOM_MAP_NAMES: Array[String] = Array("room1-final", "room2-final", "room3-final")
-
   val WORLD_TOP_BORDER_NAME: String = "top-border"
   val WORLD_TOP_BORDER_OFFSET: (Float, Float) = (1, -48)
   val WORLD_RIGHT_BORDER_NAME: String = "right-border"
@@ -23,8 +21,8 @@ object MapConstants {
   val BOTTOM_KEY_ITEM_ROOM_OFFSET: (Float, Float) = (67, 44)
 
   val INNER_BORDER_NAMES: Array[String] = Array("inner-border1", "inner-border2", "inner-border3")
-  val INNER_BORDER_OFFSET: (Int, Int) = (13, 34)
+  val INNER_BORDER_OFFSET: (Float, Float) = (13, 34)
   val INNER_ROOM_MAP_NAMES: Array[String] = Array("room1", "room2", "room3", "room4", "room5", "room6", "room7")
-  val INNER_ROOM_MAP_OFFSET: Array[(Int, Int)] = Array((13, -8), (13, 34), (54, -8), (54, 34), (95, -8), (95, 34))
+  val INNER_ROOM_MAP_OFFSET: Array[(Float, Float)] = Array((13, -8), (13, 34), (54, -8), (54, 34), (95, -8), (95, 34))
 
 }
