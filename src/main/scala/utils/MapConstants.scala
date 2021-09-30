@@ -22,7 +22,7 @@ object MapConstants {
 
   val INNER_BORDER_NAMES: Array[String] = Array("inner-border1", "inner-border2", "inner-border3")
   val INNER_BORDER_OFFSET: (Int, Int) = (13, 34)
-  val INNER_ROOM_MAP_NAMES: Array[String] = Array("room1", "room2", "room3", "room4", "room5", "room6")
+  val INNER_ROOM_MAP_NAMES: Array[String] = Array("room1", "room2", "room3", "room4", "room5", "room6", "room7")
   val INNER_ROOM_MAP_OFFSET: Array[(Int, Int)] = Array((13, -8), (13, 34), (54, -8), (54, 34), (95, -8), (95, 34))
 
 }
