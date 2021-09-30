@@ -24,11 +24,8 @@ object ApplicationConstants {
   val GAME_LOOP_STEP = 16666666
 
   val RANDOM_SEED: Int = 42
-  val RANDOM: Random = new Random()
-
-  val HERO_ROOM_MAP_NAME: String = "hero-room"
-  val BOSS_ROOM_MAP_NAME: String = "boss-room"
-  val ROOM_MAP_NAMES: Array[String] = Array("room1-final", "room2-final", "room3-final")
+  val RANDOM: Random = new Random(seed = RANDOM_SEED)
+  var NEXT_RANDOM_SEED: Int = Math.abs(RANDOM.nextInt())
 
   //Menu Screens Constants
   val MAIN_MENU_BACKGROUND_PATH: String = "assets/backgrounds/background_main_menu.png"

@@ -123,9 +123,9 @@ object EntitiesFactoryImpl extends EntitiesFactory {
     if (!rounder) shape.setAsBox(size._1, size._2)
     else
       shape.set(Array[Vector2](
-        (size._1, size._2), (size._1, -size._2+1f.PPM),
-        (size._1-1f.PPM, -size._2), (-size._1+1f.PPM, -size._2),
-        (-size._1, -size._2+1f.PPM), (-size._1, size._2)))
+        (size._1, size._2), (size._1, -size._2 + 1f.PPM),
+        (size._1 - 1f.PPM, -size._2), (-size._1 + 1f.PPM, -size._2),
+        (-size._1, -size._2 + 1f.PPM), (-size._1, size._2)))
     shape
   }
 

@@ -86,7 +86,6 @@ class DoorInteraction(hero: Hero, door: Entity, leftSensor: Entity, rightSensor:
     this.rightSensor.changeCollisions(OPEN_DOOR_COLLISION_BIT)
     this.door.setState(State.Opening)
     this.hero.setEnvironmentInteraction(Option.empty)
-    print("Hero opened door")
   }
 }
 

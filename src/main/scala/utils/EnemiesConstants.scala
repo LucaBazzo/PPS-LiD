@@ -6,17 +6,18 @@ import model.entity.EntityType.EntityType
 import model.entity.Statistic.{Statistic, _}
 
 object EnemiesConstants {
-  val ENEMIES_DROP_RATE = 0.3f
-  val PACMAN_SPAWN_RATE = 0.01
+  val ENEMIES_DROP_RATE: Float = 0.3f
+  val PACMAN_SPAWN_RATE: Float = 0.01f
 
   val ENEMY_SCORE: Int = 100
   val BOSS_SCORE: Int = 1000
 
   val PROJECTILE_ENTITIES_DURATION: Int = 5000
   val PROJECTILE_DYING_STATE_DURATION: Int = 500
-  val ENEMIES_DYING_STATE_DURATION:Long = 1000
+  val ENEMIES_DYING_STATE_DURATION: Long = 1000
 
-  val ENEMY_TYPES: List[EntityType] = List(EntityType.EnemySkeleton, EntityType.EnemyWorm, EntityType.EnemySlime, EntityType.EnemyBat)
+  val ENEMY_TYPES: List[EntityType] = List(EntityType.EnemySkeleton, EntityType.EnemyWorm,
+    EntityType.EnemySlime, EntityType.EnemyBat)
   val BOSS_TYPES: List[EntityType] = List(EntityType.EnemyBossWizard)
 
   val SKELETON_STATS: Map[Statistic, Float] = Map(
@@ -24,48 +25,42 @@ object EnemiesConstants {
     Health -> 200f,
     CurrentHealth -> 200f,
     Defence -> 0f,
-    MovementSpeed -> 40f.PPM,
-  )
+    MovementSpeed -> 40f.PPM)
 
   val WORM_STATS: Map[Statistic, Float] = Map(
     Strength -> 50f,
     Health -> 150f,
     CurrentHealth -> 150f,
     Defence -> 0f,
-    MovementSpeed -> 40f.PPM,
-  )
+    MovementSpeed -> 40f.PPM)
 
   val SLIME_STATS: Map[Statistic, Float] = Map(
     Strength -> 60f,
     Health -> 300f,
     CurrentHealth -> 300f,
     Defence -> 0f,
-    MovementSpeed -> 30f.PPM,
-  )
+    MovementSpeed -> 30f.PPM)
 
   val BAT_STATS: Map[Statistic, Float] = Map(
     Strength -> 50f,
     Health -> 200f,
     CurrentHealth -> 200f,
     Defence -> 0f,
-    MovementSpeed -> 20f.PPM,
-  )
+    MovementSpeed -> 20f.PPM)
 
   val WIZARD_BOSS_STATS: Map[Statistic, Float] = Map(
     Strength -> 80f,
     Health -> 500f,
     CurrentHealth -> 500f,
     Defence -> 0f,
-    MovementSpeed -> 40f.PPM,
-  )
+    MovementSpeed -> 40f.PPM)
 
   val STATS_MODIFIER: Map[Statistic, Float] = Map(
     Strength -> 1f,
     Health -> 5f,
     CurrentHealth -> 5f,
     Defence -> 1f,
-    MovementSpeed -> 1f.PPM
-  )
+    MovementSpeed -> 1f.PPM)
 
   val SKELETON_SIZE: (Float, Float) = (13f, 23f)
   val SKELETON_ATTACK_SIZE: (Float, Float) = (28f, 21f)

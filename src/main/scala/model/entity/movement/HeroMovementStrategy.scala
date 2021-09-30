@@ -78,7 +78,7 @@ case class HeroMovementStrategy(private val entity: Hero,
     this.move(-RUN_VELOCITY, right = false)
   }
 
-  private def move(runVelocity: Float, right: Boolean) {
+  private def move(runVelocity: Float, right: Boolean): Unit = {
     if(entity isNot Crouching) {
       if(canMove(right)) {
         this.entity.setVelocityX(runVelocity, this.speed)

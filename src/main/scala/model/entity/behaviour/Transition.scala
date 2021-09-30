@@ -30,7 +30,7 @@ trait Transition {
 object RichTransitions {
   /** A transition may be effectively defined without an inner state and
    * solely characterized by a completely static behaviour. It should be
-   * allowed to initialize implicitely a transition only by defining it's
+   * allowed to initialize implicitly a transition only by defining it's
    * apply method.
    *
    * @param f the functional predicate "wrapped" be the Transition interface
@@ -50,9 +50,7 @@ object RichTransitions {
  * @param transition the Transition t o negate
  */
 case class Not(transition: Transition) extends Transition {
-  override def apply(): Boolean = {
-    !transition.apply()
-  }
+  override def apply(): Boolean = !transition.apply()
 
   override def reset(): Unit = transition.reset()
 }

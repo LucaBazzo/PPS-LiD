@@ -11,8 +11,6 @@ class TestWorldUtilities extends AnyFlatSpec {
 
   val VISION_DISTANCE_NEAR: Float = 10.PPM
   val VISION_DISTANCE_FAR: Float = 10.PPM
-  val VISION_ANGLE_NARROW: Int = 10
-  val VISION_ANGLE_WIDE: Int = 90
   val PLATFORM_SIZE: (Float, Float) = (100, 10)
   val PLATFORM_POSITION: (Float, Float) = (0, 0)
 
@@ -49,12 +47,12 @@ class TestWorldUtilities extends AnyFlatSpec {
 
     enemy1.setPosition(0, 0)
     enemy2.setPosition(0, 30.PPM)
-    assert(!entitiesContainer.getWorld.get.isBodyVisible(enemy1, enemy2, VISION_ANGLE_NARROW))
+    assert(!entitiesContainer.getWorld.get.isBodyVisible(enemy1, enemy2))
 
 
     enemy1.setPosition(0, 0)
     enemy2.setPosition(30.PPM, 0.PPM)
-    assert(entitiesContainer.getWorld.get.isBodyVisible(enemy1, enemy2, VISION_ANGLE_WIDE))
+    assert(entitiesContainer.getWorld.get.isBodyVisible(enemy1, enemy2))
 
   }
 

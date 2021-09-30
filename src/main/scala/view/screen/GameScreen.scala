@@ -8,10 +8,10 @@ import com.badlogic.gdx.physics.box2d.{Box2DDebugRenderer, World}
 import com.badlogic.gdx.utils.viewport.{FitViewport, Viewport}
 import com.badlogic.gdx.{Gdx, ScreenAdapter}
 import controller.{EntitiesGetter, GameEvent, ObserverManager}
-import model.helpers.ImplicitConversions.{RichFloat, RichInt, entityToBody}
 import model.entity.Items.Items
 import model.entity._
 import model.helpers.GeometricUtilities.getBodiesDistance
+import model.helpers.ImplicitConversions.{RichFloat, entityToBody}
 import model.world.TileMapManager
 import utils.ApplicationConstants._
 import view.input.GameInputProcessor
@@ -34,7 +34,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = tileMapManager.getMapRenderer(null)
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = tileMapManager.getMapRenderer()
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 

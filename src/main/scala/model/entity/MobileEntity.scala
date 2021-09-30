@@ -118,11 +118,11 @@ trait MobileEntity extends Entity {
   def setVelocity(velocity: (Float, Float), speed: Float = 1): Unit =
     this.getBody.setLinearVelocity(velocity * speed)
 
-  /** Changes the current velocity on x and maintains the current y velocity. 
+  /** Changes the current velocity on x and maintains the current y velocity.
    * An entity velocity is defined by a force vector (a tuple of float value).
    *
    * @see [[com.badlogic.gdx.physics.box2d.Body]]
-   *      
+   *
    * @param velocity the new x velocity
    * @param speed a multiplier to the velocity
    */
@@ -290,12 +290,11 @@ object MobileEntity {
     val entityBody: EntityBody = defineEntityBody(BodyType.DynamicBody, entityCollisionBit,
       collisions, shape, position, isSensor = true)
 
-    var attack: MobileEntity = null
-    if (bullet)
-      attack = new BulletMobileEntity(entityType, entityBody, size.PPM, stats)
-    else
-      attack = new MobileEntityImpl(entityType, entityBody, size.PPM, stats)
-
+    val attack: MobileEntity = if (bullet) {
+      new BulletMobileEntity(entityType, entityBody, size.PPM, stats)
+    } else {
+      new MobileEntityImpl(entityType, entityBody, size.PPM, stats)
+    }
     attack
   }
 

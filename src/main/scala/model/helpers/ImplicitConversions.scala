@@ -54,6 +54,8 @@ object ImplicitConversions {
 
   implicit class RichWorld(world:World) {
 
+    val DEFAULT_VISION_ANGLE: Int = 90
+
     private def worldQuery(x1: Float, y1: Float, x2: Float, y2: Float, f: Fixture => Boolean): Boolean = {
       var output: Boolean = false
       world.QueryAABB((fixture: Fixture) => {
@@ -76,7 +78,7 @@ object ImplicitConversions {
     def checkCollision(x1: Float, y1: Float, x2: Float, y2: Float): Boolean =
       worldQuery(x1, y1, x2, y2, _ => true)
 
-    def isBodyVisible(sourceBody: Body, targetBody: Body, maxHorizontalAngle: Int = 90): Boolean = {
+    def isBodyVisible(sourceBody: Body, targetBody: Body, maxHorizontalAngle: Int = DEFAULT_VISION_ANGLE): Boolean = {
       // Get the list of ordered fixtures (bodies) between source and target bodies
       var fixList:Map[Fixture, Float] = Map.empty
       world.rayCast((fixture:Fixture, point:Vector2, _, _) => {
@@ -95,8 +97,8 @@ object ImplicitConversions {
         if (isTargetVisible) {
           val angle =
             new Vector2(sourceBody.getPosition.sub(targetBody.getPosition)).angleDeg()
-          isTargetVisible = ((angle >= 360-maxHorizontalAngle)
-            || (180+maxHorizontalAngle >= angle))
+          isTargetVisible = ((angle >= Math.PI.toRadians * 2 - maxHorizontalAngle)
+            || (Math.PI.toRadians + maxHorizontalAngle >= angle))
           preemptiveStop = true
         }
 

@@ -128,8 +128,7 @@ class TestHeroMovements extends AnyFlatSpec{
     assert(hero is Sliding)
     assertResult((SLIDE_VELOCITY, 0))(hero.getVelocity)
 
-    val countSlidingRedefinitionOfBody: Int =
-      SHORT_WAIT_TIME / WAIT_TIME_DECREMENT + 1
+    val countSlidingRedefinitionOfBody: Int = (SHORT_WAIT_TIME / WAIT_TIME_DECREMENT + 1).toInt
 
     for(_ <- 0 to countSlidingRedefinitionOfBody)
       hero.update()

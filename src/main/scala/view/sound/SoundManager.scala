@@ -5,7 +5,8 @@ import model.entity.EntityType.EntityType
 import model.entity.State.State
 import model.entity.{EntityType, State}
 import utils.SoundConstants.{getMusicMap, getSoundMap}
-import view.sound.SoundEvent.{AirDownAttack, Attack1, Attack2, Attack3, BossSoundtrack, BowAttack, Dying, EnemyAttack, EnemyDeath, Hurt, Jump, OpeningDoor, PickItem, SoundEvent, WorldSoundtrack}
+import view.sound.SoundEvent.{AirDownAttack, Attack1, Attack2, Attack3, BossSoundtrack, BowAttack,
+  Dying, EnemyAttack, EnemyDeath, Hurt, Jump, OpeningDoor, PickItem, SoundEvent, WorldSoundtrack}
 
 object SoundEvent extends Enumeration {
   type SoundEvent = Value
@@ -47,7 +48,7 @@ class SoundManager {
       case PickItem => soundMap(PickItem).play
       case EnemyAttack => soundMap(EnemyAttack).play
       case EnemyDeath => soundMap(EnemyDeath).play
-      case _ => println("unsupported sound")
+      case _ =>
     }
   }
 

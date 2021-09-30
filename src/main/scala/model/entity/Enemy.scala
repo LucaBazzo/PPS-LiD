@@ -149,7 +149,7 @@ class EnemyImpl(private val entityType: EntityType,
                 private var entityBody: EntityBody,
                 private val size: (Float, Float),
                 private val stats: Map[Statistic, Float],
-                private val score: Int = 100) extends LivingEntityImpl(entityType, entityBody, size, stats)
+                private val score: Int) extends LivingEntityImpl(entityType, entityBody, size, stats)
           with LivingEntity with Score with Enemy {
 
   var behaviours:Option[EnemyStateManager] = None

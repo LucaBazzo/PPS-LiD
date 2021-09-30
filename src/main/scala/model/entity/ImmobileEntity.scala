@@ -52,9 +52,11 @@ object Platform {
   createPlatformSensor(size, position, immobileEntity, sizeXOffset = PLATFORM_SENSOR_SIZE_X_OFFSET,
   sizeYOffset = -size._2, positionYOffset = - size._2 + LOWER_PLATFORM_SENSOR_POSITION_Y_OFFSET)
   createPlatformSensor(size, position, immobileEntity, sizeXOffset = -size._1,
-  sizeYOffset = SIDE_PLATFORM_SENSOR_SIDE_Y_OFFSET, positionXOffset = +size._1 + SIDE_PLATFORM_SENSOR_POSITION_X_OFFSET, positionYOffset = SIDE_PLATFORM_SENSOR_POSITION_Y_OFFSET)
+  sizeYOffset = SIDE_PLATFORM_SENSOR_SIDE_Y_OFFSET, positionXOffset = +size._1 + SIDE_PLATFORM_SENSOR_POSITION_X_OFFSET,
+    positionYOffset = SIDE_PLATFORM_SENSOR_POSITION_Y_OFFSET)
   createPlatformSensor(size, position, immobileEntity, sizeXOffset = -size._1,
-  sizeYOffset = SIDE_PLATFORM_SENSOR_SIDE_Y_OFFSET, positionXOffset = -size._1 - SIDE_PLATFORM_SENSOR_POSITION_X_OFFSET, positionYOffset = SIDE_PLATFORM_SENSOR_POSITION_Y_OFFSET)
+  sizeYOffset = SIDE_PLATFORM_SENSOR_SIDE_Y_OFFSET, positionXOffset = -size._1 - SIDE_PLATFORM_SENSOR_POSITION_X_OFFSET,
+    positionYOffset = SIDE_PLATFORM_SENSOR_POSITION_Y_OFFSET)
 
   immobileEntity
   }

@@ -27,7 +27,7 @@ object EnvironmentConstants {
 
   val WATER_SPEED_ALTERATION: Float = 0.3f
 
-  val LAVA_DAMAGE_PER_TICK: Int = 100
+  val LAVA_DAMAGE_PER_TICK: Float = 100
   val LAVA_DAMAGE_TICK_RATE: Int = 1000
   val LAVA_SPEED_ALTERATION: Float = 0.2f
 }

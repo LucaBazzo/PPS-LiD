@@ -1,13 +1,14 @@
 package model
 
 import _root_.utils.ApplicationConstants._
+import _root_.utils.HeroConstants._
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d._
 import controller.GameEvent.GameEvent
 import controller.ModelResources
+import model.entity._
 import model.entity.collision.CollisionManager
 import model.helpers.ImplicitConversions._
-import model.entity._
 import model.helpers._
 
 /**

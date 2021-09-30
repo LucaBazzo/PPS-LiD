@@ -4,8 +4,7 @@ import model.EntityBody
 import model.entity.Items.Items
 import model.entity._
 import model.helpers.ItemPools.ItemPools
-
-import scala.util.Random
+import utils.ApplicationConstants.RANDOM
 
 object ItemPools extends Enumeration {
   type ItemPools = Value
@@ -42,7 +41,6 @@ class ItemPoolImpl extends ItemPool {
   private var boss_Item_List: List[Items] = List(Items.Bow)
   private val map_Item_List: List[Items] = List(Items.Key)
   private val enemy_Item_List: List[Items] = List(Items.PotionS, Items.PotionM, Items.PotionL, Items.PotionXL)
-  private val rand = new Random
 
   override def getItem(entityBody: EntityBody, size: (Float, Float), poolName: ItemPools): ItemImpl = {
     val pickedItem: Items = pickItemFromPool(poolName)
@@ -81,7 +79,7 @@ class ItemPoolImpl extends ItemPool {
 
   private def pickRandomItemFromList(itemList: List[Items]): Items = {
     if(itemList.nonEmpty)
-      itemList(rand.nextInt(itemList.length))
+      itemList(RANDOM.nextInt(itemList.length))
     else
       Items.Wrench
   }

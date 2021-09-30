@@ -18,7 +18,6 @@ trait MovementStateManager extends StateManagerImpl {
   override def onStateBegin(): Unit = this.getMovementStrategy.onBegin()
 
   override def onStateEnd(): Unit = this.getMovementStrategy.onEnd()
-  
   def getMovementStrategy: MovementStrategy = this.getCurrentState
 }
 

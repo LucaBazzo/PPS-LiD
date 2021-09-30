@@ -61,6 +61,4 @@ object TryScala2P extends App {
 
   val goal: String = "checkCommand(command(" + Down.toString.toLowerCase() + "), state(" + Standing.toString.toLowerCase() + "))"
 
-  println(solveWithSuccess(engine, goal))
-
 }
