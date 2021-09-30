@@ -1,7 +1,7 @@
 package model.world
 
 import com.badlogic.gdx.maps.tiled.{TiledMap, TmxMapLoader}
-import utils.ApplicationConstants.RANDOM_SEED
+import utils.ApplicationConstants.RANDOM
 import utils.MapConstants._
 
 /**
@@ -27,10 +27,17 @@ trait TiledMapUtilities {
   var keyLocation: String = _
 
   /**
+   * used for class testability
+   */
+  private var isTesting: Boolean = false
+  def setIsTesting(): Unit = isTesting = true
+
+  /**
    * implicit conversion to convert TiledMapInfo in RichTiledMapInfo, with TiledMap loading
    */
   implicit def tileMap2RichTiledMap(tiledMapInfo: TiledMapInfo): RichTiledMapInfo = {
-    RichTiledMapInfo(tiledMapInfo.name, tiledMapInfo.offset, new TmxMapLoader().load("assets/maps/" + tiledMapInfo.name + ".tmx"))
+    if(isTesting) RichTiledMapInfo(tiledMapInfo.name, tiledMapInfo.offset, new TiledMap)
+    else RichTiledMapInfo(tiledMapInfo.name, tiledMapInfo.offset, new TmxMapLoader().load("assets/maps/" + tiledMapInfo.name + ".tmx"))
   }
 
   /**
@@ -52,7 +59,8 @@ trait TiledMapUtilities {
    * Updates the list of rooms to be load in the new dungeon with a randomly generated seed
    */
   def updateTiledMapList(): Unit = {
-    val seed = RANDOM_SEED
+    val seed = RANDOM.nextInt()
+
     if (seed % 2 == 0) keyLocation = TOP_KEY_ITEM_ROOM_NAME
     else keyLocation = BOTTOM_KEY_ITEM_ROOM_NAME
 
@@ -98,7 +106,6 @@ trait TiledMapUtilities {
     val absSeed: Int = seed.abs
 
     var index = absSeed % INNER_ROOM_MAP_NAMES.length
-    println(index)
     //second index is usefull to escape the infinite loop
     var supportIndex : Integer = 0
 
