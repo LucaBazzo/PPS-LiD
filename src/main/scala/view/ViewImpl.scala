@@ -40,7 +40,7 @@ trait View {
  *
  *  @param entitiesGetter monitor that contains the entities of the Model, used to place sprites, score, level number
  *  @param observerManager observer for the messages from View to Controller
- *  @param tileMapHelper class for map rendering
+ *  @param tileMapManager class for map rendering
  */
 class ViewImpl(private val entitiesGetter: EntitiesGetter,
                private val observerManager: ObserverManager,

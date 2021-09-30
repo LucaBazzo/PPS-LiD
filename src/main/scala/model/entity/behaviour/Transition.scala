@@ -49,7 +49,7 @@ object RichTransitions {
  *
  * @param transition the Transition t o negate
  */
-case class Not(transition: Transition) extends Transition {
+case class Not(private val transition: Transition) extends Transition {
   override def apply(): Boolean = !transition.apply()
 
   override def reset(): Unit = transition.reset()
@@ -59,7 +59,7 @@ case class Not(transition: Transition) extends Transition {
  *
  * @param time the amount of time to wait for the transition to be active
  */
-case class TimePredicate(time:Long) extends Transition {
+case class TimePredicate(private val time:Long) extends Transition {
   var startTime: Long = System.currentTimeMillis()
 
   override def apply(): Boolean = System.currentTimeMillis() - startTime >= time
@@ -72,7 +72,8 @@ case class TimePredicate(time:Long) extends Transition {
  * @param entity the observed entity
  * @param percentage the amount of life needed to activate the predicate
  */
-case class HealthThreshold(entity:LivingEntity, percentage:Float) extends Transition {
+case class HealthThreshold(private val entity:LivingEntity,
+                           private val percentage:Float) extends Transition {
   val healthThreshold: Float = entity.getStatistic(Statistic.Health).get * this.percentage / 100
 
   override def apply(): Boolean = this.entity.getLife <= this.healthThreshold
@@ -84,8 +85,8 @@ case class HealthThreshold(entity:LivingEntity, percentage:Float) extends Transi
  * @param attackStrategy the monitored attack strategy
  * @param numAttacks the number of attack to count
  */
-case class CompletedAttacks(attackStrategy: AttackStrategy,
-                            numAttacks: Int = 1) extends Transition {
+case class CompletedAttacks(private val attackStrategy: AttackStrategy,
+                            private val numAttacks: Int = 1) extends Transition {
 
   private var finishedAttacksCount: Int = 0
   private var lastAttackFinishedCheck: Boolean = this.attackStrategy.isAttackFinished
@@ -109,7 +110,7 @@ case class CompletedAttacks(attackStrategy: AttackStrategy,
  *
  * @param percentage the percentage at which the transition may be active
  */
-case class RandomlyTrue(percentage: Float) extends Transition {
+case class RandomlyTrue(private val percentage: Float) extends Transition {
   private var lastCheckTime:Long = 0
   private val checkPeriod: Long = 2000
   private var response: Boolean = false
@@ -138,7 +139,7 @@ case class RandomlyTrue(percentage: Float) extends Transition {
  *
  * @param entity the monitored entity
  */
-case class IsEntityAttacking(entity: Entity) extends Transition {
+case class IsEntityAttacking(private val entity: Entity) extends Transition {
   override def apply(): Boolean = List(State.Attack01, State.Attack02, State.Attack03) contains this.entity.getState
 }
 
@@ -146,7 +147,7 @@ case class IsEntityAttacking(entity: Entity) extends Transition {
  *
  * @param sourceEntity the monitored entity
  */
-case class CanMoveToTheLeft(sourceEntity:Entity) extends Transition {
+case class CanMoveToTheLeft(private val sourceEntity:Entity) extends Transition {
   override def apply(): Boolean =
     !isPathObstructedOnTheLeft(sourceEntity, vOffset = 0) &&
       isFloorPresentOnTheLeft(sourceEntity, vOffset = 0)
@@ -156,7 +157,7 @@ case class CanMoveToTheLeft(sourceEntity:Entity) extends Transition {
  *
  * @param sourceEntity the monitored entity
  */
-case class CanMoveToTheRight(sourceEntity:Entity) extends Transition {
+case class CanMoveToTheRight(private val sourceEntity:Entity) extends Transition {
   override def apply(): Boolean =
     !isPathObstructedOnTheRight(sourceEntity, vOffset = 0) &&
       isFloorPresentOnTheRight(sourceEntity, vOffset = 0)
@@ -166,9 +167,9 @@ case class CanMoveToTheRight(sourceEntity:Entity) extends Transition {
  *
  * @param sourceEntity the monitored entity
  */
-case class IsTargetNearby(sourceEntity:Entity,
-                          targetEntity:Entity,
-                          distance:Float) extends Transition {
+case class IsTargetNearby(private val sourceEntity:Entity,
+                          private val targetEntity:Entity,
+                          private val distance:Float) extends Transition {
   override def apply(): Boolean =
     getBodiesDistance(this.sourceEntity, this.targetEntity) <= distance
 }
@@ -177,8 +178,8 @@ case class IsTargetNearby(sourceEntity:Entity,
  *
  * @param sourceEntity the monitored entity
  */
-case class IsTargetVisible(sourceEntity:MobileEntity,
-                           targetEntity:Entity) extends Transition {
+case class IsTargetVisible(private val sourceEntity:MobileEntity,
+                           private val targetEntity:Entity) extends Transition {
   val world: World = EntitiesFactoryImpl.getEntitiesContainerMonitor.getWorld.get
   override def apply(): Boolean =
     world.isBodyVisible(this.sourceEntity, this.targetEntity)
@@ -188,8 +189,8 @@ case class IsTargetVisible(sourceEntity:MobileEntity,
  *
  * @param sourceEntity the monitored entity
  */
-case class IsPathWalkable(sourceEntity:MobileEntity,
-                          targetEntity:Entity) extends Transition {
+case class IsPathWalkable(private val sourceEntity:MobileEntity,
+                          private val targetEntity:Entity) extends Transition {
   override def apply(): Boolean =
     (!isPathObstructedOnTheLeft(this.sourceEntity, vOffset = 0) &&
     isFloorPresentOnTheLeft(this.sourceEntity, vOffset = 0) &&

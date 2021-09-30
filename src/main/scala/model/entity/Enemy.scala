@@ -152,8 +152,8 @@ class EnemyImpl(private val entityType: EntityType,
                 private val score: Int) extends LivingEntityImpl(entityType, entityBody, size, stats)
           with LivingEntity with Score with Enemy {
 
-  var behaviours:Option[EnemyStateManager] = None
-  var timer: Long = 0
+  private var behaviours:Option[EnemyStateManager] = None
+  private var timer: Long = 0
 
   override def getScore: Int = this.score
 
