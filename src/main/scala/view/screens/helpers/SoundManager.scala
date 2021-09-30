@@ -7,6 +7,9 @@ import model.entities.{EntityType, State}
 import utils.SoundConstants.{getMusicMap, getSoundMap}
 import view.screens.helpers.SoundEvent.{AirDownAttack, Attack1, Attack2, Attack3, BossSoundtrack, BowAttack, Dying, EnemyAttack, EnemyDeath, Hurt, Jump, OpeningDoor, PickItem, SoundEvent, WorldSoundtrack}
 
+/**
+ * event that can be associated to a sound or a music
+ */
 object SoundEvent extends Enumeration {
   type SoundEvent = Value
   val WorldSoundtrack, OpeningScreenSoundtrack, BossSoundtrack,
@@ -14,15 +17,23 @@ object SoundEvent extends Enumeration {
   EnemyAttack, EnemyDeath, OpeningDoor, PickItem = Value
 }
 
+/**
+ * manage all sound and music execution related to SoundEvents
+ */
 class SoundManager {
 
   private val musicMap: Map[SoundEvent, Music] = getMusicMap()
   private val soundMap: Map[SoundEvent, Sound] = getSoundMap()
+  //support variable to track the actually-playing music
   private var previousMusicEvent: SoundEvent = _
 
+  /**
+   * @param soundEvent play the sound related to the event
+   */
   def playSound(soundEvent: SoundEvent): Unit = {
     soundEvent match {
       case WorldSoundtrack | BossSoundtrack => {
+        //check if there is a playing music
         if(previousMusicEvent == null) {
           musicMap(soundEvent).setLooping(true)
           musicMap(soundEvent).play
@@ -31,8 +42,6 @@ class SoundManager {
 
           musicMap(soundEvent).setLooping(true)
           musicMap(soundEvent).play
-
-          previousMusicEvent = soundEvent
         }
         previousMusicEvent = soundEvent
       }
@@ -52,8 +61,16 @@ class SoundManager {
     }
   }
 
+  /**
+   * stop the actually-playing music
+   */
   def stopMusic(): Unit = musicMap(previousMusicEvent).stop
 
+  /**
+   * call playSound method with a SoundEvent based on the new state of the entity
+   * @param entityType used to identify the entity type(hero, door, enemy...)
+   * @param entityState used to identify the entity state
+   */
   def playSoundOnStateChange(entityType: EntityType, entityState: State): Unit = {
      entityType match {
        case EntityType.Hero => {
