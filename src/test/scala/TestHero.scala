@@ -1,114 +1,64 @@
 import controller.GameEvent._
+import controller.ModelResources
 import model.LevelImpl
-import model.entities.Statistic._
-import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
+import model.entity.State._
+import model.entity.Statistic._
+import model.entity._
+import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl}
 import org.scalatest.flatspec.AnyFlatSpec
-import utils.HeroConstants.JUMP_VELOCITY
+import utils.HeroConstants._
 
 class TestHero extends AnyFlatSpec{
 
   private var hero: Hero = _
 
   private def initialize(): Unit = {
-    //TODO null temporaneo
-    new LevelImpl(null, new EntitiesContainerMonitor, new ItemPoolImpl())
-    hero = EntitiesFactoryImpl.createHeroEntity(Option.empty)
+    val entitiesContainer: ModelResources = new ModelResources
+    EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
+    new LevelImpl(null, entitiesContainer, new ItemPoolImpl())
+    hero = entitiesContainer.getHero.get
   }
 
 
   "A hero" should "change his behaviour based on the commands received" in {
     initialize()
-    assertResult(State.Standing)(hero.getState)
+    assert(hero is Standing)
 
     hero.notifyCommand(MoveRight)
-    assertResult(State.Running)(hero.getState)
+    assert(hero is Running)
 
     hero.notifyCommand(Up)
-    assertResult(State.Jumping)(hero.getState)
+    assert(hero is Jumping)
 
     hero.notifyCommand(MoveRight)
-    assertResult(State.Jumping)(hero.getState)
+    assert(hero is Jumping)
 
     hero.notifyCommand(Up)
-    assertResult(State.Somersault)(hero.getState)
+    assert(hero is Somersault)
   }
 
   "A hero" should "update himself based on the physics and state he is" in {
     initialize()
-    assertResult(State.Standing)(hero.getState)
+    assert(hero is Standing)
 
     hero.notifyCommand(MoveRight)
     hero.update()
 
-    assertResult(State.Running)(hero.getState)
+    assert(hero is Running)
 
     hero.setVelocityY(-JUMP_VELOCITY)
-    assertResult(State.Running)(hero.getState)
+    assert(hero is Running)
     hero.update()
-    assertResult(State.Falling)(hero.getState)
+    assert(hero is Falling)
 
     hero.stopMovement()
     hero.update()
-    assertResult(State.Standing)(hero.getState)
-  }
-
-  "A hero" should "jumps two times until he touches the ground" in {
-    initialize()
-    hero.notifyCommand(Up)
-    hero.update()
-    assertResult(State.Jumping)(hero.getState)
-
-    hero.setVelocityY(-JUMP_VELOCITY)
-    hero.update()
-    assertResult(State.Jumping)(hero.getState)
-
-    //the hero touches the ground
-    hero.setVelocityY(0)
-    val platform: Entity = EntitiesFactoryImpl.createImmobileEntity()
-    hero.getFeet.get.collisionDetected(Option.apply(platform))
-
-    hero.update()
-
-    assert(hero.getFeet.get.isColliding)
-    assert(hero.isTouchingGround)
-
-    assertResult(State.Standing)(hero.getState)
-
-    hero.notifyCommand(Up)
-    hero.getFeet.get.collisionReleased(Option.apply(platform))
-    hero.update()
-    assertResult(State.Jumping)(hero.getState)
-
-    //second jump
-    hero.notifyCommand(Up)
-    hero.update()
-    assertResult(State.Somersault)(hero.getState)
-
-    //third time with the command UP
-    val velocityY: Float = hero.getVelocity._2
-    hero.notifyCommand(Up)
-    hero.update()
-    assert(velocityY equals hero.getVelocity._2)
-
-    //is falling
-    hero.setVelocityY(-JUMP_VELOCITY)
-    hero.update()
-    assertResult(State.Falling)(hero.getState)
-
-    //the hero touches the ground
-    hero.setVelocityY(0)
-    hero.getFeet.get.collisionDetected(Option.apply(platform))
-
-    hero.update()
-
-    assert(hero.getFeet.get.isColliding)
-    assert(hero.isTouchingGround)
+    assert(hero is Standing)
   }
 
   "A hero" should "have statistics that can be altered" in {
     initialize()
-    var statistics: Map[Statistic, Float] = hero.getStatistics
+    val statistics: Map[Statistic, Float] = hero.getStatistics
 
     assert(hero.getStatistics.nonEmpty)
 
@@ -121,14 +71,33 @@ class TestHero extends AnyFlatSpec{
 
     assertResult(statistics(Health) + 100)(hero.getStatistic(Health).get)
     assertResult(statistics(Strength) - 50)(hero.getStatistic(Strength).get)
-
-    assertResult(Option.empty)(hero.getStatistic(VisionAngle))
-
-    statistics = hero.getStatistics
-    hero.alterStatistics(Statistic.VisionAngle, 100)
-    assert(statistics equals hero.getStatistics)
   }
 
+  "A hero" should "suffer damage when is not sliding" in {
+    initialize()
+
+    assert(hero.getStatistic(Health).nonEmpty)
+    val health: Float = hero.getStatistic(Health).get
+
+    hero.sufferDamage(health / 2)
+    assertResult(health / 2)(hero.getStatistic(CurrentHealth).get)
+    assert(hero is Hurt)
+
+    hero.setState(LadderClimbing)
+    hero.sufferDamage(health / 4)
+    assertResult(health / 4)(hero.getStatistic(CurrentHealth).get)
+    assert(hero is Hurt)
+
+    hero.setState(Sliding)
+    hero.sufferDamage(1000)
+    assertResult(health / 4)(hero.getStatistic(CurrentHealth).get)
+    assert(hero is Sliding)
+
+    hero.setState(Standing)
+    hero.sufferDamage(health)
+    assertResult(0)(hero.getStatistic(CurrentHealth).get)
+    assert(hero is Dying)
+  }
 
 }
 

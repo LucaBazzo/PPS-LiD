@@ -2,9 +2,12 @@ package model
 
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.{Body, BodyDef, FixtureDef, Shape}
-import model.collisions.ImplicitConversions._
+import model.helpers.ImplicitConversions._
 import model.helpers.EntitiesFactoryImpl
 
+/**
+ *
+ */
 trait EntityBody {
 
   def getBody: Body
@@ -14,17 +17,17 @@ trait EntityBody {
                  angle: Float = 0, gravityScale: Float = 1.0f): EntityBody
 
   def setEntityCollisionBit(entityCollisionBit: Short): EntityBody
-  def getEntityCollisionBit(): Short
+  def getEntityCollisionBit: Short
   def setShape(shape: Shape): EntityBody
   def setCollisions(entitiesTypes: Short): EntityBody
-  def getEntityCollisions(): Short
+  def getEntityCollisions: Short
   def setFixtureValues(density: Float = 0, friction: Float = 2, restitution: Float = 0, isSensor: Boolean = false): EntityBody
-  def createFixture()
+  def createFixture(): Unit
 
-  def setPosition(position: (Float, Float), angle: Float = 0)
-  def addCoordinates(x: Float, y: Float)
+  def setPosition(position: (Float, Float), angle: Float = 0): Unit
+  def addCoordinates(x: Float, y: Float): Unit
 
-  def setGravityScale(gravityScale: Float = 1.0f)
+  def setGravityScale(gravityScale: Float = 1.0f): Unit
 }
 
 class EntityBodyImpl extends EntityBody {
@@ -40,9 +43,9 @@ class EntityBodyImpl extends EntityBody {
     this
   }
 
-  override def getEntityCollisionBit(): Short = this.fixtureDef.filter.categoryBits
+  override def getEntityCollisionBit: Short = this.fixtureDef.filter.categoryBits
 
-  override def getEntityCollisions(): Short = this.fixtureDef.filter.maskBits
+  override def getEntityCollisions: Short = this.fixtureDef.filter.maskBits
 
   override def setCollisions(entitiesTypes: Short): EntityBody = {
     this.fixtureDef.filter.maskBits = entitiesTypes
@@ -80,7 +83,7 @@ class EntityBodyImpl extends EntityBody {
     bodyDef.angle = angle
     bodyDef.gravityScale = gravityScale
 
-    if(this.body != null) EntitiesFactoryImpl.destroyBody(this.body)
+    if(this.body != null) EntitiesFactoryImpl.pendingDestroyBody(this.body)
     this.body = EntitiesFactoryImpl.createBody(bodyDef)
     this
   }

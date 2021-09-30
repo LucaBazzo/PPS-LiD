@@ -1,66 +1,57 @@
 package model.helpers
 
-import model.collisions.ImplicitConversions.RichFloat
-import model.entities.Entity
-import model.helpers.GeometricUtilities._
-import model.helpers.WorldUtilities._
+import ImplicitConversions.RichInt
+import com.badlogic.gdx.physics.box2d.World
+import model.entity.Entity
+import ImplicitConversions.RichWorld
 
-trait EntitiesUtilities {
+/** Static utility class containing useful functionalities for moving
+ * enemies.
+ *
+ */
+object EntitiesUtilities {
+  val world: World = EntitiesFactoryImpl.getEntitiesContainerMonitor.getWorld.get
+  def isPathObstructedOnTheLeft(entity: Entity, hOffset: Float=0.PPM, vOffset: Float=0.PPM): Boolean = {
+    val body = entity.getBody
+    val position = entity.getBody.getPosition
+    val size = entity.getSize
 
-  def isEntityVisible(sourceEntity: Entity, targetEntity: Entity, angle: Float = 90): Boolean
+    world.checkCollision(
+      position.x - size._1 - hOffset, position.y - size._2 / 2 + vOffset,
+      position.x - size._1 - hOffset, position.y + size._2 / 2 + vOffset,
+      body)
+  }
 
-  def getEntitiesDistance(sourceEntity: Entity, targetEntity: Entity): Float
+  def isPathObstructedOnTheRight(entity: Entity, hOffset: Float=0.PPM, vOffset: Float=0.PPM): Boolean = {
+    val body = entity.getBody
+    val position = entity.getBody.getPosition
+    val size = entity.getSize
 
-  def isEntityBelow(sourceEntity: Entity, targetEntity: Entity): Boolean
+    world.checkCollision(
+      position.x + size._1 + hOffset, position.y - size._2 / 2 + vOffset,
+      position.x + size._1 + hOffset, position.y + size._2 / 2 + vOffset,
+      body)
+  }
 
-  def isEntityAbove(sourceEntity: Entity, targetEntity: Entity): Boolean
+  def isFloorPresentOnTheRight(entity: Entity, hOffset: Float=0.PPM, vOffset: Float=0.PPM): Boolean = {
+    val body = entity.getBody
+    val position = entity.getBody.getPosition
+    val size = entity.getSize
 
-  def isEntityOnTheLeft(sourceEntity: Entity, targetEntity: Entity): Boolean
+    world.checkCollision(
+      position.x + size._1 + hOffset, position.y - size._2 + vOffset,
+      position.x + size._1 + hOffset, position.y - size._2 + vOffset,
+      body)
+  }
 
-  def isEntityOnTheRight(sourceEntity: Entity, targetEntity: Entity): Boolean
+  def isFloorPresentOnTheLeft(entity: Entity, hOffset: Float=0.PPM, vOffset: Float=0.PPM): Boolean = {
+    val body = entity.getBody
+    val position = entity.getBody.getPosition
+    val size = entity.getSize
 
-  def canEntitiesCollide(entity1: Entity, entity2: Entity): Boolean
-
-  def isPathObstructedOnTheLeft(entity:Entity, offset:Float = 5f.PPM): Boolean
-  def isPathObstructedOnTheRight(entity:Entity, offset:Float = 5f.PPM): Boolean
-  def isFloorPresentOnTheRight(entity:Entity, offset:Float = 5f.PPM): Boolean
-  def isFloorPresentOnTheLeft(entity:Entity, offset:Float = 5f.PPM): Boolean
-
-}
-
-object EntitiesUtilities extends EntitiesUtilities {
-
-  override def isEntityVisible(sourceEntity: Entity, targetEntity: Entity, angle:Float = 90): Boolean =
-    isBodyVisible(sourceEntity.getBody, targetEntity.getBody, angle)
-
-  override def getEntitiesDistance(sourceEntity:Entity, targetEntity:Entity): Float =
-    getBodiesDistance(sourceEntity.getBody, targetEntity.getBody)
-
-  override def isEntityBelow(sourceEntity:Entity, targetEntity:Entity): Boolean =
-    isBodyBelow(sourceEntity.getBody, targetEntity.getBody)
-
-  override def isEntityAbove(sourceEntity:Entity, targetEntity:Entity): Boolean =
-    isBodyAbove(sourceEntity.getBody, targetEntity.getBody)
-
-  override def isEntityOnTheLeft(sourceEntity:Entity, targetEntity:Entity): Boolean =
-    isBodyOnTheLeft(sourceEntity.getBody, targetEntity.getBody)
-
-  override def isEntityOnTheRight(sourceEntity:Entity, targetEntity:Entity): Boolean =
-    isBodyOnTheRight(sourceEntity.getBody, targetEntity.getBody)
-
-  override def canEntitiesCollide(entity1:Entity, entity2:Entity): Boolean =
-    canBodiesCollide(entity1.getBody, entity2.getBody)
-
-  override def isPathObstructedOnTheLeft(entity: Entity, offset: Float = 5.PPM): Boolean =
-    WorldUtilities.isPathObstructedOnTheLeft(entity.getBody, entity.getSize, offset)
-
-  override def isPathObstructedOnTheRight(entity: Entity, offset: Float = 5.PPM): Boolean =
-    WorldUtilities.isPathObstructedOnTheRight(entity.getBody, entity.getSize, offset)
-
-  override def isFloorPresentOnTheRight(entity: Entity, offset: Float = 5.PPM): Boolean =
-    WorldUtilities.isFloorPresentOnTheRight(entity.getBody, entity.getSize, offset)
-
-  override def isFloorPresentOnTheLeft(entity: Entity, offset: Float = 5.PPM): Boolean =
-    WorldUtilities.isFloorPresentOnTheLeft(entity.getBody, entity.getSize, offset)
-
+    world.checkCollision(
+      position.x - size._1 - hOffset, position.y - size._2 + vOffset,
+      position.x - size._1 - hOffset, position.y - size._2 + vOffset,
+      body)
+  }
 }

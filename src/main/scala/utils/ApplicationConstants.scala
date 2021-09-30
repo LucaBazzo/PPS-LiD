@@ -8,8 +8,10 @@ object ApplicationConstants {
 
   val TITLE = "Lost in Dungeons"
 
-  val WIDTH_SCREEN: Int = 400
-  val HEIGHT_SCREEN: Int = 208
+  val ICON_PATH = "assets/sprites/lid_icon.png"
+
+  val WIDTH_SCREEN: Float = 400
+  val HEIGHT_SCREEN: Float = 208
 
   val PIXELS_PER_METER: Float = 50
 
@@ -21,25 +23,38 @@ object ApplicationConstants {
 
   val GAME_LOOP_STEP = 16666666
 
-  val SPRITES_PACK_LOCATION = "assets/sprites/sprites.pack"
-
   val RANDOM_SEED: Int = 42
-  val RANDOM: Random = new Random()
+  val RANDOM: Random = new Random(seed = RANDOM_SEED)
+  var NEXT_RANDOM_SEED: Int = Math.abs(RANDOM.nextInt())
 
-  val HERO_ROOM_MAP_NAME: String = "hero-room"
-  val BOSS_ROOM_MAP_NAME: String = "boss-room"
-  val ROOM_MAP_NAMES: Array[String] = Array("room1-final", "room2-final", "room3-final")
+  //Menu Screens Constants
+  val MAIN_MENU_BACKGROUND_PATH: String = "assets/backgrounds/background_main_menu.png"
+  val GAME_OVER_BACKGROUND_PATH: String = "assets/backgrounds/background_game_over.png"
+  val BUTTONS_SKIN_PATH: String = "assets/buttons/buttons.pack"
 
-  //Main Menu Screen Constants
-  val DEFAULT_DISTANCE_FROM_TOP: Int = 70
-  val DISTANCE_BUTTONS_DEFAULT: Int = 8
-  val BUTTONS_WIDTH: Int = 100
-  val BUTTONS_HEIGHT: Int = 26
+  val PLAY_BUTTON_STYLE_UP: String = "play_button_inactive"
+  val PLAY_BUTTON_STYLE_DOWN: String = "play_button_active"
+  val EXIT_BUTTON_STYLE_UP: String = "exit_button_inactive"
+  val EXIT_BUTTON_STYLE_DOWN: String = "exit_button_active"
+
+  val DEFAULT_DISTANCE_FROM_TOP: Float = 70
+  val GAME_OVER_DISTANCE_FROM_TOP: Float = 50
+  val DISTANCE_BUTTONS_DEFAULT: Float = 8
+  val DISTANCE_BUTTONS_GAME_OVER: Float = 28
+  val BUTTONS_WIDTH: Float = 100
+  val BUTTONS_HEIGHT: Float = 26
   val BUTTONS_FONT_SCALE: Float = 0.30f
   val DISTANCE_FROM_TD: Float = 3
   val DISTANCE_FROM_LR: Float = 25
+  val DISTANCE_FROM_LR_NO_BTN: Float = 30
+
+  val MAIN_MENU_PLAY_TEXT = "Play"
+  val MAIN_MENU_EXIT_TEXT = "Exit"
+  val GAME_OVER_MENU_YES_TEXT = "Yes"
+  val GAME_OVER_MENU_NO_TEXT = "No"
 
   //Game Screen HUD constants
+  val LOADING_SCREEN_PATH: String = "assets/backgrounds/background_loading.png"
   val FONT_PATH_LABEL: String = "assets/fonts/lunch_doubly_so.fnt"
 
   val HEALTH_BAR_PATH: String = "assets/textures/health_bar.png"

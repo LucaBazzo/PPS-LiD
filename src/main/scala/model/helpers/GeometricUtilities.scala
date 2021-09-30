@@ -3,84 +3,30 @@ package model.helpers
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 
+/** Static class containing useful mathematical definitions and functionalities.
+ *
+ */
+object GeometricUtilities {
 
-trait GeometricUtilities {
+  def getPointsDistance(p1: Vector2, p2: Vector2): Float = p1.dst(p2)
 
-  def getPointsDistance(sourcePoint: Vector2, targetPoint: Vector2): Float
+  def isTargetPointOnTheLeft(point: Vector2, targetPoint: Vector2): Boolean = point.x - targetPoint.x >= 0
 
-  def isTargetPointOnTheLeft(sourcePoint: Vector2, targetPoint: Vector2): Boolean
+  def isTargetPointOnTheRight(point: Vector2, targetPoint: Vector2): Boolean = point.x - targetPoint.x <= 0
 
-  def isTargetPointOnTheRight(sourcePoint: Vector2, targetPoint: Vector2): Boolean
+  def isTargetPointAbove(point: Vector2, targetPoint: Vector2): Boolean = point.y - targetPoint.y <= 0
 
-  def isTargetPointAbove(sourcePoint: Vector2, targetPoint: Vector2): Boolean
+  def isTargetPointBelow(point: Vector2, targetPoint: Vector2): Boolean = point.y - targetPoint.y >= 0
 
-  def isTargetPointBelow(sourcePoint: Vector2, targetPoint: Vector2): Boolean
+  def getPointsAngle(point: Vector2, targetPoint: Vector2): Float = point.angleDeg(targetPoint)
 
-  def getPointsAngle(sourcePoint: Vector2, targetPoint: Vector2): Float
+  def isBodyBelow(body:Body, targetBody:Body): Boolean = isTargetPointBelow(body.getWorldCenter, targetBody.getWorldCenter)
 
-  def isBodyBelow(sourceBody: Body, targetBody: Body): Boolean
+  def isBodyAbove(body:Body, targetBody:Body): Boolean = isTargetPointAbove(body.getWorldCenter, targetBody.getWorldCenter)
 
-  def isBodyAbove(sourceBody: Body, targetBody: Body): Boolean
+  def isBodyOnTheLeft(body:Body, targetBody:Body): Boolean = isTargetPointOnTheLeft(body.getWorldCenter, targetBody.getWorldCenter)
 
-  def isBodyOnTheLeft(sourceBody: Body, targetBody: Body): Boolean
+  def isBodyOnTheRight(body:Body, targetBody:Body): Boolean = isTargetPointOnTheRight(body.getWorldCenter, targetBody.getWorldCenter)
 
-  def isBodyOnTheRight(sourceBody: Body, targetBody: Body): Boolean
-
-  def getBodiesDistance(sourceBody: Body, targetBody: Body): Float
-
-  def isBodyMovingToTheLeft(body: Body): Boolean
-
-  def isBodyMovingToTheRight(body: Body): Boolean
-
-  def isBodyMovingHorizontally(body: Body): Boolean
-
-  def isBodyMovingVertically(body: Body): Boolean
-
-  def isBodyMoving(body: Body): Boolean
-}
-
-object GeometricUtilities extends GeometricUtilities {
-
-  override def getPointsDistance(sourcePoint: Vector2, targetPoint: Vector2): Float =
-    sourcePoint.dst(targetPoint)
-
-  override def isTargetPointOnTheLeft(sourcePoint: Vector2, targetPoint: Vector2): Boolean =
-    sourcePoint.x - targetPoint.x >= 0
-
-  override def isTargetPointOnTheRight(sourcePoint: Vector2, targetPoint: Vector2): Boolean =
-    sourcePoint.x - targetPoint.x <= 0
-
-  override def isTargetPointAbove(sourcePoint: Vector2, targetPoint: Vector2): Boolean =
-    sourcePoint.y - targetPoint.y < 0
-
-  override def isTargetPointBelow(sourcePoint: Vector2, targetPoint: Vector2): Boolean =
-    sourcePoint.y - targetPoint.y > 0
-
-  override def getPointsAngle(sourcePoint: Vector2, targetPoint: Vector2): Float =
-    sourcePoint.angleDeg(targetPoint)
-
-  override def isBodyBelow(sourceBody:Body, targetBody:Body): Boolean =
-    isTargetPointBelow(sourceBody.getWorldCenter, targetBody.getWorldCenter)
-
-  override def isBodyAbove(sourceBody:Body, targetBody:Body): Boolean =
-    isTargetPointAbove(sourceBody.getWorldCenter, targetBody.getWorldCenter)
-
-  override def isBodyOnTheLeft(sourceBody:Body, targetBody:Body): Boolean =
-    isTargetPointOnTheLeft(sourceBody.getWorldCenter, targetBody.getWorldCenter)
-
-  override def isBodyOnTheRight(sourceBody:Body, targetBody:Body): Boolean =
-    isTargetPointOnTheRight(sourceBody.getWorldCenter, targetBody.getWorldCenter)
-
-  override def getBodiesDistance(sourceBody:Body, targetBody:Body): Float =
-    getPointsDistance(sourceBody.getWorldCenter, targetBody.getWorldCenter)
-
-  override def isBodyMovingToTheLeft(body: Body): Boolean = body.getLinearVelocity.x < 0
-
-  override def isBodyMovingToTheRight(body: Body): Boolean = body.getLinearVelocity.x > 0
-
-  override def isBodyMovingHorizontally(body: Body): Boolean = body.getLinearVelocity.x == 0
-
-  override def isBodyMovingVertically(body: Body): Boolean = body.getLinearVelocity.y == 0
-
-  override def isBodyMoving(body: Body): Boolean = body.getLinearVelocity.len() == 0
+  def getBodiesDistance(body:Body, targetBody:Body): Float = getPointsDistance(body.getWorldCenter, targetBody.getWorldCenter)
 }

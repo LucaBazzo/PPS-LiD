@@ -1,6 +1,7 @@
 import controller.GameEvent._
-import model.entities._
-import model.helpers.{EntitiesContainerMonitor, EntitiesFactoryImpl, ItemPoolImpl}
+import controller.ModelResources
+import model.entity._
+import model.helpers.{EntitiesFactoryImpl, ItemPoolImpl}
 import model.{HeroInteraction, LadderInteraction, LevelImpl}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -12,8 +13,10 @@ class TestHeroEnvironmentInteractions extends AnyFlatSpec{
   private var heroInteraction: Option[HeroInteraction] = Option.empty
 
   private def initialize(): Unit = {
-    new LevelImpl(null, new EntitiesContainerMonitor, new ItemPoolImpl())
-    hero = EntitiesFactoryImpl.createHeroEntity(Option.empty)
+    val entitiesContainer: ModelResources = new ModelResources
+    EntitiesFactoryImpl.setEntitiesContainerMonitor(entitiesContainer)
+    new LevelImpl(null, entitiesContainer, new ItemPoolImpl())
+    hero = entitiesContainer.getHero.get
     heroInteraction = Option.apply(HeroInteraction(interactionCommand, new LadderInteraction(hero)))
   }
 
@@ -59,11 +62,7 @@ class TestHeroEnvironmentInteractions extends AnyFlatSpec{
     //stop interaction
     hero.notifyCommand(interactionCommand)
     hero.update()
-    assertResult(State.Standing)(hero.getState)
-
-    hero.notifyCommand(Up)
-    hero.update()
-    assertResult(State.Jumping)(hero.getState)
+    assertResult(State.Falling)(hero.getState)
   }
 
   "A hero" should "add and remove an environment interaction" in {

@@ -1,19 +1,39 @@
 package model.helpers
 
 import model.EntityBody
-import model.collisions.EntityCollisionBit
-import model.entities.ItemPools.ItemPools
-import model.entities.Items.Items
-import model.entities._
+import model.entity.Items.Items
+import model.entity._
+import model.helpers.ItemPools.ItemPools
+import utils.ApplicationConstants.RANDOM
 
-import scala.util.Random
+object ItemPools extends Enumeration {
+  type ItemPools = Value
+  val Keys, Enemy_Drops, Default, Boss = Value
+}
 
+/** Represent the various pool from which items can be chosen for spawning
+ *
+ */
 trait ItemPool {
+
+  /** Return an Item from the specified pool, removing it from that pool
+   *
+   * @param entityBody the Box2D body to which associate the Item
+   * @param size the size of the Item
+   * @param PoolName the name of the item Pool chosen for spawn
+   * @return an Item chosen at random from the specified pool
+   */
   def getItem(entityBody: EntityBody, size: (Float, Float), PoolName: ItemPools): ItemImpl
 
+  /** Reset Boss Item Pool. The hero can obtain again those items
+   *
+   */
   def resetBossPool(): Unit
 }
 
+/** Implementation of ItemPool trait
+ *
+ */
 class ItemPoolImpl extends ItemPool {
 
   private var default_Item_List: List[Items] = List(Items.Cake, Items.Wrench, Items.Map, Items.Armor,
@@ -21,7 +41,6 @@ class ItemPoolImpl extends ItemPool {
   private var boss_Item_List: List[Items] = List(Items.Bow)
   private val map_Item_List: List[Items] = List(Items.Key)
   private val enemy_Item_List: List[Items] = List(Items.PotionS, Items.PotionM, Items.PotionL, Items.PotionXL)
-  private val rand = new Random
 
   override def getItem(entityBody: EntityBody, size: (Float, Float), poolName: ItemPools): ItemImpl = {
     val pickedItem: Items = pickItemFromPool(poolName)
@@ -60,7 +79,7 @@ class ItemPoolImpl extends ItemPool {
 
   private def pickRandomItemFromList(itemList: List[Items]): Items = {
     if(itemList.nonEmpty)
-      itemList(rand.nextInt(itemList.length))
+      itemList(RANDOM.nextInt(itemList.length))
     else
       Items.Wrench
   }
