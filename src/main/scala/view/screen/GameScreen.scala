@@ -34,7 +34,7 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
 
   private val viewPort: Viewport = new FitViewport(WIDTH_SCREEN.PPM, HEIGHT_SCREEN.PPM, camera)
 
-  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = tileMapManager.getMapRenderer
+  private val orthogonalTiledMapRenderer: OrthogonalTiledMapRenderer = tileMapManager.getMapRenderer()
 
   private val hud: Hud = new Hud(WIDTH_SCREEN, HEIGHT_SCREEN, batch)
 
@@ -88,9 +88,9 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
         this.camera.position.x = hero.getPosition._1
         this.camera.position.y = hero.getPosition._2
         this.hud.changeHealth(hero.getStatistics(Statistic.CurrentHealth), hero.getStatistics(Statistic.Health))
-        val itemPicked: Option[Items] = entitiesGetter.hasHeroPickedUpItem
-        if(itemPicked.nonEmpty)
-          this.hud.addNewItem(itemPicked.get)
+        val itemsPicked: List[Items] = entitiesGetter.hasHeroPickedUpItem
+        if(itemsPicked.nonEmpty)
+          itemsPicked.foreach(item => this.hud.addNewItem(item))
 
         if(previousStates.contains(hero)) {
           if (!previousStates(hero).equals(hero.getState))
