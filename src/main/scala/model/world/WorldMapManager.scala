@@ -170,7 +170,7 @@ class TileMapManager extends WorldMapUtilities {
     val absSeed: Int = seed.abs
 
     var index = absSeed % INNER_ROOM_MAP_NAMES.length
-    println(index)
+
     //il secondo index serve per non rimanere nel loop per sempre
     var supportIndex : Integer = 0
 

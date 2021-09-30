@@ -1,9 +1,10 @@
 package utils
 
 import alice.tuprolog._
-import controller.GameEvent._
-import model.entity.State._
 
+/** Scala to prolog converter created by Mirko Viroli and modified to be used correctly in this project
+ *
+ */
 object Scala2Prolog {
 
   def extractTerm(solveInfo:SolveInfo, i:Integer): Term =
@@ -35,6 +36,11 @@ object Scala2Prolog {
     }
   }
 
+  /** Check if the goal is successful
+   *
+   * @param engine engine that resolve the goal given
+   * @param goal the goal to be executed
+   */
   def solveWithSuccess(engine: Term => Iterable[SolveInfo], goal: Term): Boolean =
     engine(goal).map(_.isSuccess).headOption.contains(true)
 }

@@ -7,7 +7,7 @@ import view.screen.GUIFactory
 /** The class that represents the whole game, as viewed from the LibGDX
  * framework. It starts the application by showing the initial menu screen.
  *
- * Here are also catched application window closing and resize events.
+ * Here are also caught application window closing and resize events.
  *
  *  @param observerManager observer for the messages from View to Controller
  */

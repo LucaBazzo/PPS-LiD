@@ -12,7 +12,7 @@ import controller.GameEvent.GameEvent
  */
 object GameEvent extends Enumeration {
   type GameEvent = Value
-  // TODO: provare a rimuovere SetMap
+
   val StartGame, ReturnToMenu, CloseApplication, SetMap,
       Up, UpReleased, MoveRight, MoveLeft, Slide, Down, DownReleased,
       Interaction, Attack, BowAttack = Value
@@ -35,7 +35,7 @@ trait Observer {
 
 }
 
-/** Utility trait which handles a collection of Observer entities on bealth of
+/** Utility trait which handles a collection of Observer entities on health of
  * a observable entity.
  *
  * @see [[controller.Observer]]
