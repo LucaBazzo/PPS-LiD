@@ -10,7 +10,11 @@ import ImplicitConversions.RichWorld
  *
  */
 object EntitiesUtilities {
-  val world: World = EntitiesFactoryImpl.getEntitiesContainerMonitor.getWorld.get
+
+  private var world: World = EntitiesFactoryImpl.getEntitiesContainerMonitor.getWorld.get
+
+  def setWorld(world:World):Unit = this.world = world
+
   def isPathObstructedOnTheLeft(entity: Entity, hOffset: Float=0.PPM, vOffset: Float=0.PPM): Boolean = {
     val body = entity.getBody
     val position = entity.getBody.getPosition

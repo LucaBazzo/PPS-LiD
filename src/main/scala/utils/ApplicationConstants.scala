@@ -23,7 +23,8 @@ object ApplicationConstants {
 
   val GAME_LOOP_STEP = 16666666
 
-  val RANDOM_SEED: Int = 42
+  // DEMO SEED: 1
+  val RANDOM_SEED: Int = System.currentTimeMillis().toInt
   val RANDOM: Random = new Random(seed = RANDOM_SEED)
   var NEXT_RANDOM_SEED: Int = Math.abs(RANDOM.nextInt())
 

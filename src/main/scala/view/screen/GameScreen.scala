@@ -173,4 +173,8 @@ class GameScreen(private val entitiesGetter: EntitiesGetter,
     hud.dispose()
     this.observerManager.notifyEvent(GameEvent.CloseApplication)
   }
+
+  def stopMusic(): Unit = {
+    this.soundManager.stopMusic()
+  }
 }

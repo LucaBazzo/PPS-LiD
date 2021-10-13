@@ -58,6 +58,7 @@ class ModelImpl(private val controller: Observer,
     this.levelNumber = 0
     this.entitiesContainer.resetScore()
     this.entitiesContainer.setHeroStatistics(HERO_STATISTICS_DEFAULT)
+    this.entitiesContainer.heroLoseAllItems()
     this.requestNewLevel()
   }
 

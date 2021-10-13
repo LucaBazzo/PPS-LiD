@@ -376,4 +376,6 @@ class ModelResources extends EntitiesGetter with EntitiesSetter {
       executorService.shutdown()
     }
   }
+
+  def heroLoseAllItems(): Unit = this.itemsPicked = List.empty
 }

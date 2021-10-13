@@ -1,8 +1,8 @@
 package main
 
-import com.badlogic.gdx.Game
+import com.badlogic.gdx.{Game, Screen}
 import controller.{GameEvent, ObserverManager}
-import view.screen.GUIFactory
+import view.screen.{GUIFactory, GameScreen}
 
 /** The class that represents the whole game, as viewed from the LibGDX
  * framework. It starts the application by showing the initial menu screen.
@@ -30,5 +30,13 @@ class LostInDungeons(private val observerManager: ObserverManager) extends Game 
     this.getScreen.dispose()
     super.dispose()
     observerManager.notifyEvent(GameEvent.CloseApplication)
+  }
+
+  override def setScreen(screen: Screen): Unit = {
+    this.getScreen match {
+      case game: GameScreen => game.stopMusic()
+      case _ =>
+    }
+    super.setScreen(screen)
   }
 }
